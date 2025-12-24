@@ -1,0 +1,258 @@
+Technical Implementation Plan: The Theology-as-Code Layer in HaderOS v2.0
+1. Introduction: The Convergence of Computational Law and Divine Jurisprudence
+The digital age has precipitated a crisis of governance, not merely in the secular sense of regulatory compliance, but in the profound, ontological sense of ethical alignment with fundamental truths. For Muslim-majority societies and ethically conscious users globally, the current digital infrastructure—operating on utilitarian, profit-maximizing algorithms—often fundamentally conflicts with the deontological and teleological frameworks of Islamic Law (Shariah). HaderOS v2.0 represents a decisive architectural intervention: the creation of a sovereign operating system where theological norms are not extrinsic guidelines but intrinsic, executable code.
+This report details the technical implementation of the Theology-as-Code layer, the kernel-level subsystem responsible for operationalizing Fiqh (Islamic jurisprudence). Unlike traditional "Compliance-as-Code" initiatives which treat regulations as static constraints, HaderOS v2.0 treats Fiqh as a dynamic, polymorphic logic system capable of handling the inherent pluralism (Ikhtilaf) of Islamic thought.
+The architecture rests on three pillars:
+ * KAIA (Knowledge-Augmented Intelligent Agents): A cognitive engine that replaces stochastic hallucination with deterministic theological reasoning using GraphRAG (Graph Retrieval-Augmented Generation).
+ * The HaderOS Fiqh Ontology (HFO): A semantic data model designed to represent the multi-dimensional, conflicting, and temporally evolving nature of legal rulings across the four major Sunni schools (Madhabs).
+ * Theological Firewalls: A policy enforcement layer utilizing the Open Policy Agent (OPA) and Rego language to interdict ethically impermissible transactions (Haram) in real-time, functioning as a "moral hypervisor" over the application layer.
+This implementation plan is not merely a software specification; it is a blueprint for digitizing a fourteen-century-old legal tradition, translating the analog methodology of Usul al-Fiqh (Principles of Jurisprudence) into the binary logic of distributed systems.
+2. KAIA Architecture: The Cognitive Kernel
+The integration of Artificial Intelligence into theological governance presents a unique risk profile. In a secular context, an AI hallucination is a functional error; in a theological context, it is potentially a spiritual transgression (Bid'ah or heresy). Consequently, KAIA (Knowledge-Augmented Intelligent Agents) is architected to invert the standard generative AI paradigm. Rather than using the Knowledge Graph (KG) to merely "assist" the Large Language Model (LLM), KAIA uses the LLM as a natural language interface to a strictly deterministic Knowledge Graph. The source of truth remains the graph, not the model weights.
+2.1 GraphRAG: Structural Grounding for Theological Reasoning
+Standard Retrieval-Augmented Generation (RAG) relies on vector similarity search, which retrieves text chunks based on semantic proximity. This is insufficient for Fiqh, where the legal distinction between two concepts—such as Riba (usury) and Profit (Ribh)—may be semantically subtle but jurisprudentially absolute.
+KAIA employs GraphRAG, a hybrid retrieval mechanism that combines the explicit, structured relationships of a Knowledge Graph with the semantic flexibility of vector search. This ensures that retrieval is governed by the rigid ontology of legal rulings rather than probabilistic linguistic patterns.
+2.1.1 The GraphRAG Retrieval Protocol
+The retrieval process within KAIA is a multi-stage pipeline designed to maximize context precision while minimizing the "context window pollution" that leads to hallucinations.
+ * Semantic Parsing and Entity Linking: When a user query is received (e.g., "Is a 5% penalty on late loan repayment permissible?"), the initial LLM layer acts strictly as a semantic parser. It identifies key entities ("Penalty", "Loan Repayment", "Late Payment") and maps them to their standardized URIs in the HaderOS Fiqh Ontology (e.g., hfo:LatePaymentPenalty, hfo:RibaAlNasiyah). This grounding step ensures that subsequent queries operate on verified concepts.
+ * Deterministic Subgraph Traversal: Instead of retrieving text chunks, the system executes a structured query (using Cypher or SPARQL) against the Knowledge Graph. The traversal follows specific deontic edges such as :HAS_HUKM (has ruling), :CONDITIONAL_ON (conditional on), and :DERIVED_FROM (derived from). For the penalty query, the traversal would identify the relationship (LatePaymentPenalty) --> (Haram) within the majority of Madhabs, identifying it as Riba al-Jahiliya.
+ * Contextual Pruning via 'Perspectives': The retrieved subgraph is massive. To make it consumable for the generation layer, it is pruned based on the Theological Profile of the user. If the user is a follower of the Hanafi school, the traversal prioritizes edges labeled madhab: 'Hanafi'. Conflicting rulings from other schools are either filtered out or retained as "comparative context" depending on the user's intent settings.
+ * Structured Prompt Injection: The pruned subgraph is serialized into a structured format (JSON-LD or a compact Tuple format) and injected into the LLM's system prompt. The prompt includes a "Negative Constraint" directive: "You are a Mufti Assistant. You must answer ONLY using the facts provided in the Context Graph. If the answer is not in the graph, state that the ruling is unknown." This creates a closed-loop reasoning system.
+2.2 The Agentic Swarm: Digital 'Shura'
+The complexity of Islamic jurisprudence, which often requires the synthesis of textual evidence (Dalil), legal precedent (Fatwa), and objectives of law (Maqasid), cannot be handled by a single monolithic agent. KAIA utilizes a Multi-Agent Swarm Architecture, where specialized agents simulate the consultative process (Shura) of a fatwa council.
+2.2.1 The Agent Roles
+The swarm consists of three primary agent archetypes, each fine-tuned on specific datasets and constrained by distinct operational protocols:
+ * The Textualist Agent (Al-Muhaddith): This agent is responsible for the "Raw Data" layer. It interfaces with the corpus of Quranic text and Hadith collections (e.g., Sahih Bukhari, Sahih Muslim). Its primary function is to retrieve the Nass (textual evidence) relevant to the query. It does not interpret; it retrieves. It utilizes the SemanticHadith ontology to navigate the complex chain of narrators (Isnad) and the reliability ratings of Hadith.
+ * The Jurist Agent (Al-Faqih): This is the reasoning engine. It receives the raw text from the Textualist and applies the methodology of Usul al-Fiqh. It checks for abrogation (Naskh), reconciles apparent contradictions (Ikhtilaf), and applies analogical reasoning (Qiyas) if no direct text addresses the modern issue (e.g., applying the prohibition of gambling to certain types of crypto-derivatives). This agent relies heavily on the OPA/Rego policy library to simulate logical deduction.
+ * The Auditor Agent (Al-Muqasidi): This agent serves as the ethical safeguard. It evaluates the output of the Jurist against the higher objectives of Shariah (Maqasid al-Shariah), such as the preservation of wealth (Hifz al-Mal) and the preservation of intellect (Hifz al-Aql). If a ruling is technically valid but functionally destructive (e.g., a "Halal" loophole that exploits the poor), the Auditor flags it for human review. This agent utilizes fairness metrics encoded in the HFO to detect systemic bias.
+2.2.2 The Model Context Protocol (MCP) Integration
+To operationalize these agents within the broader HaderOS ecosystem, we utilize the Model Context Protocol (MCP). MCP provides a standardized interface for applications to "subscribe" to theological context.
+When a user opens a banking application on HaderOS, the app initiates an MCP handshake with the KAIA kernel. The kernel acts as an MCP Server, exposing a "Theological Context Feed." This feed dynamically injects the relevant constraints into the application's context window. For example, if the user is drafting a contract, the MCP feed provides the specific prohibitions regarding Gharar (uncertainty) applicable to the user's Madhab, effectively "wrapping" the application in a theological safety layer.
+3. Multi-Madhab Logic: Ontological Engineering
+The defining technical challenge of HaderOS v2.0 is the representation of Polymorphic Truth. Western legal tech typically assumes a single, verifiable "state of law" for any given jurisdiction. In contrast, Islamic law accepts multiple, often contradictory, rulings as valid simultaneously, provided they are derived through valid methodology. Modeling this Ikhtilaf (disagreement) requires an ontology that supports paraconsistent logic.
+3.1 The HaderOS Fiqh Ontology (HFO)
+We propose the development of the HaderOS Fiqh Ontology (HFO), a semantic framework that extends existing efforts like OntoDin  and SemanticHadith. HFO moves beyond simple subject-predicate-object triples to a hypergraph model where "relationships" themselves are first-class citizens with properties.
+3.1.1 RDF* and Singleton Properties for Reification
+Standard RDF (Resource Description Framework) struggles with conflicting statements (e.g., Shrimp --> Halal and Shrimp --> Makruh). HFO utilizes RDF-star (RDF)* and the Singleton Property pattern to reify these assertions, allowing us to attach metadata—such as the source Madhab, the scholar, and the evidence strength—directly to the edge.
+Ontological Schema for Ruling Reification:
+| Subject (Entity) | Predicate (Ruling Type) | Object (Value) | Edge Metadata (RDF*) |
+|---|---|---|---|
+| hfo:CryptoStaking | hfo:hasRuling | hfo:Permissible | madhab: Shafi, scholar: Al-Ghazali_Inst, evidence: Qiyas_Rent |
+| hfo:CryptoStaking | hfo:hasRuling | hfo:Prohibited | madhab: Hanafi, scholar: Mufti_Taqi, evidence: Riba_Fadl |
+In this schema, the "fact" is not "Crypto Staking is Permissible." The fact is "The Shafi'i school asserts that Crypto Staking is Permissible." This shift allows the Knowledge Graph to hold contradictory truths without logical collision.
+3.1.2 Temporal Versioning and Abrogation
+Rulings are not static; they evolve. HFO implements Temporal Versioning nodes to handle Naskh (abrogation) and the evolution of Fatwas over time. Each ruling edge is annotated with a validityInterval.
+ * Structure: (Ruling_Edge) --> (TimeInterval)
+ * Supersession: When a scholar issues a new Fatwa revising a previous position, a :SUPERSEDES edge connects the new ruling node to the old one. The GraphRAG retrieval engine is configured to traverse the :SUPERSEDES chain to the leaf node (current ruling) by default, while retaining the history for academic analysis.
+3.2 Modeling Complex Concepts: Riba and Gharar
+Concepts like Riba (usury) and Gharar (uncertainty) are often treated as abstract ethical principles. In HFO, they are modeled as precise Graph Patterns—structural motifs that, when detected in a transaction graph, trigger a flag.
+3.2.1 The Riba Pattern (Cyclic Asymmetry)
+Riba al-Fadl and Riba al-Nasi'ah fundamentally involve the exchange of like for like with an excess. In a transaction graph, this appears as a cycle.
+ * Graph Logic: A query detects Riba if:
+   * There is a cycle (Party A) -> (Party B) -> (Party A).
+   * The asset type exchanged is identical (e.g., USD to USD).
+   * The scalar value of the inbound edge to A is greater than the outbound edge from A.
+   * There is a temporal delay attribute on the second edge.
+     This pattern matching allows HFO to detect "hidden" Riba in complex financial engineering structures (like tawarruq) by analyzing the net flow topology rather than just the contract labels.
+3.2.2 The Gharar Pattern (Probabilistic Nodes)
+Gharar refers to excessive uncertainty or ambiguity in a contract. HFO models contract deliverables as nodes with a probability property.
+ * Graph Logic: A transaction is flagged for Gharar if it depends on a node (FutureEvent) where:
+   * probability < 1.0 (it is not certain to exist).
+   * The deliverability attribute is false.
+   * The node is a primary subject_matter of the contract (not a secondary clause).
+     This allows the system to distinguish between permissible risk (business risk) and prohibited uncertainty (gambling/speculation).
+3.3 Comparative Perspectives in Neo4j
+To visualize and query this multi-dimensional graph, HaderOS utilizes Neo4j Perspectives.
+ * The User-Centric Perspective: A banking application requests the "Hanafi Perspective." Neo4j Bloom dynamically filters the graph, hiding all edges that do not have madhab: 'Hanafi' or madhab: 'Consensus'. This presents a "collapsed" view of the truth specific to that user.
+ * The Ijtihad Perspective: For scholars, the "comparative view" highlights nodes with high divergence (high number of conflicting edges). This visualization aids in Talfiq (finding a valid combination of rulings) or identifying areas where modern consensus (Ijma) is needed.
+4. OPA/Rego Policy Integration: The Theological Firewall
+While the KAIA architecture provides the intelligence, the Open Policy Agent (OPA) provides the enforcement. OPA serves as a "Theological Firewall," a policy engine that sits between the HaderOS user and the digital world, intercepting every API call and evaluating it against the divine law encoded in the HFO.
+4.1 Deployment Architecture: The Sidecar Pattern
+HaderOS v2.0 adopts the Sidecar Pattern for OPA deployment. Every microservice in the HaderOS mesh (e.g., the Transaction Service, the Messaging Service) is paired with a dedicated OPA container.
+4.1.1 Why Sidecars?
+ * Decoupling: The theological logic (Rego policies) is completely decoupled from the business logic (Python/Go code). This allows the Fiqh board to update a ruling on cryptocurrency without requiring the engineering team to refactor the banking app.
+ * Latency: Policy decisions are made over localhost, ensuring near-zero latency (<1ms) for critical financial transactions. This is superior to a centralized policy server which would introduce network overhead.
+ * Resilience: If the central policy control plane goes down, the sidecars continue to enforce the last known good policy bundle, ensuring the system remains "Halal-by-default".
+4.2 Custom FastAPI Middleware Implementation
+HaderOS services are built primarily on FastAPI. We implement a custom TheologicalEnforcementMiddleware to transparently integrate OPA.
+4.2.1 Middleware Workflow
+ * Interception: The middleware intercepts the incoming HTTP request before it reaches the route handler.
+ * Context Extraction: It extracts the User Context (e.g., User ID, Madhab Preference) from the JWT headers and the Request Payload.
+ * Policy Query: It constructs a JSON input document and queries the local OPA sidecar via REST.
+ * Enforcement:
+   * Allow: If OPA returns true, the request is passed to the application.
+   * Deny: If OPA returns false, the middleware throws a 403 Forbidden exception, returning the theological justification (e.g., "Transaction blocked: Contains Riba al-Nasi'ah per Hanafi definition").
+4.2.2 Middleware Code Implementation
+The following Python code demonstrates the middleware logic using starlette and httpx :
+from fastapi import Request, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+import httpx
+import json
+
+class TheologicalEnforcementMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, opa_url: str):
+        super().__init__(app)
+        self.opa_url = opa_url
+
+    async def dispatch(self, request: Request, call_next):
+        # 1. Context Extraction
+        user_madhab = request.headers.get("X-User-Madhab", "Hanafi")
+        
+        # 2. Payload Capture (Robust method for async streams)
+        # We read the body and then restore it so the app can read it again
+        body_bytes = await request.body()
+        try:
+            input_payload = json.loads(body_bytes)
+        except json.JSONDecodeError:
+            input_payload = {}
+            
+        async def receive():
+            return {"type": "http.request", "body": body_bytes}
+        request._receive = receive
+
+        # 3. Construct OPA Input Document
+        opa_input = {
+            "input": {
+                "method": request.method,
+                "path": request.url.path.split("/"),
+                "user": {
+                    "madhab": user_madhab,
+                    "roles": request.headers.get("X-User-Roles", "").split(",")
+                },
+                "payload": input_payload
+            }
+        }
+
+        # 4. Query OPA Sidecar
+        async with httpx.AsyncClient() as client:
+            try:
+                # Localhost call to sidecar - extremely fast
+                response = await client.post(self.opa_url, json=opa_input)
+                decision = response.json()
+            except Exception:
+                # Fail Closed: If theology engine is unreachable, assume Haram
+                raise HTTPException(status_code=500, detail="Theological verification unavailable.")
+
+        # 5. Enforcement
+        if not decision.get("result", {}).get("allow", False):
+            reasons = decision.get("result", {}).get("deny",)
+            raise HTTPException(status_code=403, detail={"error": "Theological Prohibition", "reasons": reasons})
+
+        response = await call_next(request)
+        return response
+
+4.3 Rego Policy Engineering: Codifying the Madhabs
+Rego allows us to express complex, hierarchical decision logic. The following examples demonstrate how specific Islamic finance principles are translated into code.
+4.3.1 Riba Detection Policy (Financial Service)
+This policy checks a loan application. It enforces the prohibition of explicit interest.
+package haderos.finance
+
+import future.keywords.in
+
+default allow = false
+
+# Allow strictly 'Qard Hasan' (Benevolent Loan) - No increase
+allow {
+    input.payload.transaction_type == "loan"
+    input.payload.interest_rate == 0
+    input.payload.repayment_amount == input.payload.principal_amount
+}
+
+# Allow 'Murabaha' (Cost-Plus) only if asset ownership is verified
+allow {
+    input.payload.transaction_type == "murabaha"
+    input.payload.asset_owned_by_bank == true
+    input.payload.profit_margin > 0 # Profit is allowed, Interest is not
+}
+
+# Universal Prohibition (Consensus/Ijma)
+deny[msg] {
+    input.payload.interest_rate > 0
+    msg := "RIBA DETECTED: Explicit interest rate found. This violates consensus (Ijma)."
+}
+
+# Context-Specific Prohibition (e.g., Tawarruq is disliked in some schools)
+deny[msg] {
+    input.payload.transaction_type == "tawarruq"
+    input.user.madhab == "Hanbali" # Example constraint
+    msg := "TAWARRUQ RESTRICTION: This transaction structure is discouraged in your Madhab."
+}
+
+This Rego snippet demonstrates the "Polymorphic Truth" concept: a tawarruq transaction might be allowed for a Shafi'i user but flagged for a Hanbali user, all within the same codebase.
+4.3.2 Algorithmic Fairness and Theological Bias
+HaderOS includes "Theological Fairness" metrics. Just as AI can be biased against demographics, the system must not be biased against a specific Madhab (e.g., defaulting to the strictest opinion for everyone).
+ * Rego Metric: We track the deny_rate_by_madhab. If the system denies 90% of Maliki requests while allowing 90% of Hanafi requests for similar transactions, a Theological_Bias_Alert is triggered for the audit council.
+5. Supply Chain Theology: The 'Halal' Software Stack
+In HaderOS, ethical compliance extends recursively to the software supply chain itself. A banking application cannot be truly "Halal" if it is built upon libraries that mine user data or support unethical industries. This is the domain of Supply Chain Theology.
+5.1 SBOM Generation with Syft and CycloneDX
+We utilize Syft to generate a Software Bill of Materials (SBOM) for every container in the OS. The SBOM provides a transparent inventory of every library, package, and dependency used.
+ * Format: We standardize on CycloneDX, as it supports extensive metadata fields which we repurpose for theological annotations (e.g., marking a package's license as "permissible").
+5.2 Conftest: The Build-Time Theological Gate
+Conftest allows us to apply OPA policies to static files like SBOMs. We integrate Conftest into the CI/CD pipeline to block the deployment of "unethical" software.
+5.2.1 Policy: The 'Haram' Package Ban
+Certain software packages may be deemed non-compliant due to their functionality (e.g., gambling logic, invasive tracking) or their authorship (e.g., entities on a boycott list).
+package main
+
+import future.keywords.contains
+import future.keywords.if
+
+# List of prohibited packages (The "Haram List")
+prohibited_packages := {
+    "crypto-miner-js", 
+    "betting-odds-calc", 
+    "invasive-tracker-sdk"
+}
+
+deny contains msg if {
+    # Parse CycloneDX components
+    component := input.components[_]
+    component.name in prohibited_packages
+    msg := sprintf("HARAM SOFTWARE DETECTED: Package '%s' is prohibited due to unethical functionality.", [component.name])
+}
+
+If a developer tries to include betting-odds-calc in a HaderOS app, the build pipeline will fail immediately with a theological citation.
+5.2.2 Policy: License Compliance as 'Amanah' (Trust)
+Islamic business ethics emphasizes Amanah (trust/fulfillment of covenants). Software licenses are covenants. Using a library in violation of its license is a breach of trust.
+ * Rego Logic: The policy verifies that all components use permissible open-source licenses (MIT, Apache 2.0, GPL) and rejects proprietary or restrictive licenses that conflict with the HaderOS ethos of open knowledge.
+5.3 Immutable Provenance with Cosign
+Once an image passes the Conftest gates, it is signed using Cosign (part of the Sigstore project). This cryptographic signature is the digital equivalent of an Ijazah (certification). The runtime OPA sidecar verifies this signature before allowing the container to start. This creates an unbroken chain of custody from the source code to the execution environment, ensuring no "unverified" (potentially unethical) code can run on the sovereign infrastructure.
+6. Implementation Roadmap and Future Outlook
+6.1 Phase 1: The Foundation (Months 1-6)
+ * Ontology Seeding: Ingest core rulings from the Al-Mawsu'ah al-Fiqhiyyah (Kuwaiti Fiqh Encyclopedia) into the HaderOS Fiqh Ontology (HFO) using Neo4j. Focus on the "Transactions" (Muamalat) domain.
+ * Middleware Pilot: Deploy the TheologicalEnforcementMiddleware to the core ID and Transaction services.
+ * Riba Policy V1: Implement the basic "No Interest" Rego policy and deploy via OPA sidecars.
+6.2 Phase 2: The Agentic Layer (Months 7-12)
+ * GraphRAG Integration: Deploy the vector database and integrate it with the Neo4j graph. Train the "Jurist Agent" to perform multi-hop reasoning over the graph.
+ * Multi-Madhab Perspectives: Update the API Gateway to support X-User-Madhab headers and propagate this context to the OPA sidecars. Implement the "Polymorphic Truth" logic in Rego.
+ * Supply Chain Gating: enforce strict SBOM analysis in the CI/CD pipeline using Conftest.
+6.3 Phase 3: The 'Ijtihad Engine' (Months 13+)
+ * Algorithmic Qiyas: Enable the KAIA agents to propose new rulings for novel assets (e.g., NFTs, DAO governance tokens) based on analogical reasoning. These proposals are flagged for human scholar review, creating a "Human-in-the-Loop" generative jurisprudence.
+ * Decentralized Policy Distribution: Move the Policy Bundle server to a decentralized protocol (IPFS/Filecoin) to ensure that the Divine Law cannot be censored or altered by a central authority.
+6.4 Second-Order Insights and Implications
+ * Theological Firewalls: The OPA sidecar effectively acts as a "Theological Firewall." Just as network firewalls block malicious traffic, this layer blocks spiritually malicious transactions. This redefines "Cybersecurity" to include "Spiritual Security."
+ * Compliance-Native Applications: By offloading theological complexity to the OS layer, HaderOS enables a new breed of apps. A developer can build a generic lending app, and the OS automatically constrains it to be Shariah-compliant for Muslim users, lowering the barrier to entry for Islamic Fintech.
+ * The Feedback Loop: The interaction between KAIA (which generates new insights) and OPA (which enforces them) creates a self-optimizing legal system. As the agents digest more Fiqh, the enforcement becomes more nuanced, moving from simple binary blocks to complex, conditional allowances (Rukhsa).
+By executing this plan, HaderOS v2.0 elevates "Code" to the status of "Law" in its most profound sense—not just the law of the state, but the Law of the Divine, rendered executable, transparent, and just.
+Table 1: HaderOS Fiqh Ontology (HFO) Core Classes & Properties
+| Class Name | Description | Key Properties | Example Instance |
+|---|---|---|---|
+| hfo:LegalAct | An action performed by a user or system. | domain (Finance, Dietary), timestamp | CryptoStaking_V1 |
+| hfo:Ruling | The specific verdict on an Act. | hukm (Wajib, Haram, Makruh, Mubah), confidence_score | Ruling_Hanafi_Permissible |
+| hfo:Madhab | The school of jurisprudence. | name, methodology_type (Textual/Rational) | Hanafi, Maliki |
+| hfo:Evidence | The source text justifying the ruling. | source_text (Quran/Hadith), isnad_strength | Quran_2_275 |
+| hfo:Scholar | The authority issuing the opinion. | name, era, teacher_of | Imam_Malik |
+Table 2: OPA Integration Pattern Comparison
+| Feature | OPA as Library (Go) | OPA as Sidecar (REST) | Centralized OPA Server |
+|---|---|---|---|
+| Coupling | High (Compiled in) | Low (Network decoupled) | Low (Network decoupled) |
+| Latency | Microsecond (<1ms) | Millisecond (1-5ms) | High (>10ms + Jitter) |
+| Updates | Requires Recompile/Redeploy | Instant (Hot Reload via Bundle) | Instant |
+| Polyglot | Go only (mostly) | Any Language (Python, JS, Rust) | Any Language |
+| HaderOS Choice | Performance-critical kernels | Default for Microservices | Reporting/Analytics only |
+Table 3: SBOM Policy Violation Matrix
+| Category | Definition | Example Trigger | Conftest Action |
+|---|---|---|---|
+| Haram Explicit | Functionality strictly prohibited. | Interest calc, Gambling logic, Pork supply chain. | BLOCK. No override. |
+| Unethical Source | Author/Vendor violation. | Vendor on boycott list, unethical labor practices. | BLOCK. Requires Mufti override. |
+| Makruh Behavior | Disliked/Discouraged functionality. | Excessive user tracking, "Dark Pattern" UI libs. | WARN. Justification required. |
+| License Violation | Breach of Open Source covenant. | Non-commercial restriction, Closed Source. | BLOCK. Replace component. |

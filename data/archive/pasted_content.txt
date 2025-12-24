@@ -1,0 +1,62 @@
+Last login: Fri Dec 19 00:56:02 on ttys000
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % ls -la backend/api
+ls -la backend/api/v1
+ls -la backend/api/v1/app.py
+total 0
+drwxr-xr-x@  5 ahmedmohamedshawkyatta  staff  160 Dec 18 23:58 .
+drwxr-xr-x@ 10 ahmedmohamedshawkyatta  staff  320 Dec 18 23:58 ..
+-rw-r--r--@  1 ahmedmohamedshawkyatta  staff    0 Dec 18 23:58 __init__.py
+drwxr-xr-x@  4 ahmedmohamedshawkyatta  staff  128 Dec 18 23:58 grpc
+drwxr-xr-x@  3 ahmedmohamedshawkyatta  staff   96 Dec 18 23:58 v1
+total 0
+drwxr-xr-x@ 3 ahmedmohamedshawkyatta  staff   96 Dec 18 23:58 .
+drwxr-xr-x@ 5 ahmedmohamedshawkyatta  staff  160 Dec 18 23:58 ..
+-rw-r--r--@ 1 ahmedmohamedshawkyatta  staff    0 Dec 18 23:58 __init__.py
+ls: backend/api/v1/app.py: No such file or directory
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % python -c "import backend.api.v1.app as m; print('LOADED', m)"
+zsh: command not found: python
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % cd haderos-platform  # أو المسار الصحيح عندك
+git push origin main
+
+cd: no such file or directory: haderos-platform
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/ka364/haderos-platform.git'
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % 0f04f76 🎯 Add prioritized tasks for Sunday launch
+40fff2f 📦 Complete handover package ready
+ab594a7 📖 Add Quick Start Guide for team handover
+211568a 📋 Add comprehensive handover documentation
+
+zsh: command not found: 0f04f76
+zsh: command not found: 40fff2f
+zsh: command not found: ab594a7
+zsh: command not found: 211568a
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % which python3
+python3 --version
+/usr/bin/python3
+Python 3.9.6
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % alias python=python3
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % cd /Users/ahmedmohamedshawkyatta/Documents/GitHub/haderos-platform
+git fetch origin
+git log origin/master..HEAD --oneline
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % git status
+git branch --show-current
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   requirements.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	HANDOVER_REPORT.pdf
+	PRIORITY_TASKS_FOR_LAUNCH.pdf
+	QUICK_START_GUIDE.pdf
+	run_backend.sh
+	"\360\237\216\257 \331\202\330\247\331\212\331\224\331\205\330\251 \330\247\331\204\331\205\331\207\330\247\331\205 \330\255\330\263\330\250 \330\247\331\204\330\247\331\224\331\210\331\204\331\210\331\212\330\251 - \330\247\331\204\330\247\331\225\330\267\331\204\330\247\331\202 \331\212\331\210\331\205 \330\247\331\204\330\247\331\224\330\255\330\257 22 \330\257\331\212\330\263\331\205\330\250\330\261 2024.md"
+	"\360\237\223\232 \330\257\331\204\331\212\331\204 \331\210\330\253\330\247\331\212\331\224\331\202 \330\247\331\204\330\247\330\263\330\252\331\204\330\247\331\205 - HaderOS MVP.md"
+
+no changes added to commit (use "git add" and/or "git commit -a")
+master
+ahmedmohamedshawkyatta@ahmeds-MacBook-Air haderos-platform % 

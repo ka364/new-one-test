@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: haderos-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-haderos}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-haderos_secure_2024}
+      POSTGRES_DB: ${DB_NAME:-haderos_platform}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - haderos-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U haderos" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: haderos-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - haderos-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haderos-backend
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-haderos}:${DB_PASSWORD:-haderos_secure_2024}@postgres:5432/${DB_NAME:-haderos_platform}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - DEBUG=False
+      - CORS_ORIGINS=https://haderos.com,https://www.haderos.com
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - haderos-network
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: haderos-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    networks:
+      - haderos-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  haderos-network:
+    driver: bridge

@@ -1,0 +1,28 @@
+# Dockerfile for HaderOS Frontend - Development Mode
+# يستخدم مع docker-compose للتطوير المحلي
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm (optional but recommended)
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* package-lock.json* npm-shrinkwrap.json* ./
+
+# Install dependencies (don't use frozen-lockfile in dev)
+RUN npm install --legacy-peer-deps || pnpm install
+
+# Copy source code
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+
+# Run Vite dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -1,0 +1,50 @@
+name: haderos
+
+services:
+  - name: backend
+    github:
+      repo: ka364/haderos-platform
+      branch: master
+    build_command: pip install --upgrade pip && pip install -r requirements.txt
+    run_command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    source_dir: /
+    http_port: 8000
+    
+    environment_slug: python
+
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: postgresql://user:password@db.ondigitalocean.com:25060/haderos_platform?sslmode=require
+      - key: DEBUG
+        scope: RUN_AND_BUILD_TIME
+        value: "false"
+      - key: SECRET_KEY
+        scope: RUN_AND_BUILD_TIME
+        value: generated
+      - key: CORS_ORIGINS
+        scope: RUN_AND_BUILD_TIME
+        value: "*"
+      - key: KAIA_SERVICE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: http://localhost:8080
+      - key: THEOLOGY_FIREWALL_ENABLED
+        scope: RUN_AND_BUILD_TIME
+        value: "true"
+
+    instance_count: 1
+    instance_size_slug: basic-xs
+
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+domains:
+  - domain: haderosai.com
+    type: PRIMARY
+  - domain: www.haderosai.com
+    type: ALIAS

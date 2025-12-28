@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { eq, desc, and, gte, lte, sql, or, like, sum } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { 
+import pg from "pg";
+import {
   users,
   orders,
   transactions,
@@ -46,16 +47,23 @@ export type InsertChatMessage = InferInsertModel<typeof chatMessages>;
 export type ChatMessage = InferSelectModel<typeof chatMessages>;
 import { ENV } from './_core/env';
 
+const { Pool } = pg;
+
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: pg.Pool | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+      });
+      _db = drizzle(_pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
+      _pool = null;
     }
   }
   return _db;

@@ -4,6 +4,9 @@
  * يولد 1500 عملية بيع واقعية مع جميع البيانات المرتبطة
  */
 
+import dotenv from "dotenv";
+dotenv.config();
+
 import { getDb } from "../db";
 import {
   users,
@@ -169,10 +172,19 @@ export class FullSystemSimulator {
   }
 
   async initialize() {
+    console.log('🔌 جاري الاتصال بقاعدة البيانات...');
+    console.log('   DATABASE_URL:', process.env.DATABASE_URL ? '✅ موجود' : '❌ غير موجود');
+
     this.db = await getDb();
     if (!this.db) {
+      console.error('❌ فشل الاتصال بقاعدة البيانات');
+      console.error('   تأكد من:');
+      console.error('   1. ملف .env موجود');
+      console.error('   2. DATABASE_URL محدد في .env');
+      console.error('   3. PostgreSQL يعمل');
       throw new Error("Database connection failed");
     }
+    console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
   }
 
   // ========== المرحلة 1: إنشاء المستخدمين ==========

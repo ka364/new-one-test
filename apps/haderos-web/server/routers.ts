@@ -72,6 +72,7 @@ import { ordersRouter } from "./routers/orders";
 import { productsRouter } from "./routers/products";
 import { bioDashboardRouter } from "./routers/bio-dashboard";
 import { inventoryRouter } from "./routers/inventory";
+import { vitalSignsRouter } from "./routers/vital-signs";
 
 export const appRouter = router({
   system: systemRouter,
@@ -99,7 +100,9 @@ export const appRouter = router({
   products: productsRouter,
   bio: bioDashboardRouter,
   inventory: inventoryRouter,
-  
+  vitalSigns: vitalSignsRouter,
+  cod: codRouter,
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

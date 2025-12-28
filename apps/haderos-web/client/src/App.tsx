@@ -64,6 +64,7 @@ import FinancialPlanning from "./pages/financial/FinancialPlanning";
 import BudgetManagement from "./pages/financial/BudgetManagement";
 import CashFlowForecast from "./pages/financial/CashFlowForecast";
 import DashboardLayout from "./components/DashboardLayout";
+import VitalSignsInfographic from "./pages/VitalSignsInfographic";
 
 function Router() {
   return (
@@ -108,6 +109,12 @@ function Router() {
       <Route path={"/launch-kpis"}>
         <DashboardLayout>
           <LaunchKPIs />
+        </DashboardLayout>
+      </Route>
+
+      <Route path={"/vital-signs"}>
+        <DashboardLayout>
+          <VitalSignsInfographic />
         </DashboardLayout>
       </Route>
 

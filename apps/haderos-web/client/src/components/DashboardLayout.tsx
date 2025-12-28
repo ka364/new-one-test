@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Activity, MessageSquare } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Activity, MessageSquare, Droplets, TrendingUp } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -29,6 +29,8 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "لوحة التحكم", path: "/dashboard" },
+  { icon: Droplets, label: "المؤشرات الحيوية", path: "/vital-signs" },
+  { icon: TrendingUp, label: "مؤشرات الإطلاق", path: "/launch-kpis" },
   { icon: MessageSquare, label: "المساعد الذكي", path: "/chat" },
   { icon: Activity, label: "مراقبة Webhooks", path: "/webhooks" },
   { icon: Users, label: "الطلبات", path: "/orders" },

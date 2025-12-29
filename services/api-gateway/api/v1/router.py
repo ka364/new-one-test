@@ -12,7 +12,8 @@ from backend.api.v1.endpoints import (
     ai_models,
     bio_modules,
     security,
-    products
+    products,
+    integrations
 )
 
 # Create main API router
@@ -65,4 +66,10 @@ api_router.include_router(
     products.router,
     prefix="/products",
     tags=["products"]
+)
+
+api_router.include_router(
+    integrations.router,
+    prefix="/integrations",
+    tags=["integrations"]
 )

@@ -1485,6 +1485,11 @@ export const shippingPerformanceByGovernorate = pgTable("shipping_performance_by
 ]);
 
 // ============================================
+// SPREADSHEET COLLABORATION SCHEMA
+// ============================================
+export * from './schema-spreadsheet-collab';
+
+// ============================================
 // TYPE EXPORTS
 // ============================================
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';

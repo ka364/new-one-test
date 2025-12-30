@@ -1,0 +1,75 @@
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+redis==5.0.1
+
+# Message Queue
+kafka-python==2.0.2
+pika==1.3.2
+
+# Security & Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+email-validator==2.2.0
+python-multipart==0.0.20
+cryptography==41.0.7
+PyJWT==2.8.0
+# API & Web
+requests==2.31.0
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Data Processing
+pandas==2.1.3
+numpy==1.26.2
+scipy==1.11.4
+openpyxl==3.1.5
+
+# Machine Learning
+scikit-learn==1.3.2
+# tensorflow==2.15.0  # Removed: too large for deployment (4GB+)
+# torch==2.1.1       # Removed: too large for deployment (2GB+)
+
+# Blockchain & Smart Contracts
+web3==6.11.2
+eth-keys==0.4.0
+eth-utils==2.1.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+faker==21.0.0
+
+# Code Quality
+pylint==3.0.3
+black==23.12.0
+flake8==6.1.0
+isort==5.13.2
+mypy==1.7.1
+
+# Logging & Monitoring
+python-json-logger==2.0.7
+prometheus-client==0.19.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+opentelemetry-instrumentation-fastapi==0.42b0
+
+# Utilities
+python-dotenv==1.0.0
+click==8.1.7
+rich==13.7.0
+pyyaml==6.0.1
+
+# Documentation
+sphinx==7.2.6
+sphinx-rtd-theme==2.0.0

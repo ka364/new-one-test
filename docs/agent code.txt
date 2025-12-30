@@ -1,0 +1,173 @@
+import json
+import re
+import sqlite3
+from collections import defaultdict
+from nltk.stem.isri import ISRIStemmer
+from fastapi import FastAPI, HTTPException
+from typing import List, Dict, Any
+def _coerce_surahs(self, raw):
+    # يقبل الصيغتين:
+    # 1) {"surahs": [...]} بالصيغـة القديمة
+    # 2) [...] قائمة سور مباشرة، مفاتيحها id/text
+    if isinstance(raw, dict) and 'surahs' in raw:
+        return raw['surahs']
+    if isinstance(raw, list):
+        fixed = []
+        for s in raw:
+            verses = s.get('verses', [])
+            fixed.append({
+                'number': s.get('id'),
+                'name': s.get('name'),
+                'verses': [{'number': v.get('id'), 'text': v.get('text', '')} for v in verses]
+            })
+        return fixed
+    return []
+
+# ==================== QuranicEngine ====================
+class QuranicEngine:
+    def __init__(self, json_file_path='quran-data.json', sqlite_path='quran_index.db', use_sqlite=True):
+        try:
+            with open(json_file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.surahs = data.get('surahs', [])
+            print(f"✔ تم تحميل القرآن الكريم ({len(self.surahs)} سورة).")
+        except Exception as e:
+            print(f"✖ خطأ في التحميل: {e}")
+            self.surahs = []
+
+        self.stemmer = ISRIStemmer()
+        self.use_sqlite = use_sqlite
+        self.sqlite_path = sqlite_path
+
+        if self.use_sqlite:
+            self.conn = sqlite3.connect(self.sqlite_path)
+            self._init_db()
+            self._populate_db()
+        else:
+            self.inverted_index = defaultdict(list)
+            self._build_index()
+
+    def _normalize(self, text):
+        text = re.sub(r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]', '', text)
+        text = re.sub(r'[^\w\s]', '', text)
+        return text
+
+    def _build_index(self):
+        for surah in self.surahs:
+            for verse in surah['verses']:
+                clean = self._normalize(verse['text'])
+                for w in clean.split():
+                    root = self.stemmer.stem(w)
+                    self.inverted_index[root].append({
+                        'surah_number': surah['number'],
+                        'surah_name': surah['name'],
+                        'verse_number': verse['number'],
+                        'text': verse['text']
+                    })
+
+    def _init_db(self):
+        c = self.conn.cursor()
+        c.execute("CREATE TABLE IF NOT EXISTS verses (id INTEGER PRIMARY KEY, surah_number INTEGER, surah_name TEXT, verse_number INTEGER, text TEXT)")
+        c.execute("CREATE TABLE IF NOT EXISTS root_verse (root TEXT, verse_id INTEGER, FOREIGN KEY(verse_id) REFERENCES verses(id))")
+        self.conn.commit()
+
+    def _populate_db(self):
+        c = self.conn.cursor()
+        c.execute("SELECT COUNT(*) FROM verses")
+        if c.fetchone()[0] == 0:
+            for surah in self.surahs:
+                for verse in surah['verses']:
+                    c.execute("INSERT INTO verses (surah_number, surah_name, verse_number, text) VALUES (?, ?, ?, ?)",
+                              (surah['number'], surah['name'], verse['number'], verse['text']))
+                    vid = c.lastrowid
+                    clean = self._normalize(verse['text'])
+                    for w in clean.split():
+                        root = self.stemmer.stem(w)
+                        c.execute("INSERT INTO root_verse (root, verse_id) VALUES (?, ?)", (root, vid))
+            self.conn.commit()
+
+    def search_exact(self, phrase):
+        if self.use_sqlite:
+            c = self.conn.cursor()
+            pattern = f"%{phrase}%"
+            c.execute("SELECT surah_number, surah_name, verse_number, text FROM verses WHERE text LIKE ?", (pattern,))
+            return [dict(zip([col[0] for col in c.description], row)) for row in c.fetchall()]
+        else:
+            return [v for v in self.get_all_verses() if phrase in v['text']]
+
+    def get_all_verses(self):
+        for surah in self.surahs:
+            for verse in surah['verses']:
+                yield {
+                    'surah_number': surah['number'],
+                    'surah_name': surah['name'],
+                    'verse_number': verse['number'],
+                    'text': verse['text']
+                }
+
+# ==================== KAIA ====================
+class KAIA:
+    def __init__(self, q_engine: QuranicEngine):
+        self.q_engine = q_engine
+        self.kpis = {
+            "delivery_failure_rate": 50,
+            "customer_satisfaction": 65,
+            "conversion_rate": 22
+        }
+
+    def validate_decision(self, decision_text: str) -> Dict[str, Any]:
+        references = self.q_engine.search_exact("عدل")
+        ethical = any("عدل" in v['text'] for v in references)
+        return {
+            'decision': decision_text,
+            'is_ethical': ethical,
+            'references': references[:3]
+        }
+
+    def advise_on_strategy(self, strategy: str):
+        if "ظلم" in strategy:
+            return {"status": "رفض", "reason": "الاستراتيجية تحتوي ظلم"}
+        return {"status": "موافقة", "advice": "الخطة متوافقة مع القيم القرآنية"}
+
+    def update_kpis(self, new_data: Dict[str, float]):
+        self.kpis.update(new_data)
+        return self.kpis
+
+    def operational_report(self):
+        return {
+            "KPIs": self.kpis,
+            "recommendations": [
+                "تحسين إدارة التوصيل لخفض معدل الفشل",
+                "زيادة التفاعل مع العملاء لرفع الرضا",
+                "تحسين الحملات التسويقية لزيادة التحويل"
+            ]
+        }
+
+# ==================== API ====================
+app = FastAPI(title="KAIA Life Agent with Quranic Core")
+q_engine = QuranicEngine('quran-data.json', use_sqlite=True)
+kaia = KAIA(q_engine)
+
+@app.get("/search_quran")
+def search_quran(phrase: str):
+    return {"results": q_engine.search_exact(phrase)}
+
+@app.get("/validate_decision")
+def validate_decision_api(decision: str):
+    return kaia.validate_decision(decision)
+
+@app.get("/advise_strategy")
+def advise_strategy_api(strategy: str):
+    return kaia.advise_on_strategy(strategy)
+
+@app.post("/update_kpis")
+def update_kpis_api(new_kpis: Dict[str, float]):
+    return kaia.update_kpis(new_kpis)
+
+@app.get("/report")
+def operational_report_api():
+    return kaia.operational_report()
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=8000)

@@ -3,36 +3,26 @@ import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
 import { requireDb } from "../db";
 import { orders } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
-import { 
-  validateOrderWithArachnid, 
+import {
+  validateOrderWithArachnid,
   trackOrderLifecycle,
-  getOrderInsights 
+  getOrderInsights
 } from "../bio-modules/orders-bio-integration.js";
+import { schemas } from "../_core/validation";
+import { cache } from "../_core/cache";
+import { logger } from "../_core/logger";
 
 export const ordersRouter = router({
   // Create new order
   createOrder: publicProcedure
-    .input(
-      z.object({
-        customerName: z.string(),
-        customerEmail: z.string().email().optional(),
-        customerPhone: z.string(),
-        shippingAddress: z.string(),
-        items: z.array(
-          z.object({
-            productId: z.number(),
-            productName: z.string(),
-            quantity: z.number(),
-            price: z.number(),
-            size: z.string().optional(),
-            color: z.string().optional(),
-          })
-        ),
-        totalAmount: z.number(),
-        notes: z.string().optional(),
-      })
-    )
+    .input(schemas.createOrder)
     .mutation(async ({ input, ctx }) => {
+      logger.info('Creating new order', {
+        customerName: input.customerName,
+        itemCount: input.items.length,
+        totalAmount: input.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      });
+
       const db = await requireDb();
       
       // Generate unique order number
@@ -94,6 +84,15 @@ export const ordersRouter = router({
       // Track order lifecycle
       await trackOrderLifecycle(orderIds[0], orderNumber, "created");
 
+      logger.info('Order created successfully', {
+        orderId: orderIds[0],
+        orderNumber,
+        validationWarnings: validation.warnings.length,
+      });
+
+      // Invalidate cache
+      cache.delete('orders:all');
+
       return {
         success: true,
         orderId: orderIds[0],
@@ -109,12 +108,19 @@ export const ordersRouter = router({
 
   // Get all orders (protected - admin only)
   getAllOrders: protectedProcedure.query(async () => {
-    const db = await requireDb();
-    const allOrders = await db
-      .select()
-      .from(orders)
-      .orderBy(desc(orders.createdAt));
-    return allOrders;
+    return cache.getOrSet(
+      'orders:all',
+      async () => {
+        logger.debug('Cache miss - fetching all orders from DB');
+        const db = await requireDb();
+        const allOrders = await db
+          .select()
+          .from(orders)
+          .orderBy(desc(orders.createdAt));
+        return allOrders;
+      },
+      300 // 5 minutes TTL
+    );
   }),
 
   // Get order by ID
@@ -154,23 +160,15 @@ export const ordersRouter = router({
 
   // Update order status (protected - admin only)
   updateOrderStatus: protectedProcedure
-    .input(
-      z.object({
-        orderId: z.number(),
-        status: z.enum([
-          "pending",
-          "confirmed",
-          "processing",
-          "shipped",
-          "delivered",
-          "cancelled",
-          "refunded",
-        ]),
-      })
-    )
+    .input(schemas.updateOrderStatus)
     .mutation(async ({ input }) => {
+      logger.info('Updating order status', {
+        orderId: input.orderId,
+        newStatus: input.status,
+      });
+
       const db = await requireDb();
-      
+
       // Get order to get orderNumber
       const [order] = await db
         .select()
@@ -178,9 +176,10 @@ export const ordersRouter = router({
         .where(eq(orders.id, input.orderId));
 
       if (!order) {
+        logger.warn('Order not found', { orderId: input.orderId });
         throw new Error("Order not found");
       }
-      
+
       await db
         .update(orders)
         .set({
@@ -192,6 +191,15 @@ export const ordersRouter = router({
       // Track lifecycle with Bio-Modules
       const lifecycleStatus = input.status as "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
       await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
+
+      logger.info('Order status updated successfully', {
+        orderId: input.orderId,
+        oldStatus: order.status,
+        newStatus: input.status,
+      });
+
+      // Invalidate cache
+      cache.delete('orders:all');
 
       return {
         success: true,
@@ -208,8 +216,13 @@ export const ordersRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      logger.info('Updating payment status', {
+        orderId: input.orderId,
+        paymentStatus: input.paymentStatus,
+      });
+
       const db = await requireDb();
-      
+
       await db
         .update(orders)
         .set({
@@ -217,6 +230,14 @@ export const ordersRouter = router({
           updatedAt: new Date().toISOString(),
         })
         .where(eq(orders.id, input.orderId));
+
+      logger.info('Payment status updated successfully', {
+        orderId: input.orderId,
+        paymentStatus: input.paymentStatus,
+      });
+
+      // Invalidate cache
+      cache.delete('orders:all');
 
       return {
         success: true,

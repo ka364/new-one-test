@@ -13,6 +13,9 @@ import {
   getAllSubmissionsForMonth,
   getGenerationLogs,
 } from "../db-employees";
+import { schemas } from "../_core/validation";
+import { cache } from "../_core/cache";
+import { logger } from "../_core/logger";
 
 export const employeesRouter = router({
   // Generate monthly accounts (Admin only)
@@ -26,14 +29,26 @@ export const employeesRouter = router({
     .mutation(async ({ input, ctx }) => {
       // Only admin can generate accounts
       if (ctx.user.role !== "admin") {
+        logger.warn('Unauthorized access to generateAccounts', { userId: ctx.user.id });
         throw new TRPCError({ code: "FORBIDDEN" });
       }
+
+      logger.info('Generating monthly accounts', {
+        count: input.employeeNames.length,
+        month: input.month,
+        adminId: ctx.user.id,
+      });
 
       const accounts = await generateMonthlyAccounts(
         input.employeeNames,
         input.month,
         ctx.user.id
       );
+
+      logger.info('Monthly accounts generated successfully', {
+        count: accounts.length,
+        month: input.month,
+      });
 
       // Generate Excel file with credentials
       const workbook = XLSX.utils.book_new();
@@ -75,21 +90,26 @@ export const employeesRouter = router({
 
   // Employee login
   login: publicProcedure
-    .input(
-      z.object({
-        username: z.string(),
-        password: z.string(),
-      })
-    )
+    .input(schemas.login)
     .mutation(async ({ input }) => {
-      const account = await verifyEmployeeLogin(input.username, input.password);
+      logger.info('Employee login attempt', { username: input.email });
+
+      // Convert email to username for backward compatibility
+      const username = input.email.split('@')[0] || input.email;
+      const account = await verifyEmployeeLogin(username, input.password);
 
       if (!account) {
+        logger.warn('Employee login failed', { username: input.email });
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "اسم المستخدم أو كلمة المرور غير صحيحة، أو انتهت صلاحية الحساب",
         });
       }
+
+      logger.info('Employee login successful', {
+        accountId: account.id,
+        employeeName: account.employeeName,
+      });
 
       return {
         accountId: account.id,
@@ -104,10 +124,18 @@ export const employeesRouter = router({
     .input(z.object({ month: z.string() }))
     .query(async ({ input, ctx }) => {
       if (ctx.user.role !== "admin") {
+        logger.warn('Unauthorized access to getActiveAccounts', { userId: ctx.user.id });
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      return await getActiveAccountsForMonth(input.month);
+      return cache.getOrSet(
+        `employees:active:${input.month}`,
+        async () => {
+          logger.debug('Cache miss - fetching active accounts from DB', { month: input.month });
+          return await getActiveAccountsForMonth(input.month);
+        },
+        300 // 5 minutes TTL
+      );
     }),
 
   // Deactivate account (Admin only)
@@ -115,10 +143,23 @@ export const employeesRouter = router({
     .input(z.object({ accountId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.role !== "admin") {
+        logger.warn('Unauthorized access to deactivateAccount', { userId: ctx.user.id });
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
+      logger.info('Deactivating employee account', {
+        accountId: input.accountId,
+        adminId: ctx.user.id,
+      });
+
       await deactivateAccount(input.accountId);
+
+      logger.info('Employee account deactivated successfully', { accountId: input.accountId });
+
+      // Invalidate cache (clear all employee caches as we don't know the month)
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      cache.delete(`employees:active:${currentMonth}`);
+
       return { success: true };
     }),
 
@@ -142,11 +183,21 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      logger.info('Employee submitting data', {
+        accountId: input.accountId,
+        dataType: input.dataType,
+      });
+
       const data = await submitEmployeeData(
         input.accountId,
         input.dataType,
         input.dataJson
       );
+
+      logger.info('Employee data submitted successfully', {
+        accountId: input.accountId,
+        dataType: input.dataType,
+      });
 
       return data;
     }),

@@ -4,35 +4,53 @@ import { requireDb } from "../db";
 import { products } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { applyDynamicPricing } from "../bio-modules/orders-bio-integration.js";
+import { schemas } from "../_core/validation";
+import { cache } from "../_core/cache";
+import { logger } from "../_core/logger";
 
 export const productsRouter = router({
   // Get all products
   getAllProducts: publicProcedure.query(async () => {
-    const db = await requireDb();
-    const allProducts = await db
-      .select()
-      .from(products)
-      .where(eq(products.isActive, 1))
-      .orderBy(desc(products.createdAt));
-    return allProducts;
+    return cache.getOrSet(
+      'products:all',
+      async () => {
+        logger.debug('Cache miss - fetching all products from DB');
+        const db = await requireDb();
+        const allProducts = await db
+          .select()
+          .from(products)
+          .where(eq(products.isActive, 1))
+          .orderBy(desc(products.createdAt));
+        return allProducts;
+      },
+      600 // 10 minutes TTL (products change less frequently)
+    );
   }),
 
   // Get product by ID
   getProductById: publicProcedure
     .input(z.object({ productId: z.number() }))
     .query(async ({ input }) => {
-      const db = await requireDb();
-      
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, input.productId));
+      return cache.getOrSet(
+        `products:${input.productId}`,
+        async () => {
+          logger.debug('Cache miss - fetching product from DB', { productId: input.productId });
+          const db = await requireDb();
 
-      if (!product) {
-        throw new Error("Product not found");
-      }
+          const [product] = await db
+            .select()
+            .from(products)
+            .where(eq(products.id, input.productId));
 
-      return product;
+          if (!product) {
+            logger.warn('Product not found', { productId: input.productId });
+            throw new Error("Product not found");
+          }
+
+          return product;
+        },
+        600 // 10 minutes TTL
+      );
     }),
 
   // Get dynamic price for a product (with Chameleon integration)
@@ -87,28 +105,32 @@ export const productsRouter = router({
 
   // Create new product (protected - admin only)
   createProduct: protectedProcedure
-    .input(
-      z.object({
-        modelCode: z.string(),
-        supplierPrice: z.number(),
-        sellingPrice: z.number().optional(),
-        category: z.string().optional(),
-      })
-    )
+    .input(schemas.createProduct)
     .mutation(async ({ input }) => {
+      logger.info('Creating new product', {
+        modelCode: input.name,
+        sku: input.sku,
+        price: input.price,
+      });
+
       const db = await requireDb();
-      
+
       const result = await db
         .insert(products)
         .values({
-          modelCode: input.modelCode,
-          supplierPrice: input.supplierPrice.toString(),
-          sellingPrice: input.sellingPrice?.toString() || null,
+          modelCode: input.sku,
+          supplierPrice: input.costPrice?.toString() || input.price.toString(),
+          sellingPrice: input.price.toString(),
           category: input.category || null,
           isActive: 1,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
+
+      logger.info('Product created successfully', { sku: input.sku });
+
+      // Invalidate cache
+      cache.delete('products:all');
 
       return {
         success: true,
@@ -118,33 +140,32 @@ export const productsRouter = router({
 
   // Update product (protected - admin only)
   updateProduct: protectedProcedure
-    .input(
-      z.object({
-        productId: z.number(),
-        modelCode: z.string().optional(),
-        supplierPrice: z.number().optional(),
-        sellingPrice: z.number().optional(),
-        category: z.string().optional(),
-        isActive: z.number().optional(),
-      })
-    )
+    .input(schemas.updateProduct.extend({ productId: z.number() }))
     .mutation(async ({ input }) => {
+      logger.info('Updating product', { productId: input.productId });
+
       const db = await requireDb();
-      
+
       const updateData: any = {
         updatedAt: new Date().toISOString(),
       };
 
-      if (input.modelCode !== undefined) updateData.modelCode = input.modelCode;
-      if (input.supplierPrice !== undefined) updateData.supplierPrice = input.supplierPrice.toString();
-      if (input.sellingPrice !== undefined) updateData.sellingPrice = input.sellingPrice.toString();
+      if (input.sku !== undefined) updateData.modelCode = input.sku;
+      if (input.costPrice !== undefined) updateData.supplierPrice = input.costPrice.toString();
+      if (input.price !== undefined) updateData.sellingPrice = input.price.toString();
       if (input.category !== undefined) updateData.category = input.category;
-      if (input.isActive !== undefined) updateData.isActive = input.isActive;
+      if (input.isActive !== undefined) updateData.isActive = input.isActive ? 1 : 0;
 
       await db
         .update(products)
         .set(updateData)
         .where(eq(products.id, input.productId));
+
+      logger.info('Product updated successfully', { productId: input.productId });
+
+      // Invalidate cache
+      cache.delete('products:all');
+      cache.delete(`products:${input.productId}`);
 
       return {
         success: true,
@@ -156,8 +177,10 @@ export const productsRouter = router({
   deleteProduct: protectedProcedure
     .input(z.object({ productId: z.number() }))
     .mutation(async ({ input }) => {
+      logger.info('Deleting product (soft delete)', { productId: input.productId });
+
       const db = await requireDb();
-      
+
       await db
         .update(products)
         .set({
@@ -165,6 +188,12 @@ export const productsRouter = router({
           updatedAt: new Date().toISOString(),
         })
         .where(eq(products.id, input.productId));
+
+      logger.info('Product deleted successfully', { productId: input.productId });
+
+      // Invalidate cache
+      cache.delete('products:all');
+      cache.delete(`products:${input.productId}`);
 
       return {
         success: true,

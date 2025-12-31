@@ -56,3 +56,18 @@ coverage/
 .cache/
 .temp/
 tmp/
+*.zip
+*.rar
+*.7z
+
+# Large files (>100MB)
+*.mp4
+*.m4a
+*.pptx
+*.dylib
+*.so
+*.tar
+services/api-gateway/.venv/
+إطلاق المشروع للموظفين بعد مراجعة الملفات-8/
+مراجعة الموقف وتشغيل النظام/
+apps/untitled folder.zip

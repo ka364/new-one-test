@@ -11,6 +11,6 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: connectionString,
-    ssl: false, // Disable SSL verification for DigitalOcean managed database
+    ssl: { rejectUnauthorized: false }, // Allow self-signed certificates for DigitalOcean
   },
 });

@@ -435,7 +435,7 @@ export const monthlyEmployeeAccounts = pgTable("monthly_employee_accounts", {
 	otpAttempts: integer("otp_attempts").default(0),
 },
 (table) => [
-	index("username").on(table.username),
+	index("monthly_emp_accounts_username").on(table.username),
 ]);
 
 export const notifications = pgTable("notifications", {
@@ -583,8 +583,8 @@ export const productImages = pgTable("product_images", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
 (table) => [
-	index("product_id_idx").on(table.productId),
-	index("is_primary_idx").on(table.isPrimary),
+	index("product_images_product_id_idx").on(table.productId),
+	index("product_images_is_primary_idx").on(table.isPrimary),
 ]);
 
 export const productSizeCharts = pgTable("product_size_charts", {

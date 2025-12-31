@@ -1,0 +1,138 @@
+{
+  "brand": {
+    "name": "HADEROS AI CLOUD",
+    "tagline": "Sistem Operasi untuk Perniagaan Pasaran Baru Muncul",
+    "vision": "Sistem Operasi berkuasa AI, disampaikan melalui Cloud, yang sudah dibina (Had) dan sedia (Hader), dengan jiwa yang benar-benar tempatan (ض)."
+  },
+  "about": {
+    "title": "Tentang HADEROS",
+    "hero": {
+      "title": "HADEROS AI CLOUD",
+      "subtitle": "Sistem Operasi untuk Perniagaan Pasaran Baru Muncul",
+      "description": "HADEROS lebih daripada perisian—ia adalah platform untuk transformasi digital dalam pasaran baru muncul. Kami menggabungkan teknologi bertaraf dunia dengan pemahaman tempatan yang mendalam untuk memperkasakan perniagaan di Timur Tengah, Asia Tenggara, dan Afrika."
+    },
+    "nameSection": {
+      "title": "Nama: Visi Global dengan Jiwa Tempatan",
+      "components": {
+        "had": {
+          "meaning": "Sudah siap.",
+          "significance": "Platform gred perusahaan kami bukan janji masa depan; ia sudah dibina, diuji, dan sedia hari ini."
+        },
+        "er": {
+          "meaning": "Yang melakukan.",
+          "significance": "HADEROS adalah sistem aktif, pemboleh, enjin yang memacu pertumbuhan pelanggan kami."
+        },
+        "os": {
+          "meaning": "Sistem Operasi",
+          "significance": "Kami menyediakan Sistem Operasi asas untuk Perniagaan dalam pasaran baru muncul."
+        },
+        "hader": {
+          "component": "حاضر",
+          "romanization": "Hader",
+          "meaning": "Hadir / Sedia",
+          "significance": "Perkataan Arab untuk 'hadir' atau 'sedia', menandakan kesediaan pasaran kami dan komitmen kami untuk hadir bagi pelanggan kami."
+        },
+        "dhad": {
+          "component": "ض",
+          "romanization": "Dhad",
+          "meaning": "Huruf Arab 'ض'",
+          "significance": "'D' dalam nama kami mewakili huruf Arab unik 'ض', simbol akar tempatan kami yang mendalam dan komitmen kami untuk membina budaya kami.",
+          "unique": "Unik kepada bahasa Arab"
+        }
+      }
+    },
+    "mission": {
+      "title": "Misi Kami",
+      "description": "Mendemokrasikan teknologi perusahaan dengan menyediakan penyelesaian perniagaan yang mampu milik, berprestasi tinggi, dan disesuaikan secara budaya untuk PKS dalam ekonomi yang paling pesat berkembang di dunia."
+    },
+    "values": {
+      "title": "Nilai-nilai Kami",
+      "excellence": {
+        "title": "Kecemerlangan",
+        "description": "Kami menyampaikan kualiti gred perusahaan dengan keselamatan A+ dan prestasi <200ms."
+      },
+      "accessibility": {
+        "title": "Kebolehcapaian",
+        "description": "Kami menjadikan teknologi bertaraf dunia mampu milik, dengan harga 60-95% lebih rendah daripada pesaing global."
+      },
+      "localSoul": {
+        "title": "Jiwa Tempatan",
+        "description": "Kami membina untuk pasaran kami, dengan sokongan bahasa penuh, pemahaman budaya, dan pasukan tempatan."
+      },
+      "innovation": {
+        "title": "Inovasi",
+        "description": "Kami memanfaatkan AI dan teknologi awan terkini untuk menyelesaikan masalah perniagaan sebenar."
+      },
+      "transparency": {
+        "title": "Ketelusan",
+        "description": "Kami beroperasi dengan keterbukaan sepenuhnya, menyediakan metrik yang jelas dan komunikasi yang jujur."
+      }
+    },
+    "technical": {
+      "title": "Kecemerlangan Teknikal",
+      "subtitle": "Platform gred perusahaan dengan metrik terbukti",
+      "security": {
+        "label": "Gred Keselamatan",
+        "note": "Skor: 95/100"
+      },
+      "performance": {
+        "label": "Masa Respons",
+        "note": "60% lebih pantas daripada pesaing"
+      },
+      "validation": {
+        "label": "Liputan Pengesahan",
+        "note": "Integriti data lengkap"
+      }
+    },
+    "vision2028": {
+      "title": "Visi 2028",
+      "subtitle": "Membina sistem operasi ekonomi untuk pasaran baru muncul",
+      "factories": "Kilang Menyertai",
+      "merchants": "Peniaga & Pengedar",
+      "jobs": "Pekerjaan Dicipta",
+      "orders": "Pesanan Diproses",
+      "alliances": "Pakatan Strategik"
+    },
+    "markets": {
+      "title": "Pasaran Kami",
+      "phase1": "Pelancaran Awal",
+      "phase2": "Pengembangan",
+      "phase3": "Jangkauan Global"
+    },
+    "languages": {
+      "title": "Bahasa yang Disokong"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Pengurusan Perniagaan dengan Hati Nurani",
+      "subtitle": "Platform pintar bersepadu untuk pengurusan perniagaan dengan tadbir urus etika terbina dalam dan ejen pintar yang bekerja untuk anda",
+      "cta": {
+        "dashboard": "Ke Papan Pemuka",
+        "login": "Log Masuk",
+        "showcase": "Lihat Platform",
+        "about": "Tentang HADEROS"
+      }
+    },
+    "features": {
+      "title": "Ciri Platform",
+      "subtitle": "Sistem bersepadu yang menggabungkan kecerdasan buatan dan tadbir urus etika untuk menguruskan perniagaan anda dengan cekap"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 HADEROS AI CLOUD. Hak cipta terpelihara.",
+    "tagline": "Sistem Operasi untuk Perniagaan Pasaran Baru Muncul",
+    "nameMeaning": "HADEROS = HAD (Dibina) + ER (Pemboleh) + OS (Sistem Operasi) | حاضر (Sedia) | ض (Jiwa Tempatan)",
+    "links": {
+      "about": "Tentang",
+      "showcase": "Showcase"
+    }
+  },
+  "language": {
+    "select": "Pilih Bahasa",
+    "english": "English",
+    "arabic": "العربية",
+    "indonesian": "Bahasa Indonesia",
+    "malay": "Bahasa Melayu"
+  }
+}

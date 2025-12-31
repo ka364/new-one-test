@@ -1,0 +1,138 @@
+{
+  "brand": {
+    "name": "HADEROS AI CLOUD",
+    "tagline": "The Operating System for Emerging Market Businesses",
+    "vision": "An AI-powered Operating System, delivered via the Cloud, that is already built (Had) and ready (Hader), with a soul that is authentically local (ض)."
+  },
+  "about": {
+    "title": "About HADEROS",
+    "hero": {
+      "title": "HADEROS AI CLOUD",
+      "subtitle": "The Operating System for Emerging Market Businesses",
+      "description": "HADEROS is more than software—it's a platform for digital transformation in emerging markets. We combine world-class technology with deep local understanding to empower businesses across the Middle East, Southeast Asia, and Africa."
+    },
+    "nameSection": {
+      "title": "The Name: A Global Vision with a Local Soul",
+      "components": {
+        "had": {
+          "meaning": "It is done.",
+          "significance": "Our enterprise-grade platform is not a future promise; it is built, tested, and ready today."
+        },
+        "er": {
+          "meaning": "The one that does.",
+          "significance": "HADEROS is an active system, an enabler, the engine that powers our clients' growth."
+        },
+        "os": {
+          "meaning": "Operating System",
+          "significance": "We provide the fundamental Operating System for Business in emerging markets."
+        },
+        "hader": {
+          "component": "حاضر",
+          "romanization": "Hader",
+          "meaning": "Present / Ready",
+          "significance": "The Arabic word for 'present' or 'ready,' signifying our market readiness and our commitment to being present for our customers."
+        },
+        "dhad": {
+          "component": "ض",
+          "romanization": "Dhad",
+          "meaning": "The Arabic Letter 'ض'",
+          "significance": "The 'D' in our name represents the unique Arabic letter 'ض', a symbol of our deep local roots and our commitment to building for our culture.",
+          "unique": "Unique to Arabic"
+        }
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "To democratize enterprise technology by providing affordable, high-performance, and culturally adapted business solutions to SMBs in the world's fastest-growing economies."
+    },
+    "values": {
+      "title": "Our Values",
+      "excellence": {
+        "title": "Excellence",
+        "description": "We deliver enterprise-grade quality with A+ security and <200ms performance."
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "We make world-class technology affordable, with pricing 60-95% lower than global competitors."
+      },
+      "localSoul": {
+        "title": "Local Soul",
+        "description": "We build for our markets, with full language support, cultural understanding, and local teams."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "We leverage cutting-edge AI and cloud technology to solve real business problems."
+      },
+      "transparency": {
+        "title": "Transparency",
+        "description": "We operate with complete openness, providing clear metrics and honest communication."
+      }
+    },
+    "technical": {
+      "title": "Technical Excellence",
+      "subtitle": "Enterprise-grade platform with proven metrics",
+      "security": {
+        "label": "Security Grade",
+        "note": "Score: 95/100"
+      },
+      "performance": {
+        "label": "Response Time",
+        "note": "60% faster than competitors"
+      },
+      "validation": {
+        "label": "Validation Coverage",
+        "note": "Complete data integrity"
+      }
+    },
+    "vision2028": {
+      "title": "Vision 2028",
+      "subtitle": "Building an economic operating system for emerging markets",
+      "factories": "Factories Onboarded",
+      "merchants": "Merchants & Traders",
+      "jobs": "Jobs Created",
+      "orders": "Orders Processed",
+      "alliances": "Strategic Alliances"
+    },
+    "markets": {
+      "title": "Our Markets",
+      "phase1": "Initial Launch",
+      "phase2": "Expansion",
+      "phase3": "Global Reach"
+    },
+    "languages": {
+      "title": "Languages Supported"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Business Management with Conscience",
+      "subtitle": "An integrated smart platform for business management with built-in ethical governance and intelligent agents working for you",
+      "cta": {
+        "dashboard": "Go to Dashboard",
+        "login": "Sign In",
+        "showcase": "View Platform Showcase",
+        "about": "About HADEROS"
+      }
+    },
+    "features": {
+      "title": "Platform Features",
+      "subtitle": "An integrated system combining artificial intelligence and ethical governance to manage your business efficiently"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 HADEROS AI CLOUD. All rights reserved.",
+    "tagline": "The Operating System for Emerging Market Businesses",
+    "nameMeaning": "HADEROS = HAD (Built) + ER (Enabler) + OS (Operating System) | حاضر (Ready) | ض (Local Soul)",
+    "links": {
+      "about": "About",
+      "showcase": "Showcase"
+    }
+  },
+  "language": {
+    "select": "Select Language",
+    "english": "English",
+    "arabic": "العربية",
+    "indonesian": "Bahasa Indonesia",
+    "malay": "Bahasa Melayu"
+  }
+}

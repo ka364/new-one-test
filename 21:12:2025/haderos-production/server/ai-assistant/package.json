@@ -1,0 +1,36 @@
+{
+  "name": "@haderos/ai-assistant",
+  "version": "1.0.0",
+  "description": "HADEROS AI Assistant - Automated code analysis, testing, and security",
+  "main": "index.ts",
+  "bin": {
+    "haderos-ai": "./cli/index.ts"
+  },
+  "scripts": {
+    "analyze": "tsx cli/index.ts analyze",
+    "generate-tests": "tsx cli/index.ts generate-tests",
+    "audit": "tsx cli/index.ts audit",
+    "scan": "tsx cli/index.ts scan"
+  },
+  "keywords": [
+    "ai",
+    "code-analysis",
+    "testing",
+    "security",
+    "automation"
+  ],
+  "author": "HADEROS Team",
+  "license": "MIT",
+  "dependencies": {
+    "openai": "^4.0.0",
+    "@anthropic-ai/sdk": "^0.17.0",
+    "@google/generative-ai": "^0.1.0",
+    "xai-sdk": "^1.0.0",
+    "commander": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

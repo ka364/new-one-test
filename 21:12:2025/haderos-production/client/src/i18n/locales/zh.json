@@ -1,0 +1,145 @@
+{
+  "brand": {
+    "name": "HADEROS AI CLOUD",
+    "tagline": "新兴市场企业的操作系统",
+    "vision": "一个由人工智能驱动的操作系统，通过云交付，已经构建完成（Had）并准备就绪（Hader），拥有真正本地化的灵魂（ض）。"
+  },
+  "about": {
+    "title": "关于 HADEROS",
+    "hero": {
+      "title": "HADEROS AI CLOUD",
+      "subtitle": "新兴市场企业的操作系统",
+      "description": "HADEROS 不仅仅是软件——它是新兴市场数字化转型的平台。我们将世界级技术与深厚的本地理解相结合，为中东、东南亚和非洲的企业赋能。"
+    },
+    "nameSection": {
+      "title": "名称：全球愿景与本地灵魂",
+      "components": {
+        "had": {
+          "meaning": "已完成。",
+          "significance": "我们的企业级平台不是未来的承诺；它已经构建、测试并在今天准备就绪。"
+        },
+        "er": {
+          "meaning": "执行者。",
+          "significance": "HADEROS 是一个主动系统，一个赋能者，驱动客户增长的引擎。"
+        },
+        "os": {
+          "meaning": "操作系统",
+          "significance": "我们为新兴市场提供基础的商业操作系统。"
+        },
+        "hader": {
+          "component": "حاضر",
+          "romanization": "Hader",
+          "meaning": "在场 / 准备好",
+          "significance": "阿拉伯语中'在场'或'准备好'的意思，象征着我们的市场准备和对客户的承诺。"
+        },
+        "dhad": {
+          "component": "ض",
+          "romanization": "Dhad",
+          "meaning": "阿拉伯字母 'ض'",
+          "significance": "我们名称中的'D'代表独特的阿拉伯字母'ض'，象征着我们深厚的本地根基和为文化建设的承诺。",
+          "unique": "阿拉伯语独有"
+        },
+        "zhunbei": {
+          "component": "准备就绪",
+          "romanization": "Zhǔnbèi jiùxù",
+          "meaning": "完全准备就绪",
+          "significance": "中文表达结合了准备（准备）和完全就绪（就绪），象征着我们为亚洲市场服务的绝对准备。"
+        }
+      }
+    },
+    "mission": {
+      "title": "我们的使命",
+      "description": "通过为世界上增长最快的经济体中的中小企业提供经济实惠、高性能和文化适应的商业解决方案，使企业技术民主化。"
+    },
+    "values": {
+      "title": "我们的价值观",
+      "excellence": {
+        "title": "卓越",
+        "description": "我们提供企业级质量，A+安全性和<200ms性能。"
+      },
+      "accessibility": {
+        "title": "可及性",
+        "description": "我们使世界级技术变得经济实惠，价格比全球竞争对手低60-95%。"
+      },
+      "localSoul": {
+        "title": "本地灵魂",
+        "description": "我们为市场而建，提供全面的语言支持、文化理解和本地团队。"
+      },
+      "innovation": {
+        "title": "创新",
+        "description": "我们利用尖端的人工智能和云技术解决真实的商业问题。"
+      },
+      "transparency": {
+        "title": "透明度",
+        "description": "我们以完全开放的方式运营，提供清晰的指标和诚实的沟通。"
+      }
+    },
+    "technical": {
+      "title": "技术卓越",
+      "subtitle": "具有经过验证指标的企业级平台",
+      "security": {
+        "label": "安全等级",
+        "note": "得分：95/100"
+      },
+      "performance": {
+        "label": "响应时间",
+        "note": "比竞争对手快60%"
+      },
+      "validation": {
+        "label": "验证覆盖率",
+        "note": "完整的数据完整性"
+      }
+    },
+    "vision2028": {
+      "title": "2028愿景",
+      "subtitle": "为新兴市场构建经济操作系统",
+      "factories": "入驻工厂",
+      "merchants": "商家和贸易商",
+      "jobs": "创造就业",
+      "orders": "处理订单",
+      "alliances": "战略联盟"
+    },
+    "markets": {
+      "title": "我们的市场",
+      "phase1": "初始启动",
+      "phase2": "扩张",
+      "phase3": "全球覆盖"
+    },
+    "languages": {
+      "title": "支持的语言"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "有良知的企业管理",
+      "subtitle": "集成智能平台，用于企业管理，内置道德治理和为您工作的智能代理",
+      "cta": {
+        "dashboard": "前往控制面板",
+        "login": "登录",
+        "showcase": "查看平台展示",
+        "about": "关于 HADEROS"
+      }
+    },
+    "features": {
+      "title": "平台功能",
+      "subtitle": "结合人工智能和道德治理的集成系统，高效管理您的业务"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 HADEROS AI CLOUD. 版权所有。",
+    "tagline": "新兴市场企业的操作系统",
+    "nameMeaning": "HADEROS = HAD（已构建）+ ER（赋能者）+ OS（操作系统）| حاضر（准备好）| ض（本地灵魂）| 准备就绪（完全准备）",
+    "links": {
+      "about": "关于",
+      "showcase": "展示"
+    }
+  },
+  "language": {
+    "select": "选择语言",
+    "english": "English",
+    "arabic": "العربية",
+    "indonesian": "Bahasa Indonesia",
+    "malay": "Bahasa Melayu",
+    "chinese": "中文"
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "brand": {
+    "name": "HADEROS AI CLOUD",
+    "tagline": "Sistem Operasi untuk Bisnis Pasar Berkembang",
+    "vision": "Sistem Operasi bertenaga AI, disampaikan melalui Cloud, yang sudah dibangun (Had) dan siap (Hader), dengan jiwa yang benar-benar lokal (ض)."
+  },
+  "about": {
+    "title": "Tentang HADEROS",
+    "hero": {
+      "title": "HADEROS AI CLOUD",
+      "subtitle": "Sistem Operasi untuk Bisnis Pasar Berkembang",
+      "description": "HADEROS lebih dari sekadar perangkat lunak—ini adalah platform untuk transformasi digital di pasar berkembang. Kami menggabungkan teknologi kelas dunia dengan pemahaman lokal yang mendalam untuk memberdayakan bisnis di Timur Tengah, Asia Tenggara, dan Afrika."
+    },
+    "nameSection": {
+      "title": "Nama: Visi Global dengan Jiwa Lokal",
+      "components": {
+        "had": {
+          "meaning": "Sudah selesai.",
+          "significance": "Platform tingkat enterprise kami bukan janji masa depan; sudah dibangun, diuji, dan siap hari ini."
+        },
+        "er": {
+          "meaning": "Yang melakukan.",
+          "significance": "HADEROS adalah sistem aktif, enabler, mesin yang mendorong pertumbuhan klien kami."
+        },
+        "os": {
+          "meaning": "Sistem Operasi",
+          "significance": "Kami menyediakan Sistem Operasi fundamental untuk Bisnis di pasar berkembang."
+        },
+        "hader": {
+          "component": "حاضر",
+          "romanization": "Hader",
+          "meaning": "Hadir / Siap",
+          "significance": "Kata Arab untuk 'hadir' atau 'siap', menandakan kesiapan pasar kami dan komitmen kami untuk hadir bagi pelanggan kami."
+        },
+        "dhad": {
+          "component": "ض",
+          "romanization": "Dhad",
+          "meaning": "Huruf Arab 'ض'",
+          "significance": "'D' dalam nama kami mewakili huruf Arab unik 'ض', simbol akar lokal kami yang dalam dan komitmen kami untuk membangun budaya kami.",
+          "unique": "Unik untuk bahasa Arab"
+        }
+      }
+    },
+    "mission": {
+      "title": "Misi Kami",
+      "description": "Mendemokratisasi teknologi enterprise dengan menyediakan solusi bisnis yang terjangkau, berkinerja tinggi, dan disesuaikan secara budaya untuk UKM di ekonomi dengan pertumbuhan tercepat di dunia."
+    },
+    "values": {
+      "title": "Nilai-nilai Kami",
+      "excellence": {
+        "title": "Keunggulan",
+        "description": "Kami memberikan kualitas tingkat enterprise dengan keamanan A+ dan kinerja <200ms."
+      },
+      "accessibility": {
+        "title": "Aksesibilitas",
+        "description": "Kami membuat teknologi kelas dunia terjangkau, dengan harga 60-95% lebih rendah dari pesaing global."
+      },
+      "localSoul": {
+        "title": "Jiwa Lokal",
+        "description": "Kami membangun untuk pasar kami, dengan dukungan bahasa penuh, pemahaman budaya, dan tim lokal."
+      },
+      "innovation": {
+        "title": "Inovasi",
+        "description": "Kami memanfaatkan AI dan teknologi cloud terkini untuk memecahkan masalah bisnis nyata."
+      },
+      "transparency": {
+        "title": "Transparansi",
+        "description": "Kami beroperasi dengan keterbukaan penuh, memberikan metrik yang jelas dan komunikasi yang jujur."
+      }
+    },
+    "technical": {
+      "title": "Keunggulan Teknis",
+      "subtitle": "Platform tingkat enterprise dengan metrik terbukti",
+      "security": {
+        "label": "Tingkat Keamanan",
+        "note": "Skor: 95/100"
+      },
+      "performance": {
+        "label": "Waktu Respons",
+        "note": "60% lebih cepat dari pesaing"
+      },
+      "validation": {
+        "label": "Cakupan Validasi",
+        "note": "Integritas data lengkap"
+      }
+    },
+    "vision2028": {
+      "title": "Visi 2028",
+      "subtitle": "Membangun sistem operasi ekonomi untuk pasar berkembang",
+      "factories": "Pabrik Bergabung",
+      "merchants": "Pedagang & Distributor",
+      "jobs": "Pekerjaan Tercipta",
+      "orders": "Pesanan Diproses",
+      "alliances": "Aliansi Strategis"
+    },
+    "markets": {
+      "title": "Pasar Kami",
+      "phase1": "Peluncuran Awal",
+      "phase2": "Ekspansi",
+      "phase3": "Jangkauan Global"
+    },
+    "languages": {
+      "title": "Bahasa yang Didukung"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Manajemen Bisnis dengan Hati Nurani",
+      "subtitle": "Platform cerdas terintegrasi untuk manajemen bisnis dengan tata kelola etis bawaan dan agen cerdas yang bekerja untuk Anda",
+      "cta": {
+        "dashboard": "Ke Dashboard",
+        "login": "Masuk",
+        "showcase": "Lihat Platform",
+        "about": "Tentang HADEROS"
+      }
+    },
+    "features": {
+      "title": "Fitur Platform",
+      "subtitle": "Sistem terintegrasi yang menggabungkan kecerdasan buatan dan tata kelola etis untuk mengelola bisnis Anda secara efisien"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 HADEROS AI CLOUD. Hak cipta dilindungi.",
+    "tagline": "Sistem Operasi untuk Bisnis Pasar Berkembang",
+    "nameMeaning": "HADEROS = HAD (Dibangun) + ER (Enabler) + OS (Sistem Operasi) | حاضر (Siap) | ض (Jiwa Lokal)",
+    "links": {
+      "about": "Tentang",
+      "showcase": "Showcase"
+    }
+  },
+  "language": {
+    "select": "Pilih Bahasa",
+    "english": "English",
+    "arabic": "العربية",
+    "indonesian": "Bahasa Indonesia",
+    "malay": "Bahasa Melayu"
+  }
+}

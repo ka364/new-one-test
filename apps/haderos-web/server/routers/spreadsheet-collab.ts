@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { router as createTRPCRouter, protectedProcedure } from "../_core/trpc";
 import { 
   spreadsheetSessions, cellComments, spreadsheetVersions, 
   spreadsheetSharing, spreadsheetEdits, spreadsheetFormulas, spreadsheetCharts,

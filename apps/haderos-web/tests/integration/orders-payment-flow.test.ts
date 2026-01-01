@@ -13,7 +13,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { appRouter } from '../../server/routers';
-import { createTRPCMsw } from 'msw-trpc';
 import { TRPCError } from '@trpc/server';
 
 // Mock context
@@ -30,7 +29,11 @@ const createMockContext = (user?: { id: number; role?: string }) => ({
 });
 
 describe('Integration: Orders + Payment Flow', () => {
-  const caller = appRouter.createCaller(createMockContext());
+  let caller: ReturnType<typeof appRouter.createCaller>;
+  
+  beforeEach(() => {
+    caller = appRouter.createCaller(createMockContext());
+  });
 
   beforeEach(() => {
     // Reset mocks before each test

@@ -28,7 +28,11 @@ const createMockContext = (user?: { id: number; role?: string }) => ({
 });
 
 describe('Integration: Egyptian Customer Journey', () => {
-  const caller = appRouter.createCaller(createMockContext());
+  let caller: ReturnType<typeof appRouter.createCaller>;
+  
+  beforeEach(() => {
+    caller = appRouter.createCaller(createMockContext());
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

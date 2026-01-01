@@ -1077,8 +1077,7 @@ export const codRouter = router({
         await db.update(codOrders)
           .set({
             status: 'cancelled',
-            cancellationReason: input.reason,
-            cancelledAt: new Date().toISOString(),
+            currentStage: 'cancelled',
             updatedAt: new Date().toISOString(),
           })
           .where(eq(codOrders.orderId, input.orderId));
@@ -1087,6 +1086,7 @@ export const codRouter = router({
         logger.info('COD order cancelled', {
           orderId: input.orderId,
           previousStage: currentStage,
+          reason: input.reason,
           duration: `${duration}ms`,
         });
 

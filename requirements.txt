@@ -21,7 +21,7 @@ bcrypt==4.0.1
 email-validator==2.2.0
 python-multipart==0.0.20
 cryptography==41.0.7
-PyJWT==2.8.0
+PyJWT==2.10.1
 # API & Web
 requests==2.31.0
 httpx==0.25.2

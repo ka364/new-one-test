@@ -1,0 +1,36 @@
+{
+  "source": {
+    "include": [
+      "server/routers",
+      "server/services",
+      "server/bio-modules",
+      "server/_core"
+    ],
+    "includePattern": "\\.(js|ts)$",
+    "exclude": [
+      "node_modules",
+      "dist",
+      "build",
+      "**/*.test.ts",
+      "**/tests/**"
+    ]
+  },
+  "opts": {
+    "destination": "./docs/api",
+    "recurse": true,
+    "template": "node_modules/docdash",
+    "readme": "./docs/README.md"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  }
+}
+

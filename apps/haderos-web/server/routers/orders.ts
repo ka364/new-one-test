@@ -31,10 +31,9 @@ export const ordersRouter = router({
       // Get user ID (default to 1 if not authenticated)
       const userId = ctx.user?.id || 1;
 
-      // Create separate order for each item (based on current schema)
-      const orderIds: number[] = [];
-      
-      for (const item of input.items) {
+      // Prepare batch insert data (instead of loop)
+      const now = new Date().toISOString();
+      const orderValues = input.items.map((item, index) => {
         const itemDescription = [
           item.size ? `المقاس: ${item.size}` : null,
           item.color ? `اللون: ${item.color}` : null,
@@ -42,33 +41,35 @@ export const ordersRouter = router({
           .filter(Boolean)
           .join(", ");
 
-        const result = await db
-          .insert(orders)
-          .values({
-            orderNumber: `${orderNumber}-${orderIds.length + 1}`,
-            customerName: input.customerName,
-            customerEmail: input.customerEmail || null,
-            customerPhone: input.customerPhone || null,
-            productName: item.productName,
-            productDescription: itemDescription || null,
-            quantity: item.quantity,
-            unitPrice: item.price.toString(),
-            totalAmount: (item.price * item.quantity).toString(),
-            currency: "EGP",
-            status: "pending",
-            paymentStatus: "pending",
-            shippingAddress: input.shippingAddress,
-            notes: input.notes || null,
-            createdBy: userId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        
-        // Extract ID from result
-        if (result && typeof result === 'object' && 'insertId' in result) {
-          orderIds.push(Number(result.insertId));
-        }
-      }
+        return {
+          orderNumber: `${orderNumber}-${index + 1}`,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail || null,
+          customerPhone: input.customerPhone || null,
+          productName: item.productName,
+          productDescription: itemDescription || null,
+          quantity: item.quantity,
+          unitPrice: item.price.toString(),
+          totalAmount: (item.price * item.quantity).toString(),
+          currency: "EGP",
+          status: "pending",
+          paymentStatus: "pending",
+          shippingAddress: input.shippingAddress,
+          notes: input.notes || null,
+          createdBy: userId,
+          createdAt: now,
+          updatedAt: now,
+        };
+      });
+
+      // Batch insert all orders at once (much faster!)
+      const insertedOrders = await db
+        .insert(orders)
+        .values(orderValues)
+        .returning();
+
+      // Extract order IDs
+      const orderIds = insertedOrders.map(order => order.id);
 
       // Validate order with Arachnid (Bio-Module)
       const validation = await validateOrderWithArachnid({
@@ -90,12 +91,17 @@ export const ordersRouter = router({
         validationWarnings: validation.warnings.length,
       });
 
-      // Invalidate cache
+      // Invalidate cache (multiple keys for better cache invalidation)
       cache.delete('orders:all');
+      if (input.customerPhone) {
+        cache.delete(`orders:customer:${input.customerPhone}`);
+      }
+      cache.delete('orders:status:pending');
 
       return {
         success: true,
-        orderId: orderIds[0],
+        orderId: orderIds[0], // Primary order ID (for backward compatibility)
+        orderIds: orderIds, // All order IDs (useful for multi-item orders)
         orderNumber,
         message: "تم إنشاء الطلب بنجاح",
         validation: {

@@ -1,7 +1,40 @@
 # 📚 فهرس وثائق HaderOS
 # HaderOS Documentation Index
 
-**آخر تحديث:** 29 ديسمبر 2025
+**آخر تحديث:** 1 يناير 2026
+
+---
+
+## 🚀 البدء السريع (جديد!)
+
+| الوثيقة | الوصف | اللغة |
+|---------|-------|-------|
+| [QUICK_START_AR.md](QUICK_START_AR.md) | دليل البدء السريع (5 دقائق) | العربية |
+| [TROUBLESHOOTING_AR.md](TROUBLESHOOTING_AR.md) | حل المشاكل الشائعة | العربية |
+| [API_REFERENCE_AR.md](API_REFERENCE_AR.md) | مرجع الـ API الكامل | العربية |
+| [DEPLOYMENT_GUIDE_AR.md](DEPLOYMENT_GUIDE_AR.md) | دليل النشر | العربية |
+
+---
+
+## 📖 أدلة المستخدم (جديد!)
+
+| الوثيقة | الوصف |
+|---------|-------|
+| [USER_MANUAL_PHONE_SALES_AR.md](USER_MANUAL_PHONE_SALES_AR.md) | دليل المبيعات الهاتفية |
+| [USER_MANUAL_WHATSAPP_COMMERCE_AR.md](USER_MANUAL_WHATSAPP_COMMERCE_AR.md) | دليل التجارة عبر واتساب |
+| [USER_MANUAL_BNPL_AR.md](USER_MANUAL_BNPL_AR.md) | دليل نظام التقسيط |
+| [USER_MANUAL_UNIFIED_CRM_AR.md](USER_MANUAL_UNIFIED_CRM_AR.md) | دليل إدارة العملاء |
+
+---
+
+## 🔧 الأدوات (جديد!)
+
+| الأداة | الوصف |
+|--------|-------|
+| [HADEROS_API_Postman_Collection.json](HADEROS_API_Postman_Collection.json) | مجموعة Postman API |
+| `scripts/full-setup.sh` | إعداد كامل تفاعلي |
+| `scripts/generate-secrets.sh` | توليد مفاتيح الأمان |
+| `scripts/health-check.sh` | فحص صحة النظام |
 
 ---
 

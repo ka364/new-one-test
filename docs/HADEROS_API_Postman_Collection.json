@@ -1,0 +1,475 @@
+{
+  "info": {
+    "name": "HADEROS AI CLOUD API",
+    "description": "Complete API collection for HADEROS e-commerce platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "haderos-api-v1"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "productionUrl",
+      "value": "https://api.haderos.ai",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@haderos.ai\",\n  \"password\": \"your-password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/auth.login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "auth.login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/auth.me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "auth.me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/auth.logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "auth.logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/orders.list?input={\"limit\":50}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "orders.list"],
+              "query": [{"key": "input", "value": "{\"limit\":50}"}]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/orders.getById?input={\"id\":1}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "orders.getById"],
+              "query": [{"key": "input", "value": "{\"id\":1}"}]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"أحمد محمد\",\n  \"customerPhone\": \"01012345678\",\n  \"customerEmail\": \"customer@example.com\",\n  \"items\": [\n    {\"productId\": 1, \"quantity\": 2, \"price\": 299.99}\n  ],\n  \"shippingAddress\": \"123 شارع التحرير، القاهرة\",\n  \"paymentMethod\": \"cod\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/orders.create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "orders.create"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"status\": \"processing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/orders.updateStatus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "orders.updateStatus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/products.list?input={\"limit\":50}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "products.list"],
+              "query": [{"key": "input", "value": "{\"limit\":50}"}]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/products.getById?input={\"id\":1}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "products.getById"],
+              "query": [{"key": "input", "value": "{\"id\":1}"}]
+            }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/products.search?input={\"query\":\"حذاء\"}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "products.search"],
+              "query": [{"key": "input", "value": "{\"query\":\"حذاء\"}"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopify",
+      "item": [
+        {
+          "name": "Sync Products",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shopify.syncProducts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shopify.syncProducts"]
+            }
+          }
+        },
+        {
+          "name": "Sync Orders",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shopify.syncOrders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shopify.syncOrders"]
+            }
+          }
+        },
+        {
+          "name": "Get Sync Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shopify.getSyncStatus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shopify.getSyncStatus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipments",
+      "item": [
+        {
+          "name": "List Shipments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shipments.list",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shipments.list"]
+            }
+          }
+        },
+        {
+          "name": "Create Shipment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"provider\": \"bosta\",\n  \"recipientName\": \"أحمد محمد\",\n  \"recipientPhone\": \"01012345678\",\n  \"address\": \"123 شارع التحرير\",\n  \"city\": \"القاهرة\",\n  \"governorate\": \"القاهرة\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shipments.create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shipments.create"]
+            }
+          }
+        },
+        {
+          "name": "Track Shipment",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/shipments.track?input={\"trackingNumber\":\"BST123456\"}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "shipments.track"],
+              "query": [{"key": "input", "value": "{\"trackingNumber\":\"BST123456\"}"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get Available Providers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/payment.getProviders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "payment.getProviders"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"amount\": 599.99,\n  \"provider\": \"instapay\",\n  \"customerPhone\": \"01012345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/payment.create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "payment.create"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/payment.getStatus?input={\"transactionId\":1}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "payment.getStatus"],
+              "query": [{"key": "input", "value": "{\"transactionId\":1}"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "BNPL (Buy Now Pay Later)",
+      "item": [
+        {
+          "name": "Check Eligibility",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerPhone\": \"01012345678\",\n  \"amount\": 1500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/bnpl.checkEligibility",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "bnpl.checkEligibility"]
+            }
+          }
+        },
+        {
+          "name": "Create BNPL Contract",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"customerId\": 1,\n  \"totalAmount\": 1500,\n  \"installments\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/bnpl.createContract",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "bnpl.createContract"]
+            }
+          }
+        },
+        {
+          "name": "Get Installment Schedule",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/bnpl.getSchedule?input={\"contractId\":1}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "bnpl.getSchedule"],
+              "query": [{"key": "input", "value": "{\"contractId\":1}"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp Commerce",
+      "item": [
+        {
+          "name": "Send Catalog",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"201012345678\",\n  \"catalogId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/whatsappCommerce.sendCatalog",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "whatsappCommerce.sendCatalog"]
+            }
+          }
+        },
+        {
+          "name": "Create WhatsApp Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerPhone\": \"201012345678\",\n  \"items\": [{\"productId\": 1, \"quantity\": 1}],\n  \"address\": \"القاهرة\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/whatsappCommerce.createOrder",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "whatsappCommerce.createOrder"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "COD Tracking",
+      "item": [
+        {
+          "name": "Get COD Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/cod.getOrders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "cod.getOrders"]
+            }
+          }
+        },
+        {
+          "name": "Update COD Status",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"status\": \"collected\",\n  \"collectedAmount\": 599.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/cod.updateStatus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "cod.updateStatus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bio Dashboard",
+      "item": [
+        {
+          "name": "Get System Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/bio.getHealth",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "bio.getHealth"]
+            }
+          }
+        },
+        {
+          "name": "Get Module Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/trpc/bio.getModuleStatus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trpc", "bio.getModuleStatus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Shopify Order Created",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Shopify-Topic", "value": "orders/create"},
+              {"key": "X-Shopify-Hmac-Sha256", "value": "{{webhookSignature}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 123456789,\n  \"name\": \"#1001\",\n  \"email\": \"customer@example.com\",\n  \"total_price\": \"599.99\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/shopify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "webhooks", "shopify"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

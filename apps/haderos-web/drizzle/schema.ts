@@ -1495,6 +1495,26 @@ export * from './schema-spreadsheet-collab';
 export * from './schema-messaging';
 
 // ============================================
+// MARKETER TOOLS SCHEMA
+// ============================================
+export * from './schema-marketer-tools';
+
+// ============================================
+// UNIFIED PAYMENTS SCHEMA
+// ============================================
+export * from './schema-payments';
+
+// ============================================
+// WHATSAPP COMMERCE SCHEMA
+// ============================================
+export * from './schema-whatsapp-commerce';
+
+// ============================================
+// BNPL SCHEMA
+// ============================================
+export * from './schema-bnpl';
+
+// ============================================
 // TYPE EXPORTS
 // ============================================
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';

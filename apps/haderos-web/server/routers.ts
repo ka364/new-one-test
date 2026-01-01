@@ -49,9 +49,12 @@ import { getDemandPlannerAgent } from "./agents/demandPlannerAgent";
 import { getCampaignOrchestratorAgent } from "./agents/campaignOrchestratorAgent";
 import { invokeLLM } from "./_core/llm";
 import { nanoid } from "nanoid";
-// import { adaptiveRouter } from './routers/adaptive'; // Disabled - missing db functions
-// import { contentCreatorRouter } from './routers/contentCreator'; // Disabled - missing db functions
+import { adaptiveRouter } from './routers/adaptive';
+import { contentCreatorRouter } from './routers/contentCreator';
 import { nowshoesRouter } from "./routers/nowshoes";
+import { whatsappCommerceRouter } from "./routers/whatsapp-commerce";
+import { bnplRouter } from "./routers/bnpl";
+import { paymentRouter } from "./routers/payment";
 import { employeesRouter } from "./routers/employees";
 import { shipmentsRouter } from "./routers/shipments";
 import { hrRouter } from "./routers/hr";
@@ -88,8 +91,11 @@ export const appRouter = router({
   investors: investorsRouter,
   financial: financialRouter,
   kaia: kaiaRouter,
-  // adaptive: adaptiveRouter, // Disabled - missing db functions
-  // contentCreator: contentCreatorRouter, // Disabled - missing db functions
+  adaptive: adaptiveRouter,
+  contentCreator: contentCreatorRouter,
+  whatsappCommerce: whatsappCommerceRouter,
+  bnpl: bnplRouter,
+  payment: paymentRouter,
   nowshoes: nowshoesRouter,
   employees: employeesRouter,
   shipments: shipmentsRouter,

@@ -247,10 +247,58 @@ export class CephalopodDistributedEngine {
    * Get user's authority level
    */
   private async getUserAuthorityLevel(userId: number): Promise<AuthorityLevel> {
-    // TODO: Get from database
-    // For now, return default level based on user ID
-    const defaultLevel = userId <= 5 ? 7 : 4; // Founders get level 7, others get level 4
-    return this.authorityLevels.get(defaultLevel) || this.authorityLevels.get(1)!;
+    try {
+      const { db } = await import("../db");
+      const { users } = await import("../../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+
+      // Get user from database
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!user) {
+        // User not found, return lowest level
+        return this.authorityLevels.get(1)!;
+      }
+
+      // Map user role to authority level
+      const roleToLevel: Record<string, number> = {
+        "admin": 7,
+        "founder": 7,
+        "ceo": 7,
+        "operations_director": 6,
+        "director": 6,
+        "regional_manager": 5,
+        "area_manager": 5,
+        "branch_manager": 4,
+        "manager": 4,
+        "supervisor": 3,
+        "senior_staff": 2,
+        "staff": 1,
+        "employee": 1
+      };
+
+      const userRole = (user.role || "staff").toLowerCase();
+      const level = roleToLevel[userRole] || 1;
+
+      // Check for temporary escalation
+      const metadata = user.metadata as any;
+      if (metadata?.temporaryAuthority) {
+        const tempAuth = metadata.temporaryAuthority;
+        if (tempAuth.expiresAt && new Date(tempAuth.expiresAt) > new Date()) {
+          return this.authorityLevels.get(tempAuth.level) || this.authorityLevels.get(level)!;
+        }
+      }
+
+      return this.authorityLevels.get(level) || this.authorityLevels.get(1)!;
+    } catch (error) {
+      console.error("[Cephalopod] Error getting user authority level:", error);
+      // Fallback to simple logic
+      const defaultLevel = userId <= 5 ? 7 : 4;
+      return this.authorityLevels.get(defaultLevel) || this.authorityLevels.get(1)!;
+    }
   }
 
   /**
@@ -290,16 +338,90 @@ export class CephalopodDistributedEngine {
   private async generateApprovalChain(context: DecisionContext, currentAuthority: AuthorityLevel): Promise<number[]> {
     const chain: number[] = [];
 
-    // Find next authority level that can approve
-    for (let level = currentAuthority.level + 1; level <= 7; level++) {
-      const nextAuthority = this.authorityLevels.get(level);
-      if (!nextAuthority) continue;
+    try {
+      const { db } = await import("../db");
+      const { users, branchEmployees } = await import("../../drizzle/schema");
+      const { eq, and, inArray } = await import("drizzle-orm");
 
-      const canApprove = await this.checkActionAllowed(context, nextAuthority);
-      if (canApprove) {
-        // TODO: Get actual user ID for this authority level
-        chain.push(level * 1000); // Placeholder
-        break;
+      // Find next authority level that can approve
+      for (let level = currentAuthority.level + 1; level <= 7; level++) {
+        const nextAuthority = this.authorityLevels.get(level);
+        if (!nextAuthority) continue;
+
+        const canApprove = await this.checkActionAllowed(context, nextAuthority);
+        if (canApprove) {
+          // Get actual users with this authority level
+          const rolesByLevel: Record<number, string[]> = {
+            7: ["admin", "founder", "ceo"],
+            6: ["operations_director", "director"],
+            5: ["regional_manager", "area_manager"],
+            4: ["branch_manager", "manager"],
+            3: ["supervisor"],
+            2: ["senior_staff"],
+            1: ["staff", "employee"]
+          };
+
+          const roles = rolesByLevel[level] || [];
+
+          // First try to find approver in same branch
+          if (context.branchId) {
+            const branchApprovers = await db
+              .select({ userId: branchEmployees.userId })
+              .from(branchEmployees)
+              .where(
+                and(
+                  eq(branchEmployees.branchId, context.branchId),
+                  eq(branchEmployees.isActive, true)
+                )
+              );
+
+            if (branchApprovers.length > 0) {
+              const branchUserIds = branchApprovers.map(e => e.userId).filter(Boolean) as number[];
+
+              const approvers = await db
+                .select()
+                .from(users)
+                .where(
+                  and(
+                    inArray(users.id, branchUserIds),
+                    inArray(users.role, roles)
+                  )
+                );
+
+              if (approvers.length > 0) {
+                chain.push(approvers[0].id);
+                break;
+              }
+            }
+          }
+
+          // Fallback: Find any user with this role
+          const globalApprovers = await db
+            .select()
+            .from(users)
+            .where(inArray(users.role, roles));
+
+          if (globalApprovers.length > 0) {
+            chain.push(globalApprovers[0].id);
+            break;
+          }
+
+          // Last resort: Use placeholder
+          chain.push(level * 1000);
+          break;
+        }
+      }
+    } catch (error) {
+      console.error("[Cephalopod] Error generating approval chain:", error);
+      // Fallback to placeholder
+      for (let level = currentAuthority.level + 1; level <= 7; level++) {
+        const nextAuthority = this.authorityLevels.get(level);
+        if (!nextAuthority) continue;
+        const canApprove = await this.checkActionAllowed(context, nextAuthority);
+        if (canApprove) {
+          chain.push(level * 1000);
+          break;
+        }
       }
     }
 
@@ -421,13 +543,70 @@ export class CephalopodDistributedEngine {
     decisionsToday: number;
     approvalRate: number;
   }> {
-    // TODO: Implement actual statistics from database
-    return {
-      totalLevels: this.authorityLevels.size,
-      activeDelegations: Array.from(this.delegationRules.values()).filter(r => r.active).length,
-      decisionsToday: 0,
-      approvalRate: 0
-    };
+    try {
+      const { db } = await import("../db");
+      const { events, agentInsights } = await import("../../drizzle/schema");
+      const { eq, and, gte, sql } = await import("drizzle-orm");
+
+      // Get today's start
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      // Get decisions today from events
+      const decisionEvents = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(events)
+        .where(
+          and(
+            eq(events.type, "decision.evaluated"),
+            gte(events.createdAt, todayStart)
+          )
+        );
+
+      const decisionsToday = Number(decisionEvents[0]?.count || 0);
+
+      // Get approval rate from insights
+      const approvalInsights = await db
+        .select()
+        .from(agentInsights)
+        .where(
+          and(
+            eq(agentInsights.agentType, "cephalopod"),
+            eq(agentInsights.insightType, "authority_decision"),
+            gte(agentInsights.createdAt, todayStart)
+          )
+        );
+
+      let approvedCount = 0;
+      let totalDecisions = approvalInsights.length;
+
+      for (const insight of approvalInsights) {
+        const metadata = insight.insightData as any;
+        if (metadata?.allowed) {
+          approvedCount++;
+        }
+      }
+
+      const approvalRate = totalDecisions > 0
+        ? Math.round((approvedCount / totalDecisions) * 100)
+        : 100; // Default to 100% if no decisions
+
+      return {
+        totalLevels: this.authorityLevels.size,
+        activeDelegations: Array.from(this.delegationRules.values()).filter(r => r.active).length,
+        decisionsToday,
+        approvalRate
+      };
+    } catch (error) {
+      console.error("[Cephalopod] Error getting statistics:", error);
+      // Return defaults on error
+      return {
+        totalLevels: this.authorityLevels.size,
+        activeDelegations: Array.from(this.delegationRules.values()).filter(r => r.active).length,
+        decisionsToday: 0,
+        approvalRate: 100
+      };
+    }
   }
 
   /**

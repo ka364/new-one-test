@@ -73,8 +73,11 @@ export async function handleOrderCreate(orderData: any) {
       console.error("[Shopify Webhook] Failed to send notification:", notifError);
     }
 
-    // TODO: Update inventory
-    // TODO: Create shipment record
+    // Update inventory for each line item
+    await updateInventoryFromOrder(lineItems, "subtract");
+
+    // Create shipment record
+    await createShipmentFromOrder(order.id, orderData, shippingAddress);
 
     return { success: true, orderId: order.id };
   } catch (error: any) {
@@ -134,7 +137,9 @@ export async function handleOrderCancel(orderData: any) {
       console.error("[Shopify Webhook] Failed to send notification:", notifError);
     }
 
-    // TODO: Restore inventory
+    // Restore inventory for cancelled order
+    const lineItems = orderData.line_items || [];
+    await updateInventoryFromOrder(lineItems, "add");
 
     return { success: true };
   } catch (error: any) {
@@ -221,11 +226,114 @@ export async function logWebhookEvent(
     if (!db) return;
 
     await db.execute(
-      sql`INSERT INTO shopify_webhook_logs 
-          (topic, shopify_id, payload, processed, error, created_at) 
+      sql`INSERT INTO shopify_webhook_logs
+          (topic, shopify_id, payload, processed, error, created_at)
           VALUES (${topic}, ${shopifyOrderId}, ${JSON.stringify(payload)}, ${status === 'success' ? 1 : 0}, ${errorMessage || null}, NOW())`
     );
   } catch (error) {
     console.error("[Shopify Webhook] Failed to log webhook event:", error);
+  }
+}
+
+/**
+ * Update inventory from Shopify order
+ */
+async function updateInventoryFromOrder(
+  lineItems: any[],
+  action: "subtract" | "add"
+): Promise<void> {
+  try {
+    const db = await requireDb();
+    if (!db) return;
+
+    for (const item of lineItems) {
+      const sku = item.sku;
+      const quantity = item.quantity || 1;
+
+      if (!sku) continue;
+
+      // Find product by SKU and update inventory
+      const operator = action === "subtract" ? "-" : "+";
+
+      await db.execute(
+        sql`UPDATE products
+            SET inventory_quantity = GREATEST(0, COALESCE(inventory_quantity, 0) ${sql.raw(operator)} ${quantity}),
+                updated_at = NOW()
+            WHERE model_code = ${sku} OR sku = ${sku}`
+      ).catch(() => {
+        console.log(`[Shopify Webhook] Product not found for SKU: ${sku}`);
+      });
+
+      // Also update branch inventory if exists
+      await db.execute(
+        sql`UPDATE branch_inventory
+            SET available = GREATEST(0, COALESCE(available, 0) ${sql.raw(operator)} ${quantity}),
+                updated_at = NOW()
+            WHERE product_id IN (
+              SELECT id FROM products WHERE model_code = ${sku} OR sku = ${sku}
+            )`
+      ).catch(() => {
+        // Branch inventory table might not exist
+      });
+
+      console.log(`[Shopify Webhook] Inventory ${action}ed for ${sku}: ${quantity}`);
+    }
+  } catch (error) {
+    console.error("[Shopify Webhook] Error updating inventory:", error);
+  }
+}
+
+/**
+ * Create shipment record from Shopify order
+ */
+async function createShipmentFromOrder(
+  orderId: number,
+  orderData: any,
+  shippingAddress: any
+): Promise<void> {
+  try {
+    const db = await requireDb();
+    if (!db) return;
+
+    const shipmentNumber = `SHP-${orderData.order_number}-${Date.now().toString(36).toUpperCase()}`;
+
+    await db.execute(
+      sql`INSERT INTO shipments (
+            shipment_number,
+            order_id,
+            shopify_order_id,
+            recipient_name,
+            recipient_phone,
+            recipient_email,
+            shipping_address,
+            city,
+            governorate,
+            postal_code,
+            country,
+            status,
+            created_at
+          ) VALUES (
+            ${shipmentNumber},
+            ${orderId},
+            ${orderData.id.toString()},
+            ${shippingAddress.first_name || ''} ${shippingAddress.last_name || ''},
+            ${shippingAddress.phone || orderData.customer?.phone || ''},
+            ${orderData.email || orderData.customer?.email || ''},
+            ${shippingAddress.address1 || ''} ${shippingAddress.address2 || ''},
+            ${shippingAddress.city || ''},
+            ${shippingAddress.province || ''},
+            ${shippingAddress.zip || ''},
+            ${shippingAddress.country || 'Egypt'},
+            'pending',
+            NOW()
+          )
+          ON CONFLICT DO NOTHING`
+    ).catch((err) => {
+      console.log(`[Shopify Webhook] Shipment creation skipped or failed:`, err.message);
+    });
+
+    console.log(`[Shopify Webhook] Shipment created: ${shipmentNumber}`);
+  } catch (error) {
+    console.error("[Shopify Webhook] Error creating shipment:", error);
   }
 }

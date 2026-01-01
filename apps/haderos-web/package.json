@@ -14,7 +14,19 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "simulate": "tsx scripts/run-simulation.ts",
-    "simulate:full": "NODE_ENV=development tsx scripts/run-simulation.ts"
+    "simulate:full": "NODE_ENV=development tsx scripts/run-simulation.ts",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged",
+    "quality": "pnpm run lint && pnpm run check && pnpm run test"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
@@ -111,6 +123,13 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.1.3",

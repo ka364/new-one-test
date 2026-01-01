@@ -272,9 +272,11 @@ export const ordersRouter = router({
   getOrderById: publicProcedure
     .input(z.object({ orderId: z.number() }))
     .query(async ({ input }) => {
+      const startTime = Date.now();
+
       try {
         const db = await requireDb();
-        
+
         const [order] = await db
           .select()
           .from(orders)
@@ -287,19 +289,23 @@ export const ordersRouter = router({
           });
         }
 
+        const duration = Date.now() - startTime;
+        logger.debug('Order fetched successfully', {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
         return order;
       } catch (error: any) {
-        if (error instanceof TRPCError) {
-          throw error;
-        }
+        if (error instanceof TRPCError) throw error;
 
-        logger.error('Failed to get order by ID', error, {
+        logger.error('Failed to fetch order', error, {
           orderId: input.orderId,
         });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب بيانات الطلب',
+          message: 'فشل في جلب بيانات الطلب',
           cause: error,
         });
       }
@@ -327,7 +333,7 @@ export const ordersRouter = router({
     .input(schemas.updateOrderStatus)
     .mutation(async ({ input }) => {
       const startTime = Date.now();
-      
+
       try {
         logger.info('Updating order status', {
           orderId: input.orderId,
@@ -343,44 +349,49 @@ export const ordersRouter = router({
           .where(eq(orders.id, input.orderId));
 
         if (!order) {
-          logger.warn('Order not found', { orderId: input.orderId });
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'الطلب غير موجود',
           });
         }
 
-        // Update order status
-        try {
-          await db
-            .update(orders)
-            .set({
-              status: input.status,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(orders.id, input.orderId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, {
-            orderId: input.orderId,
-          });
-          
+        // Validate status transition
+        const validTransitions: Record<string, string[]> = {
+          pending: ['confirmed', 'cancelled'],
+          confirmed: ['processing', 'cancelled'],
+          processing: ['shipped', 'cancelled'],
+          shipped: ['delivered', 'cancelled'],
+          delivered: [],
+          cancelled: [],
+        };
+
+        const currentStatus = order.status || 'pending';
+        const allowedStatuses = validTransitions[currentStatus] || [];
+
+        if (!allowedStatuses.includes(input.status) && input.status !== currentStatus) {
           throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
-            cause: dbError,
+            code: 'BAD_REQUEST',
+            message: `لا يمكن تغيير الحالة من "${currentStatus}" إلى "${input.status}"`,
           });
         }
 
-        // Track lifecycle with Bio-Modules - with error handling
+        await db
+          .update(orders)
+          .set({
+            status: input.status,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(orders.id, input.orderId));
+
+        // Track lifecycle with Bio-Modules (with error handling)
         try {
           const lifecycleStatus = input.status as "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
           await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
-        } catch (trackError: any) {
+        } catch (bioError: any) {
           logger.warn('Order lifecycle tracking failed', {
-            error: trackError.message,
+            error: bioError.message,
             orderId: input.orderId,
           });
-          // Continue even if tracking fails
         }
 
         const duration = Date.now() - startTime;
@@ -391,26 +402,24 @@ export const ordersRouter = router({
           duration: `${duration}ms`,
         });
 
-        // Invalidate cache - with error handling
+        // Invalidate cache
         try {
           cache.delete('orders:all');
-          cache.delete(`orders:${input.orderId}`);
-          cache.delete(`orders:status:${order.status}`);
+          cache.delete(`orders:status:${currentStatus}`);
           cache.delete(`orders:status:${input.status}`);
         } catch (cacheError: any) {
-          logger.warn('Cache invalidation failed', {
-            error: cacheError.message,
-          });
-          // Continue even if cache invalidation fails
+          logger.warn('Cache invalidation failed', { error: cacheError.message });
         }
 
         return {
           success: true,
           message: "تم تحديث حالة الطلب",
+          previousStatus: currentStatus,
+          newStatus: input.status,
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Order status update failed (TRPCError)', {
             code: error.code,
@@ -421,14 +430,14 @@ export const ordersRouter = router({
           throw error;
         }
 
-        logger.error('Order status update failed (Unexpected Error)', error, {
+        logger.error('Order status update failed', error, {
           orderId: input.orderId,
           duration: `${duration}ms`,
         });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
+          message: 'فشل في تحديث حالة الطلب',
           cause: error,
         });
       }
@@ -444,7 +453,7 @@ export const ordersRouter = router({
     )
     .mutation(async ({ input }) => {
       const startTime = Date.now();
-      
+
       try {
         logger.info('Updating payment status', {
           orderId: input.orderId,
@@ -460,62 +469,64 @@ export const ordersRouter = router({
           .where(eq(orders.id, input.orderId));
 
         if (!order) {
-          logger.warn('Order not found', { orderId: input.orderId });
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'الطلب غير موجود',
           });
         }
 
-        // Update payment status
-        try {
-          await db
-            .update(orders)
-            .set({
-              paymentStatus: input.paymentStatus,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(orders.id, input.orderId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, {
-            orderId: input.orderId,
-          });
-          
+        // Validate payment status transition
+        const previousPaymentStatus = order.paymentStatus || 'pending';
+        const validTransitions: Record<string, string[]> = {
+          pending: ['paid', 'failed'],
+          paid: ['refunded'],
+          failed: ['pending', 'paid'],
+          refunded: [],
+        };
+
+        const allowedStatuses = validTransitions[previousPaymentStatus] || [];
+
+        if (!allowedStatuses.includes(input.paymentStatus) && input.paymentStatus !== previousPaymentStatus) {
           throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
-            cause: dbError,
+            code: 'BAD_REQUEST',
+            message: `لا يمكن تغيير حالة الدفع من "${previousPaymentStatus}" إلى "${input.paymentStatus}"`,
           });
         }
+
+        await db
+          .update(orders)
+          .set({
+            paymentStatus: input.paymentStatus,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(orders.id, input.orderId));
 
         const duration = Date.now() - startTime;
         logger.info('Payment status updated successfully', {
           orderId: input.orderId,
-          oldStatus: order.paymentStatus,
-          newStatus: input.paymentStatus,
+          previousPaymentStatus,
+          newPaymentStatus: input.paymentStatus,
           duration: `${duration}ms`,
         });
 
-        // Invalidate cache - with error handling
+        // Invalidate cache
         try {
           cache.delete('orders:all');
-          cache.delete(`orders:${input.orderId}`);
-          cache.delete(`orders:payment:${order.paymentStatus}`);
+          cache.delete(`orders:payment:${previousPaymentStatus}`);
           cache.delete(`orders:payment:${input.paymentStatus}`);
         } catch (cacheError: any) {
-          logger.warn('Cache invalidation failed', {
-            error: cacheError.message,
-          });
-          // Continue even if cache invalidation fails
+          logger.warn('Cache invalidation failed', { error: cacheError.message });
         }
 
         return {
           success: true,
           message: "تم تحديث حالة الدفع",
+          previousPaymentStatus,
+          newPaymentStatus: input.paymentStatus,
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Payment status update failed (TRPCError)', {
             code: error.code,
@@ -526,14 +537,14 @@ export const ordersRouter = router({
           throw error;
         }
 
-        logger.error('Payment status update failed (Unexpected Error)', error, {
+        logger.error('Payment status update failed', error, {
           orderId: input.orderId,
           duration: `${duration}ms`,
         });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
+          message: 'فشل في تحديث حالة الدفع',
           cause: error,
         });
       }

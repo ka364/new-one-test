@@ -272,18 +272,37 @@ export const ordersRouter = router({
   getOrderById: publicProcedure
     .input(z.object({ orderId: z.number() }))
     .query(async ({ input }) => {
-      const db = await requireDb();
-      
-      const [order] = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.id, input.orderId));
+      try {
+        const db = await requireDb();
+        
+        const [order] = await db
+          .select()
+          .from(orders)
+          .where(eq(orders.id, input.orderId));
 
-      if (!order) {
-        throw new Error("Order not found");
+        if (!order) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        return order;
+      } catch (error: any) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
+        logger.error('Failed to get order by ID', error, {
+          orderId: input.orderId,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب بيانات الطلب',
+          cause: error,
+        });
       }
-
-      return order;
     }),
 
   // Get orders by order number
@@ -307,49 +326,112 @@ export const ordersRouter = router({
   updateOrderStatus: protectedProcedure
     .input(schemas.updateOrderStatus)
     .mutation(async ({ input }) => {
-      logger.info('Updating order status', {
-        orderId: input.orderId,
-        newStatus: input.status,
-      });
+      const startTime = Date.now();
+      
+      try {
+        logger.info('Updating order status', {
+          orderId: input.orderId,
+          newStatus: input.status,
+        });
 
-      const db = await requireDb();
+        const db = await requireDb();
 
-      // Get order to get orderNumber
-      const [order] = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.id, input.orderId));
+        // Get order to get orderNumber
+        const [order] = await db
+          .select()
+          .from(orders)
+          .where(eq(orders.id, input.orderId));
 
-      if (!order) {
-        logger.warn('Order not found', { orderId: input.orderId });
-        throw new Error("Order not found");
+        if (!order) {
+          logger.warn('Order not found', { orderId: input.orderId });
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        // Update order status
+        try {
+          await db
+            .update(orders)
+            .set({
+              status: input.status,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(orders.id, input.orderId));
+        } catch (dbError: any) {
+          logger.error('Database update failed', dbError, {
+            orderId: input.orderId,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        // Track lifecycle with Bio-Modules - with error handling
+        try {
+          const lifecycleStatus = input.status as "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+          await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
+        } catch (trackError: any) {
+          logger.warn('Order lifecycle tracking failed', {
+            error: trackError.message,
+            orderId: input.orderId,
+          });
+          // Continue even if tracking fails
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Order status updated successfully', {
+          orderId: input.orderId,
+          oldStatus: order.status,
+          newStatus: input.status,
+          duration: `${duration}ms`,
+        });
+
+        // Invalidate cache - with error handling
+        try {
+          cache.delete('orders:all');
+          cache.delete(`orders:${input.orderId}`);
+          cache.delete(`orders:status:${order.status}`);
+          cache.delete(`orders:status:${input.status}`);
+        } catch (cacheError: any) {
+          logger.warn('Cache invalidation failed', {
+            error: cacheError.message,
+          });
+          // Continue even if cache invalidation fails
+        }
+
+        return {
+          success: true,
+          message: "تم تحديث حالة الطلب",
+        };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Order status update failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Order status update failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
       }
-
-      await db
-        .update(orders)
-        .set({
-          status: input.status,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(orders.id, input.orderId));
-
-      // Track lifecycle with Bio-Modules
-      const lifecycleStatus = input.status as "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
-      await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
-
-      logger.info('Order status updated successfully', {
-        orderId: input.orderId,
-        oldStatus: order.status,
-        newStatus: input.status,
-      });
-
-      // Invalidate cache
-      cache.delete('orders:all');
-
-      return {
-        success: true,
-        message: "تم تحديث حالة الطلب",
-      };
     }),
 
   // Update payment status (protected - admin only)
@@ -361,33 +443,100 @@ export const ordersRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      logger.info('Updating payment status', {
-        orderId: input.orderId,
-        paymentStatus: input.paymentStatus,
-      });
-
-      const db = await requireDb();
-
-      await db
-        .update(orders)
-        .set({
+      const startTime = Date.now();
+      
+      try {
+        logger.info('Updating payment status', {
+          orderId: input.orderId,
           paymentStatus: input.paymentStatus,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(orders.id, input.orderId));
+        });
 
-      logger.info('Payment status updated successfully', {
-        orderId: input.orderId,
-        paymentStatus: input.paymentStatus,
-      });
+        const db = await requireDb();
 
-      // Invalidate cache
-      cache.delete('orders:all');
+        // Verify order exists first
+        const [order] = await db
+          .select()
+          .from(orders)
+          .where(eq(orders.id, input.orderId));
 
-      return {
-        success: true,
-        message: "تم تحديث حالة الدفع",
-      };
+        if (!order) {
+          logger.warn('Order not found', { orderId: input.orderId });
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        // Update payment status
+        try {
+          await db
+            .update(orders)
+            .set({
+              paymentStatus: input.paymentStatus,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(orders.id, input.orderId));
+        } catch (dbError: any) {
+          logger.error('Database update failed', dbError, {
+            orderId: input.orderId,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Payment status updated successfully', {
+          orderId: input.orderId,
+          oldStatus: order.paymentStatus,
+          newStatus: input.paymentStatus,
+          duration: `${duration}ms`,
+        });
+
+        // Invalidate cache - with error handling
+        try {
+          cache.delete('orders:all');
+          cache.delete(`orders:${input.orderId}`);
+          cache.delete(`orders:payment:${order.paymentStatus}`);
+          cache.delete(`orders:payment:${input.paymentStatus}`);
+        } catch (cacheError: any) {
+          logger.warn('Cache invalidation failed', {
+            error: cacheError.message,
+          });
+          // Continue even if cache invalidation fails
+        }
+
+        return {
+          success: true,
+          message: "تم تحديث حالة الدفع",
+        };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Payment status update failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Payment status update failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // Get Bio-Module insights for an order

@@ -1,0 +1,80 @@
+# HADEROS Failed Authentication Alert
+# Rule: Detect Multiple Failed Login Attempts
+
+name: "HADEROS Failed Authentication Alert"
+type: frequency
+
+# =============================================================================
+# Index Pattern
+# =============================================================================
+index: haderos-security-*
+
+# =============================================================================
+# Query Filter
+# =============================================================================
+filter:
+  - query:
+      bool:
+        must:
+          - match:
+              tags: "failed_auth"
+
+# =============================================================================
+# Threshold
+# =============================================================================
+num_events: 5
+timeframe:
+  minutes: 10
+
+# =============================================================================
+# Aggregation
+# =============================================================================
+query_key: client_ip
+
+# =============================================================================
+# Alert Conditions
+# =============================================================================
+realert:
+  minutes: 30
+
+# =============================================================================
+# Alert Content
+# =============================================================================
+alert_subject: "[WARNING] HADEROS: Multiple Failed Login Attempts from {0}"
+alert_subject_args:
+  - client_ip
+
+alert_text: |
+  Multiple Failed Authentication Attempts Detected!
+
+  Source IP: {0}
+  Number of Attempts: {1}
+  Time Window: Last 10 minutes
+  GeoIP Country: {2}
+
+  This may indicate:
+  - Brute force attack
+  - Credential stuffing
+  - Automated scanning
+
+  Recommended Actions:
+  1. Review the source IP
+  2. Check if IP is known malicious
+  3. Consider temporary IP ban
+  4. Verify affected accounts
+
+  ---
+  HADEROS SIEM Security Team
+
+alert_text_args:
+  - client_ip
+  - num_hits
+  - geoip.country_name
+
+# =============================================================================
+# Alert Methods
+# =============================================================================
+alert:
+  - debug
+  # - email
+  # - slack

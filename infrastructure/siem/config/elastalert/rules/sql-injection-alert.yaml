@@ -1,0 +1,78 @@
+# HADEROS SQL Injection Detection Alert
+# Rule: Detect SQL Injection Attempts
+
+name: "HADEROS SQL Injection Detection"
+type: any
+
+# =============================================================================
+# Index Pattern
+# =============================================================================
+index: haderos-*
+
+# =============================================================================
+# Query Filter
+# =============================================================================
+filter:
+  - query:
+      bool:
+        should:
+          - match:
+              tags: "sql_injection"
+          - regexp:
+              message:
+                value: ".*(union\\s+select|or\\s+1\\s*=\\s*1|drop\\s+table|insert\\s+into|delete\\s+from).*"
+                flags: "ALL"
+        minimum_should_match: 1
+
+# =============================================================================
+# Alert Conditions
+# =============================================================================
+realert:
+  minutes: 1
+
+# =============================================================================
+# Alert Content
+# =============================================================================
+alert_subject: "[CRITICAL] HADEROS: SQL Injection Attempt Detected"
+
+alert_text: |
+  SQL INJECTION ATTEMPT DETECTED!
+
+  This is a CRITICAL security event requiring immediate attention.
+
+  Source IP: {0}
+  Target URL: {1}
+  User Agent: {2}
+  Timestamp: {3}
+
+  Payload (sanitized excerpt):
+  {4}
+
+  Immediate Actions Required:
+  1. Block the source IP immediately
+  2. Review application logs for data exfiltration
+  3. Check database audit logs
+  4. Verify WAF rules are active
+  5. Consider incident response procedures
+
+  ---
+  HADEROS SIEM - CRITICAL ALERT
+
+alert_text_args:
+  - client_ip
+  - url.path
+  - user_agent
+  - "@timestamp"
+  - message
+
+# =============================================================================
+# Alert Methods
+# =============================================================================
+alert:
+  - debug
+  # - email
+  # - slack
+  # - pagerduty
+
+# Priority
+priority: 1

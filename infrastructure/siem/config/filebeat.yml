@@ -1,0 +1,241 @@
+# HADEROS Filebeat Configuration
+# Log Collection and Shipping
+
+# =============================================================================
+# Filebeat Inputs
+# =============================================================================
+filebeat.inputs:
+
+  # ---------------------------------------------------------------------------
+  # HADEROS Application Logs
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: haderos-app-logs
+    enabled: true
+    paths:
+      - /var/log/haderos/*.log
+      - /var/log/haderos/**/*.log
+    fields:
+      app: haderos
+      type: application
+    fields_under_root: true
+    multiline:
+      pattern: '^\d{4}-\d{2}-\d{2}'
+      negate: true
+      match: after
+    processors:
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+
+  # ---------------------------------------------------------------------------
+  # Docker Container Logs
+  # ---------------------------------------------------------------------------
+  - type: container
+    id: haderos-docker-logs
+    enabled: true
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    stream: all
+    fields:
+      type: docker
+    fields_under_root: true
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+  # ---------------------------------------------------------------------------
+  # Nginx Access Logs
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: nginx-access
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+      - /var/log/nginx/*-access.log
+    fields:
+      type: nginx
+      log_type: access
+    fields_under_root: true
+
+  # ---------------------------------------------------------------------------
+  # Nginx Error Logs
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: nginx-error
+    enabled: true
+    paths:
+      - /var/log/nginx/error.log
+      - /var/log/nginx/*-error.log
+    fields:
+      type: nginx
+      log_type: error
+    fields_under_root: true
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Logs
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: postgres-logs
+    enabled: true
+    paths:
+      - /var/log/postgresql/*.log
+    fields:
+      type: postgresql
+    fields_under_root: true
+    multiline:
+      pattern: '^\d{4}-\d{2}-\d{2}'
+      negate: true
+      match: after
+
+  # ---------------------------------------------------------------------------
+  # System Auth Logs (Security)
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: system-auth
+    enabled: true
+    paths:
+      - /var/log/auth.log
+      - /var/log/secure
+    fields:
+      type: system
+      log_type: auth
+      security: true
+    fields_under_root: true
+
+  # ---------------------------------------------------------------------------
+  # System Syslog
+  # ---------------------------------------------------------------------------
+  - type: log
+    id: system-syslog
+    enabled: true
+    paths:
+      - /var/log/syslog
+      - /var/log/messages
+    fields:
+      type: system
+      log_type: syslog
+    fields_under_root: true
+
+# =============================================================================
+# Filebeat Modules
+# =============================================================================
+filebeat.modules:
+
+  # ---------------------------------------------------------------------------
+  # System Module
+  # ---------------------------------------------------------------------------
+  - module: system
+    syslog:
+      enabled: true
+    auth:
+      enabled: true
+
+  # ---------------------------------------------------------------------------
+  # Nginx Module
+  # ---------------------------------------------------------------------------
+  - module: nginx
+    access:
+      enabled: true
+      var.paths: ["/var/log/nginx/access.log*"]
+    error:
+      enabled: true
+      var.paths: ["/var/log/nginx/error.log*"]
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Module
+  # ---------------------------------------------------------------------------
+  - module: postgresql
+    log:
+      enabled: true
+      var.paths: ["/var/log/postgresql/*.log"]
+
+# =============================================================================
+# Processors
+# =============================================================================
+processors:
+  # Add host metadata
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+  # Add cloud metadata (AWS, GCP, Azure)
+  - add_cloud_metadata: ~
+
+  # Add Docker metadata
+  - add_docker_metadata: ~
+
+  # Add Kubernetes metadata (if applicable)
+  - add_kubernetes_metadata: ~
+
+  # Drop debug events in production
+  - drop_event:
+      when:
+        and:
+          - equals:
+              log.level: "debug"
+          - not:
+              equals:
+                fields.environment: "development"
+
+  # Fingerprint for deduplication
+  - fingerprint:
+      fields: ["message", "@timestamp", "host.name"]
+      target_field: "@metadata._id"
+      method: "sha256"
+
+# =============================================================================
+# Output Configuration
+# =============================================================================
+output.logstash:
+  hosts: ["logstash:5044"]
+  loadbalance: true
+  bulk_max_size: 2048
+  worker: 2
+
+# Alternative: Direct to Elasticsearch
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   username: "elastic"
+#   password: "${ELASTIC_PASSWORD}"
+#   index: "haderos-%{[type]}-%{+yyyy.MM.dd}"
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# =============================================================================
+# Monitoring
+# =============================================================================
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  username: "elastic"
+  password: "${ELASTIC_PASSWORD}"
+
+# =============================================================================
+# Setup
+# =============================================================================
+setup.template.enabled: true
+setup.template.name: "haderos"
+setup.template.pattern: "haderos-*"
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 1
+
+setup.ilm.enabled: true
+setup.ilm.rollover_alias: "haderos"
+setup.ilm.pattern: "{now/d}-000001"
+setup.ilm.policy_name: "haderos-policy"
+
+setup.kibana:
+  host: "kibana:5601"
+  username: "elastic"
+  password: "${ELASTIC_PASSWORD}"

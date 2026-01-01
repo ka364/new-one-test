@@ -23,7 +23,7 @@ python-multipart==0.0.20
 cryptography==41.0.7
 PyJWT==2.8.0
 # API & Web
-requests==2.31.0
+requests==2.32.5
 httpx==0.25.2
 aiohttp==3.9.1
 

@@ -240,9 +240,73 @@ export const codRouter = router({
   // GET ORDER BY ID
   // ============================================
   getOrderById: protectedProcedure
-    .input(z.object({ orderId: z.string() }))
+    .input(z.object({ orderId: z.string().min(1) }))
     .query(async ({ input }) => {
-      return await codWorkflowService.getTrackingStatus(input.orderId);
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.orderId || input.orderId.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف الطلب مطلوب',
+          });
+        }
+
+        logger.debug('Fetching COD order by ID', { orderId: input.orderId });
+
+        let result;
+        try {
+          result = await codWorkflowService.getTrackingStatus(input.orderId);
+        } catch (serviceError: any) {
+          logger.error('COD workflow service failed', serviceError, {
+            orderId: input.orderId,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في جلب حالة الطلب. يرجى المحاولة مرة أخرى',
+            cause: serviceError,
+          });
+        }
+
+        if (!result) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('COD order fetched successfully', {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('COD order fetch failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('COD order fetch failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب حالة الطلب. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================
@@ -250,8 +314,106 @@ export const codRouter = router({
   // ============================================
   updateStage: protectedProcedure
     .input(updateStageSchema)
-    .mutation(async ({ input }) => {
-      return await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
+    .mutation(async ({ input, ctx }) => {
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.orderId || input.orderId.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف الطلب مطلوب',
+          });
+        }
+
+        if (!input.stage) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'المرحلة مطلوبة',
+          });
+        }
+
+        // Validate stage transition (basic check)
+        const validStages = [
+          'customerService',
+          'confirmation',
+          'preparation',
+          'supplier',
+          'shipping',
+          'delivery',
+          'collection',
+          'settlement',
+        ];
+
+        if (!validStages.includes(input.stage)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'المرحلة غير صالحة',
+          });
+        }
+
+        logger.info('Updating COD order stage', {
+          orderId: input.orderId,
+          stage: input.stage,
+          updatedBy: ctx.user?.id,
+        });
+
+        let result;
+        try {
+          result = await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
+        } catch (serviceError: any) {
+          logger.error('COD workflow service failed', serviceError, {
+            orderId: input.orderId,
+            stage: input.stage,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
+            cause: serviceError,
+          });
+        }
+
+        if (!result) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('COD order stage updated successfully', {
+          orderId: input.orderId,
+          stage: input.stage,
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('COD order stage update failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            stage: input.stage,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('COD order stage update failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          stage: input.stage,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================
@@ -260,15 +422,106 @@ export const codRouter = router({
   allocateShipping: protectedProcedure
     .input(
       z.object({
-        orderId: z.string(),
+        orderId: z.string().min(1),
         shippingAddress: shippingAddressSchema,
       })
     )
-    .mutation(async ({ input }) => {
-      return await shippingAllocatorService.allocatePartner(
-        input.orderId,
-        input.shippingAddress
-      );
+    .mutation(async ({ input, ctx }) => {
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.orderId || input.orderId.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف الطلب مطلوب',
+          });
+        }
+
+        if (!input.shippingAddress) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'عنوان الشحن مطلوب',
+          });
+        }
+
+        if (!input.shippingAddress.governorate || input.shippingAddress.governorate.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'المحافظة مطلوبة',
+          });
+        }
+
+        if (!input.shippingAddress.city || input.shippingAddress.city.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'المدينة مطلوبة',
+          });
+        }
+
+        logger.info('Allocating shipping partner', {
+          orderId: input.orderId,
+          governorate: input.shippingAddress.governorate,
+          city: input.shippingAddress.city,
+          allocatedBy: ctx.user?.id,
+        });
+
+        let result;
+        try {
+          result = await shippingAllocatorService.allocatePartner(
+            input.orderId,
+            input.shippingAddress
+          );
+        } catch (serviceError: any) {
+          logger.error('Shipping allocator service failed', serviceError, {
+            orderId: input.orderId,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في تخصيص شركة الشحن. يرجى المحاولة مرة أخرى',
+            cause: serviceError,
+          });
+        }
+
+        if (!result) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'لم يتم العثور على شركة شحن مناسبة',
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Shipping partner allocated successfully', {
+          orderId: input.orderId,
+          partnerId: result.partnerId || 'N/A',
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Shipping allocation failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Shipping allocation failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء تخصيص شركة الشحن. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================
@@ -277,17 +530,102 @@ export const codRouter = router({
   fallbackShipping: protectedProcedure
     .input(
       z.object({
-        orderId: z.string(),
-        originalPartnerId: z.number(),
-        reason: z.string(),
+        orderId: z.string().min(1),
+        originalPartnerId: z.number().positive(),
+        reason: z.string().min(1),
       })
     )
-    .mutation(async ({ input }) => {
-      return await shippingAllocatorService.fallbackToAlternative(
-        input.orderId,
-        input.originalPartnerId,
-        input.reason
-      );
+    .mutation(async ({ input, ctx }) => {
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.orderId || input.orderId.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف الطلب مطلوب',
+          });
+        }
+
+        if (!input.originalPartnerId || input.originalPartnerId <= 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف شركة الشحن الأصلية غير صحيح',
+          });
+        }
+
+        if (!input.reason || input.reason.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'سبب التبديل مطلوب',
+          });
+        }
+
+        logger.info('Fallback to alternative shipping partner', {
+          orderId: input.orderId,
+          originalPartnerId: input.originalPartnerId,
+          reason: input.reason,
+          initiatedBy: ctx.user?.id,
+        });
+
+        let result;
+        try {
+          result = await shippingAllocatorService.fallbackToAlternative(
+            input.orderId,
+            input.originalPartnerId,
+            input.reason
+          );
+        } catch (serviceError: any) {
+          logger.error('Shipping fallback service failed', serviceError, {
+            orderId: input.orderId,
+            originalPartnerId: input.originalPartnerId,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في التبديل إلى شركة شحن بديلة. يرجى المحاولة مرة أخرى',
+            cause: serviceError,
+          });
+        }
+
+        if (!result) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'لم يتم العثور على شركة شحن بديلة',
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Shipping fallback completed successfully', {
+          orderId: input.orderId,
+          newPartnerId: result.partnerId || 'N/A',
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Shipping fallback failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Shipping fallback failed (Unexpected Error)', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء التبديل إلى شركة شحن بديلة. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================

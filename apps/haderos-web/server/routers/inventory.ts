@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import {
   distributeResources,
   checkInventoryAvailability,
@@ -8,6 +9,7 @@ import {
   delegateAuthority,
   getResourceInsights,
 } from "../bio-modules/inventory-bio-integration.js";
+import { logger } from "../_core/logger";
 
 export const inventoryRouter = router({
   // Distribute resources (Bio-Module: Mycelium)
@@ -25,12 +27,77 @@ export const inventoryRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const result = await distributeResources(
-        input.orderId,
-        input.requiredItems,
-        input.deliveryLocation
-      );
-      return result;
+      const startTime = Date.now();
+
+      try {
+        // Input validation
+        if (!input.requiredItems || input.requiredItems.length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'يجب تحديد عنصر واحد على الأقل',
+          });
+        }
+
+        // Validate quantities
+        for (const item of input.requiredItems) {
+          if (item.quantity <= 0) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `الكمية يجب أن تكون أكبر من صفر للمنتج ${item.productId}`,
+            });
+          }
+        }
+
+        if (!input.deliveryLocation || input.deliveryLocation.trim() === '') {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'يجب تحديد موقع التسليم',
+          });
+        }
+
+        logger.info('Distributing resources', {
+          orderId: input.orderId,
+          itemCount: input.requiredItems.length,
+          deliveryLocation: input.deliveryLocation,
+        });
+
+        const result = await distributeResources(
+          input.orderId,
+          input.requiredItems,
+          input.deliveryLocation
+        );
+
+        const duration = Date.now() - startTime;
+        logger.info('Resources distributed successfully', {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+
+        if (error instanceof TRPCError) {
+          logger.error('Resource distribution failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            orderId: input.orderId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Resource distribution failed', error, {
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في توزيع الموارد',
+          cause: error,
+        });
+      }
     }),
 
   // Check inventory availability (Bio-Module: Mycelium)
@@ -46,8 +113,55 @@ export const inventoryRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const result = await checkInventoryAvailability(input.items);
-      return result;
+      const startTime = Date.now();
+
+      try {
+        // Input validation
+        if (!input.items || input.items.length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'يجب تحديد عنصر واحد على الأقل للتحقق',
+          });
+        }
+
+        // Validate quantities
+        for (const item of input.items) {
+          if (item.quantity <= 0) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `الكمية يجب أن تكون أكبر من صفر للمنتج ${item.productId}`,
+            });
+          }
+        }
+
+        logger.debug('Checking inventory availability', {
+          itemCount: input.items.length,
+        });
+
+        const result = await checkInventoryAvailability(input.items);
+
+        const duration = Date.now() - startTime;
+        logger.debug('Availability check completed', {
+          itemCount: input.items.length,
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+
+        if (error instanceof TRPCError) throw error;
+
+        logger.error('Availability check failed', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في التحقق من توفر المخزون',
+          cause: error,
+        });
+      }
     }),
 
   // Request replenishment (Bio-Module: Mycelium)
@@ -60,12 +174,65 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const result = await requestReplenishment(
-        input.productId,
-        input.quantity,
-        input.urgency
-      );
-      return result;
+      const startTime = Date.now();
+
+      try {
+        // Input validation
+        if (input.quantity <= 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'الكمية يجب أن تكون أكبر من صفر',
+          });
+        }
+
+        logger.info('Requesting replenishment', {
+          productId: input.productId,
+          quantity: input.quantity,
+          urgency: input.urgency,
+        });
+
+        const result = await requestReplenishment(
+          input.productId,
+          input.quantity,
+          input.urgency
+        );
+
+        const duration = Date.now() - startTime;
+        logger.info('Replenishment request submitted', {
+          productId: input.productId,
+          urgency: input.urgency,
+          duration: `${duration}ms`,
+        });
+
+        return {
+          success: true,
+          message: 'تم إرسال طلب التجديد بنجاح',
+          ...result,
+        };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+
+        if (error instanceof TRPCError) {
+          logger.error('Replenishment request failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            productId: input.productId,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Replenishment request failed', error, {
+          productId: input.productId,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في إرسال طلب التجديد',
+          cause: error,
+        });
+      }
     }),
 
   // Make distributed decision (Bio-Module: Cephalopod)
@@ -83,12 +250,47 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const result = await makeDistributedDecision(
-        input.decisionType,
-        input.context,
-        input.requiredApprovers || []
-      );
-      return result;
+      const startTime = Date.now();
+
+      try {
+        logger.info('Making distributed decision', {
+          decisionType: input.decisionType,
+          approversCount: input.requiredApprovers?.length || 0,
+        });
+
+        const result = await makeDistributedDecision(
+          input.decisionType,
+          input.context,
+          input.requiredApprovers || []
+        );
+
+        const duration = Date.now() - startTime;
+        logger.info('Decision made successfully', {
+          decisionType: input.decisionType,
+          duration: `${duration}ms`,
+        });
+
+        return {
+          success: true,
+          message: 'تم اتخاذ القرار بنجاح',
+          ...result,
+        };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+
+        if (error instanceof TRPCError) throw error;
+
+        logger.error('Decision making failed', error, {
+          decisionType: input.decisionType,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في اتخاذ القرار',
+          cause: error,
+        });
+      }
     }),
 
   // Delegate authority (Bio-Module: Cephalopod)
@@ -107,18 +309,104 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const result = await delegateAuthority(
-        input.fromEntity,
-        input.toEntity,
-        input.authority,
-        input.duration
-      );
-      return result;
+      const startTime = Date.now();
+
+      try {
+        // Validation
+        if (input.fromEntity === input.toEntity) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'لا يمكن تفويض السلطة لنفس الجهة',
+          });
+        }
+
+        if (input.duration <= 0 || input.duration > 720) { // Max 30 days
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'مدة التفويض يجب أن تكون بين 1 و 720 ساعة',
+          });
+        }
+
+        logger.info('Delegating authority', {
+          from: input.fromEntity,
+          to: input.toEntity,
+          authority: input.authority,
+          duration: input.duration,
+        });
+
+        const result = await delegateAuthority(
+          input.fromEntity,
+          input.toEntity,
+          input.authority,
+          input.duration
+        );
+
+        const duration = Date.now() - startTime;
+        logger.info('Authority delegated successfully', {
+          from: input.fromEntity,
+          to: input.toEntity,
+          authority: input.authority,
+          duration: `${duration}ms`,
+        });
+
+        return {
+          success: true,
+          message: 'تم تفويض السلطة بنجاح',
+          ...result,
+        };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+
+        if (error instanceof TRPCError) {
+          logger.error('Authority delegation failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Authority delegation failed', error, {
+          from: input.fromEntity,
+          to: input.toEntity,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في تفويض السلطة',
+          cause: error,
+        });
+      }
     }),
 
   // Get resource insights (Bio-Modules)
   getInsights: publicProcedure.query(async () => {
-    const insights = await getResourceInsights();
-    return insights;
+    const startTime = Date.now();
+
+    try {
+      logger.debug('Fetching resource insights');
+
+      const insights = await getResourceInsights();
+
+      const duration = Date.now() - startTime;
+      logger.debug('Resource insights fetched', {
+        duration: `${duration}ms`,
+      });
+
+      return insights;
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+
+      logger.error('Failed to fetch resource insights', error, {
+        duration: `${duration}ms`,
+      });
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'فشل في جلب تحليلات الموارد',
+        cause: error,
+      });
+    }
   }),
 });

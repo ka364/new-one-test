@@ -5,7 +5,7 @@
  * Provides comprehensive monitoring, error tracking, and performance metrics
  */
 
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 export interface PerformanceMetric {
   name: string;

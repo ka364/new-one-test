@@ -1,0 +1,36 @@
+name: Auto-Backup to Backup Repository
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Add backup remote
+        run: |
+          git remote add backup https://github.com/ka364/new-one-test.git || true
+          git remote set-url backup https://github.com/ka364/new-one-test.git
+      
+      - name: Push to backup repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url backup https://${{ secrets.GITHUB_TOKEN }}@github.com/ka364/new-one-test.git
+          git push backup main || git push backup master || echo "Push failed, may need manual setup"
+

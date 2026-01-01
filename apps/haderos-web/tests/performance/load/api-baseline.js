@@ -195,19 +195,93 @@ export default function () {
   // ========== Scenario 6: Bio-Modules Status (5% of traffic) ==========
   group('6. Bio-Modules Health Check', () => {
     const response = http.get(
-      `${BASE_URL}/api/trpc/bioProtocol.getStatus`,
+      `${BASE_URL}/api/trpc/bio.getDashboard`,
       { headers: HEADERS }
     );
 
-    recordMetrics(response, 'bioProtocol.getStatus');
+    recordMetrics(response, 'bio.getDashboard');
 
     check(response, {
-      'bioProtocol.status - status 200': (r) => r.status === 200,
-      'bioProtocol.status - under 500ms': (r) => r.timings.duration < 500,
+      'bio.dashboard - status 200': (r) => r.status === 200,
+      'bio.dashboard - under 500ms': (r) => r.timings.duration < 500,
     });
 
     sleep(0.3);
   });
+
+  // ========== Scenario 7: Get Order by ID (5% of traffic) ==========
+  if (Math.random() < 0.05) {
+    group('7. Get Order Details', () => {
+      const orderIds = [1, 2, 3, 4, 5];
+      const orderId = orderIds[Math.floor(Math.random() * orderIds.length)];
+
+      const response = http.get(
+        `${BASE_URL}/api/trpc/orders.getOrderById?input=${encodeURIComponent(JSON.stringify({ orderId }))}`,
+        { headers: HEADERS }
+      );
+
+      recordMetrics(response, 'orders.getOrderById');
+
+      check(response, {
+        'orders.getById - status 200 or 404': (r) => [200, 404].includes(r.status),
+        'orders.getById - under 400ms': (r) => r.timings.duration < 400,
+      });
+
+      sleep(0.2);
+    });
+  }
+
+  // ========== Scenario 8: Update Order Status (3% of traffic) ==========
+  if (Math.random() < 0.03) {
+    group('8. Update Order Status', () => {
+      const orderIds = [1, 2, 3, 4, 5];
+      const orderId = orderIds[Math.floor(Math.random() * orderIds.length)];
+      const statuses = ['confirmed', 'processing', 'shipped'];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+      const payload = JSON.stringify({
+        orderId,
+        status,
+      });
+
+      const response = http.post(
+        `${BASE_URL}/api/trpc/orders.updateOrderStatus`,
+        payload,
+        { headers: HEADERS }
+      );
+
+      recordMetrics(response, 'orders.updateOrderStatus');
+
+      check(response, {
+        'orders.updateStatus - status 200 or 400': (r) => [200, 400].includes(r.status),
+        'orders.updateStatus - under 600ms': (r) => r.timings.duration < 600,
+      });
+
+      sleep(0.5);
+    });
+  }
+
+  // ========== Scenario 9: Products List with Pagination (2% of traffic) ==========
+  if (Math.random() < 0.02) {
+    group('9. Products List Paginated', () => {
+      const page = Math.floor(Math.random() * 5) + 1;
+      const limit = 20;
+
+      const response = http.get(
+        `${BASE_URL}/api/trpc/products.list?input=${encodeURIComponent(JSON.stringify({ page, limit }))}`,
+        { headers: HEADERS }
+      );
+
+      recordMetrics(response, 'products.list.paginated');
+
+      check(response, {
+        'products.list.paginated - status 200': (r) => r.status === 200,
+        'products.list.paginated - under 500ms': (r) => r.timings.duration < 500,
+      });
+
+      sleep(0.3);
+    });
+  }
 
   // Think time between iterations (simulates real user behavior)
   sleep(Math.random() * 2 + 1);

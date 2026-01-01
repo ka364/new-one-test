@@ -75,6 +75,7 @@ import { inventoryRouter } from "./routers/inventory";
 import { vitalSignsRouter } from "./routers/vital-signs";
 import { spreadsheetCollabRouter } from "./routers/spreadsheet-collab";
 import { messagingRouter } from "./routers/messaging";
+import { egyptianCommerceRouter } from "./routers/egyptian-commerce";
 
 export const appRouter = router({
   system: systemRouter,
@@ -106,6 +107,7 @@ export const appRouter = router({
   cod: codRouter,
   spreadsheet: spreadsheetCollabRouter,
   messaging: messagingRouter,
+  egyptianCommerce: egyptianCommerceRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

@@ -638,16 +638,62 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await requireDb();
+      const startTime = Date.now();
+      try {
+        logger.debug('Fetching shipping partners', {
+          active: input.active,
+        });
 
-      let query = db.select().from(shippingPartners);
+        const db = await requireDb();
 
-      if (input.active !== undefined) {
-        query = query.where(eq(shippingPartners.active, input.active ? 1 : 0)) as any;
+        let partners;
+        try {
+          let query = db.select().from(shippingPartners);
+
+          if (input.active !== undefined) {
+            query = query.where(eq(shippingPartners.active, input.active ? 1 : 0)) as any;
+          }
+
+          partners = await query;
+        } catch (dbError: any) {
+          logger.error('Database query failed', dbError);
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في جلب شركات الشحن. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Shipping partners fetched successfully', {
+          count: partners.length,
+          duration: `${duration}ms`,
+        });
+
+        return { partners };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Shipping partners fetch failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Shipping partners fetch failed (Unexpected Error)', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب شركات الشحن. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
       }
-
-      const partners = await query;
-      return { partners };
     }),
 
   // ============================================
@@ -656,7 +702,7 @@ export const codRouter = router({
   updateShippingPartner: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.number().positive(),
         data: z.object({
           active: z.number().optional(),
           suspended: z.number().optional(),
@@ -666,14 +712,92 @@ export const codRouter = router({
         }),
       })
     )
-    .mutation(async ({ input }) => {
-      const db = await requireDb();
+    .mutation(async ({ input, ctx }) => {
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.id || input.id <= 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'معرّف شركة الشحن غير صحيح',
+          });
+        }
 
-      await db.update(shippingPartners)
-        .set(input.data)
-        .where(eq(shippingPartners.id, input.id));
+        if (!input.data || Object.keys(input.data).length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'يجب تحديد بيانات للتحديث',
+          });
+        }
 
-      return { success: true };
+        logger.info('Updating shipping partner', {
+          partnerId: input.id,
+          updatedBy: ctx.user?.id,
+        });
+
+        const db = await requireDb();
+
+        // Check if partner exists
+        const [existingPartner] = await db
+          .select()
+          .from(shippingPartners)
+          .where(eq(shippingPartners.id, input.id));
+
+        if (!existingPartner) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'شركة الشحن غير موجودة',
+          });
+        }
+
+        // Update partner
+        try {
+          await db.update(shippingPartners)
+            .set(input.data)
+            .where(eq(shippingPartners.id, input.id));
+        } catch (dbError: any) {
+          logger.error('Database update failed', dbError, {
+            partnerId: input.id,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في تحديث شركة الشحن. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Shipping partner updated successfully', {
+          partnerId: input.id,
+          duration: `${duration}ms`,
+        });
+
+        return { success: true };
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Shipping partner update failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            partnerId: input.id,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Shipping partner update failed (Unexpected Error)', error, {
+          partnerId: input.id,
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء تحديث شركة الشحن. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================
@@ -767,67 +891,245 @@ export const codRouter = router({
   generateReport: protectedProcedure
     .input(
       z.object({
-        startDate: z.string(),
-        endDate: z.string(),
+        startDate: z.string().min(1),
+        endDate: z.string().min(1),
       })
     )
     .query(async ({ input }) => {
-      const startDate = new Date(input.startDate);
-      const endDate = new Date(input.endDate);
+      const startTime = Date.now();
+      try {
+        // Input validation
+        if (!input.startDate || input.startDate.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'تاريخ البداية مطلوب',
+          });
+        }
 
-      return await codWorkflowService.generateReport(startDate, endDate);
+        if (!input.endDate || input.endDate.trim().length === 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'تاريخ النهاية مطلوب',
+          });
+        }
+
+        const startDate = new Date(input.startDate);
+        const endDate = new Date(input.endDate);
+
+        // Validate dates
+        if (isNaN(startDate.getTime())) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'تاريخ البداية غير صحيح',
+          });
+        }
+
+        if (isNaN(endDate.getTime())) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'تاريخ النهاية غير صحيح',
+          });
+        }
+
+        if (startDate > endDate) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'تاريخ البداية يجب أن يكون قبل تاريخ النهاية',
+          });
+        }
+
+        logger.info('Generating COD report', {
+          startDate: input.startDate,
+          endDate: input.endDate,
+        });
+
+        let result;
+        try {
+          result = await codWorkflowService.generateReport(startDate, endDate);
+        } catch (serviceError: any) {
+          logger.error('COD report generation failed', serviceError, {
+            startDate: input.startDate,
+            endDate: input.endDate,
+          });
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في إنشاء التقرير. يرجى المحاولة مرة أخرى',
+            cause: serviceError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('COD report generated successfully', {
+          startDate: input.startDate,
+          endDate: input.endDate,
+          duration: `${duration}ms`,
+        });
+
+        return result;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('COD report generation failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('COD report generation failed (Unexpected Error)', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء إنشاء التقرير. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
+      }
     }),
 
   // ============================================
   // GET DASHBOARD STATS
   // ============================================
   getDashboardStats: protectedProcedure.query(async () => {
-    const db = await requireDb();
+    const startTime = Date.now();
+    try {
+      logger.debug('Fetching dashboard stats');
 
-    // Get counts by stage
-    const stageStats = await db.select({
-      stage: codOrders.currentStage,
-      count: sql<number>`count(*)`,
-    })
-      .from(codOrders)
-      .groupBy(codOrders.currentStage);
+      const db = await requireDb();
 
-    // Get counts by status
-    const statusStats = await db.select({
-      status: codOrders.status,
-      count: sql<number>`count(*)`,
-    })
-      .from(codOrders)
-      .groupBy(codOrders.status);
+      let stageStats, statusStats, totalCOD, todayOrders;
+      
+      try {
+        // Get counts by stage
+        stageStats = await db.select({
+          stage: codOrders.currentStage,
+          count: sql<number>`count(*)`,
+        })
+          .from(codOrders)
+          .groupBy(codOrders.currentStage);
 
-    // Get total COD value
-    const [totalCOD] = await db.select({
-      total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
-    })
-      .from(codOrders);
+        // Get counts by status
+        statusStats = await db.select({
+          status: codOrders.status,
+          count: sql<number>`count(*)`,
+        })
+          .from(codOrders)
+          .groupBy(codOrders.status);
 
-    // Get today's orders
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+        // Get total COD value
+        [totalCOD] = await db.select({
+          total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
+        })
+          .from(codOrders);
 
-    const todayOrders = await db.select()
-      .from(codOrders)
-      .where(gte(codOrders.createdAt, today.toISOString()));
+        // Get today's orders
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-    return {
-      stageStats,
-      statusStats,
-      totalCODValue: totalCOD?.total || 0,
-      todayOrdersCount: todayOrders.length,
-    };
+        todayOrders = await db.select()
+          .from(codOrders)
+          .where(gte(codOrders.createdAt, today.toISOString()));
+      } catch (dbError: any) {
+        logger.error('Database query failed', dbError);
+        
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في جلب إحصائيات لوحة التحكم. يرجى المحاولة مرة أخرى',
+          cause: dbError,
+        });
+      }
+
+      const duration = Date.now() - startTime;
+      logger.info('Dashboard stats fetched successfully', {
+        duration: `${duration}ms`,
+      });
+
+      return {
+        stageStats,
+        statusStats,
+        totalCODValue: totalCOD?.total || 0,
+        todayOrdersCount: todayOrders.length,
+      };
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      
+      if (error instanceof TRPCError) {
+        logger.error('Dashboard stats fetch failed (TRPCError)', {
+          code: error.code,
+          message: error.message,
+          duration: `${duration}ms`,
+        });
+        throw error;
+      }
+
+      logger.error('Dashboard stats fetch failed (Unexpected Error)', error, {
+        duration: `${duration}ms`,
+      });
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'حدث خطأ أثناء جلب إحصائيات لوحة التحكم. يرجى المحاولة مرة أخرى',
+        cause: error,
+      });
+    }
   }),
 
   // ============================================
   // GET SHIPPING COMPANIES
   // ============================================
   getShippingCompanies: protectedProcedure.query(async () => {
-    const db = await requireDb();
-    return await db.select().from(shippingPartners);
+    const startTime = Date.now();
+    try {
+      logger.debug('Fetching shipping companies');
+
+      const db = await requireDb();
+
+      let companies;
+      try {
+        companies = await db.select().from(shippingPartners);
+      } catch (dbError: any) {
+        logger.error('Database query failed', dbError);
+        
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في جلب شركات الشحن. يرجى المحاولة مرة أخرى',
+          cause: dbError,
+        });
+      }
+
+      const duration = Date.now() - startTime;
+      logger.info('Shipping companies fetched successfully', {
+        count: companies.length,
+        duration: `${duration}ms`,
+      });
+
+      return companies;
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      
+      if (error instanceof TRPCError) {
+        logger.error('Shipping companies fetch failed (TRPCError)', {
+          code: error.code,
+          message: error.message,
+          duration: `${duration}ms`,
+        });
+        throw error;
+      }
+
+      logger.error('Shipping companies fetch failed (Unexpected Error)', error, {
+        duration: `${duration}ms`,
+      });
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'حدث خطأ أثناء جلب شركات الشحن. يرجى المحاولة مرة أخرى',
+        cause: error,
+      });
+    }
   }),
 
   // ============================================
@@ -838,18 +1140,65 @@ export const codRouter = router({
       governorateCode: z.string().optional(),
     }))
     .query(async ({ input }) => {
-      const db = await requireDb();
-      
-      if (input.governorateCode) {
-        return await db.select()
-          .from(shippingPerformanceByGovernorate)
-          .where(eq(shippingPerformanceByGovernorate.governorateCode, input.governorateCode))
-          .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
+      const startTime = Date.now();
+      try {
+        logger.debug('Fetching performance by governorate', {
+          governorateCode: input.governorateCode,
+        });
+
+        const db = await requireDb();
+        
+        let performance;
+        try {
+          if (input.governorateCode) {
+            performance = await db.select()
+              .from(shippingPerformanceByGovernorate)
+              .where(eq(shippingPerformanceByGovernorate.governorateCode, input.governorateCode))
+              .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
+          } else {
+            performance = await db.select()
+              .from(shippingPerformanceByGovernorate)
+              .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
+          }
+        } catch (dbError: any) {
+          logger.error('Database query failed', dbError);
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في جلب أداء المحافظ. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Performance by governorate fetched successfully', {
+          count: performance.length,
+          duration: `${duration}ms`,
+        });
+
+        return performance;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Performance by governorate fetch failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Performance by governorate fetch failed (Unexpected Error)', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب أداء المحافظ. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
       }
-      
-      return await db.select()
-        .from(shippingPerformanceByGovernorate)
-        .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
     }),
 
   // ============================================
@@ -860,19 +1209,66 @@ export const codRouter = router({
       centerCode: z.string().optional(),
     }))
     .query(async ({ input }) => {
-      const db = await requireDb();
-      
-      if (input.centerCode) {
-        return await db.select()
-          .from(shippingPerformanceByCenter)
-          .where(eq(shippingPerformanceByCenter.centerCode, input.centerCode))
-          .orderBy(desc(shippingPerformanceByCenter.totalShipments));
+      const startTime = Date.now();
+      try {
+        logger.debug('Fetching performance by center', {
+          centerCode: input.centerCode,
+        });
+
+        const db = await requireDb();
+        
+        let performance;
+        try {
+          if (input.centerCode) {
+            performance = await db.select()
+              .from(shippingPerformanceByCenter)
+              .where(eq(shippingPerformanceByCenter.centerCode, input.centerCode))
+              .orderBy(desc(shippingPerformanceByCenter.totalShipments));
+          } else {
+            performance = await db.select()
+              .from(shippingPerformanceByCenter)
+              .orderBy(desc(shippingPerformanceByCenter.totalShipments))
+              .limit(50);
+          }
+        } catch (dbError: any) {
+          logger.error('Database query failed', dbError);
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في جلب أداء المراكز. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Performance by center fetched successfully', {
+          count: performance.length,
+          duration: `${duration}ms`,
+        });
+
+        return performance;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Performance by center fetch failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Performance by center fetch failed (Unexpected Error)', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب أداء المراكز. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
       }
-      
-      return await db.select()
-        .from(shippingPerformanceByCenter)
-        .orderBy(desc(shippingPerformanceByCenter.totalShipments))
-        .limit(50);
     }),
 
   // ============================================
@@ -883,18 +1279,65 @@ export const codRouter = router({
       pointCode: z.string().optional(),
     }))
     .query(async ({ input }) => {
-      const db = await requireDb();
-      
-      if (input.pointCode) {
-        return await db.select()
-          .from(shippingPerformanceByPoint)
-          .where(eq(shippingPerformanceByPoint.pointCode, input.pointCode))
-          .orderBy(desc(shippingPerformanceByPoint.totalShipments));
+      const startTime = Date.now();
+      try {
+        logger.debug('Fetching performance by point', {
+          pointCode: input.pointCode,
+        });
+
+        const db = await requireDb();
+        
+        let performance;
+        try {
+          if (input.pointCode) {
+            performance = await db.select()
+              .from(shippingPerformanceByPoint)
+              .where(eq(shippingPerformanceByPoint.pointCode, input.pointCode))
+              .orderBy(desc(shippingPerformanceByPoint.totalShipments));
+          } else {
+            performance = await db.select()
+              .from(shippingPerformanceByPoint)
+              .orderBy(desc(shippingPerformanceByPoint.totalShipments))
+              .limit(50);
+          }
+        } catch (dbError: any) {
+          logger.error('Database query failed', dbError);
+          
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل في جلب أداء النقاط. يرجى المحاولة مرة أخرى',
+            cause: dbError,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        logger.info('Performance by point fetched successfully', {
+          count: performance.length,
+          duration: `${duration}ms`,
+        });
+
+        return performance;
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        
+        if (error instanceof TRPCError) {
+          logger.error('Performance by point fetch failed (TRPCError)', {
+            code: error.code,
+            message: error.message,
+            duration: `${duration}ms`,
+          });
+          throw error;
+        }
+
+        logger.error('Performance by point fetch failed (Unexpected Error)', error, {
+          duration: `${duration}ms`,
+        });
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'حدث خطأ أثناء جلب أداء النقاط. يرجى المحاولة مرة أخرى',
+          cause: error,
+        });
       }
-      
-      return await db.select()
-        .from(shippingPerformanceByPoint)
-        .orderBy(desc(shippingPerformanceByPoint.totalShipments))
-        .limit(50);
     }),
 });

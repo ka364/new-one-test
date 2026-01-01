@@ -1,282 +1,358 @@
-# 🧠 HADEROS-AI-CLOUD
+<div align="center">
 
-**Bio-Inspired AI Platform - Production-Ready Architecture**
+# 🧬 HADEROS AI Cloud
 
+### نظام تشغيل للاقتصاد الأخلاقي
+### Operating System for Ethical Economy
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/ka364/HADEROS-AI-CLOUD/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-green.svg)]()
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![tRPC](https://img.shields.io/badge/tRPC-11-398CCB.svg)](https://trpc.io/)
+
+<br>
+
+**منصة متكاملة للتجارة الإلكترونية في مصر والشرق الأوسط**
+
+[البدء السريع](#-البدء-السريع) •
+[الميزات](#-الميزات) •
+[التوثيق](#-التوثيق) •
+[المساهمة](#-المساهمة)
+
+</div>
 
 ---
 
-## 🎯 Overview
-
-HADEROS-AI-CLOUD is a next-generation platform combining:
-- 🧬 **Bio-inspired AI modules** (KAIA, Sentinel, Kinetic, Ledger)
-- 📊 **Enterprise operations** (powered by Frappe/ERPNext)
-- 🚀 **Modern web technologies** (React 19, TypeScript, tRPC)
-- ⛓️ **Blockchain integration** (Smart contracts)
-
-**Current Focus:** NOW SHOES - E-commerce platform for footwear
-
----
-
-## 📂 Project Structure
+## 📊 نظرة سريعة
 
 ```
-HADEROS-AI-CLOUD/
-├── apps/                    # Applications
-│   ├── haderos-web/        # Main web app (React 19 + Node.js)
-│   └── haderos-admin/      # Admin panel
-│
-├── services/               # Microservices (Python/FastAPI)
-│   └── api-gateway/        # API Gateway with bio-modules
-│
-├── contracts/              # Smart Contracts (Solidity)
-│
-├── infrastructure/         # Deployment & DevOps
-│   ├── docker/            # Docker configurations
-│   ├── deployment/        # Deployment scripts
-│   └── certificates/      # SSL certificates
-│
-├── docs/                   # Documentation (112 files)
-│
-├── data/                   # Data & Archives
-│   ├── deliveries/        # Delivery files
-│   ├── archive/           # Archived files
-│   └── databases/         # Reference databases
-│
-└── config/                 # Configurations
+┌─────────────────────────────────────────────────────────────────────┐
+│                      HADEROS AI Cloud v1.0.0                        │
+├─────────────────────────────────────────────────────────────────────┤
+│  📁 34 Database Schemas    │  🔌 70+ API Routers                    │
+│  🧬 70 Bio-Modules         │  📝 66,000+ Lines of Code              │
+│  🔗 6 External Integrations│  📚 30+ Documentation Files            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Quick Start
+## ✨ الميزات
 
-### Prerequisites
+<table>
+<tr>
+<td width="50%">
 
-- **Node.js** 20+ with pnpm
-- **Python** 3.11+
-- **PostgreSQL** 15+
-- **Redis** 7+
-- **Git**
+### 🛒 إدارة الطلبات
+- نظام طلبات متكامل (7 حالات)
+- تتبع في الوقت الفعلي
+- إدارة المرتجعات
+- حساب تلقائي للضرائب
 
----
+</td>
+<td width="50%">
 
-### Installation
+### 💳 بوابات الدفع المصرية
+- COD (الدفع عند الاستلام)
+- InstaPay
+- PayMob
+- Fawry
+- المحافظ الإلكترونية
 
-#### 1. Clone & Setup
+</td>
+</tr>
+<tr>
+<td>
 
-```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/HADEROS-AI-CLOUD.git
-cd HADEROS-AI-CLOUD
-```
+### 🚚 نظام الشحن
+- تكامل Bosta
+- تكامل J&T Express
+- تتبع الشحنات
+- COD Collection
 
-#### 2. Web Application (Node.js)
+</td>
+<td>
 
-```bash
-cd apps/haderos-web
+### 📱 WhatsApp Commerce
+- إنشاء الطلبات عبر WhatsApp
+- الكتالوجات التفاعلية
+- الرد الآلي
+- تتبع المحادثات
 
-# Install dependencies
-pnpm install
+</td>
+</tr>
+<tr>
+<td>
 
-# Setup environment
-cp .env.example .env
-# Edit .env with your configuration
+### 💰 نظام التقسيط (BNPL)
+- ValU
+- Sympl
+- Souhoola
+- Contact
 
-# Run database migrations
-pnpm db:migrate
+</td>
+<td>
 
-# Start development server
-pnpm dev
-```
+### 🏪 Shopify Integration
+- مزامنة ثنائية الاتجاه
+- Webhooks
+- إدارة المخزون
+- مزامنة الطلبات
 
-#### 3. API Gateway (Python)
-
-```bash
-cd services/api-gateway
-
-# Install dependencies
-pip install -r requirements.txt --break-system-packages
-
-# Setup environment
-cp .env.example .env
-# Edit .env with your configuration
-
-# Start API server
-python main.py
-```
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **TailwindCSS** - Styling
-- **shadcn/ui** - Component library
-
-### Backend (Node.js)
-- **tRPC** - Type-safe API
-- **Drizzle ORM** - Database ORM
-- **PostgreSQL** - Primary database
-- **Redis** - Caching
-
-### Backend (Python)
-- **FastAPI** - API framework
-- **SQLAlchemy** - ORM
-- **PostgreSQL** - Database
-- **Kafka/RabbitMQ** - Message queue
-
-### Blockchain
-- **Solidity** - Smart contracts
-- **Hardhat** - Development framework
-- **Ethers.js** - Blockchain interaction
-
-### Infrastructure
-- **Docker** - Containerization
-- **Kubernetes** - Orchestration
-- **Nginx** - Reverse proxy
-- **DigitalOcean** - Cloud hosting
-
----
-
-## 📚 Documentation
-
-Comprehensive documentation available in `/docs/`:
-
-### Getting Started
-- [Quick Start](./docs/QUICK_START.md)
-- [Local Setup](./docs/LOCAL_SETUP.md)
-- [Deployment Guide](./docs/DEPLOYMENT.md)
-
-### Strategic
-- [90-Day Plan](./docs/90_DAY_EXECUTION_PLAN.md)
-- [Strategic Roadmap](./docs/STRATEGIC_ROADMAP_IMPLEMENTATION.md)
-- [Islamic Foundation](./docs/HADEROS_ISLAMIC_FOUNDATION.md)
-
-### Technical
-- [Complete System Guide](./docs/COMPLETE_SYSTEM_GUIDE.md)
-- [Security Guide](./docs/SECURITY_GUIDE.md)
-- [Testing Guide](./docs/TESTING_GUIDE.md)
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🧬 Bio-Modules
 
-### KAIA (Theology Engine)
-Sharia-compliant decision making and validation
+نظام مستوحى من الطبيعة لتحقيق المرونة والذكاء:
 
-### Sentinel (Monitoring)
-Real-time system monitoring and alerting
-
-### Kinetic (Optimization)
-ML-powered demand forecasting and optimization
-
-### Ledger (Blockchain)
-Blockchain integration and smart contracts
-
----
-
-## 🔐 Security
-
-- ✅ JWT authentication
-- ✅ Role-based access control
-- ✅ Data encryption at rest and in transit
-- ✅ Regular security audits
-- ✅ OWASP Top 10 compliance
-
-See [Security Guide](./docs/SECURITY_GUIDE.md) for details.
+| Module | الوظيفة | الإلهام |
+|--------|---------|---------|
+| 🦠 **Tardigrade** | المرونة والاستدامة | دب الماء |
+| 🦎 **Chameleon** | التكيف التلقائي | الحرباء |
+| 🐙 **Cephalopod** | الذكاء الموزع | الأخطبوط |
+| 🍄 **Mycelium** | الشبكات والتواصل | الفطريات |
+| 🐦 **Corvid** | الذكاء والتعلم | الغراب |
+| 🐜 **Ant Colony** | التنظيم الجماعي | مستعمرة النمل |
 
 ---
 
-## 🧪 Testing
+## 🚀 البدء السريع
+
+### المتطلبات
+
+- **Node.js** 18.0+
+- **pnpm** 8.0+
+- **PostgreSQL** 15.0+
+- **Git** 2.30+
+
+### التثبيت
 
 ```bash
-# Run all tests
-pnpm test
+# 1. Clone المشروع
+git clone https://github.com/ka364/HADEROS-AI-CLOUD.git
+cd HADEROS-AI-CLOUD
 
-# Run specific test suite
-pnpm test:unit
-pnpm test:integration
-pnpm test:e2e
+# 2. تشغيل سكريبت الإعداد التفاعلي
+chmod +x scripts/full-setup.sh
+./scripts/full-setup.sh
+
+# أو التثبيت اليدوي:
+cd apps/haderos-web
+pnpm install
+cp .env.example .env
+pnpm drizzle-kit push
+pnpm dev
+```
+
+### التحقق من الصحة
+
+```bash
+./scripts/health-check.sh
 ```
 
 ---
 
-## 🚢 Deployment
+## 📂 هيكل المشروع
 
-### Development
-```bash
-docker-compose -f infrastructure/docker/docker-compose.dev.yml up
+```
+HADEROS-AI-CLOUD/
+├── 📁 apps/
+│   └── haderos-web/           # التطبيق الرئيسي
+│       ├── src/               # React Components
+│       ├── server/            # Backend (tRPC)
+│       │   ├── _core/         # Core utilities
+│       │   ├── routers/       # 70+ API routers
+│       │   └── services/      # Business logic
+│       └── drizzle/           # 34 Database schemas
+│
+├── 📁 docs/                   # التوثيق الشامل
+│   ├── QUICK_START_AR.md      # البدء السريع
+│   ├── API_REFERENCE_AR.md    # مرجع الـ API
+│   ├── TECHNICAL_REFERENCE_AR.md  # المرجع الفني
+│   └── generated/             # توثيق مُولّد تلقائياً
+│
+├── 📁 scripts/                # أدوات المساعدة
+│   ├── full-setup.sh          # إعداد كامل
+│   ├── generate-docs.sh       # توليد التوثيق
+│   └── health-check.sh        # فحص الصحة
+│
+├── 📁 .github/                # GitHub templates
+│   ├── ISSUE_TEMPLATE/        # قوالب الـ Issues
+│   └── PULL_REQUEST_TEMPLATE.md
+│
+├── CONTRIBUTING.md            # دليل المساهمة
+├── CHANGELOG.md               # سجل التغييرات
+└── README.md                  # هذا الملف
 ```
 
-### Production
+---
+
+## 🛠️ التقنيات
+
+<table>
+<tr>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="48" height="48" alt="React" />
+<br>React 19
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="48" height="48" alt="TypeScript" />
+<br>TypeScript
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="48" height="48" alt="Node.js" />
+<br>Node.js
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" width="48" height="48" alt="PostgreSQL" />
+<br>PostgreSQL
+</td>
+</tr>
+<tr>
+<td align="center" width="96">
+<img src="https://trpc.io/img/logo.svg" width="48" height="48" alt="tRPC" />
+<br>tRPC
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" width="48" height="48" alt="Redis" />
+<br>Redis
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="48" height="48" alt="Docker" />
+<br>Docker
+</td>
+<td align="center" width="96">
+<img src="https://vitejs.dev/logo.svg" width="48" height="48" alt="Vite" />
+<br>Vite
+</td>
+</tr>
+</table>
+
+---
+
+## 📚 التوثيق
+
+### للمطورين
+| الوثيقة | الوصف |
+|---------|-------|
+| [البدء السريع](docs/QUICK_START_AR.md) | إعداد في 5 دقائق |
+| [مرجع الـ API](docs/API_REFERENCE_AR.md) | جميع الـ endpoints |
+| [المرجع الفني](docs/TECHNICAL_REFERENCE_AR.md) | البنية والخدمات |
+| [مخططات البنية](docs/ARCHITECTURE_DIAGRAMS.md) | Mermaid diagrams |
+
+### للمستخدمين
+| الوثيقة | الوصف |
+|---------|-------|
+| [دليل المبيعات الهاتفية](docs/USER_MANUAL_PHONE_SALES_AR.md) | للموظفين |
+| [دليل WhatsApp Commerce](docs/USER_MANUAL_WHATSAPP_COMMERCE_AR.md) | للتجار |
+| [دليل التقسيط](docs/USER_MANUAL_BNPL_AR.md) | نظام BNPL |
+| [دليل CRM](docs/USER_MANUAL_UNIFIED_CRM_AR.md) | إدارة العملاء |
+
+### للتشغيل
+| الوثيقة | الوصف |
+|---------|-------|
+| [دليل النشر](docs/DEPLOYMENT_GUIDE_AR.md) | النشر للإنتاج |
+| [حل المشاكل](docs/TROUBLESHOOTING_AR.md) | المشاكل الشائعة |
+| [فهرس الوثائق](docs/INDEX.md) | جميع الوثائق |
+
+---
+
+## 🧪 الاختبار والبناء
+
 ```bash
-# Build and deploy
-./infrastructure/deployment/deploy.sh production
+# فحص الأنواع
+pnpm typecheck
+
+# فحص الأسلوب
+pnpm lint
+
+# البناء
+pnpm build
+
+# التشغيل للإنتاج
+pnpm start
 ```
 
-See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
+---
+
+## 🤝 المساهمة
+
+نرحب بجميع المساهمات! راجع [CONTRIBUTING.md](CONTRIBUTING.md) للتفاصيل.
+
+```bash
+# 1. Fork المشروع
+# 2. إنشاء branch جديد
+git checkout -b feature/amazing-feature
+
+# 3. Commit التغييرات
+git commit -m "feat: add amazing feature"
+
+# 4. Push
+git push origin feature/amazing-feature
+
+# 5. إنشاء Pull Request
+```
 
 ---
 
-## 📊 Project Statistics
+## 📋 سجل التغييرات
 
-- **Files:** 971 files
-- **Lines of Code:** 354,167
-- **Documentation:** 112 documents
-- **Languages:** TypeScript, Python, Solidity
-- **Status:** Active Development
+راجع [CHANGELOG.md](CHANGELOG.md) للتفاصيل الكاملة.
 
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
+### v1.0.0 (2026-01-02)
+- ✨ الإصدار الأول الكامل
+- 🛒 نظام الطلبات المتكامل
+- 💳 بوابات الدفع المصرية
+- 🚚 تكامل الشحن
+- 📱 WhatsApp Commerce
+- 💰 نظام التقسيط
 
 ---
 
-## 📄 License
+## 👥 أنواع المستخدمين
 
-This project is licensed under the MIT License - see [LICENSE](./LICENSE)
-
----
-
-## 👥 Team
-
-HaderOS Team - Building the future of bio-inspired AI
-
----
-
-## 📞 Support
-
-- **Documentation:** `/docs/`
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/HADEROS-AI-CLOUD/issues)
-- **Email:** team@haderos.ai
+<table>
+<tr>
+<td align="center">🏭<br><b>المُصنّع</b><br>إدارة المنتجات</td>
+<td align="center">🏪<br><b>التاجر</b><br>إدارة الطلبات</td>
+<td align="center">🚚<br><b>شركة الشحن</b><br>تتبع الشحنات</td>
+</tr>
+<tr>
+<td align="center">👔<br><b>الموظف</b><br>المبيعات الهاتفية</td>
+<td align="center">📣<br><b>المسوّق</b><br>الحملات التسويقية</td>
+<td align="center">👤<br><b>العميل</b><br>التسوق</td>
+</tr>
+</table>
 
 ---
 
-## 🗺️ Roadmap
+## 📞 الدعم
 
-### Phase 1 (Current - Q1 2025)
-- ✅ Project consolidation
-- 🔄 Frappe/ERPNext integration
-- 🔄 Production deployment
-
-### Phase 2 (Q2 2025)
-- [ ] Advanced bio-modules
-- [ ] Blockchain features
-- [ ] Mobile applications
-
-### Phase 3 (Q3 2025)
-- [ ] B2B SaaS expansion
-- [ ] International markets
-- [ ] Advanced AI features
+- **التوثيق:** [docs/](docs/)
+- **Issues:** [GitHub Issues](https://github.com/ka364/HADEROS-AI-CLOUD/issues)
+- **Email:** support@haderos.ai
 
 ---
 
-**Built with ❤️ by HaderOS Team**
+## 📄 الترخيص
 
-*Leveraging biology-inspired intelligence for modern commerce*
+هذا المشروع مرخص تحت [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+**صُنع بـ ❤️ من فريق HADEROS**
+
+*نظام تشغيل للاقتصاد الأخلاقي*
+
+[![GitHub stars](https://img.shields.io/github/stars/ka364/HADEROS-AI-CLOUD?style=social)](https://github.com/ka364/HADEROS-AI-CLOUD)
+[![GitHub forks](https://img.shields.io/github/forks/ka364/HADEROS-AI-CLOUD?style=social)](https://github.com/ka364/HADEROS-AI-CLOUD/fork)
+
+</div>

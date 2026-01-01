@@ -1,47 +1,41 @@
-import { defineConfig } from "vitest/config";
-import path from "path";
-
-const templateRoot = path.resolve(import.meta.dirname);
+import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
-  root: templateRoot,
-  resolve: {
-    alias: {
-      "@": path.resolve(templateRoot, "client", "src"),
-      "@shared": path.resolve(templateRoot, "shared"),
-      "@assets": path.resolve(templateRoot, "attached_assets"),
-      "@server": path.resolve(templateRoot, "server"),
-    },
-  },
   test: {
     globals: true,
-    environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts", "tests/**/*.test.ts"],
-    setupFiles: ["./tests/setup.ts"],
+    environment: 'node',
     coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html", "lcov"],
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
-        "node_modules/",
-        "dist/",
-        "build/",
-        "**/*.test.ts",
-        "**/*.spec.ts",
-        "**/types.ts",
-        "**/*.d.ts",
-        "tests/",
-        "drizzle/",
-        "client/",
+        'node_modules/',
+        'dist/',
+        'build/',
+        '**/*.config.*',
+        '**/*.test.*',
+        '**/tests/**',
+        '**/test/**',
+        '**/__tests__/**',
+        '**/__mocks__/**',
+        '**/mockData/**',
+        '**/mocks/**',
       ],
-      // Target 80% coverage for backend
       thresholds: {
-        lines: 60,      // Start with 60%, gradually increase
-        functions: 60,
-        branches: 50,
-        statements: 60,
+        lines: 90,
+        functions: 90,
+        branches: 85,
+        statements: 90,
       },
     },
-    testTimeout: 15000,
-    hookTimeout: 15000,
+    include: ['**/*.test.ts', '**/*.test.tsx', '**/tests/**/*.ts'],
+    testTimeout: 10000,
+    hookTimeout: 10000,
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './client/src'),
+      '@shared': path.resolve(__dirname, './shared'),
+    },
   },
 });

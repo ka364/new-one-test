@@ -12,6 +12,9 @@
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "simulate": "tsx scripts/run-simulation.ts",
     "simulate:full": "NODE_ENV=development tsx scripts/run-simulation.ts"

@@ -149,9 +149,9 @@ export const appRouter = router({
   }),
 
   // ============================================
-  // ORDERS
+  // LEGACY ORDERS (للتوافق مع الكود القديم)
   // ============================================
-  orders: router({
+  legacyOrders: router({
     list: protectedProcedure
       .input(z.object({ limit: z.number().optional() }).optional())
       .query(async ({ input }) => {
@@ -625,10 +625,6 @@ export const appRouter = router({
       }),
   }),
 
-  // ============================================
-  // COD TRACKING SYSTEM
-  // ============================================
-  cod: codRouter,
 });
 
 

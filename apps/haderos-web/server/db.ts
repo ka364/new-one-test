@@ -52,6 +52,9 @@ const { Pool } = pg;
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: pg.Pool | null = null;
 
+// Export db instance for direct access (will be null until getDb() is called)
+export { _db as db };
+
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {

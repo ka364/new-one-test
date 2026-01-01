@@ -3,7 +3,7 @@
  * راوتر الدفع الموحد
  */
 
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
 import { z } from "zod";
 import { getUnifiedPaymentService } from "../services/unified-payment.service";
 import { db } from "../db";

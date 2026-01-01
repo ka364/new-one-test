@@ -340,7 +340,7 @@ export const fawryReferences = pgTable("fawry_references", {
   paidAt: timestamp("paid_at"),
 
   // Payment Location
-  paidAt: varchar("paid_at_location", { length: 200 }),
+  paidAtLocation: varchar("paid_at_location", { length: 200 }),
 
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [

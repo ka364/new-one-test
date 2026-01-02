@@ -101,12 +101,12 @@ export const paymentRouter = router({
           total: input.amount + fee,
           netAmount: input.amount - fee,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error instanceof TRPCError) {
           throw error;
         }
 
-        logger.error('Failed to calculate payment fee', error, {
+        logger.error('Failed to calculate payment fee', error instanceof Error ? error : new Error(String(error)), {
           amount: input.amount,
           providerCode: input.providerCode,
         });
@@ -172,8 +172,8 @@ export const paymentRouter = router({
         let paymentResult;
         try {
           paymentResult = await service.createPayment(input);
-        } catch (serviceError: any) {
-          logger.error('Payment service failed', serviceError, {
+        } catch (serviceError: unknown) {
+          logger.error('Payment service failed', serviceError instanceof Error ? serviceError : new Error(String(serviceError)), {
             orderId: input.orderId,
             providerCode: input.providerCode,
           });
@@ -218,9 +218,9 @@ export const paymentRouter = router({
               // In production, you might want to block the payment here
               // For now, we'll just log and continue
             }
-          } catch (bioError: any) {
+          } catch (bioError: unknown) {
             logger.warn('Bio-Module validation failed, continuing anyway', {
-              error: bioError.message,
+              error: bioError instanceof Error ? bioError.message : String(bioError),
               transactionId: paymentResult.transactionId,
             });
             // Continue even if Bio-Module validation fails
@@ -235,9 +235,9 @@ export const paymentRouter = router({
               paymentResult.transactionNumber || '',
               'pending'
             );
-          } catch (trackError: any) {
+          } catch (trackError: unknown) {
             logger.warn('Payment lifecycle tracking failed', {
-              error: trackError.message,
+              error: trackError instanceof Error ? trackError.message : String(trackError),
               transactionId: paymentResult.transactionId,
             });
             // Continue even if tracking fails
@@ -379,8 +379,8 @@ export const paymentRouter = router({
             input.payload,
             input.signature
           );
-        } catch (webhookError: any) {
-          logger.error('Webhook processing failed', webhookError, {
+        } catch (webhookError: unknown) {
+          logger.error('Webhook processing failed', webhookError instanceof Error ? webhookError : new Error(String(webhookError)), {
             provider: input.provider,
             eventType: input.eventType,
           });
@@ -405,9 +405,9 @@ export const paymentRouter = router({
                   ? 'refunded'
                   : 'processing'
           );
-        } catch (trackError: any) {
+        } catch (trackError: unknown) {
           logger.warn('Payment lifecycle tracking failed for webhook', {
-            error: trackError.message,
+            error: trackError instanceof Error ? trackError.message : String(trackError),
           });
           // Continue even if tracking fails
         }
@@ -611,8 +611,8 @@ export const paymentRouter = router({
             reason: input.reason,
             requestedBy: ctx.user?.id || 0,
           });
-        } catch (refundError: any) {
-          logger.error('Refund processing failed', refundError, {
+        } catch (refundError: unknown) {
+          logger.error('Refund processing failed', refundError instanceof Error ? refundError : new Error(String(refundError)), {
             transactionId: input.transactionId,
           });
 
@@ -631,9 +631,9 @@ export const paymentRouter = router({
               },
               `Refund failed: ${refundError.message}`
             );
-          } catch (bioError: any) {
+          } catch (bioError: unknown) {
             logger.warn('Bio-Module failure tracking failed', {
-              error: bioError.message,
+              error: bioError instanceof Error ? bioError.message : String(bioError),
             });
           }
 
@@ -651,9 +651,9 @@ export const paymentRouter = router({
             transaction.transactionNumber,
             'refunded'
           );
-        } catch (trackError: any) {
-          logger.warn('Payment lifecycle tracking failed for refund', {
-            error: trackError.message,
+          } catch (trackError: unknown) {
+            logger.warn('Payment lifecycle tracking failed for refund', {
+              error: trackError instanceof Error ? trackError.message : String(trackError),
           });
           // Continue even if tracking fails
         }

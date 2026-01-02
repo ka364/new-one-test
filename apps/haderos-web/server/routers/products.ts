@@ -1,3 +1,25 @@
+/**
+ * @fileoverview Products Router - HADEROS E-commerce Platform
+ * @module server/routers/products
+ * @description Handles all product-related operations including CRUD, search,
+ * inventory management, and dynamic pricing through Bio-Modules integration.
+ *
+ * @author HADEROS Team
+ * @version 2.0.0
+ * @license MIT
+ *
+ * @example
+ * // Get all products
+ * const products = await trpc.products.getAllProducts.query();
+ *
+ * @example
+ * // Search products
+ * const results = await trpc.products.searchProducts.query({
+ *   query: 'حذاء رياضي',
+ *   limit: 10
+ * });
+ */
+
 import { z } from "zod";
 import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -9,8 +31,37 @@ import { schemas } from "../_core/validation";
 import { cache } from "../_core/cache";
 import { logger } from "../_core/logger";
 
+/**
+ * Products Router - tRPC router for product management
+ *
+ * @description Provides the following procedures:
+ * - `getAllProducts` - Fetch all active products
+ * - `getProductById` - Fetch single product by ID
+ * - `searchProducts` - Search products by name/SKU
+ * - `getProductWithDynamicPrice` - Get product with AI-adjusted pricing
+ * - `createProduct` - Create new product (protected)
+ * - `updateProduct` - Update existing product (protected)
+ * - `deleteProduct` - Soft delete product (protected)
+ * - `restoreProduct` - Restore deleted product (protected)
+ * - `getProductsByCategory` - Filter products by category
+ * - `getProductStats` - Get product statistics (protected)
+ *
+ * @see {@link https://trpc.io/docs/router tRPC Router Documentation}
+ */
 export const productsRouter = router({
-  // Get all products
+  /**
+   * Get all active products
+   *
+   * @description Fetches all active products from the database with caching.
+   * Results are cached for 10 minutes to improve performance.
+   *
+   * @returns {Promise<Product[]>} Array of active products sorted by creation date
+   * @throws {TRPCError} With code 'INTERNAL_SERVER_ERROR' if database operation fails
+   *
+   * @example
+   * const products = await trpc.products.getAllProducts.query();
+   * console.log(`Found ${products.length} products`);
+   */
   getAllProducts: publicProcedure.query(async () => {
     const startTime = Date.now();
 

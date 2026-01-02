@@ -1,3 +1,33 @@
+/**
+ * @fileoverview Inventory Router - HADEROS E-commerce Platform
+ * @module server/routers/inventory
+ * @description Manages inventory across multiple branches with Bio-Modules
+ * integration for intelligent resource distribution and stock management.
+ *
+ * @author HADEROS Team
+ * @version 2.0.0
+ * @license MIT
+ *
+ * Bio-Modules Integration:
+ * - Mycelium: Resource distribution across branches
+ * - Cephalopod: Distributed decision making
+ *
+ * @example
+ * // Check inventory availability
+ * const availability = await trpc.inventory.checkAvailability.query({
+ *   productId: 123,
+ *   quantity: 10
+ * });
+ *
+ * @example
+ * // Distribute resources
+ * const distribution = await trpc.inventory.distributeResources.query({
+ *   orderId: 456,
+ *   requiredItems: [{ productId: 123, quantity: 5 }],
+ *   deliveryLocation: 'القاهرة'
+ * });
+ */
+
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -11,8 +41,25 @@ import {
 } from "../bio-modules/inventory-bio-integration.js";
 import { logger } from "../_core/logger";
 
+/**
+ * Inventory Router - tRPC router for inventory management
+ *
+ * @description Provides procedures for:
+ * - Resource distribution across branches (Mycelium)
+ * - Availability checking
+ * - Replenishment requests
+ * - Distributed decision making (Cephalopod)
+ * - Authority delegation
+ *
+ * @see {@link ../bio-modules/inventory-bio-integration Bio-Modules Integration}
+ */
 export const inventoryRouter = router({
-  // Distribute resources (Bio-Module: Mycelium)
+  /**
+   * Distribute resources using Mycelium Bio-Module
+   *
+   * @description Intelligently distributes inventory from optimal branches
+   * based on distance, availability, and cost optimization.
+   */
   distributeResources: publicProcedure
     .input(
       z.object({

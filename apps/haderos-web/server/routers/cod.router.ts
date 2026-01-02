@@ -1,9 +1,68 @@
 /**
- * COD Tracking Router
- * tRPC procedures for COD order management
+ * @fileoverview COD Tracking Router - HADEROS E-commerce Platform
+ * @module server/routers/cod
+ * @description Complete Cash on Delivery (COD) order management system
+ * for Egypt's e-commerce market. Handles the full COD lifecycle from
+ * order creation to final settlement.
+ *
+ * @author HADEROS Team
+ * @version 2.0.0
+ * @license MIT
  *
  * تتبع طلبات الدفع عند الاستلام (COD)
  * نظام إدارة شامل للشحن والتوصيل في مصر
+ *
+ * @example
+ * // Create COD order
+ * const codOrder = await trpc.cod.createCODOrder.mutate({
+ *   orderId: 'ORD-2026-001',
+ *   customerName: 'أحمد محمد',
+ *   customerPhone: '01012345678',
+ *   shippingAddress: { governorate: 'القاهرة', city: 'مدينة نصر', ... },
+ *   orderAmount: 599.99,
+ *   codAmount: 650.00
+ * });
+ *
+ * @example
+ * // Update COD stage
+ * await trpc.cod.updateCODStage.mutate({
+ *   orderId: 'ORD-2026-001',
+ *   newStage: 'shipping',
+ *   notes: 'تم تسليم الشحنة للمندوب'
+ * });
+ *
+ * COD Stage Flow:
+ * ┌─────────────────┐
+ * │ customerService │ → Initial order entry
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │  confirmation   │ → Customer confirms order
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │   preparation   │ → Order being prepared
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │    supplier     │ → Supplier processing
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │    shipping     │ → In transit
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │    delivery     │ → Out for delivery
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │   collection    │ → Cash collected
+ * └────────┬────────┘
+ *          ↓
+ * ┌─────────────────┐
+ * │   settlement    │ → Amount settled
+ * └─────────────────┘
  */
 
 import { router, protectedProcedure } from "../_core/trpc";

@@ -1,3 +1,23 @@
+/**
+ * @fileoverview Orders Router - HADEROS E-commerce Platform
+ * @module server/routers/orders
+ * @description Handles all order-related operations including creation,
+ * status management, and Bio-Modules integration for fraud detection.
+ *
+ * @author HADEROS Team
+ * @version 2.0.0
+ * @license MIT
+ *
+ * @example
+ * // Create a new order
+ * const order = await trpc.orders.createOrder.mutate({
+ *   customerName: 'أحمد محمد',
+ *   customerPhone: '01012345678',
+ *   items: [{ productId: 1, quantity: 2, price: 299.99 }],
+ *   totalAmount: 599.98
+ * });
+ */
+
 import { z } from "zod";
 import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -13,8 +33,24 @@ import { schemas } from "../_core/validation";
 import { cache } from "../_core/cache";
 import { logger } from "../_core/logger";
 
+/**
+ * Orders Router - tRPC router for order management
+ *
+ * @description Provides procedures for order lifecycle management:
+ * - Order creation with validation
+ * - Status updates with transition validation
+ * - Arachnid fraud detection integration
+ * - Performance tracking
+ *
+ * @see {@link ../bio-modules/orders-bio-integration Bio-Modules Integration}
+ */
 export const ordersRouter = router({
-  // Create new order
+  /**
+   * Create a new order
+   *
+   * @description Creates order with Egyptian phone validation and fraud detection
+   * @throws {TRPCError} BAD_REQUEST if validation fails
+   */
   createOrder: publicProcedure
     .input(schemas.createOrder)
     .mutation(async ({ input, ctx }) => {

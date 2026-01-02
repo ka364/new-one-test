@@ -1,21 +1,58 @@
 /**
- * Async Performance Wrapper
- * Apple-Level Performance Tracking
- *
+ * @fileoverview Async Performance Wrapper
+ * @description Apple-Level Performance Tracking
+ * 
  * Provides utilities for tracking performance of async operations
- * with automatic logging and metrics collection.
+ * with automatic logging and metrics collection using high-resolution timers.
+ * 
+ * @module async-performance-wrapper
+ * @author HADEROS Team
+ * @since 1.0.0
  */
 
 import { logger } from './logger';
 import { monitoring } from './monitoring';
 
+/**
+ * Performance context for tracking operations
+ */
 export interface PerformanceContext {
+  /** Name of the operation being tracked */
   operation: string;
+  /** Additional context details for logging */
   details?: Record<string, unknown>;
 }
 
 /**
- * Wrap async function with performance tracking
+ * Wraps an async function with performance tracking
+ *
+ * @template T
+ * @param {PerformanceContext} context - Performance tracking context
+ * @param {() => Promise<T>} fn - Async function to track
+ * @returns {Promise<T>} Result of the async function
+ *
+ * @description
+ * Tracks performance of async operations using high-resolution timers (hrtime).
+ * Automatically logs performance metrics and records them in the monitoring system.
+ * Tracks both successful and failed operations.
+ *
+ * @example
+ * ```typescript
+ * const result = await withPerformanceTracking(
+ *   {
+ *     operation: 'orders.createOrder',
+ *     details: { customerPhone: '01012345678' }
+ *   },
+ *   async () => {
+ *     return await OrdersService.createOrder(input);
+ *   }
+ * );
+ * ```
+ *
+ * @performance
+ * - Uses hrtime for nanosecond precision
+ * - Minimal overhead: <1ms per operation
+ * - Automatic metric recording
  */
 export async function withPerformanceTracking<T>(
   context: PerformanceContext,
@@ -73,7 +110,28 @@ export async function withPerformanceTracking<T>(
 }
 
 /**
- * Create a performance-tracked async function
+ * Creates a performance-tracked async function
+ *
+ * @template TArgs
+ * @template TReturn
+ * @param {string} operation - Name of the operation
+ * @param {(...args: TArgs) => Promise<TReturn>} fn - Async function to wrap
+ * @returns {(...args: TArgs) => Promise<TReturn>} Wrapped function with performance tracking
+ *
+ * @description
+ * Creates a new function that automatically tracks performance for every call.
+ * Useful for wrapping existing functions without modifying their implementation.
+ *
+ * @example
+ * ```typescript
+ * const trackedCreateOrder = createTrackedAsyncFunction(
+ *   'orders.createOrder',
+ *   OrdersService.createOrder
+ * );
+ * 
+ * // Now every call is automatically tracked
+ * const result = await trackedCreateOrder(input);
+ * ```
  */
 export function createTrackedAsyncFunction<TArgs extends unknown[], TReturn>(
   operation: string,
@@ -93,7 +151,29 @@ export function createTrackedAsyncFunction<TArgs extends unknown[], TReturn>(
 }
 
 /**
- * Track performance of multiple operations in parallel
+ * Tracks performance of multiple operations executed in parallel
+ *
+ * @template T
+ * @param {Array<{name: string; fn: () => Promise<T>; details?: Record<string, unknown>}>} operations - Array of operations to track
+ * @returns {Promise<T[]>} Array of results from all operations
+ *
+ * @description
+ * Executes multiple async operations in parallel and tracks their individual
+ * and combined performance. Useful for batch operations.
+ *
+ * @example
+ * ```typescript
+ * const results = await trackParallelOperations([
+ *   { name: 'fetchUser', fn: () => fetchUser(1) },
+ *   { name: 'fetchOrder', fn: () => fetchOrder(123) },
+ *   { name: 'fetchProduct', fn: () => fetchProduct(456) }
+ * ]);
+ * ```
+ *
+ * @performance
+ * - Executes operations in parallel (Promise.all)
+ * - Tracks individual operation performance
+ * - Tracks total execution time
  */
 export async function trackParallelOperations<T>(
   operations: Array<{
@@ -129,7 +209,29 @@ export async function trackParallelOperations<T>(
 }
 
 /**
- * Track performance of sequential operations
+ * Tracks performance of multiple operations executed sequentially
+ *
+ * @template T
+ * @param {Array<{name: string; fn: () => Promise<T>; details?: Record<string, unknown>}>} operations - Array of operations to track
+ * @returns {Promise<T[]>} Array of results from all operations
+ *
+ * @description
+ * Executes multiple async operations sequentially and tracks their individual
+ * performance. Useful when operations depend on each other.
+ *
+ * @example
+ * ```typescript
+ * const results = await trackSequentialOperations([
+ *   { name: 'createOrder', fn: () => createOrder(input) },
+ *   { name: 'createPayment', fn: () => createPayment(orderId) },
+ *   { name: 'sendNotification', fn: () => sendNotification(orderId) }
+ * ]);
+ * ```
+ *
+ * @performance
+ * - Executes operations sequentially (for loop)
+ * - Tracks individual operation performance
+ * - Total time = sum of all operation times
  */
 export async function trackSequentialOperations<T>(
   operations: Array<{

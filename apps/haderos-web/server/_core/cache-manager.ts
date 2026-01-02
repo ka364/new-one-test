@@ -1,30 +1,66 @@
 /**
- * Cache Manager Utilities
- * Apple-Level Cache Management
- *
+ * @fileoverview Cache Manager Utilities
+ * @description Apple-Level Cache Management
+ * 
  * Provides utilities for consistent cache invalidation and management
- * across all routers and services.
+ * across all routers and services. Includes graceful error handling
+ * and comprehensive cache key management.
+ * 
+ * @module cache-manager
+ * @author HADEROS Team
+ * @since 1.0.0
  */
 
 import { logger } from './logger';
 import { cache } from './cache';
 
+/**
+ * Cache key configuration for an entity
+ */
 export interface CacheKeys {
+  /** Array of cache keys for "all" queries */
   all?: string[];
+  /** Function to generate cache key by ID */
   byId?: (id: number | string) => string;
+  /** Function to generate cache key by status */
   byStatus?: (status: string) => string;
+  /** Function to generate cache key by customer */
   byCustomer?: (customerId: string) => string;
+  /** Custom cache keys */
   custom?: string[];
 }
 
+/**
+ * Context for cache invalidation
+ */
 export interface CacheInvalidationContext {
+  /** Entity name (e.g., 'orders', 'products') */
   entity: string;
+  /** Cache key configuration */
   keys: CacheKeys;
+  /** Additional context for key generation */
   context?: Record<string, unknown>;
 }
 
 /**
- * Safely invalidate cache with error handling
+ * Safely invalidates cache keys with error handling
+ *
+ * @param {string[]} keys - Array of cache keys to invalidate
+ * @returns {Promise<void>}
+ *
+ * @description
+ * Invalidates multiple cache keys with graceful error handling.
+ * Continues invalidating remaining keys even if one fails.
+ * Logs warnings for failed invalidations but doesn't throw.
+ *
+ * @example
+ * ```typescript
+ * await safeCacheInvalidate([
+ *   'orders:all',
+ *   'orders:123',
+ *   'orders:status:pending'
+ * ]);
+ * ```
  */
 export async function safeCacheInvalidate(keys: string[]): Promise<void> {
   for (const key of keys) {
@@ -41,7 +77,28 @@ export async function safeCacheInvalidate(keys: string[]): Promise<void> {
 }
 
 /**
- * Invalidate cache based on context
+ * Invalidates cache based on context and entity configuration
+ *
+ * @param {CacheInvalidationContext} context - Cache invalidation context
+ * @returns {Promise<void>}
+ *
+ * @description
+ * Intelligently invalidates cache keys based on entity configuration and context.
+ * Generates all relevant cache keys (by ID, status, customer, etc.) and invalidates them.
+ * Handles errors gracefully and logs invalidation details.
+ *
+ * @example
+ * ```typescript
+ * await invalidateCache({
+ *   entity: 'orders',
+ *   keys: createCacheKeys('orders'),
+ *   context: {
+ *     id: 123,
+ *     status: 'pending',
+ *     customerId: '01012345678'
+ *   }
+ * });
+ * ```
  */
 export async function invalidateCache(
   context: CacheInvalidationContext

@@ -91,7 +91,26 @@ export interface CalculateFeeResult {
 
 export class PaymentService {
   /**
-   * Calculate payment fee
+   * Calculates payment fee for a given amount and provider
+   *
+   * @description
+   * Calculates the payment processing fee based on the amount and payment provider.
+   * Uses the unified payment service to determine fees.
+   *
+   * @param {CalculateFeeInput} input - Input containing amount and provider code
+   * @returns {Promise<CalculateFeeResult>} Fee calculation result with amount, fee, total, and net amount
+   * @throws {TRPCError} If amount is invalid or provider not found
+   *
+   * @example
+   * ```typescript
+   * const fee = await PaymentService.calculateFee({
+   *   amount: 1000,
+   *   providerCode: 'instapay'
+   * });
+   * // Returns: { amount: 1000, fee: 15, total: 1015, netAmount: 985 }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async calculateFee(input: CalculateFeeInput): Promise<CalculateFeeResult> {
     validatePositiveNumber(input.amount, 'المبلغ');
@@ -121,7 +140,40 @@ export class PaymentService {
   }
 
   /**
-   * Create payment
+   * Creates a payment transaction
+   *
+   * @description
+   * Creates a new payment transaction using the unified payment service.
+   * Includes Bio-Module fraud detection (Arachnid) and payment lifecycle tracking.
+   * Invalidates payment cache after creation.
+   *
+   * @param {CreatePaymentInput} input - Payment creation input
+   * @returns {Promise<CreatePaymentResult>} Payment creation result with transaction details
+   * @throws {TRPCError} If validation fails, payment service fails, or creation fails
+   *
+   * @example
+   * ```typescript
+   * const payment = await PaymentService.createPayment({
+   *   orderId: 123,
+   *   orderNumber: 'ORD-001',
+   *   amount: 1000,
+   *   providerCode: 'instapay',
+   *   customer: {
+   *     name: 'أحمد محمد',
+   *     phone: '01012345678',
+   *     email: 'ahmed@example.com'
+   *   }
+   * });
+   * // Returns: { success: true, transactionId: 456, transactionNumber: 'TXN-...', ... }
+   * ```
+   *
+   * @security
+   * - Input validation (phone format, amounts)
+   * - Bio-Module fraud detection (Arachnid)
+   * - Payment lifecycle tracking
+   * - Graceful degradation if Bio-Modules fail
+   *
+   * @since 1.0.0
    */
   static async createPayment(input: CreatePaymentInput): Promise<CreatePaymentResult> {
     // Input validation
@@ -233,7 +285,24 @@ export class PaymentService {
   }
 
   /**
-   * Get payment status
+   * Gets the status of a payment transaction
+   *
+   * @description
+   * Retrieves the current status of a payment transaction by transaction ID or number.
+   *
+   * @param {GetPaymentStatusInput} input - Input containing transactionId or transactionNumber
+   * @returns {Promise<PaymentStatusResult>} Payment status with all transaction details
+   * @throws {TRPCError} If transactionId/transactionNumber not provided or transaction not found
+   *
+   * @example
+   * ```typescript
+   * const status = await PaymentService.getPaymentStatus({
+   *   transactionId: 456
+   * });
+   * // Returns: { transactionNumber: 'TXN-...', status: 'completed', amount: 1000, ... }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async getPaymentStatus(input: GetPaymentStatusInput): Promise<PaymentStatusResult> {
     if (!input.transactionId && !input.transactionNumber) {
@@ -276,7 +345,37 @@ export class PaymentService {
   }
 
   /**
-   * Handle payment webhook
+   * Handles a payment webhook from a payment provider
+   *
+   * @description
+   * Processes incoming webhooks from payment providers (InstaPay, PayMob, etc.).
+   * Validates webhook signature and updates payment status accordingly.
+   * Tracks payment lifecycle using Bio-Modules.
+   *
+   * @param {string} provider - Payment provider code (e.g., 'instapay', 'paymob')
+   * @param {string} eventType - Webhook event type (e.g., 'payment.completed', 'payment.failed')
+   * @param {Record<string, unknown>} payload - Webhook payload data
+   * @param {string} [signature] - Optional webhook signature for validation
+   * @returns {Promise<{success: boolean}>} Webhook processing result
+   * @throws {TRPCError} If webhook processing fails
+   *
+   * @example
+   * ```typescript
+   * const result = await PaymentService.handleWebhook(
+   *   'instapay',
+   *   'payment.completed',
+   *   { transactionId: 456, status: 'completed' },
+   *   'signature-hash'
+   * );
+   * // Returns: { success: true }
+   * ```
+   *
+   * @security
+   * - Webhook signature validation
+   * - Secure payload processing
+   * - Bio-Module lifecycle tracking
+   *
+   * @since 1.0.0
    */
   static async handleWebhook(
     provider: string,
@@ -335,7 +434,32 @@ export class PaymentService {
   }
 
   /**
-   * Process refund
+   * Processes a refund for a completed payment transaction
+   *
+   * @description
+   * Processes a refund for a completed payment transaction. Validates transaction
+   * status and uses the unified payment service to process the refund.
+   * Tracks refund lifecycle using Bio-Modules.
+   *
+   * @param {number} transactionId - The ID of the transaction to refund
+   * @param {number} [amount] - Optional partial refund amount (full refund if not provided)
+   * @param {string} reason - Reason for the refund
+   * @param {number} requestedBy - The ID of the user requesting the refund
+   * @returns {Promise<{success: boolean; refundId?: number; message: string}>} Refund processing result
+   * @throws {TRPCError} If transaction not found, transaction not refundable, or refund fails
+   *
+   * @example
+   * ```typescript
+   * const result = await PaymentService.processRefund(
+   *   456,
+   *   500, // Partial refund
+   *   'Customer requested refund',
+   *   1
+   * );
+   * // Returns: { success: true, refundId: 789, message: 'تم معالجة الاسترداد بنجاح' }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async processRefund(
     transactionId: number,

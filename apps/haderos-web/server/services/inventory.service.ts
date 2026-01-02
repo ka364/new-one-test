@@ -115,7 +115,36 @@ export interface DelegateAuthorityResult {
 
 export class InventoryService {
   /**
-   * Distribute resources (Bio-Module: Mycelium)
+   * Distributes resources for an order using Mycelium Bio-Module
+   *
+   * @description
+   * Intelligently distributes inventory resources across locations for an order
+   * using the Mycelium Bio-Module. Uses caching for performance optimization.
+   * Falls back gracefully if Bio-Module fails.
+   *
+   * @param {DistributeResourcesInput} input - Input containing orderId, required items, and delivery location
+   * @returns {Promise<DistributeResourcesResult>} Distribution result with allocated resources and alternatives
+   * @throws {TRPCError} If validation fails or distribution fails
+   *
+   * @example
+   * ```typescript
+   * const result = await InventoryService.distributeResources({
+   *   orderId: 123,
+   *   requiredItems: [
+   *     { productId: 1, quantity: 2 },
+   *     { productId: 2, quantity: 1 }
+   *   ],
+   *   deliveryLocation: 'القاهرة'
+   * });
+   * // Returns: { success: true, allocatedResources: [...], alternativeOptions: [...] }
+   * ```
+   *
+   * @performance
+   * - Cache TTL: 3 minutes
+   * - Graceful fallback on Bio-Module failure
+   * - Cache invalidation on resource allocation
+   *
+   * @since 1.0.0
    */
   static async distributeResources(input: DistributeResourcesInput): Promise<DistributeResourcesResult> {
     // Input validation using utilities
@@ -177,7 +206,33 @@ export class InventoryService {
   }
 
   /**
-   * Check inventory availability (Bio-Module: Mycelium)
+   * Checks inventory availability for items using Mycelium Bio-Module
+   *
+   * @description
+   * Checks the availability of inventory items across all locations using
+   * the Mycelium Bio-Module. Uses caching for performance optimization.
+   * Falls back gracefully if Bio-Module fails.
+   *
+   * @param {CheckAvailabilityInput} input - Input containing array of items to check
+   * @returns {Promise<CheckAvailabilityResult>} Availability result with available/missing items and recommendations
+   * @throws {TRPCError} If validation fails or check fails
+   *
+   * @example
+   * ```typescript
+   * const result = await InventoryService.checkAvailability({
+   *   items: [
+   *     { productId: 1, quantity: 2 },
+   *     { productId: 2, quantity: 1 }
+   *   ]
+   * });
+   * // Returns: { available: true, availableItems: [...], missingItems: [], recommendations: [...] }
+   * ```
+   *
+   * @performance
+   * - Cache TTL: 5 minutes
+   * - Graceful fallback on Bio-Module failure
+   *
+   * @since 1.0.0
    */
   static async checkAvailability(input: CheckAvailabilityInput): Promise<CheckAvailabilityResult> {
     // Input validation using utilities
@@ -233,7 +288,28 @@ export class InventoryService {
   }
 
   /**
-   * Request replenishment (Bio-Module: Mycelium)
+   * Requests inventory replenishment using Mycelium Bio-Module
+   *
+   * @description
+   * Requests replenishment of inventory for a product with specified urgency level.
+   * Uses the Mycelium Bio-Module to find suppliers and estimate delivery times.
+   * Falls back gracefully if Bio-Module fails.
+   *
+   * @param {RequestReplenishmentInput} input - Input containing productId, quantity, and urgency
+   * @returns {Promise<RequestReplenishmentResult>} Replenishment result with success status and supplier recommendations
+   * @throws {TRPCError} If validation fails or request fails
+   *
+   * @example
+   * ```typescript
+   * const result = await InventoryService.requestReplenishment({
+   *   productId: 1,
+   *   quantity: 100,
+   *   urgency: 'high'
+   * });
+   * // Returns: { success: true, estimatedDelivery: Date, supplierRecommendations: [...] }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async requestReplenishment(input: RequestReplenishmentInput): Promise<RequestReplenishmentResult> {
     validatePositiveNumber(input.productId, 'معرّف المنتج');
@@ -287,7 +363,28 @@ export class InventoryService {
   }
 
   /**
-   * Make distributed decision (Bio-Module: Cephalopod)
+   * Makes a distributed decision using Cephalopod Bio-Module
+   *
+   * @description
+   * Makes intelligent decisions (order approval, pricing override, inventory transfer, etc.)
+   * using the Cephalopod Bio-Module for distributed decision-making.
+   * Falls back gracefully if Bio-Module fails.
+   *
+   * @param {MakeDecisionInput} input - Input containing decision type, context, and required approvers
+   * @returns {Promise<MakeDecisionResult>} Decision result with decision, confidence, and required approvals
+   * @throws {TRPCError} If validation fails or decision fails
+   *
+   * @example
+   * ```typescript
+   * const result = await InventoryService.makeDecision({
+   *   decisionType: 'order_approval',
+   *   context: { orderId: 123, amount: 1000 },
+   *   requiredApprovers: ['manager', 'finance']
+   * });
+   * // Returns: { decision: 'approved', confidence: 0.9, requiredApprovals: [...] }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async makeDecision(input: MakeDecisionInput): Promise<MakeDecisionResult> {
     if (!input.decisionType) {
@@ -340,7 +437,29 @@ export class InventoryService {
   }
 
   /**
-   * Delegate authority (Bio-Module: Cephalopod)
+   * Delegates authority between entities using Cephalopod Bio-Module
+   *
+   * @description
+   * Delegates specific authority (approve orders, modify prices, manage inventory, etc.)
+   * from one entity to another for a specified duration using the Cephalopod Bio-Module.
+   * Falls back gracefully if Bio-Module fails.
+   *
+   * @param {DelegateAuthorityInput} input - Input containing from/to entities, authority type, and duration
+   * @returns {Promise<DelegateAuthorityResult>} Delegation result with delegation ID and expiry date
+   * @throws {TRPCError} If validation fails or delegation fails
+   *
+   * @example
+   * ```typescript
+   * const result = await InventoryService.delegateAuthority({
+   *   fromEntity: 'manager',
+   *   toEntity: 'assistant',
+   *   authority: 'approve_orders',
+   *   duration: 24 // hours
+   * });
+   * // Returns: { success: true, delegationId: 'DEL-...', expiresAt: Date }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async delegateAuthority(input: DelegateAuthorityInput): Promise<DelegateAuthorityResult> {
     validateNonEmptyString(input.fromEntity, 'الكيان المصدر');
@@ -392,7 +511,22 @@ export class InventoryService {
   }
 
   /**
-   * Get resource insights (Bio-Modules)
+   * Gets resource insights from Bio-Modules
+   *
+   * @description
+   * Retrieves overall health and status insights from all Bio-Modules
+   * related to inventory and resource management.
+   * Falls back gracefully if Bio-Modules fail.
+   *
+   * @returns {Promise<{overallHealth: number; moduleStatus: Record<string, unknown>; recommendations: string[]}>} Resource insights
+   *
+   * @example
+   * ```typescript
+   * const insights = await InventoryService.getInsights();
+   * // Returns: { overallHealth: 0.9, moduleStatus: {...}, recommendations: [...] }
+   * ```
+   *
+   * @since 1.0.0
    */
   static async getInsights(): Promise<{
     overallHealth: number;

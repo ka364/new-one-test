@@ -8,66 +8,61 @@ import { applyDynamicPricing } from '../bio-modules/orders-bio-integration.js';
 import { schemas } from '../_core/validation';
 import { cache } from '../_core/cache';
 import { logger } from '../_core/logger';
+import { withErrorHandling, isDuplicateKeyError } from '../_core/error-handler';
+import { withPerformanceTracking } from '../_core/async-performance-wrapper';
+import { invalidateProductCache } from '../_core/cache-manager';
 
 export const productsRouter = router({
   // Get all products
   getAllProducts: publicProcedure.query(async () => {
-    const startTime = Date.now();
-    try {
-      logger.debug('Fetching all products');
+    return withErrorHandling(
+      'products.getAllProducts',
+      async () => {
+        logger.debug('Fetching all products');
 
-      // Try cache first, with fallback to DB
-      let allProducts;
-      try {
-        allProducts = await cache.getOrSet(
-          'products:all',
-          async () => {
-            logger.debug('Cache miss - fetching all products from DB');
-            const db = await requireDb();
-            const productsList = await db
-              .select()
-              .from(products)
-              .where(eq(products.isActive, 1))
-              .orderBy(desc(products.createdAt));
-            return productsList;
-          },
-          600 // 10 minutes TTL (products change less frequently)
-        );
-      } catch (cacheError: unknown) {
-        logger.warn('Cache failed, fetching from DB', { error: cacheError instanceof Error ? cacheError.message : String(cacheError) });
-        const db = await requireDb();
-        allProducts = await db
-          .select()
-          .from(products)
-          .where(eq(products.isActive, 1))
-          .orderBy(desc(products.createdAt));
+        // Try cache first, with fallback to DB
+        let allProducts;
+        try {
+          allProducts = await cache.getOrSet(
+            'products:all',
+            async () => {
+              logger.debug('Cache miss - fetching all products from DB');
+              const db = await requireDb();
+              const productsList = await db
+                .select()
+                .from(products)
+                .where(eq(products.isActive, 1))
+                .orderBy(desc(products.createdAt));
+              return productsList;
+            },
+            600 // 10 minutes TTL (products change less frequently)
+          );
+        } catch (cacheError: unknown) {
+          logger.warn('Cache failed, fetching from DB', { error: cacheError instanceof Error ? cacheError.message : String(cacheError) });
+          const db = await requireDb();
+          allProducts = await db
+            .select()
+            .from(products)
+            .where(eq(products.isActive, 1))
+            .orderBy(desc(products.createdAt));
+        }
+
+        logger.info('Products fetched successfully', {
+          count: allProducts.length,
+        });
+
+        return allProducts;
       }
-
-      const duration = Date.now() - startTime;
-      logger.info('Products fetched successfully', {
-        count: allProducts.length,
-        duration: `${duration}ms`,
-      });
-
-      return allProducts;
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
-      logger.error('Failed to fetch products', error instanceof Error ? error : new Error(String(error)), { duration: `${duration}ms` });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'فشل في جلب المنتجات. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // Get product by ID
   getProductById: publicProcedure
     .input(z.object({ productId: z.number().positive() }))
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'products.getProductById',
+        async () => {
         // Input validation
         if (!input.productId || input.productId <= 0) {
           throw new TRPCError({
@@ -126,37 +121,16 @@ export const productsRouter = router({
           product = productFromDb;
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Product fetched successfully', {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        return product;
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Product fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
+          logger.info('Product fetched successfully', {
             productId: input.productId,
-            duration: `${duration}ms`,
           });
-          throw error;
-        }
 
-        logger.error('Product fetch failed (Unexpected Error)', error, {
+          return product;
+        },
+        {
           productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'فشل في جلب المنتج. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+        }
+      );
     }),
 
   // Get dynamic price for a product (with Chameleon integration)
@@ -175,8 +149,17 @@ export const productsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'products.getDynamicPrice',
+          details: {
+            productId: input.productId,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'products.getDynamicPrice',
+            async () => {
         // Input validation
         if (!input.productId || input.productId <= 0) {
           throw new TRPCError({
@@ -233,56 +216,48 @@ export const productsRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Dynamic price calculated successfully', {
-          productId: input.productId,
-          basePrice,
-          adjustedPrice: pricingResult.adjustedPrice,
-          duration: `${duration}ms`,
-        });
+              logger.info('Dynamic price calculated successfully', {
+                productId: input.productId,
+                basePrice,
+                adjustedPrice: pricingResult.adjustedPrice,
+              });
 
-        return {
-          productId: product.id,
-          modelCode: product.modelCode,
-          basePrice,
-          adjustedPrice: pricingResult.adjustedPrice,
-          discount: pricingResult.discount,
-          discountPercentage: Math.round((pricingResult.discount / basePrice) * 100),
-          reason: pricingResult.reason,
-          savings: basePrice - pricingResult.adjustedPrice,
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Dynamic price calculation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            productId: input.productId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return {
+                productId: product.id,
+                modelCode: product.modelCode,
+                basePrice,
+                adjustedPrice: pricingResult.adjustedPrice,
+                discount: pricingResult.discount,
+                discountPercentage: Math.round((pricingResult.discount / basePrice) * 100),
+                reason: pricingResult.reason,
+                savings: basePrice - pricingResult.adjustedPrice,
+              };
+            },
+            {
+              productId: input.productId,
+            }
+          );
         }
-
-        logger.error('Dynamic price calculation failed (Unexpected Error)', error, {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'فشل في حساب السعر الديناميكي. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Create new product (protected - admin only)
   createProduct: protectedProcedure
     .input(schemas.createProduct)
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'products.createProduct',
+          details: {
+            sku: input.sku,
+            price: input.price,
+            createdBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'products.createProduct',
+            async () => {
         // Input validation
         if (!input.name || input.name.trim().length === 0) {
           throw new TRPCError({
@@ -327,39 +302,34 @@ export const productsRouter = router({
           });
         }
 
-        // Insert product
-        let insertedProduct;
-        try {
-          const result = await db
-            .insert(products)
-            .values({
-              modelCode: input.sku,
-              supplierPrice: input.costPrice?.toString() || input.price.toString(),
-              sellingPrice: input.price.toString(),
-              category: input.category || null,
-              isActive: 1,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            })
-            .returning();
+              // Insert product
+              let insertedProduct;
+              try {
+                const result = await db
+                  .insert(products)
+                  .values({
+                    modelCode: input.sku,
+                    supplierPrice: input.costPrice?.toString() || input.price.toString(),
+                    sellingPrice: input.price.toString(),
+                    category: input.category || null,
+                    isActive: 1,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  })
+                  .returning();
 
-          insertedProduct = result[0];
-        } catch (dbError: unknown) {
-        logger.error('Database insert failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { sku: input.sku });
-
-          if ((dbError instanceof Error && 'code' in dbError && dbError.code === '23505') || (dbError instanceof Error && dbError.message?.includes('duplicate'))) {
-            throw new TRPCError({
-              code: 'CONFLICT',
-              message: 'رمز المنتج (SKU) موجود مسبقاً',
-            });
-          }
-
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في إنشاء المنتج. يرجى المحاولة مرة أخرى',
-            cause: dbError,
-          });
-        }
+                insertedProduct = result[0];
+              } catch (dbError: unknown) {
+                // Check for duplicate using utility
+                if (isDuplicateKeyError(dbError)) {
+                  throw new TRPCError({
+                    code: 'CONFLICT',
+                    message: 'رمز المنتج (SKU) موجود مسبقاً',
+                  });
+                }
+                // Re-throw to be handled by withErrorHandling
+                throw dbError;
+              }
 
         if (!insertedProduct) {
           throw new TRPCError({
@@ -368,59 +338,48 @@ export const productsRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Product created successfully', {
-          productId: insertedProduct.id,
-          sku: input.sku,
-          duration: `${duration}ms`,
-        });
+              logger.info('Product created successfully', {
+                productId: insertedProduct.id,
+                sku: input.sku,
+              });
 
-        // Invalidate cache - with error handling
-        try {
-          cache.delete('products:all');
-          cache.delete(`products:${insertedProduct.id}`);
-        } catch (cacheError: any) {
-          logger.warn('Cache invalidation failed', { error: cacheError.message });
-          // Continue even if cache invalidation fails
+              // Invalidate cache using utility
+              await invalidateProductCache({
+                productId: insertedProduct.id,
+              });
+
+              return {
+                success: true,
+                productId: insertedProduct.id,
+                message: 'تم إنشاء المنتج بنجاح',
+              };
+            },
+            {
+              sku: input.sku,
+              price: input.price,
+              createdBy: ctx.user?.id,
+            }
+          );
         }
-
-        return {
-          success: true,
-          productId: insertedProduct.id,
-          message: 'تم إنشاء المنتج بنجاح',
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Product creation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            sku: input.sku,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('Product creation failed (Unexpected Error)', error, {
-          sku: input.sku,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء إنشاء المنتج. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Update product (protected - admin only)
   updateProduct: protectedProcedure
     .input(schemas.updateProduct.extend({ productId: z.number().positive() }))
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'products.updateProduct',
+          details: {
+            productId: input.productId,
+            updatedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'products.updateProduct',
+            async () => {
         // Input validation
         if (!input.productId || input.productId <= 0) {
           throw new TRPCError({
@@ -489,77 +448,60 @@ export const productsRouter = router({
         if (input.category !== undefined) updateData.category = input.category;
         if (input.isActive !== undefined) updateData.isActive = input.isActive ? 1 : 0;
 
-        // Update product
-        try {
-          await db.update(products).set(updateData).where(eq(products.id, input.productId));
-        } catch (dbError: unknown) {
-          logger.error('Database update failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { productId: input.productId });
+              // Update product
+              try {
+                await db.update(products).set(updateData).where(eq(products.id, input.productId));
+              } catch (dbError: unknown) {
+                // Check for duplicate using utility
+                if (isDuplicateKeyError(dbError)) {
+                  throw new TRPCError({
+                    code: 'CONFLICT',
+                    message: 'رمز المنتج (SKU) موجود مسبقاً',
+                  });
+                }
+                // Re-throw to be handled by withErrorHandling
+                throw dbError;
+              }
 
-          if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
-            throw new TRPCError({
-              code: 'CONFLICT',
-              message: 'رمز المنتج (SKU) موجود مسبقاً',
-            });
-          }
+              logger.info('Product updated successfully', {
+                productId: input.productId,
+              });
 
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث المنتج. يرجى المحاولة مرة أخرى',
-            cause: dbError,
-          });
+              // Invalidate cache using utility
+              await invalidateProductCache({
+                productId: input.productId,
+              });
+
+              return {
+                success: true,
+                message: 'تم تحديث المنتج بنجاح',
+              };
+            },
+            {
+              productId: input.productId,
+              updatedBy: ctx.user?.id,
+            }
+          );
         }
-
-        const duration = Date.now() - startTime;
-        logger.info('Product updated successfully', {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        // Invalidate cache - with error handling
-        try {
-          cache.delete('products:all');
-          cache.delete(`products:${input.productId}`);
-        } catch (cacheError: any) {
-          logger.warn('Cache invalidation failed', { error: cacheError.message });
-          // Continue even if cache invalidation fails
-        }
-
-        return {
-          success: true,
-          message: 'تم تحديث المنتج بنجاح',
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Product update failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            productId: input.productId,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('Product update failed (Unexpected Error)', error, {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث المنتج. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Delete product (soft delete - protected - admin only)
   deleteProduct: protectedProcedure
     .input(z.object({ productId: z.number().positive() }))
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'products.deleteProduct',
+          details: {
+            productId: input.productId,
+            deletedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'products.deleteProduct',
+            async () => {
         // Input validation
         if (!input.productId || input.productId <= 0) {
           throw new TRPCError({
@@ -588,67 +530,35 @@ export const productsRouter = router({
           });
         }
 
-        // Soft delete (set isActive to 0)
-        try {
-          await db
-            .update(products)
-            .set({
-              isActive: 0,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(products.id, input.productId));
-        } catch (dbError: unknown) {
-          logger.error('Database update failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { productId: input.productId });
+              // Soft delete (set isActive to 0)
+              await db
+                .update(products)
+                .set({
+                  isActive: 0,
+                  updatedAt: new Date().toISOString(),
+                })
+                .where(eq(products.id, input.productId));
 
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في حذف المنتج. يرجى المحاولة مرة أخرى',
-            cause: dbError,
-          });
+              logger.info('Product deleted successfully', {
+                productId: input.productId,
+              });
+
+              // Invalidate cache using utility
+              await invalidateProductCache({
+                productId: input.productId,
+              });
+
+              return {
+                success: true,
+                message: 'تم حذف المنتج بنجاح',
+              };
+            },
+            {
+              productId: input.productId,
+              deletedBy: ctx.user?.id,
+            }
+          );
         }
-
-        const duration = Date.now() - startTime;
-        logger.info('Product deleted successfully', {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        // Invalidate cache - with error handling
-        try {
-          cache.delete('products:all');
-          cache.delete(`products:${input.productId}`);
-        } catch (cacheError: any) {
-          logger.warn('Cache invalidation failed', { error: cacheError.message });
-          // Continue even if cache invalidation fails
-        }
-
-        return {
-          success: true,
-          message: 'تم حذف المنتج بنجاح',
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Product deletion failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            productId: input.productId,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('Product deletion failed (Unexpected Error)', error, {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء حذف المنتج. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 });

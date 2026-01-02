@@ -10,9 +10,14 @@ import {
   getResourceInsights,
 } from '../bio-modules/inventory-bio-integration.js';
 import { logger } from '../_core/logger';
+import { cache } from '../_core/cache';
 import { withErrorHandling } from '../_core/error-handler';
 import { withPerformanceTracking } from '../_core/async-performance-wrapper';
 import { invalidateInventoryCache } from '../_core/cache-manager';
+import {
+  validateNonEmptyArray,
+  validatePositiveNumber,
+} from '../_core/validation-utils';
 
 export const inventoryRouter = router({
   // Distribute resources (Bio-Module: Mycelium)
@@ -45,56 +50,53 @@ export const inventoryRouter = router({
           return withErrorHandling(
             'inventory.distributeResources',
             async () => {
-        // Input validation
-        if (!input.orderId || input.orderId <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'معرّف الطلب غير صحيح',
-          });
-        }
+              // Input validation using utilities
+              validatePositiveNumber(input.orderId, 'معرّف الطلب');
+              validateNonEmptyArray(input.requiredItems, 'العناصر المطلوبة');
+              if (!input.deliveryLocation || input.deliveryLocation.trim().length === 0) {
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'موقع التوصيل مطلوب',
+                });
+              }
 
-        if (!input.requiredItems || input.requiredItems.length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'يجب تحديد عنصر واحد على الأقل',
-          });
-        }
+              logger.info('Distributing resources', {
+                orderId: input.orderId,
+                itemCount: input.requiredItems.length,
+                deliveryLocation: input.deliveryLocation,
+              });
 
-        if (!input.deliveryLocation || input.deliveryLocation.trim().length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'موقع التوصيل مطلوب',
-          });
-        }
+              // Create cache key based on order and items
+              const cacheKey = `inventory:distribution:${input.orderId}:${input.requiredItems.map((item) => `${item.productId}-${item.quantity}`).join(',')}`;
 
-        logger.info('Distributing resources', {
-          orderId: input.orderId,
-          itemCount: input.requiredItems.length,
-          deliveryLocation: input.deliveryLocation,
-        });
+              // Try cache first, with fallback to Bio-Module
+              const result = await cache.getOrSet(
+                cacheKey,
+                async () => {
+                  // Call Bio-Module (Mycelium) - with error handling
+                  try {
+                    return await distributeResources(
+                      input.orderId,
+                      input.requiredItems,
+                      input.deliveryLocation
+                    );
+                  } catch (bioError: unknown) {
+                    logger.warn('Bio-Module distribution failed, using fallback', {
+                      error: bioError instanceof Error ? bioError.message : String(bioError),
+                      orderId: input.orderId,
+                    });
 
-        // Call Bio-Module (Mycelium) - with error handling
-        let result;
-        try {
-          result = await distributeResources(
-            input.orderId,
-            input.requiredItems,
-            input.deliveryLocation
-          );
-        } catch (bioError: unknown) {
-          logger.warn('Bio-Module distribution failed, using fallback', {
-            error: bioError instanceof Error ? bioError.message : String(bioError),
-            orderId: input.orderId,
-          });
-
-          // Fallback response
-          result = {
-            success: false,
-            message: 'فشل في توزيع الموارد. يرجى المحاولة مرة أخرى',
-            allocatedResources: [],
-            alternativeOptions: ['استخدام مستودع افتراضي'],
-          };
-        }
+                    // Fallback response
+                    return {
+                      success: false,
+                      message: 'فشل في توزيع الموارد. يرجى المحاولة مرة أخرى',
+                      allocatedResources: [],
+                      alternativeOptions: ['استخدام مستودع افتراضي'],
+                    };
+                  }
+                },
+                180 // 3 minutes TTL (distribution results change when inventory changes)
+              );
 
               logger.info('Resource distribution completed', {
                 orderId: input.orderId,
@@ -145,55 +147,49 @@ export const inventoryRouter = router({
           return withErrorHandling(
             'inventory.checkAvailability',
             async () => {
-        // Input validation
-        if (!input.items || input.items.length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'يجب تحديد عنصر واحد على الأقل',
-          });
-        }
+              // Input validation using utilities
+              validateNonEmptyArray(input.items, 'العناصر');
 
-        // Validate each item
-        for (const item of input.items) {
-          if (!item.productId || item.productId <= 0) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'معرّف المنتج غير صحيح',
-            });
-          }
-          if (!item.quantity || item.quantity <= 0) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'الكمية يجب أن تكون أكبر من صفر',
-            });
-          }
-        }
+              // Validate each item
+              for (const item of input.items) {
+                validatePositiveNumber(item.productId, 'معرّف المنتج');
+                validatePositiveNumber(item.quantity, 'الكمية');
+              }
 
-        logger.debug('Checking inventory availability', {
-          itemCount: input.items.length,
-        });
+              logger.debug('Checking inventory availability', {
+                itemCount: input.items.length,
+              });
 
-        // Call Bio-Module (Mycelium) - with error handling
-        let result;
-        try {
-          result = await checkInventoryAvailability(input.items);
-        } catch (bioError: unknown) {
-          logger.warn('Bio-Module availability check failed, using fallback', {
-            error: bioError instanceof Error ? bioError.message : String(bioError),
-          });
+              // Create cache key based on items
+              const cacheKey = `inventory:availability:${input.items.map((item) => `${item.productId}-${item.quantity}`).join(',')}`;
 
-          // Fallback response
-          result = {
-            available: false,
-            availableItems: [],
-            missingItems: input.items.map((item) => ({
-              productId: item.productId,
-              requiredQuantity: item.quantity,
-              shortfall: item.quantity,
-            })),
-            recommendations: ['التحقق من المخزون يدوياً'],
-          };
-        }
+              // Try cache first, with fallback to Bio-Module
+              const result = await cache.getOrSet(
+                cacheKey,
+                async () => {
+                  // Call Bio-Module (Mycelium) - with error handling
+                  try {
+                    return await checkInventoryAvailability(input.items);
+                  } catch (bioError: unknown) {
+                    logger.warn('Bio-Module availability check failed, using fallback', {
+                      error: bioError instanceof Error ? bioError.message : String(bioError),
+                    });
+
+                    // Fallback response
+                    return {
+                      available: false,
+                      availableItems: [],
+                      missingItems: input.items.map((item) => ({
+                        productId: item.productId,
+                        requiredQuantity: item.quantity,
+                        shortfall: item.quantity,
+                      })),
+                      recommendations: ['التحقق من المخزون يدوياً'],
+                    };
+                  }
+                },
+                300 // 5 minutes TTL (inventory availability changes frequently)
+              );
 
               logger.info('Inventory availability check completed', {
                 available: result.available,

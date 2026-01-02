@@ -67,9 +67,9 @@ export const inventoryRouter = router({
             input.requiredItems,
             input.deliveryLocation
           );
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module distribution failed, using fallback', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
             orderId: input.orderId,
           });
 
@@ -103,7 +103,7 @@ export const inventoryRouter = router({
           throw error;
         }
 
-        logger.error('Resource distribution failed (Unexpected Error)', error, {
+        logger.error('Resource distribution failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
           orderId: input.orderId,
           duration: `${duration}ms`,
         });
@@ -203,7 +203,7 @@ export const inventoryRouter = router({
           throw error;
         }
 
-        logger.error('Inventory availability check failed (Unexpected Error)', error, {
+        logger.error('Inventory availability check failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
           duration: `${duration}ms`,
         });
 
@@ -296,7 +296,7 @@ export const inventoryRouter = router({
           throw error;
         }
 
-        logger.error('Replenishment request failed (Unexpected Error)', error, {
+        logger.error('Replenishment request failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error))), {
           productId: input.productId,
           duration: `${duration}ms`,
         });
@@ -390,7 +390,7 @@ export const inventoryRouter = router({
           throw error;
         }
 
-        logger.error('Distributed decision failed (Unexpected Error)', error, {
+        logger.error('Distributed decision failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
           decisionType: input.decisionType,
           duration: `${duration}ms`,
         });
@@ -500,7 +500,7 @@ export const inventoryRouter = router({
           throw error;
         }
 
-        logger.error('Authority delegation failed (Unexpected Error)', error, {
+        logger.error('Authority delegation failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
           duration: `${duration}ms`,
         });
 
@@ -541,10 +541,10 @@ export const inventoryRouter = router({
       });
 
       return insights;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
 
-      logger.error('Resource insights fetch failed', error, {
+      logger.error('Resource insights fetch failed', error instanceof Error ? error : new Error(String(error)), {
         duration: `${duration}ms`,
       });
 

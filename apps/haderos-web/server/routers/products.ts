@@ -344,8 +344,8 @@ export const productsRouter = router({
             .returning();
 
           insertedProduct = result[0];
-        } catch (dbError: any) {
-          logger.error('Database insert failed', dbError, { sku: input.sku });
+      } catch (dbError: unknown) {
+        logger.error('Database insert failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { sku: input.sku });
 
           if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
             throw new TRPCError({

@@ -10,6 +10,9 @@ import {
   getResourceInsights,
 } from '../bio-modules/inventory-bio-integration.js';
 import { logger } from '../_core/logger';
+import { withErrorHandling } from '../_core/error-handler';
+import { withPerformanceTracking } from '../_core/async-performance-wrapper';
+import { invalidateInventoryCache } from '../_core/cache-manager';
 
 export const inventoryRouter = router({
   // Distribute resources (Bio-Module: Mycelium)
@@ -29,8 +32,19 @@ export const inventoryRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'inventory.distributeResources',
+          details: {
+            orderId: input.orderId,
+            itemCount: input.requiredItems.length,
+            deliveryLocation: input.deliveryLocation,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'inventory.distributeResources',
+            async () => {
         // Input validation
         if (!input.orderId || input.orderId <= 0) {
           throw new TRPCError({
@@ -82,38 +96,27 @@ export const inventoryRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Resource distribution completed', {
-          orderId: input.orderId,
-          success: result.success,
-          duration: `${duration}ms`,
-        });
+              logger.info('Resource distribution completed', {
+                orderId: input.orderId,
+                success: result.success,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache if resources were allocated
+              if (result.success && result.allocatedResources?.length > 0) {
+                await invalidateInventoryCache({
+                  productId: input.requiredItems[0]?.productId,
+                });
+              }
 
-        if (error instanceof TRPCError) {
-          logger.error('Resource distribution failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              orderId: input.orderId,
+              itemCount: input.requiredItems.length,
+            }
+          );
         }
-
-        logger.error('Resource distribution failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء توزيع الموارد. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Check inventory availability (Bio-Module: Mycelium)
@@ -131,8 +134,17 @@ export const inventoryRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'inventory.checkAvailability',
+          details: {
+            itemCount: input.items.length,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'inventory.checkAvailability',
+            async () => {
         // Input validation
         if (!input.items || input.items.length === 0) {
           throw new TRPCError({
@@ -183,36 +195,19 @@ export const inventoryRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Inventory availability check completed', {
-          available: result.available,
-          itemCount: input.items.length,
-          duration: `${duration}ms`,
-        });
+              logger.info('Inventory availability check completed', {
+                available: result.available,
+                itemCount: input.items.length,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Inventory availability check failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              itemCount: input.items.length,
+            }
+          );
         }
-
-        logger.error('Inventory availability check failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء التحقق من توفر المخزون. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Request replenishment (Bio-Module: Mycelium)
@@ -225,8 +220,20 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'inventory.requestReplenishment',
+          details: {
+            productId: input.productId,
+            quantity: input.quantity,
+            urgency: input.urgency,
+            requestedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'inventory.requestReplenishment',
+            async () => {
         // Input validation
         if (!input.productId || input.productId <= 0) {
           throw new TRPCError({
@@ -275,38 +282,28 @@ export const inventoryRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Replenishment request completed', {
-          productId: input.productId,
-          success: result.success,
-          duration: `${duration}ms`,
-        });
+              logger.info('Replenishment request completed', {
+                productId: input.productId,
+                success: result.success,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache if replenishment was successful
+              if (result.success) {
+                await invalidateInventoryCache({
+                  productId: input.productId,
+                });
+              }
 
-        if (error instanceof TRPCError) {
-          logger.error('Replenishment request failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            productId: input.productId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              productId: input.productId,
+              quantity: input.quantity,
+              requestedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Replenishment request failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error))), {
-          productId: input.productId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء طلب إعادة التزويد. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Make distributed decision (Bio-Module: Cephalopod)
@@ -324,8 +321,18 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'inventory.makeDecision',
+          details: {
+            decisionType: input.decisionType,
+            requestedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'inventory.makeDecision',
+            async () => {
         // Input validation
         if (!input.decisionType) {
           throw new TRPCError({
@@ -369,38 +376,20 @@ export const inventoryRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Distributed decision completed', {
-          decisionType: input.decisionType,
-          decision: result.decision,
-          duration: `${duration}ms`,
-        });
+              logger.info('Distributed decision completed', {
+                decisionType: input.decisionType,
+                decision: result.decision,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Distributed decision failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            decisionType: input.decisionType,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              decisionType: input.decisionType,
+              requestedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Distributed decision failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
-          decisionType: input.decisionType,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء اتخاذ القرار. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Delegate authority (Bio-Module: Cephalopod)
@@ -419,8 +408,20 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'inventory.delegateAuthority',
+          details: {
+            fromEntity: input.fromEntity,
+            toEntity: input.toEntity,
+            authority: input.authority,
+            delegatedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'inventory.delegateAuthority',
+            async () => {
         // Input validation
         if (!input.fromEntity || input.fromEntity.trim().length === 0) {
           throw new TRPCError({
@@ -481,78 +482,51 @@ export const inventoryRouter = router({
           };
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Authority delegation completed', {
-          success: result.success,
-          duration: `${duration}ms`,
-        });
+              logger.info('Authority delegation completed', {
+                success: result.success,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Authority delegation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              fromEntity: input.fromEntity,
+              toEntity: input.toEntity,
+              authority: input.authority,
+              delegatedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Authority delegation failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تفويض الصلاحية. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Get resource insights (Bio-Modules)
   getInsights: publicProcedure.query(async () => {
-    const startTime = Date.now();
-    try {
-      logger.debug('Fetching resource insights');
+    return withErrorHandling(
+      'inventory.getInsights',
+      async () => {
+        logger.debug('Fetching resource insights');
 
-      // Call Bio-Module - with error handling
-      let insights;
-      try {
-        insights = await getResourceInsights();
-      } catch (bioError: any) {
-        logger.warn('Bio-Module insights failed, using fallback', {
-          error: bioError.message,
-        });
+        // Call Bio-Module - with error handling
+        let insights;
+        try {
+          insights = await getResourceInsights();
+        } catch (bioError: unknown) {
+          logger.warn('Bio-Module insights failed, using fallback', {
+            error: bioError instanceof Error ? bioError.message : String(bioError),
+          });
 
-        // Fallback response
-        insights = {
-          overallHealth: 0,
-          moduleStatus: {},
-          recommendations: ['التحقق من حالة Bio-Modules يدوياً'],
-        };
+          // Fallback response
+          insights = {
+            overallHealth: 0,
+            moduleStatus: {},
+            recommendations: ['التحقق من حالة Bio-Modules يدوياً'],
+          };
+        }
+
+        logger.info('Resource insights fetched successfully');
+
+        return insights;
       }
-
-      const duration = Date.now() - startTime;
-      logger.info('Resource insights fetched successfully', {
-        duration: `${duration}ms`,
-      });
-
-      return insights;
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
-
-      logger.error('Resource insights fetch failed', error instanceof Error ? error : new Error(String(error)), {
-        duration: `${duration}ms`,
-      });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء جلب رؤى الموارد. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 });

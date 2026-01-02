@@ -11,7 +11,7 @@ import {
 } from '../bio-modules/orders-bio-integration.js';
 import { schemas } from '../_core/validation';
 import { logger } from '../_core/logger';
-import { withErrorHandling, handleError } from '../_core/error-handler';
+import { withErrorHandling, isDuplicateKeyError } from '../_core/error-handler';
 import { withPerformanceTracking } from '../_core/async-performance-wrapper';
 import { invalidateOrderCache } from '../_core/cache-manager';
 
@@ -69,231 +69,195 @@ export const ordersRouter = router({
         return withErrorHandling(
           'orders.createOrder',
           async () => {
-      // Input validation
-      if (!input.items || input.items.length === 0) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'يجب إضافة عنصر واحد على الأقل للطلب',
-        });
+            // Input validation
+            if (!input.items || input.items.length === 0) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'يجب إضافة عنصر واحد على الأقل للطلب',
+              });
+            }
+
+            // Validate customer phone format (Egyptian format)
+            if (input.customerPhone && !/^01[0-9]{9}$/.test(input.customerPhone)) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'رقم الهاتف غير صحيح. يجب أن يكون رقم مصري (01XXXXXXXXX)',
+              });
+            }
+
+            // Calculate total amount
+            const calculatedTotal = input.items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0
+            );
+
+            // Validate total amount matches
+            if (Math.abs(calculatedTotal - input.totalAmount) > 0.01) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'إجمالي المبلغ غير متطابق مع العناصر',
+              });
+            }
+
+            logger.info('Creating new order', {
+              customerName: input.customerName,
+              itemCount: input.items.length,
+              totalAmount: calculatedTotal,
+            });
+
+            const db = await requireDb();
+
+            // Generate unique order number
+            const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+            // Get user ID (default to 1 if not authenticated)
+            const userId = ctx.user?.id || 1;
+
+            // Prepare batch insert data (instead of loop)
+            const now = new Date().toISOString();
+            const orderValues = input.items.map((item, index) => {
+              // Validate item data
+              if (item.quantity <= 0) {
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: `الكمية يجب أن تكون أكبر من صفر للعنصر ${index + 1}`,
+                });
+              }
+
+              if (item.price <= 0) {
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: `السعر يجب أن يكون أكبر من صفر للعنصر ${index + 1}`,
+                });
+              }
+
+              const itemDescription = [
+                item.size ? `المقاس: ${item.size}` : null,
+                item.color ? `اللون: ${item.color}` : null,
+              ]
+                .filter(Boolean)
+                .join(', ');
+
+              return {
+                orderNumber: `${orderNumber}-${index + 1}`,
+                customerName: input.customerName,
+                customerEmail: input.customerEmail || null,
+                customerPhone: input.customerPhone || null,
+                productName: item.productName,
+                productDescription: itemDescription || null,
+                quantity: item.quantity,
+                unitPrice: item.price.toString(),
+                totalAmount: (item.price * item.quantity).toString(),
+                currency: 'EGP',
+                status: 'pending',
+                paymentStatus: 'pending',
+                shippingAddress: input.shippingAddress,
+                notes: input.notes || null,
+                createdBy: userId,
+                createdAt: now,
+                updatedAt: now,
+              };
+            });
+
+            // Batch insert all orders at once (much faster!)
+            let insertedOrders;
+            try {
+              insertedOrders = await db.insert(orders).values(orderValues).returning();
+            } catch (dbError: unknown) {
+              // Check for duplicate order number using utility
+              if (isDuplicateKeyError(dbError)) {
+                throw new TRPCError({
+                  code: 'CONFLICT',
+                  message: 'رقم الطلب موجود مسبقاً. يرجى المحاولة مرة أخرى',
+                });
+              }
+              // Re-throw to be handled by withErrorHandling
+              throw dbError;
+            }
+
+            // Extract order IDs
+            const orderIds = insertedOrders.map((order) => order.id);
+
+            if (orderIds.length === 0) {
+              throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'فشل في إنشاء الطلب. لم يتم إنشاء أي سجلات',
+              });
+            }
+
+            // Validate order with Arachnid (Bio-Module) - with error handling
+            let validation;
+            try {
+              validation = await validateOrderWithArachnid({
+                orderId: orderIds[0],
+                orderNumber,
+                customerName: input.customerName,
+                customerPhone: input.customerPhone || '',
+                totalAmount: input.totalAmount,
+                items: input.items,
+                shippingAddress: input.shippingAddress || '',
+              });
+            } catch (bioError: unknown) {
+              logger.warn('Bio-Module validation failed, continuing anyway', {
+                error: bioError instanceof Error ? bioError.message : String(bioError),
+                orderId: orderIds[0],
+              });
+              // Continue with default validation if Bio-Module fails
+              validation = {
+                isValid: true,
+                anomalies: [],
+                warnings: ['Bio-Module validation unavailable'],
+                recommendations: [],
+                confidence: 0.8,
+              };
+            }
+
+            // Track order lifecycle - with error handling
+            try {
+              await trackOrderLifecycle(orderIds[0], orderNumber, 'created');
+            } catch (trackError: unknown) {
+              logger.warn('Order lifecycle tracking failed', {
+                error: trackError instanceof Error ? trackError.message : String(trackError),
+                orderId: orderIds[0],
+              });
+              // Continue even if tracking fails
+            }
+
+            logger.info('Order created successfully', {
+              orderId: orderIds[0],
+              orderNumber,
+              orderIds: orderIds,
+              validationWarnings: validation.warnings.length,
+            });
+
+            // Invalidate cache using utility
+            await invalidateOrderCache({
+              orderId: orderIds[0],
+              orderNumber,
+              customerPhone: input.customerPhone,
+              status: 'pending',
+            });
+
+            return {
+              success: true,
+              orderId: orderIds[0], // Primary order ID (for backward compatibility)
+              orderIds: orderIds, // All order IDs (useful for multi-item orders)
+              orderNumber,
+              message: 'تم إنشاء الطلب بنجاح',
+              validation: {
+                isValid: validation.isValid,
+                warnings: validation.warnings,
+                recommendations: validation.recommendations,
+              },
+            };
+          },
+          {
+            customerName: input.customerName,
+            itemCount: input.items?.length || 0,
+          }
+        );
       }
-
-      // Validate customer phone format (Egyptian format)
-      if (input.customerPhone && !/^01[0-9]{9}$/.test(input.customerPhone)) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'رقم الهاتف غير صحيح. يجب أن يكون رقم مصري (01XXXXXXXXX)',
-        });
-      }
-
-      // Calculate total amount
-      const calculatedTotal = input.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-
-      // Validate total amount matches
-      if (Math.abs(calculatedTotal - input.totalAmount) > 0.01) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'إجمالي المبلغ غير متطابق مع العناصر',
-        });
-      }
-
-      logger.info('Creating new order', {
-        customerName: input.customerName,
-        itemCount: input.items.length,
-        totalAmount: calculatedTotal,
-      });
-
-      const db = await requireDb();
-
-      // Generate unique order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-      // Get user ID (default to 1 if not authenticated)
-      const userId = ctx.user?.id || 1;
-
-      // Prepare batch insert data (instead of loop)
-      const now = new Date().toISOString();
-      const orderValues = input.items.map((item, index) => {
-        // Validate item data
-        if (item.quantity <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `الكمية يجب أن تكون أكبر من صفر للعنصر ${index + 1}`,
-          });
-        }
-
-        if (item.price <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `السعر يجب أن يكون أكبر من صفر للعنصر ${index + 1}`,
-          });
-        }
-
-        const itemDescription = [
-          item.size ? `المقاس: ${item.size}` : null,
-          item.color ? `اللون: ${item.color}` : null,
-        ]
-          .filter(Boolean)
-          .join(', ');
-
-        return {
-          orderNumber: `${orderNumber}-${index + 1}`,
-          customerName: input.customerName,
-          customerEmail: input.customerEmail || null,
-          customerPhone: input.customerPhone || null,
-          productName: item.productName,
-          productDescription: itemDescription || null,
-          quantity: item.quantity,
-          unitPrice: item.price.toString(),
-          totalAmount: (item.price * item.quantity).toString(),
-          currency: 'EGP',
-          status: 'pending',
-          paymentStatus: 'pending',
-          shippingAddress: input.shippingAddress,
-          notes: input.notes || null,
-          createdBy: userId,
-          createdAt: now,
-          updatedAt: now,
-        };
-      });
-
-      // Batch insert all orders at once (much faster!)
-      let insertedOrders;
-      try {
-        insertedOrders = await db.insert(orders).values(orderValues).returning();
-      } catch (dbError: unknown) {
-        logger.error('Database insert failed', dbError instanceof Error ? dbError : new Error(String(dbError)), {
-          orderNumber,
-          itemCount: input.items.length,
-        });
-
-        // Check for duplicate order number
-        if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
-          throw new TRPCError({
-            code: 'CONFLICT',
-            message: 'رقم الطلب موجود مسبقاً. يرجى المحاولة مرة أخرى',
-          });
-        }
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى',
-          cause: dbError,
-        });
-      }
-
-      // Extract order IDs
-      const orderIds = insertedOrders.map((order) => order.id);
-
-      if (orderIds.length === 0) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'فشل في إنشاء الطلب. لم يتم إنشاء أي سجلات',
-        });
-      }
-
-      // Validate order with Arachnid (Bio-Module) - with error handling
-      let validation;
-      try {
-        validation = await validateOrderWithArachnid({
-          orderId: orderIds[0],
-          orderNumber,
-          customerName: input.customerName,
-          customerPhone: input.customerPhone || '',
-          totalAmount: input.totalAmount,
-          items: input.items,
-          shippingAddress: input.shippingAddress || '',
-        });
-      } catch (bioError: unknown) {
-        logger.warn('Bio-Module validation failed, continuing anyway', {
-          error: bioError instanceof Error ? bioError.message : String(bioError),
-          orderId: orderIds[0],
-        });
-        // Continue with default validation if Bio-Module fails
-        validation = {
-          isValid: true,
-          anomalies: [],
-          warnings: ['Bio-Module validation unavailable'],
-          recommendations: [],
-          confidence: 0.8,
-        };
-      }
-
-      // Track order lifecycle - with error handling
-      try {
-        await trackOrderLifecycle(orderIds[0], orderNumber, 'created');
-      } catch (trackError: unknown) {
-        logger.warn('Order lifecycle tracking failed', {
-          error: trackError instanceof Error ? trackError.message : String(trackError),
-          orderId: orderIds[0],
-        });
-        // Continue even if tracking fails
-      }
-
-      const duration = Date.now() - startTime;
-      logger.info('Order created successfully', {
-        orderId: orderIds[0],
-        orderNumber,
-        orderIds: orderIds,
-        validationWarnings: validation.warnings.length,
-        duration: `${duration}ms`,
-      });
-
-      // Invalidate cache (multiple keys for better cache invalidation)
-      try {
-        cache.delete('orders:all');
-        if (input.customerPhone) {
-          cache.delete(`orders:customer:${input.customerPhone}`);
-        }
-        cache.delete('orders:status:pending');
-      } catch (cacheError: unknown) {
-        logger.warn('Cache invalidation failed', {
-          error: cacheError instanceof Error ? cacheError.message : String(cacheError),
-        });
-        // Continue even if cache invalidation fails
-      }
-
-      return {
-        success: true,
-        orderId: orderIds[0], // Primary order ID (for backward compatibility)
-        orderIds: orderIds, // All order IDs (useful for multi-item orders)
-        orderNumber,
-        message: 'تم إنشاء الطلب بنجاح',
-        validation: {
-          isValid: validation.isValid,
-          warnings: validation.warnings,
-          recommendations: validation.recommendations,
-        },
-      };
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-        
-        // If it's already a TRPCError, re-throw it
-        if (error instanceof TRPCError) {
-        logger.error('Order creation failed (TRPCError)', {
-          code: error.code,
-          message: error.message,
-          duration: `${duration}ms`,
-        });
-        throw error;
-      }
-
-      // Log unexpected errors
-      logger.error('Order creation failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
-        customerName: input.customerName,
-        itemCount: input.items?.length || 0,
-        duration: `${duration}ms`,
-      });
-
-      // Return generic error to client
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // Get all orders (protected - admin only)
@@ -365,115 +329,87 @@ export const ordersRouter = router({
   updateOrderStatus: protectedProcedure
     .input(schemas.updateOrderStatus)
     .mutation(async ({ input }) => {
-      const startTime = Date.now();
+      return withPerformanceTracking(
+        {
+          operation: 'orders.updateOrderStatus',
+          details: {
+            orderId: input.orderId,
+            newStatus: input.status,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'orders.updateOrderStatus',
+            async () => {
+              logger.info('Updating order status', {
+                orderId: input.orderId,
+                newStatus: input.status,
+              });
 
-      try {
-        logger.info('Updating order status', {
-          orderId: input.orderId,
-          newStatus: input.status,
-        });
+              const db = await requireDb();
 
-        const db = await requireDb();
+              // Get order to get orderNumber
+              const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
 
-        // Get order to get orderNumber
-        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
+              if (!order) {
+                logger.warn('Order not found', { orderId: input.orderId });
+                throw new TRPCError({
+                  code: 'NOT_FOUND',
+                  message: 'الطلب غير موجود',
+                });
+              }
 
-        if (!order) {
-          logger.warn('Order not found', { orderId: input.orderId });
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'الطلب غير موجود',
-          });
-        }
+              // Update order status
+              await db
+                .update(orders)
+                .set({
+                  status: input.status,
+                  updatedAt: new Date().toISOString(),
+                })
+                .where(eq(orders.id, input.orderId));
 
-        // Update order status
-        try {
-          await db
-            .update(orders)
-            .set({
+              // Track lifecycle with Bio-Modules - with error handling
+              try {
+                const lifecycleStatus = input.status as
+                  | 'created'
+                  | 'confirmed'
+                  | 'processing'
+                  | 'shipped'
+                  | 'delivered'
+                  | 'cancelled';
+                await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
+              } catch (trackError: unknown) {
+                logger.warn('Order lifecycle tracking failed', {
+                  error: trackError instanceof Error ? trackError.message : String(trackError),
+                  orderId: input.orderId,
+                });
+                // Continue even if tracking fails
+              }
+
+              logger.info('Order status updated successfully', {
+                orderId: input.orderId,
+                oldStatus: order.status,
+                newStatus: input.status,
+              });
+
+              // Invalidate cache using utility
+              await invalidateOrderCache({
+                orderId: input.orderId,
+                status: input.status,
+              });
+
+              return {
+                success: true,
+                message: 'تم تحديث حالة الطلب',
+              };
+            },
+            {
+              orderId: input.orderId,
               status: input.status,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(orders.id, input.orderId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, {
-            orderId: input.orderId,
-          });
-
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
-            cause: dbError,
-          });
+            }
+          );
         }
-
-        // Track lifecycle with Bio-Modules - with error handling
-        try {
-          const lifecycleStatus = input.status as
-            | 'created'
-            | 'confirmed'
-            | 'processing'
-            | 'shipped'
-            | 'delivered'
-            | 'cancelled';
-          await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
-        } catch (trackError: unknown) {
-          logger.warn('Order lifecycle tracking failed', {
-            error: trackError instanceof Error ? trackError.message : String(trackError),
-            orderId: input.orderId,
-          });
-          // Continue even if tracking fails
-        }
-
-        const duration = Date.now() - startTime;
-        logger.info('Order status updated successfully', {
-          orderId: input.orderId,
-          oldStatus: order.status,
-          newStatus: input.status,
-          duration: `${duration}ms`,
-        });
-
-        // Invalidate cache - with error handling
-        try {
-          cache.delete('orders:all');
-          cache.delete(`orders:${input.orderId}`);
-          cache.delete(`orders:status:${order.status}`);
-          cache.delete(`orders:status:${input.status}`);
-        } catch (cacheError: unknown) {
-          logger.warn('Cache invalidation failed', {
-            error: cacheError instanceof Error ? cacheError.message : String(cacheError),
-          });
-          // Continue even if cache invalidation fails
-        }
-
-        return {
-          success: true,
-          message: 'تم تحديث حالة الطلب',
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Order status update failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('Order status update failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث حالة الطلب. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Update payment status (protected - admin only)
@@ -485,97 +421,68 @@ export const ordersRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const startTime = Date.now();
+      return withPerformanceTracking(
+        {
+          operation: 'orders.updatePaymentStatus',
+          details: {
+            orderId: input.orderId,
+            paymentStatus: input.paymentStatus,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'orders.updatePaymentStatus',
+            async () => {
+              logger.info('Updating payment status', {
+                orderId: input.orderId,
+                paymentStatus: input.paymentStatus,
+              });
 
-      try {
-        logger.info('Updating payment status', {
-          orderId: input.orderId,
-          paymentStatus: input.paymentStatus,
-        });
+              const db = await requireDb();
 
-        const db = await requireDb();
+              // Verify order exists first
+              const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
 
-        // Verify order exists first
-        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
+              if (!order) {
+                logger.warn('Order not found', { orderId: input.orderId });
+                throw new TRPCError({
+                  code: 'NOT_FOUND',
+                  message: 'الطلب غير موجود',
+                });
+              }
 
-        if (!order) {
-          logger.warn('Order not found', { orderId: input.orderId });
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'الطلب غير موجود',
-          });
-        }
+              // Update payment status
+              await db
+                .update(orders)
+                .set({
+                  paymentStatus: input.paymentStatus,
+                  updatedAt: new Date().toISOString(),
+                })
+                .where(eq(orders.id, input.orderId));
 
-        // Update payment status
-        try {
-          await db
-            .update(orders)
-            .set({
+              logger.info('Payment status updated successfully', {
+                orderId: input.orderId,
+                oldStatus: order.paymentStatus,
+                newStatus: input.paymentStatus,
+              });
+
+              // Invalidate cache using utility
+              await invalidateOrderCache({
+                orderId: input.orderId,
+              });
+
+              return {
+                success: true,
+                message: 'تم تحديث حالة الدفع',
+              };
+            },
+            {
+              orderId: input.orderId,
               paymentStatus: input.paymentStatus,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(orders.id, input.orderId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, {
-            orderId: input.orderId,
-          });
-
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
-            cause: dbError,
-          });
+            }
+          );
         }
-
-        const duration = Date.now() - startTime;
-        logger.info('Payment status updated successfully', {
-          orderId: input.orderId,
-          oldStatus: order.paymentStatus,
-          newStatus: input.paymentStatus,
-          duration: `${duration}ms`,
-        });
-
-        // Invalidate cache - with error handling
-        try {
-          cache.delete('orders:all');
-          cache.delete(`orders:${input.orderId}`);
-          cache.delete(`orders:payment:${order.paymentStatus}`);
-          cache.delete(`orders:payment:${input.paymentStatus}`);
-        } catch (cacheError: unknown) {
-          logger.warn('Cache invalidation failed', {
-            error: cacheError instanceof Error ? cacheError.message : String(cacheError),
-          });
-          // Continue even if cache invalidation fails
-        }
-
-        return {
-          success: true,
-          message: 'تم تحديث حالة الدفع',
-        };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Payment status update failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('Payment status update failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث حالة الدفع. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // Get Bio-Module insights for an order

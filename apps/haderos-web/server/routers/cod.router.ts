@@ -19,6 +19,9 @@ import {
 } from '../../drizzle/schema';
 import { eq, desc, and, gte, lte, sql } from 'drizzle-orm';
 import { logger } from '../_core/logger';
+import { withErrorHandling } from '../_core/error-handler';
+import { withPerformanceTracking } from '../_core/async-performance-wrapper';
+import { invalidateOrderCache } from '../_core/cache-manager';
 
 // ============================================
 // SCHEMAS
@@ -69,8 +72,19 @@ export const codRouter = router({
   // CREATE COD ORDER
   // ============================================
   createOrder: protectedProcedure.input(createCODOrderSchema).mutation(async ({ input, ctx }) => {
-    const startTime = Date.now();
-    try {
+    return withPerformanceTracking(
+      {
+        operation: 'cod.createOrder',
+        details: {
+          orderId: input.orderId,
+          orderAmount: input.orderAmount,
+          createdBy: ctx.user?.id,
+        },
+      },
+      async () => {
+        return withErrorHandling(
+          'cod.createOrder',
+          async () => {
       // Input validation
       if (!input.orderId || input.orderId.trim().length === 0) {
         throw new TRPCError({
@@ -129,37 +143,24 @@ export const codRouter = router({
         });
       }
 
-      const duration = Date.now() - startTime;
-      logger.info('COD order created successfully', {
-        orderId: input.orderId,
-        duration: `${duration}ms`,
-      });
+            logger.info('COD order created successfully', {
+              orderId: input.orderId,
+            });
 
-      return result;
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
+            // Invalidate cache
+            await invalidateOrderCache({
+              orderNumber: input.orderId,
+            });
 
-      if (error instanceof TRPCError) {
-        logger.error('COD order creation failed (TRPCError)', {
-          code: error.code,
-          message: error.message,
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-        throw error;
+            return result;
+          },
+          {
+            orderId: input.orderId,
+            createdBy: ctx.user?.id,
+          }
+        );
       }
-
-      logger.error('COD order creation failed (Unexpected Error)', error, {
-        orderId: input.orderId,
-        duration: `${duration}ms`,
-      });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء إنشاء طلب الدفع عند الاستلام. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // ============================================
@@ -175,8 +176,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getAllOrders',
+        async () => {
         logger.debug('Fetching COD orders', {
           limit: input.limit,
           offset: input.offset,
@@ -210,35 +212,19 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('COD orders fetched successfully', {
-          count: orders.length,
-          duration: `${duration}ms`,
-        });
-
-        return { orders, total: orders.length };
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('COD orders fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
+          logger.info('COD orders fetched successfully', {
+            count: orders.length,
           });
-          throw error;
+
+          return { orders, total: orders.length };
+        },
+        {
+          limit: input.limit,
+          offset: input.offset,
+          status: input.status,
+          stage: input.stage,
         }
-
-        logger.error('COD orders fetch failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب الطلبات. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -247,8 +233,9 @@ export const codRouter = router({
   getOrderById: protectedProcedure
     .input(z.object({ orderId: z.string().min(1) }))
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getOrderById',
+        async () => {
         // Input validation
         if (!input.orderId || input.orderId.trim().length === 0) {
           throw new TRPCError({
@@ -281,45 +268,35 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('COD order fetched successfully', {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('COD order fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
+          logger.info('COD order fetched successfully', {
             orderId: input.orderId,
-            duration: `${duration}ms`,
           });
-          throw error;
-        }
 
-        logger.error('COD order fetch failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
+          return result;
+        },
+        {
           orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب حالة الطلب. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+        }
+      );
     }),
 
   // ============================================
   // UPDATE STAGE
   // ============================================
   updateStage: protectedProcedure.input(updateStageSchema).mutation(async ({ input, ctx }) => {
-    const startTime = Date.now();
-    try {
+    return withPerformanceTracking(
+      {
+        operation: 'cod.updateStage',
+        details: {
+          orderId: input.orderId,
+          stage: input.stage,
+          updatedBy: ctx.user?.id,
+        },
+      },
+      async () => {
+        return withErrorHandling(
+          'cod.updateStage',
+          async () => {
       // Input validation
       if (!input.orderId || input.orderId.trim().length === 0) {
         throw new TRPCError({
@@ -383,40 +360,26 @@ export const codRouter = router({
         });
       }
 
-      const duration = Date.now() - startTime;
-      logger.info('COD order stage updated successfully', {
-        orderId: input.orderId,
-        stage: input.stage,
-        duration: `${duration}ms`,
-      });
+            logger.info('COD order stage updated successfully', {
+              orderId: input.orderId,
+              stage: input.stage,
+            });
 
-      return result;
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
+            // Invalidate cache
+            await invalidateOrderCache({
+              orderNumber: input.orderId,
+            });
 
-      if (error instanceof TRPCError) {
-        logger.error('COD order stage update failed (TRPCError)', {
-          code: error.code,
-          message: error.message,
-          orderId: input.orderId,
-          stage: input.stage,
-          duration: `${duration}ms`,
-        });
-        throw error;
+            return result;
+          },
+          {
+            orderId: input.orderId,
+            stage: input.stage,
+            updatedBy: ctx.user?.id,
+          }
+        );
       }
-
-      logger.error('COD order stage update failed (Unexpected Error)', error, {
-        orderId: input.orderId,
-        stage: input.stage,
-        duration: `${duration}ms`,
-      });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // ============================================
@@ -430,8 +393,19 @@ export const codRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'cod.allocateShipping',
+          details: {
+            orderId: input.orderId,
+            governorate: input.shippingAddress.governorate,
+            allocatedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'cod.allocateShipping',
+            async () => {
         // Input validation
         if (!input.orderId || input.orderId.trim().length === 0) {
           throw new TRPCError({
@@ -496,38 +470,25 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Shipping partner allocated successfully', {
-          orderId: input.orderId,
-          partnerId: result.partnerId || 'N/A',
-          duration: `${duration}ms`,
-        });
+              logger.info('Shipping partner allocated successfully', {
+                orderId: input.orderId,
+                partnerId: result.partnerId || 'N/A',
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache
+              await invalidateOrderCache({
+                orderNumber: input.orderId,
+              });
 
-        if (error instanceof TRPCError) {
-          logger.error('Shipping allocation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              orderId: input.orderId,
+              allocatedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Shipping allocation failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تخصيص شركة الشحن. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -542,8 +503,19 @@ export const codRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'cod.fallbackShipping',
+          details: {
+            orderId: input.orderId,
+            originalPartnerId: input.originalPartnerId,
+            initiatedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'cod.fallbackShipping',
+            async () => {
         // Input validation
         if (!input.orderId || input.orderId.trim().length === 0) {
           throw new TRPCError({
@@ -600,38 +572,26 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Shipping fallback completed successfully', {
-          orderId: input.orderId,
-          newPartnerId: result.partnerId || 'N/A',
-          duration: `${duration}ms`,
-        });
+              logger.info('Shipping fallback completed successfully', {
+                orderId: input.orderId,
+                newPartnerId: result.partnerId || 'N/A',
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache
+              await invalidateOrderCache({
+                orderNumber: input.orderId,
+              });
 
-        if (error instanceof TRPCError) {
-          logger.error('Shipping fallback failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              orderId: input.orderId,
+              originalPartnerId: input.originalPartnerId,
+              initiatedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Shipping fallback failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء التبديل إلى شركة شحن بديلة. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -644,8 +604,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getShippingPartners',
+        async () => {
         logger.debug('Fetching shipping partners', {
           active: input.active,
         });
@@ -671,35 +632,16 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Shipping partners fetched successfully', {
-          count: partners.length,
-          duration: `${duration}ms`,
-        });
-
-        return { partners };
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Shipping partners fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
+          logger.info('Shipping partners fetched successfully', {
+            count: partners.length,
           });
-          throw error;
+
+          return { partners };
+        },
+        {
+          active: input.active,
         }
-
-        logger.error('Shipping partners fetch failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب شركات الشحن. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -719,8 +661,18 @@ export const codRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'cod.updateShippingPartner',
+          details: {
+            partnerId: input.id,
+            updatedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'cod.updateShippingPartner',
+            async () => {
         // Input validation
         if (!input.id || input.id <= 0) {
           throw new TRPCError({
@@ -774,37 +726,19 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Shipping partner updated successfully', {
-          partnerId: input.id,
-          duration: `${duration}ms`,
-        });
+              logger.info('Shipping partner updated successfully', {
+                partnerId: input.id,
+              });
 
-        return { success: true };
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Shipping partner update failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            partnerId: input.id,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return { success: true };
+            },
+            {
+              partnerId: input.id,
+              updatedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Shipping partner update failed (Unexpected Error)', error, {
-          partnerId: input.id,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث شركة الشحن. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -817,8 +751,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getTrackingLogs',
+        async () => {
         // Input validation
         if (!input.orderId || input.orderId.trim().length === 0) {
           throw new TRPCError({
@@ -860,38 +795,17 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Tracking logs fetched successfully', {
-          orderId: input.orderId,
-          logCount: logs.length,
-          duration: `${duration}ms`,
-        });
-
-        return { logs };
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Tracking logs fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
+          logger.info('Tracking logs fetched successfully', {
             orderId: input.orderId,
-            duration: `${duration}ms`,
+            logCount: logs.length,
           });
-          throw error;
-        }
 
-        logger.error('Tracking logs fetch failed (Unexpected Error)', error, {
+          return { logs };
+        },
+        {
           orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب سجلات التتبع. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+        }
+      );
     }),
 
   // ============================================
@@ -905,8 +819,18 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'cod.generateReport',
+          details: {
+            startDate: input.startDate,
+            endDate: input.endDate,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'cod.generateReport',
+            async () => {
         // Input validation
         if (!input.startDate || input.startDate.trim().length === 0) {
           throw new TRPCError({
@@ -968,44 +892,29 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('COD report generated successfully', {
-          startDate: input.startDate,
-          endDate: input.endDate,
-          duration: `${duration}ms`,
-        });
+              logger.info('COD report generated successfully', {
+                startDate: input.startDate,
+                endDate: input.endDate,
+              });
 
-        return result;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('COD report generation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return result;
+            },
+            {
+              startDate: input.startDate,
+              endDate: input.endDate,
+            }
+          );
         }
-
-        logger.error('COD report generation failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء إنشاء التقرير. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
   // GET DASHBOARD STATS
   // ============================================
   getDashboardStats: protectedProcedure.query(async () => {
-    const startTime = Date.now();
-    try {
+    return withErrorHandling(
+      'cod.getDashboardStats',
+      async () => {
       logger.debug('Fetching dashboard stats');
 
       const db = await requireDb();
@@ -1056,47 +965,25 @@ export const codRouter = router({
         });
       }
 
-      const duration = Date.now() - startTime;
-      logger.info('Dashboard stats fetched successfully', {
-        duration: `${duration}ms`,
-      });
+        logger.info('Dashboard stats fetched successfully');
 
-      return {
-        stageStats,
-        statusStats,
-        totalCODValue: totalCOD?.total || 0,
-        todayOrdersCount: todayOrders.length,
-      };
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
-
-      if (error instanceof TRPCError) {
-        logger.error('Dashboard stats fetch failed (TRPCError)', {
-          code: error.code,
-          message: error.message,
-          duration: `${duration}ms`,
-        });
-        throw error;
+        return {
+          stageStats,
+          statusStats,
+          totalCODValue: totalCOD?.total || 0,
+          todayOrdersCount: todayOrders.length,
+        };
       }
-
-      logger.error('Dashboard stats fetch failed (Unexpected Error)', error, {
-        duration: `${duration}ms`,
-      });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء جلب إحصائيات لوحة التحكم. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // ============================================
   // GET SHIPPING COMPANIES
   // ============================================
   getShippingCompanies: protectedProcedure.query(async () => {
-    const startTime = Date.now();
-    try {
+    return withErrorHandling(
+      'cod.getShippingCompanies',
+      async () => {
       logger.debug('Fetching shipping companies');
 
       const db = await requireDb();
@@ -1114,35 +1001,13 @@ export const codRouter = router({
         });
       }
 
-      const duration = Date.now() - startTime;
-      logger.info('Shipping companies fetched successfully', {
-        count: companies.length,
-        duration: `${duration}ms`,
-      });
-
-      return companies;
-    } catch (error: unknown) {
-      const duration = Date.now() - startTime;
-
-      if (error instanceof TRPCError) {
-        logger.error('Shipping companies fetch failed (TRPCError)', {
-          code: error.code,
-          message: error.message,
-          duration: `${duration}ms`,
+        logger.info('Shipping companies fetched successfully', {
+          count: companies.length,
         });
-        throw error;
+
+        return companies;
       }
-
-      logger.error('Shipping companies fetch failed (Unexpected Error)', error, {
-        duration: `${duration}ms`,
-      });
-
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'حدث خطأ أثناء جلب شركات الشحن. يرجى المحاولة مرة أخرى',
-        cause: error,
-      });
-    }
+    );
   }),
 
   // ============================================
@@ -1155,8 +1020,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getPerformanceByGovernorate',
+        async () => {
         logger.debug('Fetching performance by governorate', {
           governorateCode: input.governorateCode,
         });
@@ -1187,35 +1053,16 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Performance by governorate fetched successfully', {
-          count: performance.length,
-          duration: `${duration}ms`,
-        });
-
-        return performance;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Performance by governorate fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
+          logger.info('Performance by governorate fetched successfully', {
+            count: performance.length,
           });
-          throw error;
+
+          return performance;
+        },
+        {
+          governorateCode: input.governorateCode,
         }
-
-        logger.error('Performance by governorate fetch failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب أداء المحافظ. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -1228,8 +1075,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getPerformanceByCenter',
+        async () => {
         logger.debug('Fetching performance by center', {
           centerCode: input.centerCode,
         });
@@ -1261,35 +1109,16 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Performance by center fetched successfully', {
-          count: performance.length,
-          duration: `${duration}ms`,
-        });
-
-        return performance;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Performance by center fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
+          logger.info('Performance by center fetched successfully', {
+            count: performance.length,
           });
-          throw error;
+
+          return performance;
+        },
+        {
+          centerCode: input.centerCode,
         }
-
-        logger.error('Performance by center fetch failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب أداء المراكز. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -1302,8 +1131,9 @@ export const codRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const startTime = Date.now();
-      try {
+      return withErrorHandling(
+        'cod.getPerformanceByPoint',
+        async () => {
         logger.debug('Fetching performance by point', {
           pointCode: input.pointCode,
         });
@@ -1335,34 +1165,15 @@ export const codRouter = router({
           });
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Performance by point fetched successfully', {
-          count: performance.length,
-          duration: `${duration}ms`,
-        });
-
-        return performance;
-      } catch (error: unknown) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Performance by point fetch failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            duration: `${duration}ms`,
+          logger.info('Performance by point fetched successfully', {
+            count: performance.length,
           });
-          throw error;
+
+          return performance;
+        },
+        {
+          pointCode: input.pointCode,
         }
-
-        logger.error('Performance by point fetch failed (Unexpected Error)', error, {
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب أداء النقاط. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 });

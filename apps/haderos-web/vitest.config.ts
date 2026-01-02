@@ -33,12 +33,12 @@ export default defineConfig({
         "drizzle/",
         "client/",
       ],
-      // Target 80% coverage for backend
+      // Target 90%+ coverage for Apple-level quality
       thresholds: {
-        lines: 60,      // Start with 60%, gradually increase
-        functions: 60,
-        branches: 50,
-        statements: 60,
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
       },
     },
     testTimeout: 15000,

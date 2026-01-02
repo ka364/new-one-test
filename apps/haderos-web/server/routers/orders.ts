@@ -256,11 +256,11 @@ export const ordersRouter = router({
           recommendations: validation.recommendations,
         },
       };
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-
-      // If it's already a TRPCError, re-throw it
-      if (error instanceof TRPCError) {
+      } catch (error: unknown) {
+        const duration = Date.now() - startTime;
+        
+        // If it's already a TRPCError, re-throw it
+        if (error instanceof TRPCError) {
         logger.error('Order creation failed (TRPCError)', {
           code: error.code,
           message: error.message,

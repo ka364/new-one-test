@@ -33,8 +33,8 @@ export const productsRouter = router({
           },
           600 // 10 minutes TTL (products change less frequently)
         );
-      } catch (cacheError: any) {
-        logger.warn('Cache failed, fetching from DB', { error: cacheError.message });
+      } catch (cacheError: unknown) {
+        logger.warn('Cache failed, fetching from DB', { error: cacheError instanceof Error ? cacheError.message : String(cacheError) });
         const db = await requireDb();
         allProducts = await db
           .select()
@@ -50,9 +50,9 @@ export const productsRouter = router({
       });
 
       return allProducts;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
-      logger.error('Failed to fetch products', error, { duration: `${duration}ms` });
+      logger.error('Failed to fetch products', error instanceof Error ? error : new Error(String(error)), { duration: `${duration}ms` });
 
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -220,9 +220,9 @@ export const productsRouter = router({
             basePrice,
             input.context || {}
           );
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module dynamic pricing failed, using base price', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
             productId: input.productId,
           });
           // Fallback to base price if Bio-Module fails
@@ -492,8 +492,8 @@ export const productsRouter = router({
         // Update product
         try {
           await db.update(products).set(updateData).where(eq(products.id, input.productId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, { productId: input.productId });
+        } catch (dbError: unknown) {
+          logger.error('Database update failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { productId: input.productId });
 
           if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
             throw new TRPCError({
@@ -597,8 +597,8 @@ export const productsRouter = router({
               updatedAt: new Date().toISOString(),
             })
             .where(eq(products.id, input.productId));
-        } catch (dbError: any) {
-          logger.error('Database update failed', dbError, { productId: input.productId });
+        } catch (dbError: unknown) {
+          logger.error('Database update failed', dbError instanceof Error ? dbError : new Error(String(dbError)), { productId: input.productId });
 
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',

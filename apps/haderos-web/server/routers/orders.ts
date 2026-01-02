@@ -10,8 +10,10 @@ import {
   getOrderInsights,
 } from '../bio-modules/orders-bio-integration.js';
 import { schemas } from '../_core/validation';
-import { cache } from '../_core/cache';
 import { logger } from '../_core/logger';
+import { withErrorHandling, handleError } from '../_core/error-handler';
+import { withPerformanceTracking } from '../_core/async-performance-wrapper';
+import { invalidateOrderCache } from '../_core/cache-manager';
 
 export const ordersRouter = router({
   /**
@@ -55,9 +57,18 @@ export const ordersRouter = router({
    * @author HADEROS Team
    */
   createOrder: publicProcedure.input(schemas.createOrder).mutation(async ({ input, ctx }) => {
-    const startTime = Date.now();
-
-    try {
+    return withPerformanceTracking(
+      {
+        operation: 'orders.createOrder',
+        details: {
+          itemCount: input.items?.length || 0,
+          customerName: input.customerName,
+        },
+      },
+      async () => {
+        return withErrorHandling(
+          'orders.createOrder',
+          async () => {
       // Input validation
       if (!input.items || input.items.length === 0) {
         throw new TRPCError({

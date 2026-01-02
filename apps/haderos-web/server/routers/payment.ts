@@ -21,6 +21,9 @@ import {
   getPaymentInsights,
 } from '../bio-modules/payment-bio-integration.js';
 import { logger } from '../_core/logger';
+import { withErrorHandling } from '../_core/error-handler';
+import { withPerformanceTracking } from '../_core/async-performance-wrapper';
+import { invalidatePaymentCache } from '../_core/cache-manager';
 
 export const paymentRouter = router({
   // ============================================
@@ -70,53 +73,45 @@ export const paymentRouter = router({
       })
     )
     .query(async ({ input }) => {
-      try {
-        // Input validation
-        if (input.amount <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'المبلغ يجب أن يكون أكبر من صفر',
-          });
-        }
+      return withErrorHandling(
+        'payment.calculateFee',
+        async () => {
+          // Input validation
+          if (input.amount <= 0) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'المبلغ يجب أن يكون أكبر من صفر',
+            });
+          }
 
-        const [provider] = await db
-          .select()
-          .from(paymentProviders)
-          .where(eq(paymentProviders.code, input.providerCode))
-          .limit(1);
+          const [provider] = await db
+            .select()
+            .from(paymentProviders)
+            .where(eq(paymentProviders.code, input.providerCode))
+            .limit(1);
 
-        if (!provider) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'مزود الدفع غير موجود',
-          });
-        }
+          if (!provider) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'مزود الدفع غير موجود',
+            });
+          }
 
-        const service = getUnifiedPaymentService();
-        const fee = service.calculateFee(input.amount, provider);
+          const service = getUnifiedPaymentService();
+          const fee = service.calculateFee(input.amount, provider);
 
-        return {
-          amount: input.amount,
-          fee,
-          total: input.amount + fee,
-          netAmount: input.amount - fee,
-        };
-      } catch (error: unknown) {
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-
-        logger.error('Failed to calculate payment fee', error instanceof Error ? error : new Error(String(error)), {
+          return {
+            amount: input.amount,
+            fee,
+            total: input.amount + fee,
+            netAmount: input.amount - fee,
+          };
+        },
+        {
           amount: input.amount,
           providerCode: input.providerCode,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء حساب رسوم الدفع',
-          cause: error,
-        });
-      }
+        }
+      );
     }),
 
   /**
@@ -140,9 +135,19 @@ export const paymentRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const startTime = Date.now();
-
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'payment.createPayment',
+          details: {
+            orderId: input.orderId,
+            amount: input.amount,
+            providerCode: input.providerCode,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'payment.createPayment',
+            async () => {
         // Input validation
         if (input.amount <= 0) {
           throw new TRPCError({
@@ -244,42 +249,32 @@ export const paymentRouter = router({
           }
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Payment created successfully', {
-          transactionId: paymentResult.transactionId,
-          transactionNumber: paymentResult.transactionNumber,
-          amount: input.amount,
-          providerCode: input.providerCode,
-          duration: `${duration}ms`,
-        });
+              logger.info('Payment created successfully', {
+                transactionId: paymentResult.transactionId,
+                transactionNumber: paymentResult.transactionNumber,
+                amount: input.amount,
+                providerCode: input.providerCode,
+              });
 
-        return paymentResult;
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache
+              if (paymentResult.transactionId) {
+                await invalidatePaymentCache({
+                  transactionId: paymentResult.transactionId,
+                  orderId: input.orderId,
+                  customerPhone: input.customer.phone,
+                });
+              }
 
-        if (error instanceof TRPCError) {
-          logger.error('Payment creation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return paymentResult;
+            },
+            {
+              orderId: input.orderId,
+              amount: input.amount,
+              providerCode: input.providerCode,
+            }
+          );
         }
-
-        logger.error('Payment creation failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          amount: input.amount,
-          providerCode: input.providerCode,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء إنشاء الدفعة. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   /**
@@ -293,60 +288,52 @@ export const paymentRouter = router({
       })
     )
     .query(async ({ input }) => {
-      try {
-        if (!input.transactionId && !input.transactionNumber) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'يجب توفير transactionId أو transactionNumber',
-          });
-        }
+      return withErrorHandling(
+        'payment.getPaymentStatus',
+        async () => {
+          if (!input.transactionId && !input.transactionNumber) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'يجب توفير transactionId أو transactionNumber',
+            });
+          }
 
-        let condition;
-        if (input.transactionId) {
-          condition = eq(paymentTransactions.id, input.transactionId);
-        } else {
-          condition = eq(paymentTransactions.transactionNumber, input.transactionNumber!);
-        }
+          let condition;
+          if (input.transactionId) {
+            condition = eq(paymentTransactions.id, input.transactionId);
+          } else {
+            condition = eq(paymentTransactions.transactionNumber, input.transactionNumber!);
+          }
 
-        const [transaction] = await db.select().from(paymentTransactions).where(condition).limit(1);
+          const [transaction] = await db.select().from(paymentTransactions).where(condition).limit(1);
 
-        if (!transaction) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'المعاملة غير موجودة',
-          });
-        }
+          if (!transaction) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'المعاملة غير موجودة',
+            });
+          }
 
-        return {
-          transactionNumber: transaction.transactionNumber,
-          status: transaction.status,
-          amount: Number(transaction.amount),
-          fee: Number(transaction.fee),
-          providerCode: transaction.providerCode,
-          paymentUrl: transaction.paymentUrl,
-          qrCode: transaction.qrCode,
-          deepLink: transaction.deepLink,
-          referenceCode: transaction.referenceCode,
-          referenceExpiry: transaction.referenceExpiry,
-          completedAt: transaction.completedAt,
-          failureReason: transaction.failureReason,
-        };
-      } catch (error: any) {
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-
-        logger.error('Failed to get payment status', error, {
+          return {
+            transactionNumber: transaction.transactionNumber,
+            status: transaction.status,
+            amount: Number(transaction.amount),
+            fee: Number(transaction.fee),
+            providerCode: transaction.providerCode,
+            paymentUrl: transaction.paymentUrl,
+            qrCode: transaction.qrCode,
+            deepLink: transaction.deepLink,
+            referenceCode: transaction.referenceCode,
+            referenceExpiry: transaction.referenceExpiry,
+            completedAt: transaction.completedAt,
+            failureReason: transaction.failureReason,
+          };
+        },
+        {
           transactionId: input.transactionId,
           transactionNumber: input.transactionNumber,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء جلب حالة الدفعة',
-          cause: error,
-        });
-      }
+        }
+      );
     }),
 
   /**
@@ -362,9 +349,18 @@ export const paymentRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const startTime = Date.now();
-
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'payment.webhook',
+          details: {
+            provider: input.provider,
+            eventType: input.eventType,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'payment.webhook',
+            async () => {
         logger.info('Processing payment webhook', {
           provider: input.provider,
           eventType: input.eventType,
@@ -412,39 +408,20 @@ export const paymentRouter = router({
           // Continue even if tracking fails
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Webhook processed successfully', {
-          provider: input.provider,
-          eventType: input.eventType,
-          duration: `${duration}ms`,
-        });
+              logger.info('Webhook processed successfully', {
+                provider: input.provider,
+                eventType: input.eventType,
+              });
 
-        return { success: true };
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-
-        if (error instanceof TRPCError) {
-          logger.error('Webhook processing failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            provider: input.provider,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return { success: true };
+            },
+            {
+              provider: input.provider,
+              eventType: input.eventType,
+            }
+          );
         }
-
-        logger.error('Webhook processing failed (Unexpected Error)', error, {
-          provider: input.provider,
-          eventType: input.eventType,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء معالجة webhook. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   // ============================================
@@ -555,9 +532,19 @@ export const paymentRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
-
-      try {
+      return withPerformanceTracking(
+        {
+          operation: 'payment.refund',
+          details: {
+            transactionId: input.transactionId,
+            amount: input.amount,
+            requestedBy: ctx.user?.id,
+          },
+        },
+        async () => {
+          return withErrorHandling(
+            'payment.refund',
+            async () => {
         // Input validation
         if (input.amount && input.amount <= 0) {
           throw new TRPCError({
@@ -658,38 +645,26 @@ export const paymentRouter = router({
           // Continue even if tracking fails
         }
 
-        const duration = Date.now() - startTime;
-        logger.info('Refund processed successfully', {
-          transactionId: input.transactionId,
-          refundId: refundResult.refundId,
-          duration: `${duration}ms`,
-        });
+              logger.info('Refund processed successfully', {
+                transactionId: input.transactionId,
+                refundId: refundResult.refundId,
+              });
 
-        return refundResult;
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
+              // Invalidate cache
+              await invalidatePaymentCache({
+                transactionId: input.transactionId,
+              });
 
-        if (error instanceof TRPCError) {
-          logger.error('Refund processing failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            transactionId: input.transactionId,
-            duration: `${duration}ms`,
-          });
-          throw error;
+              return refundResult;
+            },
+            {
+              transactionId: input.transactionId,
+              amount: input.amount,
+              requestedBy: ctx.user?.id,
+            }
+          );
         }
-
-        logger.error('Refund processing failed (Unexpected Error)', error, {
-          transactionId: input.transactionId,
-          duration: `${duration}ms`,
-        });
-
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء معالجة الاسترداد. يرجى المحاولة مرة أخرى',
-          cause: error,
-        });
-      }
+      );
     }),
 
   /**

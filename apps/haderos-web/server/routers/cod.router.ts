@@ -955,13 +955,13 @@ export const codRouter = router({
           .select()
           .from(codOrders)
           .where(gte(codOrders.createdAt, today.toISOString()));
-      } catch (dbError: any) {
-        logger.error('Database query failed', dbError);
+      } catch (dbError: unknown) {
+        logger.error('Database query failed', dbError instanceof Error ? dbError : new Error(String(dbError)));
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'فشل في جلب إحصائيات لوحة التحكم. يرجى المحاولة مرة أخرى',
-          cause: dbError,
+          cause: dbError instanceof Error ? dbError : new Error(String(dbError)),
         });
       }
 
@@ -991,13 +991,13 @@ export const codRouter = router({
       let companies;
       try {
         companies = await db.select().from(shippingPartners);
-      } catch (dbError: any) {
-        logger.error('Database query failed', dbError);
+      } catch (dbError: unknown) {
+        logger.error('Database query failed', dbError instanceof Error ? dbError : new Error(String(dbError)));
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'فشل في جلب شركات الشحن. يرجى المحاولة مرة أخرى',
-          cause: dbError,
+          cause: dbError instanceof Error ? dbError : new Error(String(dbError)),
         });
       }
 

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useLocation, Link } from "wouter";
-import { Shield, TrendingUp, Clock, Eye, LogOut, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useLocation, Link } from 'wouter';
+import { Shield, TrendingUp, Clock, Eye, LogOut, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 type InvestorSession = {
   id: number;
@@ -19,17 +19,17 @@ export default function InvestorDashboard() {
 
   useEffect(() => {
     // Check if investor is logged in
-    const stored = localStorage.getItem("investor_session");
+    const stored = localStorage.getItem('investor_session');
     if (!stored) {
-      setLocation("/investor/login");
+      setLocation('/investor/login');
       return;
     }
-    
+
     try {
       const parsed = JSON.parse(stored);
       setSession(parsed);
     } catch {
-      setLocation("/investor/login");
+      setLocation('/investor/login');
     }
   }, [setLocation]);
 
@@ -39,9 +39,9 @@ export default function InvestorDashboard() {
   );
 
   const handleLogout = () => {
-    localStorage.removeItem("investor_session");
-    toast.success("تم تسجيل الخروج بنجاح");
-    setLocation("/investor/login");
+    localStorage.removeItem('investor_session');
+    toast.success('تم تسجيل الخروج بنجاح');
+    setLocation('/investor/login');
   };
 
   if (!session) {
@@ -49,21 +49,20 @@ export default function InvestorDashboard() {
   }
 
   const totalTime = activityQuery.data?.reduce((sum, a) => sum + (a.timeSpent || 0), 0) || 0;
-  const pageViews = activityQuery.data?.filter(a => a.actionType === 'page_view').length || 0;
-  const kaiaTests = activityQuery.data?.filter(a => a.actionType === 'kaia_test').length || 0;
+  const pageViews = activityQuery.data?.filter((a) => a.actionType === 'page_view').length || 0;
+  const kaiaTests = activityQuery.data?.filter((a) => a.actionType === 'kaia_test').length || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8"
+      dir="rtl"
+    >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">
-              مرحباً، {session.name}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              {session.company || session.email}
-            </p>
+            <h1 className="text-3xl font-bold mb-2">مرحباً، {session.name}</h1>
+            <p className="text-gray-600 dark:text-gray-300">{session.company || session.email}</p>
           </div>
           <Button variant="outline" onClick={handleLogout} className="gap-2">
             <LogOut className="w-4 h-4" />
@@ -145,15 +144,23 @@ export default function InvestorDashboard() {
             ) : activityQuery.data && activityQuery.data.length > 0 ? (
               <div className="space-y-3">
                 {activityQuery.data.slice(0, 10).map((activity) => (
-                  <div 
-                    key={activity.id} 
+                  <div
+                    key={activity.id}
                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
-                      {activity.actionType === 'page_view' && <Eye className="w-4 h-4 text-blue-600" />}
-                      {activity.actionType === 'kaia_test' && <Shield className="w-4 h-4 text-green-600" />}
-                      {activity.actionType === 'pitch_view' && <TrendingUp className="w-4 h-4 text-purple-600" />}
-                      {activity.actionType === 'login' && <ArrowRight className="w-4 h-4 text-gray-600" />}
+                      {activity.actionType === 'page_view' && (
+                        <Eye className="w-4 h-4 text-blue-600" />
+                      )}
+                      {activity.actionType === 'kaia_test' && (
+                        <Shield className="w-4 h-4 text-green-600" />
+                      )}
+                      {activity.actionType === 'pitch_view' && (
+                        <TrendingUp className="w-4 h-4 text-purple-600" />
+                      )}
+                      {activity.actionType === 'login' && (
+                        <ArrowRight className="w-4 h-4 text-gray-600" />
+                      )}
                       <div>
                         <p className="font-medium text-sm">
                           {activity.pageTitle || activity.pagePath || activity.actionType}
@@ -183,9 +190,7 @@ export default function InvestorDashboard() {
         <Card className="mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
           <CardContent className="py-8 text-center">
             <h3 className="text-2xl font-bold mb-4">جاهز للمناقشة؟</h3>
-            <p className="mb-6 opacity-90">
-              دعنا نتحدث عن فرصة الاستثمار بالتفصيل
-            </p>
+            <p className="mb-6 opacity-90">دعنا نتحدث عن فرصة الاستثمار بالتفصيل</p>
             <div className="flex gap-4 justify-center">
               <a href="mailto:ahmed@haderosai.com">
                 <Button size="lg" variant="secondary">

@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Clock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Alert, AlertDescription } from './ui/alert';
+import { Clock, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface OTPVerificationProps {
   phoneNumber: string;
   email?: string;
   onVerified: () => void;
   onBack: () => void;
-  sendOTP: () => Promise<{ method: "email" | "sms"; expiresAt: string; otpCode?: string }>;
+  sendOTP: () => Promise<{ method: 'email' | 'sms'; expiresAt: string; otpCode?: string }>;
   verifyOTP: (code: string) => Promise<{ success: boolean }>;
 }
 
@@ -23,13 +23,13 @@ export default function OTPVerification({
   sendOTP,
   verifyOTP,
 }: OTPVerificationProps) {
-  const [otpCode, setOtpCode] = useState("");
+  const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState("");
-  const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
+  const [error, setError] = useState('');
+  const [otpMethod, setOtpMethod] = useState<'email' | 'sms'>('email');
 
   // Send OTP on mount
   useEffect(() => {
@@ -50,24 +50,24 @@ export default function OTPVerification({
   const formatCountdown = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSendOTP = async () => {
     setIsSending(true);
-    setError("");
+    setError('');
     try {
       const result = await sendOTP();
       setOtpMethod(result.method);
       setCountdown(300);
       setCanResend(false);
-      
+
       // Development mode: show OTP
       if (result.otpCode) {
-        console.log("🔐 OTP Code (DEV MODE):", result.otpCode);
+        console.log('🔐 OTP Code (DEV MODE):', result.otpCode);
       }
     } catch (err: any) {
-      setError(err.message || "فشل إرسال رمز التحقق");
+      setError(err.message || 'فشل إرسال رمز التحقق');
     } finally {
       setIsSending(false);
     }
@@ -75,27 +75,27 @@ export default function OTPVerification({
 
   const handleVerifyOTP = async () => {
     if (otpCode.length !== 6) {
-      setError("يرجى إدخال رمز التحقق المكون من 6 أرقام");
+      setError('يرجى إدخال رمز التحقق المكون من 6 أرقام');
       return;
     }
 
     setIsVerifying(true);
-    setError("");
-    
+    setError('');
+
     try {
       const result = await verifyOTP(otpCode);
       if (result.success) {
         onVerified();
       }
     } catch (err: any) {
-      setError(err.message || "رمز التحقق غير صحيح");
+      setError(err.message || 'رمز التحقق غير صحيح');
     } finally {
       setIsVerifying(false);
     }
   };
 
   const handleResendOTP = async () => {
-    setOtpCode("");
+    setOtpCode('');
     await handleSendOTP();
   };
 
@@ -108,7 +108,7 @@ export default function OTPVerification({
         </CardTitle>
         <CardDescription className="text-center">
           تم إرسال رمز التحقق إلى {phoneNumber}
-          {otpMethod === "email" && email && ` و ${email}`}
+          {otpMethod === 'email' && email && ` و ${email}`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -121,11 +121,13 @@ export default function OTPVerification({
 
         {/* Countdown Timer */}
         <div className="text-center">
-          <div className={`text-5xl font-bold ${countdown > 60 ? "text-blue-600" : "text-red-600"}`}>
+          <div
+            className={`text-5xl font-bold ${countdown > 60 ? 'text-blue-600' : 'text-red-600'}`}
+          >
             {formatCountdown(countdown)}
           </div>
           <p className="text-sm text-gray-600 mt-2">
-            {countdown > 0 ? "الوقت المتبقي للتحقق" : "انتهت صلاحية الرمز"}
+            {countdown > 0 ? 'الوقت المتبقي للتحقق' : 'انتهت صلاحية الرمز'}
           </p>
         </div>
 
@@ -140,12 +142,12 @@ export default function OTPVerification({
             inputMode="numeric"
             maxLength={6}
             value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
             className="text-center text-3xl tracking-widest font-bold"
             placeholder="000000"
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === "Enter" && otpCode.length === 6) {
+              if (e.key === 'Enter' && otpCode.length === 6) {
                 handleVerifyOTP();
               }
             }}
@@ -185,15 +187,11 @@ export default function OTPVerification({
                 جاري الإرسال...
               </>
             ) : (
-              "إعادة إرسال الرمز"
+              'إعادة إرسال الرمز'
             )}
           </Button>
 
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            className="w-full"
-          >
+          <Button onClick={onBack} variant="ghost" className="w-full">
             العودة للبيانات
           </Button>
         </div>

@@ -1,5 +1,5 @@
-import { requireDb } from "./db";
-import { sql } from "drizzle-orm";
+import { requireDb } from './db';
+import { sql } from 'drizzle-orm';
 
 export interface Shipment {
   id?: number;
@@ -34,7 +34,7 @@ export async function getShipments(filters: ShipmentFilters = {}) {
   if (!db) return [];
 
   let query = sql`SELECT * FROM external_shipments WHERE 1=1`;
-  
+
   if (filters.company) {
     query = sql`${query} AND shipping_company = ${filters.company}`;
   }
@@ -105,7 +105,7 @@ export async function getShipmentStats() {
  */
 export async function bulkInsertShipments(shipments: Shipment[]) {
   const db = await requireDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   let inserted = 0;
   for (const shipment of shipments) {
@@ -129,7 +129,7 @@ export async function bulkInsertShipments(shipments: Shipment[]) {
       `);
       inserted++;
     } catch (error) {
-      console.error("Error inserting shipment:", error);
+      console.error('Error inserting shipment:', error);
     }
   }
 

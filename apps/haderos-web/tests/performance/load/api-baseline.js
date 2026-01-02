@@ -25,24 +25,24 @@ const slowRequestRate = new Rate('haderos_slow_requests'); // > 500ms
 export const options = {
   // Test stages - simulating realistic traffic patterns
   stages: [
-    { duration: '30s', target: 25 },   // Warm up - ramp to 25 users
-    { duration: '1m', target: 50 },    // Normal load - 50 concurrent users
-    { duration: '2m', target: 100 },   // Peak load - 100 concurrent users
-    { duration: '1m', target: 100 },   // Sustained peak
-    { duration: '30s', target: 0 },    // Cool down
+    { duration: '30s', target: 25 }, // Warm up - ramp to 25 users
+    { duration: '1m', target: 50 }, // Normal load - 50 concurrent users
+    { duration: '2m', target: 100 }, // Peak load - 100 concurrent users
+    { duration: '1m', target: 100 }, // Sustained peak
+    { duration: '30s', target: 0 }, // Cool down
   ],
 
   // Performance thresholds based on industry standards
   thresholds: {
     // 95% of requests should complete in under 500ms
-    'http_req_duration': ['p(95)<500', 'p(99)<1000'],
+    http_req_duration: ['p(95)<500', 'p(99)<1000'],
 
     // Error rate should be under 1%
-    'haderos_errors': ['rate<0.01'],
+    haderos_errors: ['rate<0.01'],
 
     // Custom metric thresholds
-    'haderos_response_time': ['p(95)<500'],
-    'haderos_slow_requests': ['rate<0.05'], // Less than 5% slow requests
+    haderos_response_time: ['p(95)<500'],
+    haderos_slow_requests: ['rate<0.05'], // Less than 5% slow requests
   },
 
   // Tags for organizing results
@@ -58,7 +58,7 @@ const AUTH_TOKEN = __ENV.AUTH_TOKEN || 'test-token-for-performance';
 
 const HEADERS = {
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${AUTH_TOKEN}`,
+  Authorization: `Bearer ${AUTH_TOKEN}`,
 };
 
 // ==================== Helper Functions ====================
@@ -148,9 +148,7 @@ export default function () {
   // ========== Scenario 4: Order Creation (10% of traffic) ==========
   group('4. Create Order (COD)', () => {
     const orderPayload = {
-      items: [
-        { productId: 1, quantity: Math.floor(Math.random() * 3) + 1 }
-      ],
+      items: [{ productId: 1, quantity: Math.floor(Math.random() * 3) + 1 }],
       customerInfo: {
         name: 'Test Customer',
         phone: '01012345678',
@@ -159,11 +157,9 @@ export default function () {
       paymentMethod: 'cod',
     };
 
-    const response = http.post(
-      `${BASE_URL}/api/trpc/orders.create`,
-      JSON.stringify(orderPayload),
-      { headers: HEADERS }
-    );
+    const response = http.post(`${BASE_URL}/api/trpc/orders.create`, JSON.stringify(orderPayload), {
+      headers: HEADERS,
+    });
 
     recordMetrics(response, 'orders.create');
 
@@ -177,10 +173,9 @@ export default function () {
 
   // ========== Scenario 5: Dashboard Stats (10% of traffic) ==========
   group('5. Dashboard Statistics', () => {
-    const response = http.get(
-      `${BASE_URL}/api/trpc/analytics.getDashboardStats`,
-      { headers: HEADERS }
-    );
+    const response = http.get(`${BASE_URL}/api/trpc/analytics.getDashboardStats`, {
+      headers: HEADERS,
+    });
 
     recordMetrics(response, 'analytics.getDashboardStats');
 
@@ -194,10 +189,7 @@ export default function () {
 
   // ========== Scenario 6: Bio-Modules Status (5% of traffic) ==========
   group('6. Bio-Modules Health Check', () => {
-    const response = http.get(
-      `${BASE_URL}/api/trpc/bio.getDashboard`,
-      { headers: HEADERS }
-    );
+    const response = http.get(`${BASE_URL}/api/trpc/bio.getDashboard`, { headers: HEADERS });
 
     recordMetrics(response, 'bio.getDashboard');
 
@@ -244,11 +236,9 @@ export default function () {
         status,
       });
 
-      const response = http.post(
-        `${BASE_URL}/api/trpc/orders.updateOrderStatus`,
-        payload,
-        { headers: HEADERS }
-      );
+      const response = http.post(`${BASE_URL}/api/trpc/orders.updateOrderStatus`, payload, {
+        headers: HEADERS,
+      });
 
       recordMetrics(response, 'orders.updateOrderStatus');
 
@@ -322,12 +312,13 @@ export function handleSummary(data) {
       p95ResponseTime: data.metrics.http_req_duration?.values?.['p(95)']?.toFixed(2) || 0,
       p99ResponseTime: data.metrics.http_req_duration?.values?.['p(99)']?.toFixed(2) || 0,
       errorRate: ((data.metrics.haderos_errors?.values?.rate || 0) * 100).toFixed(2) + '%',
-      slowRequestRate: ((data.metrics.haderos_slow_requests?.values?.rate || 0) * 100).toFixed(2) + '%',
+      slowRequestRate:
+        ((data.metrics.haderos_slow_requests?.values?.rate || 0) * 100).toFixed(2) + '%',
     },
     thresholds: {
       passed: Object.entries(data.metrics)
         .filter(([key, val]) => val.thresholds)
-        .every(([key, val]) => Object.values(val.thresholds).every(t => t.ok)),
+        .every(([key, val]) => Object.values(val.thresholds).every((t) => t.ok)),
     },
   };
 
@@ -342,7 +333,7 @@ export function handleSummary(data) {
   console.log('=================================================\n');
 
   return {
-    'stdout': JSON.stringify(summary, null, 2),
+    stdout: JSON.stringify(summary, null, 2),
     'summary.json': JSON.stringify(summary, null, 2),
   };
 }

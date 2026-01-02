@@ -47,10 +47,10 @@ export class CostOptimizer {
 
   // Pricing per 1M tokens (average of input/output)
   private readonly PRICING = {
-    deepseek: 0.21,    // ($0.14 + $0.28) / 2
-    gpt35: 1.0,        // ~$1/M average
-    gpt4: 30.0,        // ~$30/M average
-    gpt4turbo: 15.0,   // ~$15/M average
+    deepseek: 0.21, // ($0.14 + $0.28) / 2
+    gpt35: 1.0, // ~$1/M average
+    gpt4: 30.0, // ~$30/M average
+    gpt4turbo: 15.0, // ~$15/M average
   };
 
   constructor(deepseekApiKey: string) {
@@ -229,13 +229,15 @@ export class CostOptimizer {
     const monthly = daily * 30;
 
     // Calculate what it would cost with GPT-3.5 and GPT-4
-    const gpt35Monthly = dailyTasks.reduce((sum, task) => {
-      return sum + (task.estimatedTokens / 1_000_000) * this.PRICING.gpt35;
-    }, 0) * 30;
+    const gpt35Monthly =
+      dailyTasks.reduce((sum, task) => {
+        return sum + (task.estimatedTokens / 1_000_000) * this.PRICING.gpt35;
+      }, 0) * 30;
 
-    const gpt4Monthly = dailyTasks.reduce((sum, task) => {
-      return sum + (task.estimatedTokens / 1_000_000) * this.PRICING.gpt4;
-    }, 0) * 30;
+    const gpt4Monthly =
+      dailyTasks.reduce((sum, task) => {
+        return sum + (task.estimatedTokens / 1_000_000) * this.PRICING.gpt4;
+      }, 0) * 30;
 
     return {
       daily,
@@ -314,8 +316,12 @@ By using smart model selection with DeepSeek as the primary model:
       suggestions.push('🟡 Use DeepSeek for code analysis, reviews, and test generation');
     }
 
-    suggestions.push('✅ DeepSeek is excellent for: Code analysis, testing, reviews, documentation');
-    suggestions.push('✅ Reserve GPT-4 for: Critical decisions, complex reasoning, important content');
+    suggestions.push(
+      '✅ DeepSeek is excellent for: Code analysis, testing, reviews, documentation'
+    );
+    suggestions.push(
+      '✅ Reserve GPT-4 for: Critical decisions, complex reasoning, important content'
+    );
     suggestions.push('💡 Monitor token usage and adjust max_tokens to avoid waste');
 
     return suggestions;

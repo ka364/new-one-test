@@ -1,5 +1,5 @@
-import { requireDb } from "./db";
-import { sql } from "drizzle-orm";
+import { requireDb } from './db';
+import { sql } from 'drizzle-orm';
 
 export interface Employee {
   id?: number;
@@ -84,9 +84,7 @@ export async function getEmployeeById(id: number): Promise<Employee | null> {
   const db = await requireDb();
   if (!db) return null;
 
-  const result: any = await db.execute(
-    sql`SELECT * FROM employees WHERE id = ${id}`
-  );
+  const result: any = await db.execute(sql`SELECT * FROM employees WHERE id = ${id}`);
 
   return result && result.length > 0 ? result[0] : null;
 }

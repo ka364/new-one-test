@@ -6,11 +6,7 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "import",
-    "prefer-arrow"
-  ],
+  "plugins": ["@typescript-eslint", "import", "prefer-arrow"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -20,7 +16,7 @@
   ],
   "rules": {
     // Apple-Level Code Quality Rules
-    
+
     // TypeScript Strict Rules
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-unsafe-any": "error",
@@ -37,7 +33,7 @@
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/strict-boolean-expressions": "error",
-    
+
     // Code Quality
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-debugger": "error",
@@ -52,7 +48,7 @@
         "classPropertiesAllowed": false
       }
     ],
-    
+
     // Import Organization
     "import/order": [
       "error",
@@ -74,7 +70,7 @@
     ],
     "import/no-unresolved": "error",
     "import/no-duplicates": "error",
-    
+
     // Best Practices
     "eqeqeq": ["error", "always"],
     "no-eval": "error",
@@ -84,7 +80,7 @@
     "prefer-promise-reject-errors": "error",
     "radix": "error",
     "yoda": "error",
-    
+
     // Error Prevention
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
@@ -95,7 +91,7 @@
       }
     ],
     "no-undef": "error",
-    
+
     // Code Style (handled by Prettier, but enforce consistency)
     "curly": ["error", "all"],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
@@ -120,4 +116,3 @@
     "coverage"
   ]
 }
-

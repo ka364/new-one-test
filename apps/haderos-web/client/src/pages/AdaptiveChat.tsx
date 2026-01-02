@@ -1,16 +1,26 @@
-import { useState, useEffect, useRef } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Plus, X, Check, FileText, BarChart, FileSpreadsheet, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-import { Streamdown } from "streamdown";
+import { useState, useEffect, useRef } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Loader2,
+  Send,
+  Plus,
+  X,
+  Check,
+  FileText,
+  BarChart,
+  FileSpreadsheet,
+  Sparkles,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Streamdown } from 'streamdown';
 
 /**
  * 🌱 Adaptive Chat Interface - DeepSeek Style
- * 
+ *
  * النظام يبدأ بسيطاً ويتطور مع الاستخدام:
  * - واجهة محادثة ذكية مع AI
  * - أيقونات ديناميكية تظهر تدريجياً حسب سلوك المستخدم
@@ -19,7 +29,7 @@ import { Streamdown } from "streamdown";
  */
 
 interface Message {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 }
@@ -48,12 +58,13 @@ interface Suggestion {
 export default function AdaptiveChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      role: "assistant",
-      content: "مرحباً! أنا مساعدك الذكي في HaderOS 🌱\n\nسأتعلم من طريقة عملك وأقترح عليك أدوات جديدة تدريجياً. ماذا تريد أن تفعل اليوم؟",
+      role: 'assistant',
+      content:
+        'مرحباً! أنا مساعدك الذكي في HaderOS 🌱\n\nسأتعلم من طريقة عملك وأقترح عليك أدوات جديدة تدريجياً. ماذا تريد أن تفعل اليوم؟',
       timestamp: new Date(),
     },
   ]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +72,8 @@ export default function AdaptiveChat() {
   const { data: icons = [], refetch: refetchIcons } = trpc.adaptive.getDynamicIcons.useQuery();
 
   // Fetch pending suggestions
-  const { data: suggestions = [], refetch: refetchSuggestions } = trpc.adaptive.getPendingSuggestions.useQuery();
+  const { data: suggestions = [], refetch: refetchSuggestions } =
+    trpc.adaptive.getPendingSuggestions.useQuery();
 
   // Mutations
   const trackBehavior = trpc.adaptive.trackBehavior.useMutation();
@@ -74,7 +86,7 @@ export default function AdaptiveChat() {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // Handle send message
@@ -82,41 +94,41 @@ export default function AdaptiveChat() {
     if (!input.trim() || isGenerating) return;
 
     const userMessage: Message = {
-      role: "user",
+      role: 'user',
       content: input,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    setInput('');
     setIsGenerating(true);
 
     try {
       // Track user behavior
       await trackBehavior.mutateAsync({
-        actionType: "chat_message",
+        actionType: 'chat_message',
         actionData: { message: input },
       });
 
       // Detect intent and execute actions
       const intent = detectIntent(input);
 
-      if (intent.type === "create_invoice") {
+      if (intent.type === 'create_invoice') {
         await handleCreateInvoice(intent.data);
-      } else if (intent.type === "create_report") {
+      } else if (intent.type === 'create_report') {
         await handleCreateReport(intent.data);
-      } else if (intent.type === "general") {
+      } else if (intent.type === 'general') {
         // General chat - simulate AI response
         const aiResponse: Message = {
-          role: "assistant",
+          role: 'assistant',
           content: generateResponse(input),
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, aiResponse]);
       }
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("حدث خطأ أثناء معالجة طلبك");
+      console.error('Error:', error);
+      toast.error('حدث خطأ أثناء معالجة طلبك');
     } finally {
       setIsGenerating(false);
     }
@@ -126,24 +138,24 @@ export default function AdaptiveChat() {
   const detectIntent = (message: string) => {
     const lowerMessage = message.toLowerCase();
 
-    if (lowerMessage.includes("فاتورة") || lowerMessage.includes("invoice")) {
-      return { type: "create_invoice", data: {} };
+    if (lowerMessage.includes('فاتورة') || lowerMessage.includes('invoice')) {
+      return { type: 'create_invoice', data: {} };
     }
 
-    if (lowerMessage.includes("تقرير") || lowerMessage.includes("report")) {
-      return { type: "create_report", data: {} };
+    if (lowerMessage.includes('تقرير') || lowerMessage.includes('report')) {
+      return { type: 'create_report', data: {} };
     }
 
-    return { type: "general", data: {} };
+    return { type: 'general', data: {} };
   };
 
   // Generate AI response
   const generateResponse = (userInput: string) => {
     const responses = [
-      "فهمت! دعني أساعدك في ذلك. 🎯",
-      "بالتأكيد! سأعمل على هذا الآن. ✨",
-      "رائع! هل تريد مني إنشاء ملف Google Sheets لهذا؟ 📊",
-      "ممتاز! لاحظت أنك تقوم بهذا كثيراً. هل تريدني أن أضيف أيقونة سريعة له؟ 🚀",
+      'فهمت! دعني أساعدك في ذلك. 🎯',
+      'بالتأكيد! سأعمل على هذا الآن. ✨',
+      'رائع! هل تريد مني إنشاء ملف Google Sheets لهذا؟ 📊',
+      'ممتاز! لاحظت أنك تقوم بهذا كثيراً. هل تريدني أن أضيف أيقونة سريعة له؟ 🚀',
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   };
@@ -153,25 +165,25 @@ export default function AdaptiveChat() {
     try {
       const result = await createInvoice.mutateAsync({
         invoiceNumber: `INV-${Date.now()}`,
-        customerName: "عميل تجريبي",
+        customerName: 'عميل تجريبي',
         items: [
-          { name: "منتج 1", quantity: 2, price: 100 },
-          { name: "منتج 2", quantity: 1, price: 200 },
+          { name: 'منتج 1', quantity: 2, price: 100 },
+          { name: 'منتج 2', quantity: 1, price: 200 },
         ],
         total: 400,
       });
 
       const aiResponse: Message = {
-        role: "assistant",
+        role: 'assistant',
         content: `✅ تم إنشاء الفاتورة بنجاح!\n\n📄 [عرض الفاتورة](${result.link})\n\nهل تريد مني إنشاء المزيد من الفواتير؟`,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, aiResponse]);
-      toast.success("تم إنشاء الفاتورة بنجاح");
+      toast.success('تم إنشاء الفاتورة بنجاح');
       refetchIcons();
     } catch (error) {
-      toast.error("فشل إنشاء الفاتورة");
+      toast.error('فشل إنشاء الفاتورة');
     }
   };
 
@@ -179,25 +191,25 @@ export default function AdaptiveChat() {
   const handleCreateReport = async (data: any) => {
     try {
       const result = await createDailyReport.mutateAsync({
-        date: new Date().toISOString().split("T")[0],
+        date: new Date().toISOString().split('T')[0],
         metrics: [
-          { name: "المبيعات", value: "1000 ريال" },
-          { name: "الطلبات", value: "25 طلب" },
-          { name: "العملاء الجدد", value: "5 عملاء" },
+          { name: 'المبيعات', value: '1000 ريال' },
+          { name: 'الطلبات', value: '25 طلب' },
+          { name: 'العملاء الجدد', value: '5 عملاء' },
         ],
       });
 
       const aiResponse: Message = {
-        role: "assistant",
+        role: 'assistant',
         content: `✅ تم إنشاء التقرير اليومي!\n\n📊 [عرض التقرير](${result.link})\n\nهل تريد جدولة تقارير يومية تلقائية؟`,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, aiResponse]);
-      toast.success("تم إنشاء التقرير بنجاح");
+      toast.success('تم إنشاء التقرير بنجاح');
       refetchIcons();
     } catch (error) {
-      toast.error("فشل إنشاء التقرير");
+      toast.error('فشل إنشاء التقرير');
     }
   };
 
@@ -207,7 +219,7 @@ export default function AdaptiveChat() {
       await useIcon.mutateAsync({ iconId: icon.id });
 
       const aiResponse: Message = {
-        role: "assistant",
+        role: 'assistant',
         content: `تم فتح: ${icon.iconNameAr || icon.iconName} ✨\n\nماذا تريد أن تفعل؟`,
         timestamp: new Date(),
       };
@@ -215,7 +227,7 @@ export default function AdaptiveChat() {
       setMessages((prev) => [...prev, aiResponse]);
       refetchIcons();
     } catch (error) {
-      toast.error("حدث خطأ");
+      toast.error('حدث خطأ');
     }
   };
 
@@ -223,11 +235,11 @@ export default function AdaptiveChat() {
   const handleAcceptSuggestion = async (suggestion: Suggestion) => {
     try {
       await acceptSuggestion.mutateAsync({ suggestionId: suggestion.id });
-      toast.success("تم قبول الاقتراح!");
+      toast.success('تم قبول الاقتراح!');
       refetchSuggestions();
       refetchIcons();
     } catch (error) {
-      toast.error("فشل قبول الاقتراح");
+      toast.error('فشل قبول الاقتراح');
     }
   };
 
@@ -236,17 +248,20 @@ export default function AdaptiveChat() {
     try {
       await rejectSuggestion.mutateAsync({
         suggestionId: suggestion.id,
-        feedback: "Not needed",
+        feedback: 'Not needed',
       });
-      toast.success("تم رفض الاقتراح");
+      toast.success('تم رفض الاقتراح');
       refetchSuggestions();
     } catch (error) {
-      toast.error("فشل رفض الاقتراح");
+      toast.error('فشل رفض الاقتراح');
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900" dir="rtl">
+    <div
+      className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900"
+      dir="rtl"
+    >
       {/* Header */}
       <div className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-6 py-4">
         <div className="flex items-center gap-3">
@@ -254,9 +269,7 @@ export default function AdaptiveChat() {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-              حاضر AI 🌱
-            </h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">حاضر AI 🌱</h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               مساعدك الذكي الذي يتعلم ويتطور معك
             </p>
@@ -309,20 +322,20 @@ export default function AdaptiveChat() {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.role === "user" ? "justify-start" : "justify-end"}`}
+            className={`flex ${message.role === 'user' ? 'justify-start' : 'justify-end'}`}
           >
             <Card
               className={`max-w-[80%] p-4 ${
-                message.role === "user"
-                  ? "bg-white dark:bg-slate-800"
-                  : "bg-gradient-to-br from-blue-500 to-purple-600 text-white"
+                message.role === 'user'
+                  ? 'bg-white dark:bg-slate-800'
+                  : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
               }`}
             >
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <Streamdown>{message.content}</Streamdown>
               </div>
               <p className="text-xs opacity-70 mt-2">
-                {message.timestamp.toLocaleTimeString("ar-SA")}
+                {message.timestamp.toLocaleTimeString('ar-SA')}
               </p>
             </Card>
           </div>
@@ -375,7 +388,7 @@ export default function AdaptiveChat() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="اكتب رسالتك هنا... (مثال: أنشئ فاتورة، أنشئ تقرير يومي)"
             className="flex-1"
             disabled={isGenerating}

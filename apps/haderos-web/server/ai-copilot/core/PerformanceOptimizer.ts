@@ -65,11 +65,11 @@ export class PerformanceOptimizer {
     await this.checkInefficientLoops(bottlenecks);
 
     const metrics: PerformanceMetrics = {
-      databaseQueries: bottlenecks.filter(b => b.type === 'database').length,
-      nPlusOneQueries: bottlenecks.filter(b => b.type === 'n+1').length,
-      largePayloads: bottlenecks.filter(b => b.type === 'payload').length,
-      memoryLeaks: bottlenecks.filter(b => b.type === 'memory').length,
-      inefficientLoops: bottlenecks.filter(b => b.type === 'loop').length,
+      databaseQueries: bottlenecks.filter((b) => b.type === 'database').length,
+      nPlusOneQueries: bottlenecks.filter((b) => b.type === 'n+1').length,
+      largePayloads: bottlenecks.filter((b) => b.type === 'payload').length,
+      memoryLeaks: bottlenecks.filter((b) => b.type === 'memory').length,
+      inefficientLoops: bottlenecks.filter((b) => b.type === 'loop').length,
     };
 
     const recommendations = this.generatePerformanceRecommendations(bottlenecks);
@@ -79,7 +79,7 @@ export class PerformanceOptimizer {
       bottlenecks: bottlenecks.slice(0, 50),
       recommendations,
       metrics,
-      criticalIssues: bottlenecks.filter(b => b.severity === 'critical'),
+      criticalIssues: bottlenecks.filter((b) => b.severity === 'critical'),
     };
   }
 
@@ -208,7 +208,11 @@ export class PerformanceOptimizer {
         const content = await readFile(path.join(this.projectRoot, file), 'utf-8');
 
         // Check for large data returns
-        if (content.includes('findMany()') && !content.includes('take') && !content.includes('limit')) {
+        if (
+          content.includes('findMany()') &&
+          !content.includes('take') &&
+          !content.includes('limit')
+        ) {
           bottlenecks.push({
             id: `unlimited-query-${file}`,
             severity: 'high',
@@ -373,7 +377,7 @@ export class PerformanceOptimizer {
   ): PerformanceRecommendation[] {
     const recommendations: PerformanceRecommendation[] = [];
 
-    const types = new Set(bottlenecks.map(b => b.type));
+    const types = new Set(bottlenecks.map((b) => b.type));
 
     if (types.has('n+1')) {
       recommendations.push({

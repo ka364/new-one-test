@@ -10,12 +10,12 @@
  * - Analytics & reporting
  */
 
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { eq, and, desc, sql, gte, lte, inArray, or, count } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { v4 as uuidv4 } from "uuid";
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { getDb } from '../db';
+import { eq, and, desc, sql, gte, lte, inArray, or, count } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { v4 as uuidv4 } from 'uuid';
 
 // Import schema
 import {
@@ -25,40 +25,40 @@ import {
   returnStatusHistory,
   refundTransactions,
   returnPolicies,
-} from "../../drizzle/schema-returns";
+} from '../../drizzle/schema-returns';
 
 // ============================================
 // TYPES & VALIDATORS
 // ============================================
 
 const returnStatusEnum = z.enum([
-  "pending",
-  "approved",
-  "rejected",
-  "pickup_scheduled",
-  "picked_up",
-  "received",
-  "inspecting",
-  "inspection_passed",
-  "inspection_failed",
-  "refund_pending",
-  "refund_processing",
-  "refund_completed",
-  "exchange_processing",
-  "exchange_completed",
-  "closed",
-  "cancelled",
+  'pending',
+  'approved',
+  'rejected',
+  'pickup_scheduled',
+  'picked_up',
+  'received',
+  'inspecting',
+  'inspection_passed',
+  'inspection_failed',
+  'refund_pending',
+  'refund_processing',
+  'refund_completed',
+  'exchange_processing',
+  'exchange_completed',
+  'closed',
+  'cancelled',
 ]);
 
 const refundMethodEnum = z.enum([
-  "original_payment",
-  "store_credit",
-  "bank_transfer",
-  "wallet",
-  "cash",
+  'original_payment',
+  'store_credit',
+  'bank_transfer',
+  'wallet',
+  'cash',
 ]);
 
-const returnTypeEnum = z.enum(["refund", "exchange", "store_credit"]);
+const returnTypeEnum = z.enum(['refund', 'exchange', 'store_credit']);
 
 // ============================================
 // ROUTER
@@ -143,7 +143,7 @@ export const returnsRouter = router({
         customerId: ctx.user.id,
         customerEmail: ctx.user.email,
         returnType: input.returnType,
-        status: "pending",
+        status: 'pending',
         totalAmount: totalAmount.toString(),
         preferredRefundMethod: input.preferredRefundMethod,
         pickupAddress: input.pickupAddress,
@@ -164,7 +164,7 @@ export const returnsRouter = router({
           reasonId: item.reasonId,
           reasonDetails: item.reasonDetails,
           photoUrls: item.photoUrls || [],
-          status: "pending",
+          status: 'pending',
         });
       }
 
@@ -172,15 +172,15 @@ export const returnsRouter = router({
       await db.insert(returnStatusHistory).values({
         returnId,
         fromStatus: null,
-        toStatus: "pending",
+        toStatus: 'pending',
         changedBy: ctx.user.id,
-        notes: "طلب إرجاع جديد",
+        notes: 'طلب إرجاع جديد',
       });
 
       return {
         returnId,
         requestNumber,
-        message: "تم إنشاء طلب الإرجاع بنجاح",
+        message: 'تم إنشاء طلب الإرجاع بنجاح',
       };
     }),
 
@@ -200,8 +200,8 @@ export const returnsRouter = router({
 
       if (request.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "طلب الإرجاع غير موجود",
+          code: 'NOT_FOUND',
+          message: 'طلب الإرجاع غير موجود',
         });
       }
 
@@ -324,12 +324,12 @@ export const returnsRouter = router({
 
       if (request.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "طلب الإرجاع غير موجود",
+          code: 'NOT_FOUND',
+          message: 'طلب الإرجاع غير موجود',
         });
       }
 
-      const newStatus = input.schedulePickup ? "pickup_scheduled" : "approved";
+      const newStatus = input.schedulePickup ? 'pickup_scheduled' : 'approved';
 
       await db
         .update(returnRequests)
@@ -345,7 +345,7 @@ export const returnsRouter = router({
       // Update items status
       await db
         .update(returnItems)
-        .set({ status: "approved" })
+        .set({ status: 'approved' })
         .where(eq(returnItems.returnId, input.returnId));
 
       // Create status history
@@ -354,10 +354,10 @@ export const returnsRouter = router({
         fromStatus: request[0].status,
         toStatus: newStatus,
         changedBy: ctx.user.id,
-        notes: input.notes || "تمت الموافقة على طلب الإرجاع",
+        notes: input.notes || 'تمت الموافقة على طلب الإرجاع',
       });
 
-      return { success: true, message: "تمت الموافقة على طلب الإرجاع" };
+      return { success: true, message: 'تمت الموافقة على طلب الإرجاع' };
     }),
 
   /**
@@ -381,15 +381,15 @@ export const returnsRouter = router({
 
       if (request.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "طلب الإرجاع غير موجود",
+          code: 'NOT_FOUND',
+          message: 'طلب الإرجاع غير موجود',
         });
       }
 
       await db
         .update(returnRequests)
         .set({
-          status: "rejected",
+          status: 'rejected',
           rejectionReason: input.rejectionReason,
           updatedAt: new Date(),
         })
@@ -398,19 +398,19 @@ export const returnsRouter = router({
       // Update items status
       await db
         .update(returnItems)
-        .set({ status: "rejected" })
+        .set({ status: 'rejected' })
         .where(eq(returnItems.returnId, input.returnId));
 
       // Create status history
       await db.insert(returnStatusHistory).values({
         returnId: input.returnId,
         fromStatus: request[0].status,
-        toStatus: "rejected",
+        toStatus: 'rejected',
         changedBy: ctx.user.id,
         notes: `تم رفض الطلب: ${input.rejectionReason}`,
       });
 
-      return { success: true, message: "تم رفض طلب الإرجاع" };
+      return { success: true, message: 'تم رفض طلب الإرجاع' };
     }),
 
   /**
@@ -424,7 +424,7 @@ export const returnsRouter = router({
           z.object({
             itemId: z.number(),
             passed: z.boolean(),
-            condition: z.enum(["new", "like_new", "good", "fair", "damaged"]),
+            condition: z.enum(['new', 'like_new', 'good', 'fair', 'damaged']),
             notes: z.string().optional(),
             quantityAccepted: z.number(),
           })
@@ -446,14 +446,14 @@ export const returnsRouter = router({
             inspectionNotes: item.notes,
             inspectedBy: ctx.user.id,
             inspectedAt: new Date(),
-            status: item.passed ? "inspection_passed" : "inspection_failed",
+            status: item.passed ? 'inspection_passed' : 'inspection_failed',
           })
           .where(eq(returnItems.id, item.itemId));
       }
 
       // Check if all items passed
       const allPassed = input.items.every((item) => item.passed);
-      const newStatus = allPassed ? "inspection_passed" : "inspection_failed";
+      const newStatus = allPassed ? 'inspection_passed' : 'inspection_failed';
 
       // Calculate refund amount
       const returnItems_ = await db
@@ -481,20 +481,17 @@ export const returnsRouter = router({
       // Create status history
       await db.insert(returnStatusHistory).values({
         returnId: input.returnId,
-        fromStatus: "inspecting",
+        fromStatus: 'inspecting',
         toStatus: newStatus,
         changedBy: ctx.user.id,
-        notes:
-          input.overallNotes || (allPassed ? "اجتاز الفحص" : "فشل في الفحص"),
+        notes: input.overallNotes || (allPassed ? 'اجتاز الفحص' : 'فشل في الفحص'),
       });
 
       return {
         success: true,
         allPassed,
         refundAmount,
-        message: allPassed
-          ? "تم اجتياز الفحص بنجاح"
-          : "بعض المنتجات لم تجتز الفحص",
+        message: allPassed ? 'تم اجتياز الفحص بنجاح' : 'بعض المنتجات لم تجتز الفحص',
       };
     }),
 
@@ -532,8 +529,8 @@ export const returnsRouter = router({
 
       if (request.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "طلب الإرجاع غير موجود",
+          code: 'NOT_FOUND',
+          message: 'طلب الإرجاع غير موجود',
         });
       }
 
@@ -548,7 +545,7 @@ export const returnsRouter = router({
         customerId: request[0].customerId,
         amount: input.amount.toString(),
         refundMethod: input.refundMethod,
-        status: "processing",
+        status: 'processing',
         bankDetails: input.bankDetails,
         processedBy: ctx.user.id,
         notes: input.notes,
@@ -558,7 +555,7 @@ export const returnsRouter = router({
       await db
         .update(returnRequests)
         .set({
-          status: "refund_processing",
+          status: 'refund_processing',
           actualRefundMethod: input.refundMethod,
           refundAmount: input.amount.toString(),
           updatedAt: new Date(),
@@ -569,7 +566,7 @@ export const returnsRouter = router({
       await db.insert(returnStatusHistory).values({
         returnId: input.returnId,
         fromStatus: request[0].status,
-        toStatus: "refund_processing",
+        toStatus: 'refund_processing',
         changedBy: ctx.user.id,
         notes: `بدء معالجة الاسترداد: ${input.amount} جنيه`,
       });
@@ -578,7 +575,7 @@ export const returnsRouter = router({
         success: true,
         transactionId,
         transactionNumber,
-        message: "جاري معالجة الاسترداد",
+        message: 'جاري معالجة الاسترداد',
       };
     }),
 
@@ -604,8 +601,8 @@ export const returnsRouter = router({
 
       if (transaction.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "معاملة الاسترداد غير موجودة",
+          code: 'NOT_FOUND',
+          message: 'معاملة الاسترداد غير موجودة',
         });
       }
 
@@ -613,7 +610,7 @@ export const returnsRouter = router({
       await db
         .update(refundTransactions)
         .set({
-          status: "completed",
+          status: 'completed',
           externalReference: input.externalReference,
           completedAt: new Date(),
           updatedAt: new Date(),
@@ -624,7 +621,7 @@ export const returnsRouter = router({
       await db
         .update(returnRequests)
         .set({
-          status: "refund_completed",
+          status: 'refund_completed',
           refundCompletedAt: new Date(),
           updatedAt: new Date(),
         })
@@ -633,13 +630,13 @@ export const returnsRouter = router({
       // Create status history
       await db.insert(returnStatusHistory).values({
         returnId: transaction[0].returnId,
-        fromStatus: "refund_processing",
-        toStatus: "refund_completed",
+        fromStatus: 'refund_processing',
+        toStatus: 'refund_completed',
         changedBy: ctx.user.id,
-        notes: input.notes || "تم إتمام الاسترداد بنجاح",
+        notes: input.notes || 'تم إتمام الاسترداد بنجاح',
       });
 
-      return { success: true, message: "تم إتمام الاسترداد بنجاح" };
+      return { success: true, message: 'تم إتمام الاسترداد بنجاح' };
     }),
 
   // ==========================================
@@ -692,7 +689,7 @@ export const returnsRouter = router({
       if (!applicablePolicy) {
         return {
           eligible: false,
-          reason: "لا توجد سياسة إرجاع متاحة لهذه المنتجات",
+          reason: 'لا توجد سياسة إرجاع متاحة لهذه المنتجات',
         };
       }
 

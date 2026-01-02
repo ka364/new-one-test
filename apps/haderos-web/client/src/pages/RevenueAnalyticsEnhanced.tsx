@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   TrendingUp,
   DollarSign,
@@ -10,29 +10,40 @@ import {
   Lightbulb,
   AlertCircle,
   CheckCircle2,
-  Info
-} from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+  Info,
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { trpc } from '@/lib/trpc';
+import DashboardLayout from '@/components/DashboardLayout';
+import { toast } from 'sonner';
 import {
   exportChartToPNG,
   exportChartToJPEG,
   exportChartToPDF,
   exportMultipleChartsToPDF,
   copyChartToClipboard,
-} from "@/lib/chart-export";
+} from '@/lib/chart-export';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -55,14 +66,26 @@ export default function RevenueAnalyticsEnhanced() {
       style: 'currency',
       currency: 'EGP',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
-    const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-                        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const monthNames = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
@@ -74,11 +97,11 @@ export default function RevenueAnalyticsEnhanced() {
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Prepare chart data
-  const chartData = monthlyData.map(item => ({
+  const chartData = monthlyData.map((item) => ({
     month: formatMonth(item.month),
     revenue: item.revenue,
     orders: item.orderCount,
-    avgValue: item.orderCount > 0 ? item.revenue / item.orderCount : 0
+    avgValue: item.orderCount > 0 ? item.revenue / item.orderCount : 0,
   }));
 
   // Generate AI Insights
@@ -109,7 +132,7 @@ export default function RevenueAnalyticsEnhanced() {
     if (data.length < 2) return insights;
 
     // Revenue Trend Analysis
-    const revenues = data.map(d => d.revenue);
+    const revenues = data.map((d) => d.revenue);
     const firstHalf = revenues.slice(0, Math.floor(revenues.length / 2));
     const secondHalf = revenues.slice(Math.floor(revenues.length / 2));
     const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
@@ -138,7 +161,8 @@ export default function RevenueAnalyticsEnhanced() {
 
     // Volatility Analysis
     const mean = revenues.reduce((a, b) => a + b, 0) / revenues.length;
-    const variance = revenues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / revenues.length;
+    const variance =
+      revenues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / revenues.length;
     const stdDev = Math.sqrt(variance);
     const cv = (stdDev / mean) * 100;
 
@@ -213,13 +237,10 @@ export default function RevenueAnalyticsEnhanced() {
 
   const handleExportAllPDF = async () => {
     try {
-      await exportMultipleChartsToPDF(
-        ['revenue-chart', 'orders-chart', 'avg-value-chart'],
-        {
-          filename: `revenue-analytics-${new Date().getTime()}.pdf`,
-          title: 'تقرير تحليل الإيرادات - HADEROS',
-        }
-      );
+      await exportMultipleChartsToPDF(['revenue-chart', 'orders-chart', 'avg-value-chart'], {
+        filename: `revenue-analytics-${new Date().getTime()}.pdf`,
+        title: 'تقرير تحليل الإيرادات - HADEROS',
+      });
       toast.success('تم تصدير التقرير الكامل بنجاح');
     } catch (error) {
       toast.error('فشل تصدير التقرير');
@@ -272,10 +293,7 @@ export default function RevenueAnalyticsEnhanced() {
               مدعوم بالذكاء الاصطناعي - تحليلات وتوصيات تلقائية
             </p>
           </div>
-          <Button
-            onClick={handleExportAllPDF}
-            className="gap-2"
-          >
+          <Button onClick={handleExportAllPDF} className="gap-2">
             <Download className="h-4 w-4" />
             تصدير التقرير الكامل
           </Button>
@@ -289,9 +307,7 @@ export default function RevenueAnalyticsEnhanced() {
                 <Lightbulb className="h-5 w-5 text-yellow-500" />
                 <CardTitle>التحليلات الذكية</CardTitle>
               </div>
-              <CardDescription>
-                تحليلات تلقائية باستخدام الذكاء الاصطناعي
-              </CardDescription>
+              <CardDescription>تحليلات تلقائية باستخدام الذكاء الاصطناعي</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -307,8 +323,11 @@ export default function RevenueAnalyticsEnhanced() {
                         <AlertTitle className="mb-1">
                           {insight.title}
                           <Badge className="mr-2" variant="outline">
-                            {insight.impact === 'high' ? 'عالي' :
-                             insight.impact === 'medium' ? 'متوسط' : 'منخفض'}
+                            {insight.impact === 'high'
+                              ? 'عالي'
+                              : insight.impact === 'medium'
+                                ? 'متوسط'
+                                : 'منخفض'}
                           </Badge>
                         </AlertTitle>
                         <AlertDescription className="text-sm">
@@ -389,11 +408,15 @@ export default function RevenueAnalyticsEnhanced() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleExportPNG('revenue-chart', 'اتجاه-الإيرادات')}>
+                  <DropdownMenuItem
+                    onClick={() => handleExportPNG('revenue-chart', 'اتجاه-الإيرادات')}
+                  >
                     <FileImage className="ml-2 h-4 w-4" />
                     PNG
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExportPDF('revenue-chart', 'اتجاه الإيرادات')}>
+                  <DropdownMenuItem
+                    onClick={() => handleExportPDF('revenue-chart', 'اتجاه الإيرادات')}
+                  >
                     <FileText className="ml-2 h-4 w-4" />
                     PDF
                   </DropdownMenuItem>
@@ -414,11 +437,7 @@ export default function RevenueAnalyticsEnhanced() {
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <YAxis
                     stroke="#6b7280"
                     tick={{ fontSize: 12 }}
@@ -429,7 +448,7 @@ export default function RevenueAnalyticsEnhanced() {
                       backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `الشهر: ${label}`}
@@ -438,11 +457,7 @@ export default function RevenueAnalyticsEnhanced() {
                     wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
                     formatter={() => 'الإيرادات'}
                   />
-                  <Bar
-                    dataKey="revenue"
-                    fill="#10b981"
-                    radius={[8, 8, 0, 0]}
-                  />
+                  <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -494,21 +509,14 @@ export default function RevenueAnalyticsEnhanced() {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => value.toLocaleString('ar-EG')}
                     labelFormatter={(label) => `الشهر: ${label}`}
@@ -551,11 +559,15 @@ export default function RevenueAnalyticsEnhanced() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleExportPNG('avg-value-chart', 'متوسط-قيمة-الطلب')}>
+                  <DropdownMenuItem
+                    onClick={() => handleExportPNG('avg-value-chart', 'متوسط-قيمة-الطلب')}
+                  >
                     <FileImage className="ml-2 h-4 w-4" />
                     PNG
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExportPDF('avg-value-chart', 'متوسط قيمة الطلب')}>
+                  <DropdownMenuItem
+                    onClick={() => handleExportPDF('avg-value-chart', 'متوسط قيمة الطلب')}
+                  >
                     <FileText className="ml-2 h-4 w-4" />
                     PDF
                   </DropdownMenuItem>
@@ -576,11 +588,7 @@ export default function RevenueAnalyticsEnhanced() {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <YAxis
                     stroke="#6b7280"
                     tick={{ fontSize: 12 }}
@@ -591,7 +599,7 @@ export default function RevenueAnalyticsEnhanced() {
                       backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `الشهر: ${label}`}

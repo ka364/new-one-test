@@ -2,10 +2,10 @@ import axios, { AxiosInstance } from 'axios';
 
 /**
  * Bosta API Client
- * 
+ *
  * Official API Documentation: https://docs.bosta.co/
  * Base URL: https://app.bosta.co/api/v2
- * 
+ *
  * Authentication: Bearer Token in Authorization header
  */
 
@@ -106,7 +106,7 @@ class BostaAPI {
     this.client = axios.create({
       baseURL: BOSTA_API_BASE_URL,
       headers: {
-        'Authorization': `Bearer ${BOSTA_API_KEY}`,
+        Authorization: `Bearer ${BOSTA_API_KEY}`,
         'Content-Type': 'application/json',
       },
       timeout: 30000, // 30 seconds

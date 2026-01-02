@@ -1,21 +1,21 @@
 /**
  * Training Academy
- * 
+ *
  * Interactive training system that teaches developers the biological principles
  * behind each module through lessons, exercises, and code challenges.
- * 
+ *
  * Inspired by: "The system doesn't just document - it teaches."
  */
 
-import { BioOrganism, TrainingMaterial, LessonProgress } from "./types";
-import { bioModuleDefinitions } from "./bio-modules";
+import { BioOrganism, TrainingMaterial, LessonProgress } from './types';
+import { bioModuleDefinitions } from './bio-modules';
 
 export interface Lesson {
   id: string;
   title: string;
   organism: BioOrganism;
   duration: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   objectives: string[];
   content: LessonContent[];
   exercises: Exercise[];
@@ -23,7 +23,7 @@ export interface Lesson {
 }
 
 export interface LessonContent {
-  type: "text" | "code" | "video" | "diagram";
+  type: 'text' | 'code' | 'video' | 'diagram';
   content: string;
   language?: string; // For code blocks
 }
@@ -59,32 +59,32 @@ export interface QuizQuestion {
 export class TrainingAcademy {
   private lessons: Map<string, Lesson>;
   private progress: Map<string, LessonProgress>; // userId -> progress
-  
+
   constructor() {
     this.lessons = new Map();
     this.progress = new Map();
     this.initializeLessons();
   }
-  
+
   /**
    * Initialize all training lessons
    */
   private initializeLessons() {
     // Lesson 1: From Mechanics to Life
-    this.lessons.set("lesson_01", {
-      id: "lesson_01",
-      title: "From Mechanics to Life: The Organic Singularity",
+    this.lessons.set('lesson_01', {
+      id: 'lesson_01',
+      title: 'From Mechanics to Life: The Organic Singularity',
       organism: BioOrganism.MYCELIUM,
-      duration: "30 minutes",
-      difficulty: "beginner",
+      duration: '30 minutes',
+      difficulty: 'beginner',
       objectives: [
-        "Understand the shift from mechanical automation to organic governance",
-        "Learn the 5 principles of organic governance",
-        "Recognize the limitations of traditional SaaS"
+        'Understand the shift from mechanical automation to organic governance',
+        'Learn the 5 principles of organic governance',
+        'Recognize the limitations of traditional SaaS',
       ],
       content: [
         {
-          type: "text",
+          type: 'text',
           content: `
 # From Mechanics to Life
 
@@ -100,11 +100,11 @@ HaderOS bridges this gap by applying biological principles to business software.
 3. **Genetic Memory** - Learning from past experiences
 4. **Self-Healing** - Automatic recovery from failures
 5. **Continuous Evolution** - Constant improvement without disruption
-          `
+          `,
         },
         {
-          type: "code",
-          language: "typescript",
+          type: 'code',
+          language: 'typescript',
           content: `
 // Traditional (Mechanical) Approach
 if (inventory < threshold) {
@@ -127,14 +127,14 @@ class InventoryHomeostasis {
     }
   }
 }
-          `
-        }
+          `,
+        },
       ],
       exercises: [
         {
-          id: "ex_01_homeostasis",
-          title: "Implement Digital Homeostasis",
-          description: "Create a self-regulating system that maintains optimal inventory levels",
+          id: 'ex_01_homeostasis',
+          title: 'Implement Digital Homeostasis',
+          description: 'Create a self-regulating system that maintains optimal inventory levels',
           starterCode: `
 class InventorySystem {
   async checkInventory(productId: string) {
@@ -165,41 +165,42 @@ class InventorySystem {
   }
 }
           `,
-          tests: []
-        }
+          tests: [],
+        },
       ],
       quiz: {
         questions: [
           {
-            question: "What is Digital Homeostasis?",
+            question: 'What is Digital Homeostasis?',
             options: [
-              "A database backup strategy",
-              "Self-regulating systems that maintain balance",
-              "A type of cloud hosting",
-              "An API authentication method"
+              'A database backup strategy',
+              'Self-regulating systems that maintain balance',
+              'A type of cloud hosting',
+              'An API authentication method',
             ],
             correctAnswer: 1,
-            explanation: "Digital Homeostasis is the ability of a system to self-regulate and maintain optimal balance, inspired by biological homeostasis."
-          }
-        ]
-      }
+            explanation:
+              'Digital Homeostasis is the ability of a system to self-regulate and maintain optimal balance, inspired by biological homeostasis.',
+          },
+        ],
+      },
     });
-    
+
     // Lesson 2: Mycelium - Fungal Networks
-    this.lessons.set("lesson_02", {
-      id: "lesson_02",
-      title: "Mycelium: The Wood Wide Web",
+    this.lessons.set('lesson_02', {
+      id: 'lesson_02',
+      title: 'Mycelium: The Wood Wide Web',
       organism: BioOrganism.MYCELIUM,
-      duration: "45 minutes",
-      difficulty: "intermediate",
+      duration: '45 minutes',
+      difficulty: 'intermediate',
       objectives: [
-        "Understand how fungal networks distribute resources",
-        "Learn to implement decentralized resource allocation",
-        "Build a mycelium-inspired inventory balancing system"
+        'Understand how fungal networks distribute resources',
+        'Learn to implement decentralized resource allocation',
+        'Build a mycelium-inspired inventory balancing system',
       ],
       content: [
         {
-          type: "text",
+          type: 'text',
           content: `
 # The Mycelium Network
 
@@ -218,11 +219,11 @@ In multi-branch organizations:
 - Manual rebalancing is slow and inefficient
 
 **Mycelium Module** solves this by creating a decentralized resource distribution network.
-          `
+          `,
         },
         {
-          type: "code",
-          language: "typescript",
+          type: 'code',
+          language: 'typescript',
           content: `
 // Mycelium-Inspired Resource Distribution
 class MyceliumNetwork {
@@ -256,14 +257,15 @@ class MyceliumNetwork {
     return transferCost < opportunityCost;
   }
 }
-          `
-        }
+          `,
+        },
       ],
       exercises: [
         {
-          id: "ex_02_mycelium",
-          title: "Build Mycelium Network",
-          description: "Implement a resource distribution algorithm that balances inventory across branches",
+          id: 'ex_02_mycelium',
+          title: 'Build Mycelium Network',
+          description:
+            'Implement a resource distribution algorithm that balances inventory across branches',
           starterCode: `
 interface Branch {
   id: string;
@@ -278,26 +280,26 @@ class MyceliumBalancer {
   }
 }
           `,
-          tests: []
-        }
-      ]
+          tests: [],
+        },
+      ],
     });
-    
+
     // Lesson 3: Corvid - Crow Intelligence
-    this.lessons.set("lesson_03", {
-      id: "lesson_03",
-      title: "Corvid: Learning from Mistakes",
+    this.lessons.set('lesson_03', {
+      id: 'lesson_03',
+      title: 'Corvid: Learning from Mistakes',
       organism: BioOrganism.CORVID,
-      duration: "40 minutes",
-      difficulty: "intermediate",
+      duration: '40 minutes',
+      difficulty: 'intermediate',
       objectives: [
-        "Understand how crows learn and remember",
-        "Implement error pattern recognition",
-        "Build a system that prevents repeated mistakes"
+        'Understand how crows learn and remember',
+        'Implement error pattern recognition',
+        'Build a system that prevents repeated mistakes',
       ],
       content: [
         {
-          type: "text",
+          type: 'text',
           content: `
 # Corvid Intelligence
 
@@ -317,11 +319,11 @@ Systems repeat the same errors:
 - Knowledge is lost when employees leave
 
 **Corvid Module** solves this by implementing meta-learning and error prevention.
-          `
+          `,
         },
         {
-          type: "code",
-          language: "typescript",
+          type: 'code',
+          language: 'typescript',
           content: `
 // Corvid-Inspired Learning Engine
 class CorvidLearningEngine {
@@ -361,37 +363,36 @@ class CorvidLearningEngine {
     }
   }
 }
-          `
-        }
+          `,
+        },
       ],
-      exercises: []
+      exercises: [],
     });
-    
+
     // More lessons would be added here...
   }
-  
+
   /**
    * Get a lesson by ID
    */
   getLesson(lessonId: string): Lesson | undefined {
     return this.lessons.get(lessonId);
   }
-  
+
   /**
    * Get all lessons for an organism
    */
   getLessonsForOrganism(organism: BioOrganism): Lesson[] {
-    return Array.from(this.lessons.values())
-      .filter(lesson => lesson.organism === organism);
+    return Array.from(this.lessons.values()).filter((lesson) => lesson.organism === organism);
   }
-  
+
   /**
    * Get all available lessons
    */
   getAllLessons(): Lesson[] {
     return Array.from(this.lessons.values());
   }
-  
+
   /**
    * Start a lesson for a user
    */
@@ -400,7 +401,7 @@ class CorvidLearningEngine {
     if (!lesson) {
       throw new Error(`Lesson not found: ${lessonId}`);
     }
-    
+
     this.progress.set(`${userId}:${lessonId}`, {
       lessonId,
       userId,
@@ -408,30 +409,26 @@ class CorvidLearningEngine {
       completedSections: [],
       completedExercises: [],
       quizScore: undefined,
-      completed: false
+      completed: false,
     });
   }
-  
+
   /**
    * Complete a section of a lesson
    */
-  async completeSection(
-    userId: string,
-    lessonId: string,
-    sectionIndex: number
-  ): Promise<void> {
+  async completeSection(userId: string, lessonId: string, sectionIndex: number): Promise<void> {
     const key = `${userId}:${lessonId}`;
     const progress = this.progress.get(key);
-    
+
     if (!progress) {
-      throw new Error("Lesson not started");
+      throw new Error('Lesson not started');
     }
-    
+
     if (!progress.completedSections.includes(sectionIndex)) {
       progress.completedSections.push(sectionIndex);
     }
   }
-  
+
   /**
    * Submit an exercise solution
    */
@@ -443,21 +440,19 @@ class CorvidLearningEngine {
   ): Promise<{ passed: boolean; feedback: string }> {
     const lesson = this.lessons.get(lessonId);
     if (!lesson) {
-      throw new Error("Lesson not found");
+      throw new Error('Lesson not found');
     }
-    
-    const exercise = lesson.exercises.find(ex => ex.id === exerciseId);
+
+    const exercise = lesson.exercises.find((ex) => ex.id === exerciseId);
     if (!exercise) {
-      throw new Error("Exercise not found");
+      throw new Error('Exercise not found');
     }
-    
+
     // Run tests
-    const results = await Promise.all(
-      exercise.tests.map(test => test.test(code))
-    );
-    
-    const passed = results.every(r => r);
-    
+    const results = await Promise.all(exercise.tests.map((test) => test.test(code)));
+
+    const passed = results.every((r) => r);
+
     if (passed) {
       const key = `${userId}:${lessonId}`;
       const progress = this.progress.get(key);
@@ -465,15 +460,15 @@ class CorvidLearningEngine {
         progress.completedExercises.push(exerciseId);
       }
     }
-    
+
     return {
       passed,
-      feedback: passed 
-        ? "✅ All tests passed! Great work!" 
-        : "❌ Some tests failed. Review the requirements and try again."
+      feedback: passed
+        ? '✅ All tests passed! Great work!'
+        : '❌ Some tests failed. Review the requirements and try again.',
     };
   }
-  
+
   /**
    * Submit quiz answers
    */
@@ -484,17 +479,17 @@ class CorvidLearningEngine {
   ): Promise<{ score: number; passed: boolean; feedback: string[] }> {
     const lesson = this.lessons.get(lessonId);
     if (!lesson || !lesson.quiz) {
-      throw new Error("Quiz not found");
+      throw new Error('Quiz not found');
     }
-    
+
     const questions = lesson.quiz.questions;
     let correct = 0;
     const feedback: string[] = [];
-    
+
     for (let i = 0; i < questions.length; i++) {
       const question = questions[i];
       const userAnswer = answers[i];
-      
+
       if (userAnswer === question.correctAnswer) {
         correct++;
         feedback.push(`✅ Correct! ${question.explanation}`);
@@ -502,38 +497,37 @@ class CorvidLearningEngine {
         feedback.push(`❌ Incorrect. ${question.explanation}`);
       }
     }
-    
+
     const score = (correct / questions.length) * 100;
     const passed = score >= 70;
-    
+
     const key = `${userId}:${lessonId}`;
     const progress = this.progress.get(key);
     if (progress) {
       progress.quizScore = score;
-      
+
       // Mark lesson as completed if quiz passed
       if (passed) {
         progress.completed = true;
         progress.completedAt = new Date();
       }
     }
-    
+
     return { score, passed, feedback };
   }
-  
+
   /**
    * Get user's progress for a lesson
    */
   getProgress(userId: string, lessonId: string): LessonProgress | undefined {
     return this.progress.get(`${userId}:${lessonId}`);
   }
-  
+
   /**
    * Get all progress for a user
    */
   getUserProgress(userId: string): LessonProgress[] {
-    return Array.from(this.progress.values())
-      .filter(p => p.userId === userId);
+    return Array.from(this.progress.values()).filter((p) => p.userId === userId);
   }
 }
 
@@ -542,14 +536,14 @@ class CorvidLearningEngine {
  */
 class ErrorMemory {
   private errors: Map<string, ErrorRecord[]> = new Map();
-  
+
   async store(record: ErrorRecord) {
     const key = record.pattern;
     const existing = this.errors.get(key) || [];
     existing.push(record);
     this.errors.set(key, existing);
   }
-  
+
   async getErrorFrequency(pattern: string): Promise<number> {
     const records = this.errors.get(pattern) || [];
     return records.length;

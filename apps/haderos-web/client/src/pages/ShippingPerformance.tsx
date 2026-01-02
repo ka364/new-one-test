@@ -1,35 +1,46 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Package, Clock, Star, DollarSign } from 'lucide-react';
 
 export default function ShippingPerformance() {
   const [selectedGovernorate, setSelectedGovernorate] = useState<string>('all');
-  
+
   // Fetch shipping companies
   const { data: companies, isLoading: companiesLoading } = trpc.cod.getShippingCompanies.useQuery();
-  
+
   // Fetch performance data
-  const { data: performance, isLoading: performanceLoading } = trpc.cod.getPerformanceByGovernorate.useQuery(
-    { governorateCode: selectedGovernorate === 'all' ? undefined : selectedGovernorate },
-    { enabled: !!companies }
-  );
+  const { data: performance, isLoading: performanceLoading } =
+    trpc.cod.getPerformanceByGovernorate.useQuery(
+      { governorateCode: selectedGovernorate === 'all' ? undefined : selectedGovernorate },
+      { enabled: !!companies }
+    );
 
   const isLoading = companiesLoading || performanceLoading;
 
   // Calculate overall stats
-  const overallStats = performance?.reduce((acc, perf) => ({
-    totalShipments: acc.totalShipments + ((perf.totalShipments || 0) || 0),
-    successfulShipments: acc.successfulShipments + ((perf.successfulShipments || 0) || 0),
-    failedShipments: acc.failedShipments + (perf.failedShipments || 0),
-  }), { totalShipments: 0, successfulShipments: 0, failedShipments: 0 });
+  const overallStats = performance?.reduce(
+    (acc, perf) => ({
+      totalShipments: acc.totalShipments + (perf.totalShipments || 0 || 0),
+      successfulShipments: acc.successfulShipments + (perf.successfulShipments || 0 || 0),
+      failedShipments: acc.failedShipments + (perf.failedShipments || 0),
+    }),
+    { totalShipments: 0, successfulShipments: 0, failedShipments: 0 }
+  );
 
-  const overallSuccessRate = overallStats && overallStats.totalShipments > 0
-    ? (overallStats.successfulShipments / overallStats.totalShipments * 100).toFixed(1)
-    : '0.0';
+  const overallSuccessRate =
+    overallStats && overallStats.totalShipments > 0
+      ? ((overallStats.successfulShipments / overallStats.totalShipments) * 100).toFixed(1)
+      : '0.0';
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
@@ -159,11 +170,12 @@ export default function ShippingPerformance() {
           ))
         ) : performance && performance.length > 0 ? (
           performance.map((perf) => {
-            const company = companies?.find(c => c.id === perf.companyId);
-            const successRate = (perf.totalShipments || 0) > 0
-              ? ((perf.successfulShipments || 0) / (perf.totalShipments || 0) * 100).toFixed(1)
-              : '0.0';
-            
+            const company = companies?.find((c) => c.id === perf.companyId);
+            const successRate =
+              (perf.totalShipments || 0) > 0
+                ? (((perf.successfulShipments || 0) / (perf.totalShipments || 0)) * 100).toFixed(1)
+                : '0.0';
+
             const getSuccessRateColor = (rate: number) => {
               if (rate >= 80) return 'text-green-600';
               if (rate >= 60) return 'text-yellow-600';
@@ -175,7 +187,9 @@ export default function ShippingPerformance() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl">{company?.displayName || 'شركة غير معروفة'}</CardTitle>
+                      <CardTitle className="text-xl">
+                        {company?.displayName || 'شركة غير معروفة'}
+                      </CardTitle>
                       <CardDescription>{perf.governorateName}</CardDescription>
                     </div>
                     <Badge variant={company?.active ? 'default' : 'secondary'}>
@@ -188,7 +202,9 @@ export default function ShippingPerformance() {
                     {/* Success Rate */}
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">نسبة النجاح</div>
-                      <div className={`text-2xl font-bold ${getSuccessRateColor(parseFloat(successRate))}`}>
+                      <div
+                        className={`text-2xl font-bold ${getSuccessRateColor(parseFloat(successRate))}`}
+                      >
                         {successRate}%
                       </div>
                     </div>
@@ -196,7 +212,7 @@ export default function ShippingPerformance() {
                     {/* Total Shipments */}
                     <div>
                       <div className="text-sm text-muted-foreground mb-1">إجمالي الشحنات</div>
-                      <div className="text-2xl font-bold">{(perf.totalShipments || 0)}</div>
+                      <div className="text-2xl font-bold">{perf.totalShipments || 0}</div>
                     </div>
 
                     {/* Avg Delivery Days */}
@@ -205,7 +221,9 @@ export default function ShippingPerformance() {
                         <Clock className="h-3 w-3" />
                         متوسط التوصيل
                       </div>
-                      <div className="text-2xl font-bold">{(Number(perf.avgDeliveryDays) || 0).toFixed(1)} يوم</div>
+                      <div className="text-2xl font-bold">
+                        {(Number(perf.avgDeliveryDays) || 0).toFixed(1)} يوم
+                      </div>
                     </div>
 
                     {/* Customer Satisfaction */}
@@ -214,7 +232,9 @@ export default function ShippingPerformance() {
                         <Star className="h-3 w-3" />
                         رضاء العملاء
                       </div>
-                      <div className="text-2xl font-bold">{(Number(perf.customerSatisfaction) || 0).toFixed(1)}/5</div>
+                      <div className="text-2xl font-bold">
+                        {(Number(perf.customerSatisfaction) || 0).toFixed(1)}/5
+                      </div>
                     </div>
 
                     {/* Avg Price */}
@@ -223,14 +243,16 @@ export default function ShippingPerformance() {
                         <DollarSign className="h-3 w-3" />
                         متوسط السعر
                       </div>
-                      <div className="text-2xl font-bold">{(Number(perf.avgPrice) || 0).toFixed(0)} ج.م</div>
+                      <div className="text-2xl font-bold">
+                        {(Number(perf.avgPrice) || 0).toFixed(0)} ج.م
+                      </div>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="mt-4">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-green-600">ناجح: {(perf.successfulShipments || 0)}</span>
+                      <span className="text-green-600">ناجح: {perf.successfulShipments || 0}</span>
                       <span className="text-red-600">فاشل: {perf.failedShipments}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">

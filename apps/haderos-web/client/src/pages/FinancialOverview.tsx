@@ -1,12 +1,36 @@
-import { TrendingUp, TrendingDown, DollarSign, CreditCard, PiggyBank, Activity, BarChart3, Receipt, Shield, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { trpc } from "@/lib/trpc";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  CreditCard,
+  PiggyBank,
+  Activity,
+  BarChart3,
+  Receipt,
+  Shield,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+} from 'lucide-react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { trpc } from '@/lib/trpc';
 import { format, subDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function FinancialOverview() {
   const financialSummary = trpc.financial.getSummary.useQuery();
@@ -19,7 +43,7 @@ export default function FinancialOverview() {
     totalExpenses: 0,
     netProfit: 0,
     burnRate: 0,
-    cashBalance: 0
+    cashBalance: 0,
   };
 
   const formatCurrency = (value: number) => {
@@ -27,7 +51,7 @@ export default function FinancialOverview() {
       style: 'currency',
       currency: 'EGP',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -66,9 +90,11 @@ export default function FinancialOverview() {
                 ) : (
                   <TrendingDown className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm font-medium ${
-                  summary.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <span
+                  className={`text-sm font-medium ${
+                    summary.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
                   {formatPercentage(summary.revenueGrowth)}
                 </span>
                 <span className="text-sm text-gray-500">مقارنة بالشهر الماضي</span>
@@ -106,9 +132,11 @@ export default function FinancialOverview() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${
-                summary.netProfit >= 0 ? 'text-purple-600' : 'text-red-600'
-              }`}>
+              <div
+                className={`text-3xl font-bold ${
+                  summary.netProfit >= 0 ? 'text-purple-600' : 'text-red-600'
+                }`}
+              >
                 {formatCurrency(summary.netProfit)}
               </div>
               <div className="flex items-center gap-2 mt-2">
@@ -124,9 +152,7 @@ export default function FinancialOverview() {
         <Card>
           <CardHeader>
             <CardTitle>التدفق النقدي (آخر 30 يوم)</CardTitle>
-            <CardDescription>
-              تتبع الإيرادات والمصروفات اليومية
-            </CardDescription>
+            <CardDescription>تتبع الإيرادات والمصروفات اليومية</CardDescription>
           </CardHeader>
           <CardContent>
             {cashFlowData.isLoading ? (
@@ -138,52 +164,48 @@ export default function FinancialOverview() {
                 <AreaChart data={cashFlowData.data}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
+                  <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis
                     stroke="#6b7280"
                     tick={{ fontSize: 12 }}
                     tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `التاريخ: ${label}`}
                   />
-                  <Legend 
+                  <Legend
                     wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
-                    formatter={(value) => value === 'revenue' ? 'الإيرادات' : 'المصروفات'}
+                    formatter={(value) => (value === 'revenue' ? 'الإيرادات' : 'المصروفات')}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#10b981" 
-                    fillOpacity={1} 
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#10b981"
+                    fillOpacity={1}
                     fill="url(#colorRevenue)"
                     strokeWidth={2}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="expenses" 
-                    stroke="#ef4444" 
-                    fillOpacity={1} 
+                  <Area
+                    type="monotone"
+                    dataKey="expenses"
+                    stroke="#ef4444"
+                    fillOpacity={1}
                     fill="url(#colorExpenses)"
                     strokeWidth={2}
                   />
@@ -267,7 +289,12 @@ export default function FinancialOverview() {
                       {kaiaStats.data?.halalTransactions.toLocaleString('ar-EG')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {((kaiaStats.data?.halalTransactions || 0) / (kaiaStats.data?.totalTransactions || 1) * 100).toFixed(1)}% من الإجمالي
+                      {(
+                        ((kaiaStats.data?.halalTransactions || 0) /
+                          (kaiaStats.data?.totalTransactions || 1)) *
+                        100
+                      ).toFixed(1)}
+                      % من الإجمالي
                     </div>
                   </div>
 
@@ -280,7 +307,12 @@ export default function FinancialOverview() {
                       {kaiaStats.data?.haramTransactions.toLocaleString('ar-EG')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {((kaiaStats.data?.haramTransactions || 0) / (kaiaStats.data?.totalTransactions || 1) * 100).toFixed(1)}% من الإجمالي
+                      {(
+                        ((kaiaStats.data?.haramTransactions || 0) /
+                          (kaiaStats.data?.totalTransactions || 1)) *
+                        100
+                      ).toFixed(1)}
+                      % من الإجمالي
                     </div>
                   </div>
 
@@ -293,7 +325,12 @@ export default function FinancialOverview() {
                       {kaiaStats.data?.mushboohTransactions.toLocaleString('ar-EG')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {((kaiaStats.data?.mushboohTransactions || 0) / (kaiaStats.data?.totalTransactions || 1) * 100).toFixed(1)}% من الإجمالي
+                      {(
+                        ((kaiaStats.data?.mushboohTransactions || 0) /
+                          (kaiaStats.data?.totalTransactions || 1)) *
+                        100
+                      ).toFixed(1)}
+                      % من الإجمالي
                     </div>
                   </div>
 
@@ -306,7 +343,12 @@ export default function FinancialOverview() {
                       {kaiaStats.data?.makroohTransactions.toLocaleString('ar-EG')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {((kaiaStats.data?.makroohTransactions || 0) / (kaiaStats.data?.totalTransactions || 1) * 100).toFixed(1)}% من الإجمالي
+                      {(
+                        ((kaiaStats.data?.makroohTransactions || 0) /
+                          (kaiaStats.data?.totalTransactions || 1)) *
+                        100
+                      ).toFixed(1)}
+                      % من الإجمالي
                     </div>
                   </div>
                 </div>
@@ -317,19 +359,27 @@ export default function FinancialOverview() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">ربا (Riba)</span>
-                      <span className="font-bold text-red-600">{kaiaStats.data?.violationsByCategory.riba}</span>
+                      <span className="font-bold text-red-600">
+                        {kaiaStats.data?.violationsByCategory.riba}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">غرر (Gharar)</span>
-                      <span className="font-bold text-orange-600">{kaiaStats.data?.violationsByCategory.gharar}</span>
+                      <span className="font-bold text-orange-600">
+                        {kaiaStats.data?.violationsByCategory.gharar}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">ميسر (Maysir)</span>
-                      <span className="font-bold text-purple-600">{kaiaStats.data?.violationsByCategory.maysir}</span>
+                      <span className="font-bold text-purple-600">
+                        {kaiaStats.data?.violationsByCategory.maysir}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">سلع محرمة</span>
-                      <span className="font-bold text-gray-600">{kaiaStats.data?.violationsByCategory.haram_goods}</span>
+                      <span className="font-bold text-gray-600">
+                        {kaiaStats.data?.violationsByCategory.haram_goods}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -359,14 +409,14 @@ export default function FinancialOverview() {
               <CardTitle className="text-lg">معدل النمو</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${
-                summary.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <div
+                className={`text-2xl font-bold ${
+                  summary.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 {formatPercentage(summary.revenueGrowth)}
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                نمو الإيرادات الشهري
-              </p>
+              <p className="text-sm text-gray-500 mt-2">نمو الإيرادات الشهري</p>
             </CardContent>
           </Card>
         </div>

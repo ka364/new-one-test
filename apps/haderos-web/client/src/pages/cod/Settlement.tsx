@@ -61,10 +61,7 @@ export default function SettlementPage() {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  style={{ backgroundColor: '#C62822' }} 
-                  className="text-white flex-1"
-                >
+                <Button style={{ backgroundColor: '#C62822' }} className="text-white flex-1">
                   <CheckCircle className="h-4 w-4 ml-2" />
                   إتمام التسوية
                 </Button>

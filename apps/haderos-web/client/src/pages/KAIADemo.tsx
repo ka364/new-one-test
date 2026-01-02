@@ -1,14 +1,20 @@
-import { useState } from "react";
-import { Shield, AlertCircle, CheckCircle2, XCircle, Loader2, ArrowRight } from "lucide-react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { checkKAIACompliance } from "@/lib/backend-api";
+import { useState } from 'react';
+import { Shield, AlertCircle, CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { checkKAIACompliance } from '@/lib/backend-api';
 
 type ComplianceResult = {
   compliant: boolean;
@@ -25,13 +31,13 @@ type ComplianceResult = {
 export default function KAIADemo() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ComplianceResult | null>(null);
-  
+
   const [formData, setFormData] = useState({
-    transactionType: "sale",
-    amount: "",
-    description: "",
-    interestRate: "",
-    contractTerms: ""
+    transactionType: 'sale',
+    amount: '',
+    description: '',
+    interestRate: '',
+    contractTerms: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,23 +52,23 @@ export default function KAIADemo() {
         amount: parseFloat(formData.amount),
         description: formData.description,
         interest_rate: formData.interestRate ? parseFloat(formData.interestRate) : undefined,
-        contract_terms: formData.contractTerms || undefined
+        contract_terms: formData.contractTerms || undefined,
       });
 
       setResult(response);
-      
+
       if (response.compliant) {
-        toast.success("✅ المعاملة متوافقة", {
-          description: "هذه المعاملة تتوافق مع الشريعة الإسلامية"
+        toast.success('✅ المعاملة متوافقة', {
+          description: 'هذه المعاملة تتوافق مع الشريعة الإسلامية',
         });
       } else {
-        toast.error("❌ المعاملة غير متوافقة", {
-          description: "تم اكتشاف انتهاكات شرعية"
+        toast.error('❌ المعاملة غير متوافقة', {
+          description: 'تم اكتشاف انتهاكات شرعية',
         });
       }
     } catch (error) {
-      toast.error("خطأ في الاتصال", {
-        description: "تعذر الاتصال بخادم KAIA. يرجى المحاولة مرة أخرى."
+      toast.error('خطأ في الاتصال', {
+        description: 'تعذر الاتصال بخادم KAIA. يرجى المحاولة مرة أخرى.',
       });
     } finally {
       setLoading(false);
@@ -71,17 +77,20 @@ export default function KAIADemo() {
 
   const handleReset = () => {
     setFormData({
-      transactionType: "sale",
-      amount: "",
-      description: "",
-      interestRate: "",
-      contractTerms: ""
+      transactionType: 'sale',
+      amount: '',
+      description: '',
+      interestRate: '',
+      contractTerms: '',
     });
     setResult(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12"
+      dir="rtl"
+    >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-12">
@@ -89,7 +98,7 @@ export default function KAIADemo() {
             <Shield className="w-4 h-4" />
             <span>KAIA Theology Engine</span>
           </div>
-          
+
           <h1 className="text-4xl font-bold mb-4">محرك التحقق من الامتثال الشرعي</h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             أدخل تفاصيل المعاملة المالية وسيقوم KAIA بتحليلها للتأكد من توافقها مع الشريعة الإسلامية
@@ -107,9 +116,9 @@ export default function KAIADemo() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="transactionType">نوع المعاملة</Label>
-                  <Select 
+                  <Select
                     value={formData.transactionType}
-                    onValueChange={(value) => setFormData({...formData, transactionType: value})}
+                    onValueChange={(value) => setFormData({ ...formData, transactionType: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -131,7 +140,7 @@ export default function KAIADemo() {
                     type="number"
                     placeholder="10000"
                     value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     required
                   />
                 </div>
@@ -142,7 +151,7 @@ export default function KAIADemo() {
                     id="description"
                     placeholder="مثال: بيع أحذية رياضية بالتقسيط"
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
                   />
                 </div>
@@ -155,7 +164,7 @@ export default function KAIADemo() {
                     step="0.01"
                     placeholder="0"
                     value={formData.interestRate}
-                    onChange={(e) => setFormData({...formData, interestRate: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, interestRate: e.target.value })}
                   />
                   <p className="text-xs text-gray-500">
                     إذا كانت المعاملة تتضمن فائدة، أدخل النسبة هنا
@@ -168,7 +177,7 @@ export default function KAIADemo() {
                     id="contractTerms"
                     placeholder="مثال: دفعة أولى 30%، والباقي على 6 أشهر"
                     value={formData.contractTerms}
-                    onChange={(e) => setFormData({...formData, contractTerms: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, contractTerms: e.target.value })}
                     rows={2}
                   />
                 </div>
@@ -212,7 +221,13 @@ export default function KAIADemo() {
             {result && (
               <>
                 {/* Main Result */}
-                <Card className={result.compliant ? "border-green-500 bg-green-50 dark:bg-green-950/20" : "border-red-500 bg-red-50 dark:bg-red-950/20"}>
+                <Card
+                  className={
+                    result.compliant
+                      ? 'border-green-500 bg-green-50 dark:bg-green-950/20'
+                      : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+                  }
+                >
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       {result.compliant ? (
@@ -221,12 +236,16 @@ export default function KAIADemo() {
                         <XCircle className="w-12 h-12 text-red-600" />
                       )}
                       <div>
-                        <CardTitle className={result.compliant ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
-                          {result.compliant ? "✅ المعاملة متوافقة" : "❌ المعاملة غير متوافقة"}
+                        <CardTitle
+                          className={
+                            result.compliant
+                              ? 'text-green-700 dark:text-green-400'
+                              : 'text-red-700 dark:text-red-400'
+                          }
+                        >
+                          {result.compliant ? '✅ المعاملة متوافقة' : '❌ المعاملة غير متوافقة'}
                         </CardTitle>
-                        <CardDescription>
-                          درجة الامتثال: {result.score}%
-                        </CardDescription>
+                        <CardDescription>درجة الامتثال: {result.score}%</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -346,7 +365,11 @@ export default function KAIADemo() {
                 </Button>
               </Link>
               <Link href="/investor">
-                <Button size="lg" variant="outline" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30"
+                >
                   العودة للبوابة
                 </Button>
               </Link>

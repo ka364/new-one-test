@@ -10,7 +10,7 @@
  * - Performance Metrics
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Phone,
   PhoneCall,
@@ -56,23 +56,23 @@ import {
   Flame,
   Thermometer,
   Snowflake,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -81,23 +81,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dropdown-menu';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 // Mock Data
 const MOCK_AGENT = {
-  id: "1",
-  name: "أحمد محمد",
-  extension: "101",
-  status: "available" as const,
+  id: '1',
+  name: 'أحمد محمد',
+  extension: '101',
+  status: 'available' as const,
   dailyTarget: 50,
   completedCalls: 32,
   salesAmount: 45000,
@@ -110,137 +110,139 @@ const MOCK_STATS = {
   missedCalls: 4,
   avgDuration: 245, // seconds
   salesCalls: 8,
-  conversionRate: "25%",
+  conversionRate: '25%',
   totalDuration: 7840, // seconds
 };
 
 const MOCK_LEADS = [
   {
-    id: "1",
-    firstName: "محمد",
-    lastName: "علي",
-    phone: "01012345678",
-    status: "new",
-    priority: "hot",
-    source: "website",
+    id: '1',
+    firstName: 'محمد',
+    lastName: 'علي',
+    phone: '01012345678',
+    status: 'new',
+    priority: 'hot',
+    source: 'website',
     expectedValue: 15000,
     lastContactAt: null,
-    city: "القاهرة",
-    companyName: "شركة النيل",
+    city: 'القاهرة',
+    companyName: 'شركة النيل',
   },
   {
-    id: "2",
-    firstName: "سارة",
-    lastName: "أحمد",
-    phone: "01098765432",
-    status: "contacted",
-    priority: "warm",
-    source: "social_media",
+    id: '2',
+    firstName: 'سارة',
+    lastName: 'أحمد',
+    phone: '01098765432',
+    status: 'contacted',
+    priority: 'warm',
+    source: 'social_media',
     expectedValue: 8000,
-    lastContactAt: "منذ ساعة",
-    city: "الإسكندرية",
+    lastContactAt: 'منذ ساعة',
+    city: 'الإسكندرية',
     companyName: null,
   },
   {
-    id: "3",
-    firstName: "خالد",
-    lastName: "حسن",
-    phone: "01155667788",
-    status: "qualified",
-    priority: "hot",
-    source: "referral",
+    id: '3',
+    firstName: 'خالد',
+    lastName: 'حسن',
+    phone: '01155667788',
+    status: 'qualified',
+    priority: 'hot',
+    source: 'referral',
     expectedValue: 25000,
-    lastContactAt: "منذ يوم",
-    city: "الجيزة",
-    companyName: "مصنع الأمل",
+    lastContactAt: 'منذ يوم',
+    city: 'الجيزة',
+    companyName: 'مصنع الأمل',
   },
   {
-    id: "4",
-    firstName: "نورا",
-    lastName: "محمود",
-    phone: "01234567890",
-    status: "proposal",
-    priority: "warm",
-    source: "cold_call",
+    id: '4',
+    firstName: 'نورا',
+    lastName: 'محمود',
+    phone: '01234567890',
+    status: 'proposal',
+    priority: 'warm',
+    source: 'cold_call',
     expectedValue: 12000,
-    lastContactAt: "منذ 3 أيام",
-    city: "المنصورة",
+    lastContactAt: 'منذ 3 أيام',
+    city: 'المنصورة',
     companyName: null,
   },
 ];
 
 const MOCK_FOLLOW_UPS = [
   {
-    id: "1",
-    leadName: "محمد علي",
-    phone: "01012345678",
-    type: "call",
-    scheduledAt: "10:30",
-    priority: "hot",
-    notes: "متابعة عرض الأسعار",
+    id: '1',
+    leadName: 'محمد علي',
+    phone: '01012345678',
+    type: 'call',
+    scheduledAt: '10:30',
+    priority: 'hot',
+    notes: 'متابعة عرض الأسعار',
   },
   {
-    id: "2",
-    leadName: "سارة أحمد",
-    phone: "01098765432",
-    type: "whatsapp",
-    scheduledAt: "11:00",
-    priority: "warm",
-    notes: "إرسال كتالوج المنتجات",
+    id: '2',
+    leadName: 'سارة أحمد',
+    phone: '01098765432',
+    type: 'whatsapp',
+    scheduledAt: '11:00',
+    priority: 'warm',
+    notes: 'إرسال كتالوج المنتجات',
   },
   {
-    id: "3",
-    leadName: "خالد حسن",
-    phone: "01155667788",
-    type: "call",
-    scheduledAt: "14:00",
-    priority: "hot",
-    notes: "التفاوض على السعر النهائي",
+    id: '3',
+    leadName: 'خالد حسن',
+    phone: '01155667788',
+    type: 'call',
+    scheduledAt: '14:00',
+    priority: 'hot',
+    notes: 'التفاوض على السعر النهائي',
   },
 ];
 
 const MOCK_RECENT_CALLS = [
   {
-    id: "1",
-    leadName: "أحمد سمير",
-    phone: "01111222333",
-    direction: "outbound",
+    id: '1',
+    leadName: 'أحمد سمير',
+    phone: '01111222333',
+    direction: 'outbound',
     duration: 320,
-    outcome: "appointment",
-    time: "09:45",
+    outcome: 'appointment',
+    time: '09:45',
   },
   {
-    id: "2",
-    leadName: "فاطمة علي",
-    phone: "01222333444",
-    direction: "inbound",
+    id: '2',
+    leadName: 'فاطمة علي',
+    phone: '01222333444',
+    direction: 'inbound',
     duration: 180,
-    outcome: "sale",
-    time: "09:20",
+    outcome: 'sale',
+    time: '09:20',
   },
   {
-    id: "3",
-    leadName: "عمر محمد",
-    phone: "01333444555",
-    direction: "outbound",
+    id: '3',
+    leadName: 'عمر محمد',
+    phone: '01333444555',
+    direction: 'outbound',
     duration: 0,
-    outcome: "no_answer",
-    time: "09:00",
+    outcome: 'no_answer',
+    time: '09:00',
   },
 ];
 
 const MOCK_PIPELINE = [
-  { status: "new", label: "جديد", count: 45, value: 675000, color: "bg-blue-500" },
-  { status: "contacted", label: "تم التواصل", count: 32, value: 480000, color: "bg-yellow-500" },
-  { status: "qualified", label: "مؤهل", count: 18, value: 360000, color: "bg-orange-500" },
-  { status: "proposal", label: "عرض سعر", count: 12, value: 300000, color: "bg-purple-500" },
-  { status: "negotiation", label: "تفاوض", count: 8, value: 200000, color: "bg-pink-500" },
-  { status: "won", label: "فاز", count: 5, value: 125000, color: "bg-green-500" },
+  { status: 'new', label: 'جديد', count: 45, value: 675000, color: 'bg-blue-500' },
+  { status: 'contacted', label: 'تم التواصل', count: 32, value: 480000, color: 'bg-yellow-500' },
+  { status: 'qualified', label: 'مؤهل', count: 18, value: 360000, color: 'bg-orange-500' },
+  { status: 'proposal', label: 'عرض سعر', count: 12, value: 300000, color: 'bg-purple-500' },
+  { status: 'negotiation', label: 'تفاوض', count: 8, value: 200000, color: 'bg-pink-500' },
+  { status: 'won', label: 'فاز', count: 5, value: 125000, color: 'bg-green-500' },
 ];
 
 export default function PhoneSalesPage() {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [agentStatus, setAgentStatus] = useState<"available" | "on_call" | "break" | "offline">("available");
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [agentStatus, setAgentStatus] = useState<'available' | 'on_call' | 'break' | 'offline'>(
+    'available'
+  );
   const [isOnCall, setIsOnCall] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -252,68 +254,88 @@ export default function PhoneSalesPage() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("ar-EG", {
-      style: "currency",
-      currency: "EGP",
+    return new Intl.NumberFormat('ar-EG', {
+      style: 'currency',
+      currency: 'EGP',
       minimumFractionDigits: 0,
     }).format(amount);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "available": return "bg-green-500";
-      case "on_call": return "bg-red-500";
-      case "break": return "bg-yellow-500";
-      case "offline": return "bg-gray-500";
-      default: return "bg-gray-500";
+      case 'available':
+        return 'bg-green-500';
+      case 'on_call':
+        return 'bg-red-500';
+      case 'break':
+        return 'bg-yellow-500';
+      case 'offline':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "available": return "متاح";
-      case "on_call": return "في مكالمة";
-      case "break": return "استراحة";
-      case "offline": return "غير متصل";
-      default: return status;
+      case 'available':
+        return 'متاح';
+      case 'on_call':
+        return 'في مكالمة';
+      case 'break':
+        return 'استراحة';
+      case 'offline':
+        return 'غير متصل';
+      default:
+        return status;
     }
   };
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case "hot": return <Flame className="w-4 h-4 text-red-500" />;
-      case "warm": return <Thermometer className="w-4 h-4 text-orange-500" />;
-      case "cold": return <Snowflake className="w-4 h-4 text-blue-500" />;
-      default: return null;
+      case 'hot':
+        return <Flame className="w-4 h-4 text-red-500" />;
+      case 'warm':
+        return <Thermometer className="w-4 h-4 text-orange-500" />;
+      case 'cold':
+        return <Snowflake className="w-4 h-4 text-blue-500" />;
+      default:
+        return null;
     }
   };
 
   const getOutcomeLabel = (outcome: string) => {
     switch (outcome) {
-      case "sale": return { label: "بيع", color: "bg-green-100 text-green-800" };
-      case "appointment": return { label: "موعد", color: "bg-blue-100 text-blue-800" };
-      case "callback_requested": return { label: "معاودة اتصال", color: "bg-purple-100 text-purple-800" };
-      case "not_interested": return { label: "غير مهتم", color: "bg-gray-100 text-gray-800" };
-      case "no_answer": return { label: "لا رد", color: "bg-yellow-100 text-yellow-800" };
-      default: return { label: outcome, color: "bg-gray-100 text-gray-800" };
+      case 'sale':
+        return { label: 'بيع', color: 'bg-green-100 text-green-800' };
+      case 'appointment':
+        return { label: 'موعد', color: 'bg-blue-100 text-blue-800' };
+      case 'callback_requested':
+        return { label: 'معاودة اتصال', color: 'bg-purple-100 text-purple-800' };
+      case 'not_interested':
+        return { label: 'غير مهتم', color: 'bg-gray-100 text-gray-800' };
+      case 'no_answer':
+        return { label: 'لا رد', color: 'bg-yellow-100 text-yellow-800' };
+      default:
+        return { label: outcome, color: 'bg-gray-100 text-gray-800' };
     }
   };
 
   const handleStartCall = (lead: any) => {
     setCurrentCall(lead);
     setIsOnCall(true);
-    setAgentStatus("on_call");
+    setAgentStatus('on_call');
     setCallDuration(0);
     setShowCallDialog(true);
   };
 
   const handleEndCall = () => {
     setIsOnCall(false);
-    setAgentStatus("available");
+    setAgentStatus('available');
     setShowCallDialog(false);
     setCurrentCall(null);
   };
@@ -331,10 +353,12 @@ export default function PhoneSalesPage() {
                     {MOCK_AGENT.name[0]}
                   </AvatarFallback>
                 </Avatar>
-                <span className={cn(
-                  "absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white",
-                  getStatusColor(agentStatus)
-                )} />
+                <span
+                  className={cn(
+                    'absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white',
+                    getStatusColor(agentStatus)
+                  )}
+                />
               </div>
               <div>
                 <h1 className="font-bold text-lg">{MOCK_AGENT.name}</h1>
@@ -342,13 +366,15 @@ export default function PhoneSalesPage() {
                   <Phone className="w-3 h-3" />
                   <span>تحويلة {MOCK_AGENT.extension}</span>
                   <span className="mx-1">•</span>
-                  <span className={cn(
-                    "px-2 py-0.5 rounded-full text-xs",
-                    agentStatus === "available" && "bg-green-100 text-green-800",
-                    agentStatus === "on_call" && "bg-red-100 text-red-800",
-                    agentStatus === "break" && "bg-yellow-100 text-yellow-800",
-                    agentStatus === "offline" && "bg-gray-100 text-gray-800"
-                  )}>
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full text-xs',
+                      agentStatus === 'available' && 'bg-green-100 text-green-800',
+                      agentStatus === 'on_call' && 'bg-red-100 text-red-800',
+                      agentStatus === 'break' && 'bg-yellow-100 text-yellow-800',
+                      agentStatus === 'offline' && 'bg-gray-100 text-gray-800'
+                    )}
+                  >
                     {getStatusLabel(agentStatus)}
                   </span>
                 </div>
@@ -432,7 +458,9 @@ export default function PhoneSalesPage() {
                       <div>
                         <p className="text-sm text-gray-500">المبيعات</p>
                         <p className="text-2xl font-bold">{MOCK_STATS.salesCalls}</p>
-                        <p className="text-xs text-gray-500">معدل التحويل: {MOCK_STATS.conversionRate}</p>
+                        <p className="text-xs text-gray-500">
+                          معدل التحويل: {MOCK_STATS.conversionRate}
+                        </p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                         <DollarSign className="w-6 h-6 text-green-600" />
@@ -446,8 +474,12 @@ export default function PhoneSalesPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-500">متوسط المدة</p>
-                        <p className="text-2xl font-bold">{formatDuration(MOCK_STATS.avgDuration)}</p>
-                        <p className="text-xs text-gray-500">إجمالي: {formatDuration(MOCK_STATS.totalDuration)}</p>
+                        <p className="text-2xl font-bold">
+                          {formatDuration(MOCK_STATS.avgDuration)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          إجمالي: {formatDuration(MOCK_STATS.totalDuration)}
+                        </p>
                       </div>
                       <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                         <Timer className="w-6 h-6 text-purple-600" />
@@ -461,7 +493,9 @@ export default function PhoneSalesPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-500">الهدف اليومي</p>
-                        <p className="text-2xl font-bold">{MOCK_AGENT.completedCalls}/{MOCK_AGENT.dailyTarget}</p>
+                        <p className="text-2xl font-bold">
+                          {MOCK_AGENT.completedCalls}/{MOCK_AGENT.dailyTarget}
+                        </p>
                         <Progress
                           value={(MOCK_AGENT.completedCalls / MOCK_AGENT.dailyTarget) * 100}
                           className="h-2 mt-2"
@@ -544,7 +578,7 @@ export default function PhoneSalesPage() {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex items-center gap-3">
-                                {call.direction === "inbound" ? (
+                                {call.direction === 'inbound' ? (
                                   <PhoneIncoming className="w-5 h-5 text-blue-500" />
                                 ) : (
                                   <PhoneOutgoing className="w-5 h-5 text-green-500" />
@@ -559,7 +593,8 @@ export default function PhoneSalesPage() {
                                   {getOutcomeLabel(call.outcome).label}
                                 </Badge>
                                 <p className="text-xs text-gray-500 mt-1">
-                                  {call.time} • {call.duration > 0 ? formatDuration(call.duration) : "-"}
+                                  {call.time} •{' '}
+                                  {call.duration > 0 ? formatDuration(call.duration) : '-'}
                                 </p>
                               </div>
                             </div>
@@ -579,7 +614,11 @@ export default function PhoneSalesPage() {
                     <CardTitle className="text-lg">إجراءات سريعة</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => setShowNewLeadDialog(true)}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => setShowNewLeadDialog(true)}
+                    >
                       <UserPlus className="w-4 h-4 ml-2" />
                       إضافة عميل محتمل
                     </Button>
@@ -610,30 +649,36 @@ export default function PhoneSalesPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {MOCK_LEADS.filter(l => l.priority === "hot").slice(0, 3).map((lead) => (
-                        <div
-                          key={lead.id}
-                          className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                          onClick={() => setSelectedLead(lead.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{lead.firstName} {lead.lastName}</p>
-                              <p className="text-sm text-gray-500">{formatCurrency(lead.expectedValue)}</p>
+                      {MOCK_LEADS.filter((l) => l.priority === 'hot')
+                        .slice(0, 3)
+                        .map((lead) => (
+                          <div
+                            key={lead.id}
+                            className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                            onClick={() => setSelectedLead(lead.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">
+                                  {lead.firstName} {lead.lastName}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {formatCurrency(lead.expectedValue)}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStartCall(lead);
+                                }}
+                              >
+                                <Phone className="w-4 h-4" />
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStartCall(lead);
-                              }}
-                            >
-                              <Phone className="w-4 h-4" />
-                            </Button>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -690,7 +735,10 @@ export default function PhoneSalesPage() {
                     </thead>
                     <tbody>
                       {MOCK_LEADS.map((lead) => (
-                        <tr key={lead.id} className="border-t hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <tr
+                          key={lead.id}
+                          className="border-t hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
                           <td className="p-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="w-10 h-10">
@@ -699,7 +747,9 @@ export default function PhoneSalesPage() {
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-medium">{lead.firstName} {lead.lastName}</p>
+                                <p className="font-medium">
+                                  {lead.firstName} {lead.lastName}
+                                </p>
                                 {lead.companyName && (
                                   <p className="text-sm text-gray-500 flex items-center gap-1">
                                     <Building2 className="w-3 h-3" />
@@ -712,25 +762,25 @@ export default function PhoneSalesPage() {
                           <td className="p-4 font-mono">{lead.phone}</td>
                           <td className="p-4">
                             <Badge variant="outline">
-                              {lead.status === "new" && "جديد"}
-                              {lead.status === "contacted" && "تم التواصل"}
-                              {lead.status === "qualified" && "مؤهل"}
-                              {lead.status === "proposal" && "عرض سعر"}
+                              {lead.status === 'new' && 'جديد'}
+                              {lead.status === 'contacted' && 'تم التواصل'}
+                              {lead.status === 'qualified' && 'مؤهل'}
+                              {lead.status === 'proposal' && 'عرض سعر'}
                             </Badge>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
                               {getPriorityIcon(lead.priority)}
                               <span>
-                                {lead.priority === "hot" && "ساخن"}
-                                {lead.priority === "warm" && "دافئ"}
-                                {lead.priority === "cold" && "بارد"}
+                                {lead.priority === 'hot' && 'ساخن'}
+                                {lead.priority === 'warm' && 'دافئ'}
+                                {lead.priority === 'cold' && 'بارد'}
                               </span>
                             </div>
                           </td>
                           <td className="p-4">{formatCurrency(lead.expectedValue)}</td>
                           <td className="p-4 text-gray-500">
-                            {lead.lastContactAt || "لم يتم التواصل"}
+                            {lead.lastContactAt || 'لم يتم التواصل'}
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
@@ -796,44 +846,46 @@ export default function PhoneSalesPage() {
                   <CardContent>
                     <ScrollArea className="h-[500px]">
                       <div className="space-y-3">
-                        {[...MOCK_RECENT_CALLS, ...MOCK_RECENT_CALLS, ...MOCK_RECENT_CALLS].map((call, index) => (
-                          <div
-                            key={`${call.id}-${index}`}
-                            className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                {call.direction === "inbound" ? (
-                                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <PhoneIncoming className="w-5 h-5 text-blue-600" />
+                        {[...MOCK_RECENT_CALLS, ...MOCK_RECENT_CALLS, ...MOCK_RECENT_CALLS].map(
+                          (call, index) => (
+                            <div
+                              key={`${call.id}-${index}`}
+                              className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                  {call.direction === 'inbound' ? (
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                      <PhoneIncoming className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                      <PhoneOutgoing className="w-5 h-5 text-green-600" />
+                                    </div>
+                                  )}
+                                  <div>
+                                    <p className="font-medium">{call.leadName}</p>
+                                    <p className="text-sm text-gray-500">{call.phone}</p>
                                   </div>
-                                ) : (
-                                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                    <PhoneOutgoing className="w-5 h-5 text-green-600" />
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <Badge className={getOutcomeLabel(call.outcome).color}>
+                                    {getOutcomeLabel(call.outcome).label}
+                                  </Badge>
+                                  <div className="text-left">
+                                    <p className="font-medium">
+                                      {call.duration > 0 ? formatDuration(call.duration) : '-'}
+                                    </p>
+                                    <p className="text-sm text-gray-500">{call.time}</p>
                                   </div>
-                                )}
-                                <div>
-                                  <p className="font-medium">{call.leadName}</p>
-                                  <p className="text-sm text-gray-500">{call.phone}</p>
+                                  <Button variant="ghost" size="sm">
+                                    <Play className="w-4 h-4" />
+                                  </Button>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <Badge className={getOutcomeLabel(call.outcome).color}>
-                                  {getOutcomeLabel(call.outcome).label}
-                                </Badge>
-                                <div className="text-left">
-                                  <p className="font-medium">
-                                    {call.duration > 0 ? formatDuration(call.duration) : "-"}
-                                  </p>
-                                  <p className="text-sm text-gray-500">{call.time}</p>
-                                </div>
-                                <Button variant="ghost" size="sm">
-                                  <Play className="w-4 h-4" />
-                                </Button>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </ScrollArea>
                   </CardContent>
@@ -931,25 +983,28 @@ export default function PhoneSalesPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-7 gap-4">
-                  {["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"].map((day, index) => (
-                    <div key={day} className="border rounded-lg p-3">
-                      <h3 className="font-medium text-center mb-3">{day}</h3>
-                      <div className="space-y-2">
-                        {index < 3 && MOCK_FOLLOW_UPS.slice(0, index + 1).map((followUp) => (
-                          <div
-                            key={followUp.id}
-                            className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm cursor-pointer hover:bg-blue-100"
-                          >
-                            <div className="flex items-center gap-1 mb-1">
-                              {getPriorityIcon(followUp.priority)}
-                              <span className="font-medium">{followUp.scheduledAt}</span>
-                            </div>
-                            <p className="truncate">{followUp.leadName}</p>
-                          </div>
-                        ))}
+                  {['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'].map(
+                    (day, index) => (
+                      <div key={day} className="border rounded-lg p-3">
+                        <h3 className="font-medium text-center mb-3">{day}</h3>
+                        <div className="space-y-2">
+                          {index < 3 &&
+                            MOCK_FOLLOW_UPS.slice(0, index + 1).map((followUp) => (
+                              <div
+                                key={followUp.id}
+                                className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm cursor-pointer hover:bg-blue-100"
+                              >
+                                <div className="flex items-center gap-1 mb-1">
+                                  {getPriorityIcon(followUp.priority)}
+                                  <span className="font-medium">{followUp.scheduledAt}</span>
+                                </div>
+                                <p className="truncate">{followUp.leadName}</p>
+                              </div>
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -978,7 +1033,7 @@ export default function PhoneSalesPage() {
                     <div key={stage.status} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-3 h-3 rounded-full", stage.color)} />
+                          <div className={cn('w-3 h-3 rounded-full', stage.color)} />
                           <span className="font-medium">{stage.label}</span>
                         </div>
                         <Badge variant="secondary">{stage.count}</Badge>
@@ -986,18 +1041,28 @@ export default function PhoneSalesPage() {
                       <p className="text-lg font-bold mb-3">{formatCurrency(stage.value)}</p>
                       <ScrollArea className="h-[300px]">
                         <div className="space-y-2">
-                          {MOCK_LEADS.filter(l => l.status === stage.status || (stage.status === "new" && l.status === "new")).slice(0, 5).map((lead) => (
-                            <div
-                              key={lead.id}
-                              className="p-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                            >
-                              <div className="flex items-center justify-between">
-                                <p className="font-medium text-sm">{lead.firstName} {lead.lastName}</p>
-                                {getPriorityIcon(lead.priority)}
+                          {MOCK_LEADS.filter(
+                            (l) =>
+                              l.status === stage.status ||
+                              (stage.status === 'new' && l.status === 'new')
+                          )
+                            .slice(0, 5)
+                            .map((lead) => (
+                              <div
+                                key={lead.id}
+                                className="p-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <p className="font-medium text-sm">
+                                    {lead.firstName} {lead.lastName}
+                                  </p>
+                                  {getPriorityIcon(lead.priority)}
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                  {formatCurrency(lead.expectedValue)}
+                                </p>
                               </div>
-                              <p className="text-xs text-gray-500">{formatCurrency(lead.expectedValue)}</p>
-                            </div>
-                          ))}
+                            ))}
                         </div>
                       </ScrollArea>
                     </div>
@@ -1014,7 +1079,7 @@ export default function PhoneSalesPage() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">
-              {isOnCall ? "مكالمة جارية" : "إنهاء المكالمة"}
+              {isOnCall ? 'مكالمة جارية' : 'إنهاء المكالمة'}
             </DialogTitle>
           </DialogHeader>
           {currentCall && (
@@ -1025,7 +1090,9 @@ export default function PhoneSalesPage() {
                 </AvatarFallback>
               </Avatar>
               <h3 className="text-xl font-bold">
-                {currentCall.firstName ? `${currentCall.firstName} ${currentCall.lastName || ""}` : currentCall.leadName}
+                {currentCall.firstName
+                  ? `${currentCall.firstName} ${currentCall.lastName || ''}`
+                  : currentCall.leadName}
               </h3>
               <p className="text-gray-500 font-mono">{currentCall.phone}</p>
 
@@ -1058,11 +1125,7 @@ export default function PhoneSalesPage() {
                     >
                       <PhoneOff className="w-6 h-6" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-12 h-12 rounded-full"
-                    >
+                    <Button variant="outline" size="icon" className="w-12 h-12 rounded-full">
                       <Volume2 className="w-5 h-5" />
                     </Button>
                   </div>
@@ -1096,9 +1159,7 @@ export default function PhoneSalesPage() {
                 <Button variant="outline" onClick={() => setShowCallDialog(false)}>
                   إلغاء
                 </Button>
-                <Button onClick={() => setShowCallDialog(false)}>
-                  حفظ وإغلاق
-                </Button>
+                <Button onClick={() => setShowCallDialog(false)}>حفظ وإغلاق</Button>
               </DialogFooter>
             </div>
           )}
@@ -1110,9 +1171,7 @@ export default function PhoneSalesPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>إضافة عميل محتمل جديد</DialogTitle>
-            <DialogDescription>
-              أدخل بيانات العميل المحتمل الجديد
-            </DialogDescription>
+            <DialogDescription>أدخل بيانات العميل المحتمل الجديد</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -1184,9 +1243,7 @@ export default function PhoneSalesPage() {
             <Button variant="outline" onClick={() => setShowNewLeadDialog(false)}>
               إلغاء
             </Button>
-            <Button onClick={() => setShowNewLeadDialog(false)}>
-              إضافة العميل
-            </Button>
+            <Button onClick={() => setShowNewLeadDialog(false)}>إضافة العميل</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

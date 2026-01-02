@@ -11,28 +11,12 @@ export { SecurityAuditor } from './core/SecurityAuditor';
 export { PerformanceOptimizer } from './core/PerformanceOptimizer';
 export { SelfHealingEngine } from './core/SelfHealingEngine';
 
-export type {
-  AIAnalysisResult,
-  Issue,
-  Recommendation,
-} from './core/HaderosAICoPilot';
+export type { AIAnalysisResult, Issue, Recommendation } from './core/HaderosAICoPilot';
 
-export type {
-  StructureAnalysis,
-  ArchitectureAnalysis,
-} from './core/SystemAnalyzer';
+export type { StructureAnalysis, ArchitectureAnalysis } from './core/SystemAnalyzer';
 
-export type {
-  CodeQualityAnalysis,
-  CodeIssue,
-} from './core/AICodeGenerator';
+export type { CodeQualityAnalysis, CodeIssue } from './core/AICodeGenerator';
 
-export type {
-  SecurityAnalysis,
-  SecurityVulnerability,
-} from './core/SecurityAuditor';
+export type { SecurityAnalysis, SecurityVulnerability } from './core/SecurityAuditor';
 
-export type {
-  PerformanceAnalysis,
-  PerformanceBottleneck,
-} from './core/PerformanceOptimizer';
+export type { PerformanceAnalysis, PerformanceBottleneck } from './core/PerformanceOptimizer';

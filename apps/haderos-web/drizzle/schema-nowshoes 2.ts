@@ -1,4 +1,14 @@
-import { pgTable, serial, varchar, decimal, text, boolean, timestamp, json, integer } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  varchar,
+  decimal,
+  text,
+  boolean,
+  timestamp,
+  json,
+  integer,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Products - قائمة المنتجات من المصنع
@@ -16,7 +26,9 @@ export const products = pgTable('products', {
 // Inventory - المخزون الحالي
 export const inventory = pgTable('inventory', {
   id: serial('id').primaryKey(),
-  productId: integer('product_id').notNull().references(() => products.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
   size: varchar('size', { length: 10 }),
   color: varchar('color', { length: 50 }),
   quantity: integer('quantity').notNull().default(0),
@@ -30,7 +42,9 @@ export const inventory = pgTable('inventory', {
 export const factoryBatches = pgTable('factory_batches', {
   id: serial('id').primaryKey(),
   batchNumber: varchar('batch_number', { length: 100 }).notNull(),
-  productId: integer('product_id').notNull().references(() => products.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
   quantity: integer('quantity').notNull(),
   supplierPrice: decimal('supplier_price', { precision: 10, scale: 2 }).notNull(),
   totalCost: decimal('total_cost', { precision: 10, scale: 2 }).notNull(),
@@ -62,8 +76,12 @@ export const orders = pgTable('orders', {
 // Order Items - تفاصيل الطلبات
 export const orderItems = pgTable('order_items', {
   id: serial('id').primaryKey(),
-  orderId: integer('order_id').notNull().references(() => orders.id),
-  productId: integer('product_id').notNull().references(() => products.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
   size: varchar('size', { length: 10 }),
   color: varchar('color', { length: 50 }),
   quantity: integer('quantity').notNull().default(1),
@@ -74,7 +92,9 @@ export const orderItems = pgTable('order_items', {
 // Shipments - الشحنات
 export const shipments = pgTable('shipments', {
   id: serial('id').primaryKey(),
-  orderId: integer('order_id').notNull().references(() => orders.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id),
   shippingCompany: varchar('shipping_company', { length: 50 }).notNull(),
   waybillNumber: varchar('waybill_number', { length: 100 }),
   shippingDate: timestamp('shipping_date'),
@@ -89,8 +109,12 @@ export const shipments = pgTable('shipments', {
 // Returns - المرتجعات
 export const returns = pgTable('returns', {
   id: serial('id').primaryKey(),
-  shipmentId: integer('shipment_id').notNull().references(() => shipments.id),
-  orderId: integer('order_id').notNull().references(() => orders.id),
+  shipmentId: integer('shipment_id')
+    .notNull()
+    .references(() => shipments.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id),
   returnReason: varchar('return_reason', { length: 255 }).notNull(),
   returnDate: timestamp('return_date'),
   refundAmount: decimal('refund_amount', { precision: 10, scale: 2 }),
@@ -102,7 +126,9 @@ export const returns = pgTable('returns', {
 // Replacements - الاستبدالات
 export const replacements = pgTable('replacements', {
   id: serial('id').primaryKey(),
-  originalOrderId: integer('original_order_id').notNull().references(() => orders.id),
+  originalOrderId: integer('original_order_id')
+    .notNull()
+    .references(() => orders.id),
   newOrderId: integer('new_order_id').references(() => orders.id),
   reason: text('reason').notNull(),
   status: varchar('status', { length: 50 }).notNull().default('pending'),
@@ -114,41 +140,43 @@ export const replacements = pgTable('replacements', {
 export const dailySalesReports = pgTable('daily_sales_reports', {
   id: serial('id').primaryKey(),
   reportDate: timestamp('report_date').notNull(),
-  
+
   nowOrdersCount: integer('now_orders_count').default(0),
   nowPiecesCount: integer('now_pieces_count').default(0),
   nowRevenue: decimal('now_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   oneOrdersCount: integer('one_orders_count').default(0),
   onePiecesCount: integer('one_pieces_count').default(0),
   oneRevenue: decimal('one_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   factoryOrdersCount: integer('factory_orders_count').default(0),
   factoryPiecesCount: integer('factory_pieces_count').default(0),
   factoryRevenue: decimal('factory_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   externalOrdersCount: integer('external_orders_count').default(0),
   externalPiecesCount: integer('external_pieces_count').default(0),
   externalRevenue: decimal('external_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   websiteOrdersCount: integer('website_orders_count').default(0),
   websitePiecesCount: integer('website_pieces_count').default(0),
   websiteRevenue: decimal('website_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   totalOrdersCount: integer('total_orders_count').default(0),
   totalPiecesCount: integer('total_pieces_count').default(0),
   totalRevenue: decimal('total_revenue', { precision: 10, scale: 2 }).default('0'),
-  
+
   shippedOrdersCount: integer('shipped_orders_count').default(0),
   shippedPiecesCount: integer('shipped_pieces_count').default(0),
-  
+
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 // Stock Alerts - تنبيهات المخزون
 export const stockAlerts = pgTable('stock_alerts', {
   id: serial('id').primaryKey(),
-  inventoryId: integer('inventory_id').notNull().references(() => inventory.id),
+  inventoryId: integer('inventory_id')
+    .notNull()
+    .references(() => inventory.id),
   alertType: varchar('alert_type', { length: 50 }).notNull(),
   message: text('message').notNull(),
   isResolved: boolean('is_resolved').default(false),
@@ -159,7 +187,9 @@ export const stockAlerts = pgTable('stock_alerts', {
 // Order Status History - تاريخ حالة الطلب
 export const orderStatusHistory = pgTable('order_status_history', {
   id: serial('id').primaryKey(),
-  orderId: integer('order_id').notNull().references(() => orders.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id),
   oldStatus: varchar('old_status', { length: 50 }),
   newStatus: varchar('new_status', { length: 50 }).notNull(),
   changedBy: integer('changed_by'),
@@ -170,7 +200,9 @@ export const orderStatusHistory = pgTable('order_status_history', {
 // Product Size Charts - مقاسات المنتجات
 export const productSizeCharts = pgTable('product_size_charts', {
   id: serial('id').primaryKey(),
-  productId: integer('product_id').notNull().references(() => products.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
   size: varchar('size', { length: 10 }).notNull(),
   lengthCm: decimal('length_cm', { precision: 5, scale: 2 }),
   widthCm: decimal('width_cm', { precision: 5, scale: 2 }),
@@ -186,7 +218,9 @@ export const productSizeCharts = pgTable('product_size_charts', {
 // Shopify Products - ربط المنتجات مع Shopify
 export const shopifyProducts = pgTable('shopify_products', {
   id: serial('id').primaryKey(),
-  productId: integer('product_id').notNull().references(() => products.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
   shopifyProductId: varchar('shopify_product_id', { length: 50 }).notNull().unique(),
   nameAr: varchar('name_ar', { length: 255 }).notNull(),
   nameEn: varchar('name_en', { length: 255 }).notNull(),
@@ -206,7 +240,9 @@ export const shopifyProducts = pgTable('shopify_products', {
 // Shopify Variants - متغيرات المنتجات على Shopify
 export const shopifyVariants = pgTable('shopify_variants', {
   id: serial('id').primaryKey(),
-  shopifyProductTableId: integer('shopify_product_table_id').notNull().references(() => shopifyProducts.id),
+  shopifyProductTableId: integer('shopify_product_table_id')
+    .notNull()
+    .references(() => shopifyProducts.id),
   shopifyVariantId: varchar('shopify_variant_id', { length: 50 }).notNull().unique(),
   inventoryId: integer('inventory_id').references(() => inventory.id),
   sku: varchar('sku', { length: 100 }).notNull(),

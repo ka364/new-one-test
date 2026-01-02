@@ -143,11 +143,7 @@ export class AICodeGenerator {
       commentLines,
       blankLines,
       complexity,
-      maintainabilityIndex: this.calculateMaintainabilityIndex(
-        codeLines,
-        commentLines,
-        complexity
-      ),
+      maintainabilityIndex: this.calculateMaintainabilityIndex(codeLines, commentLines, complexity),
     };
 
     const score = this.calculateQualityScore(metrics, issues);
@@ -157,7 +153,7 @@ export class AICodeGenerator {
       issues: issues.slice(0, 50), // Top 50 issues
       metrics,
       testCoverage: 20, // Mock value - would need actual coverage data
-      criticalIssues: issues.filter(i => i.severity === 'critical'),
+      criticalIssues: issues.filter((i) => i.severity === 'critical'),
     };
   }
 
@@ -323,9 +319,9 @@ CREATE INDEX idx_${spec.name}_created ON ${spec.name}(created_at);
     let score = metrics.maintainabilityIndex;
 
     // Deduct for issues
-    const criticalIssues = issues.filter(i => i.severity === 'critical').length;
-    const highIssues = issues.filter(i => i.severity === 'high').length;
-    const mediumIssues = issues.filter(i => i.severity === 'medium').length;
+    const criticalIssues = issues.filter((i) => i.severity === 'critical').length;
+    const highIssues = issues.filter((i) => i.severity === 'high').length;
+    const mediumIssues = issues.filter((i) => i.severity === 'medium').length;
 
     score -= criticalIssues * 10;
     score -= highIssues * 5;

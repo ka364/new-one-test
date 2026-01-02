@@ -4,9 +4,9 @@ import { TRPCError } from '@trpc/server';
 import { invokeLLM } from './llm';
 
 export enum AIProvider {
-  MANUS = 'manus',      // مجاني (مدمج في Manus)
+  MANUS = 'manus', // مجاني (مدمج في Manus)
   DEEPSEEK = 'deepseek', // رخيص وسريع
-  CLAUDE = 'claude',     // متقدم وإبداعي
+  CLAUDE = 'claude', // متقدم وإبداعي
 }
 
 export type AIOptions = {
@@ -41,10 +41,10 @@ export class UnifiedAIService {
     options: { model?: string; temperature?: number } = {}
   ): Promise<AIResponse> {
     this.startTimer();
-    
+
     try {
       console.log('🤖 Using Manus invokeLLM (Free Tier)...');
-      
+
       const response = await invokeLLM({
         messages,
         temperature: options.temperature || 0.7,
@@ -58,13 +58,13 @@ export class UnifiedAIService {
         cost: 0, // مجاني تماماً
         usage: response.usage || { tokens: 0 },
         latency: this.getLatency(),
-        model: response.model || 'deepseek-chat'
+        model: response.model || 'deepseek-chat',
       };
     } catch (error: any) {
       console.error('❌ Manus LLM Error:', error);
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: `Manus invokeLLM failed: ${error.message}`
+        message: `Manus invokeLLM failed: ${error.message}`,
       });
     }
   }
@@ -75,32 +75,32 @@ export class UnifiedAIService {
     options: { model?: string; temperature?: number } = {}
   ): Promise<AIResponse> {
     this.startTimer();
-    
+
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'DEEPSEEK_API_KEY not configured in environment variables'
+        message: 'DEEPSEEK_API_KEY not configured in environment variables',
       });
     }
 
     try {
       console.log('🚀 Using DeepSeek API (Cost-effective)...');
-      
+
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           model: options.model || 'deepseek-chat',
           messages,
           temperature: options.temperature || 0.7,
           max_tokens: 2000,
-          stream: false
-        })
+          stream: false,
+        }),
       });
 
       if (!response.ok) {
@@ -109,7 +109,7 @@ export class UnifiedAIService {
       }
 
       const data = await response.json();
-      
+
       if (!data.choices || !data.choices[0]) {
         throw new Error('Invalid response format from DeepSeek API');
       }
@@ -120,13 +120,13 @@ export class UnifiedAIService {
         cost: this.calculateDeepSeekCost(data.usage || {}),
         usage: data.usage || {},
         latency: this.getLatency(),
-        model: options.model || 'deepseek-chat'
+        model: options.model || 'deepseek-chat',
       };
     } catch (error: any) {
       console.error('❌ DeepSeek API Error:', error);
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: `DeepSeek API failed: ${error.message}`
+        message: `DeepSeek API failed: ${error.message}`,
       });
     }
   }
@@ -137,27 +137,28 @@ export class UnifiedAIService {
     options: { model?: string; maxTokens?: number } = {}
   ): Promise<AIResponse> {
     this.startTimer();
-    
+
     const apiKey = process.env.CLAUDE_API_KEY;
     if (!apiKey) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'CLAUDE_API_KEY not configured in environment variables'
+        message: 'CLAUDE_API_KEY not configured in environment variables',
       });
     }
 
     try {
       console.log('🎯 Using Claude API (Advanced tasks)...');
-      
+
       // تحويل تنسيق الرسائل ليكون متوافقاً مع Claude
       const claudeMessages = messages
-        .filter(msg => msg.role !== 'system')
-        .map(msg => ({
+        .filter((msg) => msg.role !== 'system')
+        .map((msg) => ({
           role: msg.role as 'user' | 'assistant',
-          content: msg.content
+          content: msg.content,
         }));
 
-      const systemMessage = messages.find(msg => msg.role === 'system')?.content || 
+      const systemMessage =
+        messages.find((msg) => msg.role === 'system')?.content ||
         'You are a helpful AI assistant that speaks Arabic fluently.';
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -165,14 +166,14 @@ export class UnifiedAIService {
         headers: {
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           model: options.model || 'claude-3-sonnet-20240229',
           max_tokens: options.maxTokens || 1000,
           messages: claudeMessages,
-          system: systemMessage
-        })
+          system: systemMessage,
+        }),
       });
 
       if (!response.ok) {
@@ -181,7 +182,7 @@ export class UnifiedAIService {
       }
 
       const data = await response.json();
-      
+
       if (!data.content || !data.content[0]) {
         throw new Error('Invalid response format from Claude API');
       }
@@ -192,30 +193,27 @@ export class UnifiedAIService {
         cost: this.calculateClaudeCost(data.usage || {}),
         usage: data.usage || {},
         latency: this.getLatency(),
-        model: options.model || 'claude-3-sonnet-20240229'
+        model: options.model || 'claude-3-sonnet-20240229',
       };
     } catch (error: any) {
       console.error('❌ Claude API Error:', error);
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: `Claude API failed: ${error.message}`
+        message: `Claude API failed: ${error.message}`,
       });
     }
   }
 
   // ========== SMART ROUTER ==========
 
-  async generateResponse(
-    messages: any[],
-    options: AIOptions = {}
-  ): Promise<AIResponse> {
+  async generateResponse(messages: any[], options: AIOptions = {}): Promise<AIResponse> {
     const {
       provider,
       autoSelect = true,
       maxCost = 0.1, // $0.10 كحد أقصى
       fallback = true,
       model = 'auto',
-      temperature = 0.7
+      temperature = 0.7,
     } = options;
 
     console.log('🧠 Unified AI Service - Processing request...');
@@ -233,7 +231,7 @@ export class UnifiedAIService {
       maxCost,
       model
     );
-    
+
     console.log(`🤖 Smart router selected: ${selectedProvider}`);
 
     try {
@@ -250,13 +248,9 @@ export class UnifiedAIService {
 
   // ========== INTELLIGENT PROVIDER SELECTION ==========
 
-  private selectSmartProvider(
-    userMessage: string,
-    maxCost: number,
-    model: string
-  ): AIProvider {
+  private selectSmartProvider(userMessage: string, maxCost: number, model: string): AIProvider {
     const message = userMessage.toLowerCase();
-    
+
     // 1. إذا كانت المهمة بسيطة → Manus (مجاني)
     if (this.isSimpleTask(message)) {
       console.log('📝 Task type: Simple → Manus (Free)');
@@ -295,9 +289,9 @@ export class UnifiedAIService {
       /^(ما اسمك|who are you)/i,
       /^(شكرا|thank you|ممتاز)/i,
       /^(بسيط|simple|سؤال بسيط)/i,
-      /^(نعم|yes|لا|no|ok|حسنا)/i
+      /^(نعم|yes|لا|no|ok|حسنا)/i,
     ];
-    return simplePatterns.some(pattern => pattern.test(message));
+    return simplePatterns.some((pattern) => pattern.test(message));
   }
 
   private isCodeTask(message: string): boolean {
@@ -307,9 +301,9 @@ export class UnifiedAIService {
       /(javascript|typescript|python|java|php|html|css)/i,
       /(bug|error|خطأ|تصحيح)/i,
       /(مكتبة|library|package|npm|yarn)/i,
-      /(خوارزمية|algorithm|بنية بيانات)/i
+      /(خوارزمية|algorithm|بنية بيانات)/i,
     ];
-    return codePatterns.some(pattern => pattern.test(message));
+    return codePatterns.some((pattern) => pattern.test(message));
   }
 
   private isCreativeTask(message: string): boolean {
@@ -319,9 +313,9 @@ export class UnifiedAIService {
       /(إبداع|creative|تخيل|imagine)/i,
       /(تخطيط|planning|استراتيجية|strategy)/i,
       /(تصميم|design|art|فن)/i,
-      /(ابتكار|innovation|جديد|new idea)/i
+      /(ابتكار|innovation|جديد|new idea)/i,
     ];
-    return creativePatterns.some(pattern => pattern.test(message));
+    return creativePatterns.some((pattern) => pattern.test(message));
   }
 
   private isAnalyticalTask(message: string): boolean {
@@ -331,9 +325,9 @@ export class UnifiedAIService {
       /(بحث|research|study)/i,
       /(شرح|explain|explanations)/i,
       /(رأيك|opinion|نصيحة|advice)/i,
-      /(تقييم|evaluate|assessment)/i
+      /(تقييم|evaluate|assessment)/i,
     ];
-    return analyticalPatterns.some(pattern => pattern.test(message));
+    return analyticalPatterns.some((pattern) => pattern.test(message));
   }
 
   // ========== HELPER METHODS ==========
@@ -347,21 +341,21 @@ export class UnifiedAIService {
       case AIProvider.MANUS:
         return this.invokeManusLLM(messages, {
           model: options.model === 'auto' ? 'deepseek-chat' : options.model,
-          temperature: options.temperature
+          temperature: options.temperature,
         });
       case AIProvider.DEEPSEEK:
         return this.invokeDeepSeek(messages, {
           model: options.model === 'auto' ? 'deepseek-chat' : options.model,
-          temperature: options.temperature
+          temperature: options.temperature,
         });
       case AIProvider.CLAUDE:
         return this.invokeClaude(messages, {
-          model: options.model === 'auto' ? 'claude-3-sonnet-20240229' : options.model
+          model: options.model === 'auto' ? 'claude-3-sonnet-20240229' : options.model,
         });
       default:
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: `Unknown provider: ${provider}`
+          message: `Unknown provider: ${provider}`,
         });
     }
   }
@@ -373,10 +367,10 @@ export class UnifiedAIService {
   ): Promise<AIResponse> {
     // ترتيب Fallback (المجاني أولاً)
     const fallbackOrder = [
-      AIProvider.MANUS,    // مجاني ومضمون
+      AIProvider.MANUS, // مجاني ومضمون
       AIProvider.DEEPSEEK, // رخيص
-      AIProvider.CLAUDE    // متقدم
-    ].filter(p => p !== failedProvider);
+      AIProvider.CLAUDE, // متقدم
+    ].filter((p) => p !== failedProvider);
 
     for (const provider of fallbackOrder) {
       try {
@@ -390,7 +384,7 @@ export class UnifiedAIService {
 
     throw new TRPCError({
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'All AI providers failed. Please check your API keys and internet connection.'
+      message: 'All AI providers failed. Please check your API keys and internet connection.',
     });
   }
 
@@ -401,7 +395,7 @@ export class UnifiedAIService {
     const inputTokens = usage.prompt_tokens || 0;
     const outputTokens = usage.completion_tokens || 0;
     const totalTokens = inputTokens + outputTokens;
-    
+
     return (totalTokens / 1000000) * 0.14;
   }
 
@@ -409,10 +403,10 @@ export class UnifiedAIService {
     // Claude Sonnet pricing: $3 per 1M input, $15 per 1M output
     const inputTokens = usage.input_tokens || 0;
     const outputTokens = usage.output_tokens || 0;
-    
+
     const inputCost = (inputTokens / 1000000) * 3;
     const outputCost = (outputTokens / 1000000) * 15;
-    
+
     return inputCost + outputCost;
   }
 
@@ -430,15 +424,15 @@ export class UnifiedAIService {
 
   getAvailableProviders(): AIProvider[] {
     const providers: AIProvider[] = [AIProvider.MANUS];
-    
+
     if (process.env.DEEPSEEK_API_KEY) {
       providers.push(AIProvider.DEEPSEEK);
     }
-    
+
     if (process.env.CLAUDE_API_KEY) {
       providers.push(AIProvider.CLAUDE);
     }
-    
+
     return providers;
   }
 
@@ -448,22 +442,22 @@ export class UnifiedAIService {
         name: 'Manus invokeLLM',
         cost: 'Free',
         bestFor: 'Simple queries, greetings, basic tasks',
-        maxTokens: 2000
+        maxTokens: 2000,
       },
       [AIProvider.DEEPSEEK]: {
         name: 'DeepSeek API',
         cost: '$0.14 per 1M tokens',
         bestFor: 'Code generation, analysis, technical tasks',
-        maxTokens: 2000
+        maxTokens: 2000,
       },
       [AIProvider.CLAUDE]: {
         name: 'Claude API',
         cost: '$3-15 per 1M tokens',
         bestFor: 'Creative writing, complex analysis, strategy',
-        maxTokens: 1000
-      }
+        maxTokens: 1000,
+      },
     };
-    
+
     return info[provider] || { name: 'Unknown', cost: 'N/A', bestFor: 'N/A', maxTokens: 0 };
   }
 }

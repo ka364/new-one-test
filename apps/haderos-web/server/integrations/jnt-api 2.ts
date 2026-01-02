@@ -3,10 +3,10 @@ import crypto from 'crypto';
 
 /**
  * J&T Express API Client
- * 
+ *
  * Platform: https://open.jtjms-eg.com
  * Documentation: Available after registration
- * 
+ *
  * Authentication: API Account + Private Key with signature
  */
 

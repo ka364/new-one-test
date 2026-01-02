@@ -78,11 +78,14 @@ describe('Bio-Protocol System - Unit Tests', () => {
         { type: 'DatabaseError', table: 'users', count: 2 },
       ];
 
-      const patterns = errors.reduce((acc, e) => {
-        const key = e.type;
-        acc[key] = (acc[key] || 0) + e.count;
-        return acc;
-      }, {} as Record<string, number>);
+      const patterns = errors.reduce(
+        (acc, e) => {
+          const key = e.type;
+          acc[key] = (acc[key] || 0) + e.count;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       expect(patterns.ValidationError).toBe(8);
       expect(patterns.DatabaseError).toBe(2);
@@ -126,7 +129,7 @@ describe('Bio-Protocol System - Unit Tests', () => {
         { id: 3, name: 'Branch C', inventory: 80, demand: 60 },
       ];
 
-      const analyzeBalance = (branches: typeof branches.prototype[]) => {
+      const analyzeBalance = (branches: (typeof branches.prototype)[]) => {
         const totalInventory = branches.reduce((sum, b) => sum + b.inventory, 0);
         const totalDemand = branches.reduce((sum, b) => sum + b.demand, 0);
         const imbalanced = branches.filter((b) => b.inventory < b.demand);
@@ -346,8 +349,7 @@ describe('Bio-Protocol System - Unit Tests', () => {
       };
 
       const activeCount = Object.values(moduleStatuses).filter((m) => m.active).length;
-      const avgHealth =
-        Object.values(moduleStatuses).reduce((sum, m) => sum + m.health, 0) / 7;
+      const avgHealth = Object.values(moduleStatuses).reduce((sum, m) => sum + m.health, 0) / 7;
 
       expect(activeCount).toBe(7);
       expect(avgHealth).toBeGreaterThan(85);

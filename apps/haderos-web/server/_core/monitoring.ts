@@ -1,7 +1,7 @@
 /**
  * Monitoring & Observability System
  * Apple-Level Monitoring Implementation
- * 
+ *
  * Provides comprehensive monitoring, error tracking, and performance metrics
  */
 
@@ -228,7 +228,9 @@ class MonitoringService {
 export const monitoring = new MonitoringService();
 
 // Auto-cleanup every hour
-setInterval(() => {
-  monitoring.clearOldData(24);
-}, 60 * 60 * 1000);
-
+setInterval(
+  () => {
+    monitoring.clearOldData(24);
+  },
+  60 * 60 * 1000
+);

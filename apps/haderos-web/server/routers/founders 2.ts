@@ -3,8 +3,8 @@
  * Handles founder authentication, account management, and monthly password rotation
  */
 
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import {
   createFounderAccount,
   getFounderByUsername,
@@ -23,8 +23,8 @@ import {
   generateSecurePassword,
   getCurrentMonth,
   getPasswordExpiryDate,
-} from "../db-founders";
-import { TRPCError } from "@trpc/server";
+} from '../db-founders';
+import { TRPCError } from '@trpc/server';
 
 export const foundersRouter = router({
   // ============================================
@@ -55,20 +55,20 @@ export const foundersRouter = router({
             success: false,
             ipAddress: input.ipAddress,
             userAgent: input.userAgent,
-            failureReason: "Invalid credentials",
+            failureReason: 'Invalid credentials',
           });
         }
 
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "اسم المستخدم أو كلمة المرور غير صحيحة",
+          code: 'UNAUTHORIZED',
+          message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
         });
       }
 
       if (result.expired) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "انتهت صلاحية كلمة المرور. يرجى التواصل مع الإدارة لتحديثها",
+          code: 'UNAUTHORIZED',
+          message: 'انتهت صلاحية كلمة المرور. يرجى التواصل مع الإدارة لتحديثها',
         });
       }
 
@@ -97,20 +97,18 @@ export const foundersRouter = router({
   /**
    * Get current founder (from session)
    */
-  me: publicProcedure
-    .input(z.object({ founderId: z.number() }))
-    .query(async ({ input }) => {
-      const founder = await getFounderById(input.founderId);
-      if (!founder) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "الحساب غير موجود",
-        });
-      }
+  me: publicProcedure.input(z.object({ founderId: z.number() })).query(async ({ input }) => {
+    const founder = await getFounderById(input.founderId);
+    if (!founder) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'الحساب غير موجود',
+      });
+    }
 
-      const { passwordHash, ...founderData } = founder;
-      return founderData;
-    }),
+    const { passwordHash, ...founderData } = founder;
+    return founderData;
+  }),
 
   // ============================================
   // ACCOUNT MANAGEMENT (Admin Only)
@@ -136,23 +134,21 @@ export const foundersRouter = router({
       const existingByUsername = await getFounderByUsername(input.username);
       if (existingByUsername) {
         throw new TRPCError({
-          code: "CONFLICT",
-          message: "اسم المستخدم مستخدم بالفعل",
+          code: 'CONFLICT',
+          message: 'اسم المستخدم مستخدم بالفعل',
         });
       }
 
       const existingByEmail = await getFounderByEmail(input.email);
       if (existingByEmail) {
         throw new TRPCError({
-          code: "CONFLICT",
-          message: "البريد الإلكتروني مستخدم بالفعل",
+          code: 'CONFLICT',
+          message: 'البريد الإلكتروني مستخدم بالفعل',
         });
       }
 
       // Generate or use custom password
-      const password = input.generatePassword
-        ? generateSecurePassword()
-        : input.customPassword!;
+      const password = input.generatePassword ? generateSecurePassword() : input.customPassword!;
 
       // Create account
       const account = await createFounderAccount({
@@ -170,7 +166,7 @@ export const foundersRouter = router({
         success: true,
         account,
         temporaryPassword: password,
-        message: "تم إنشاء الحساب بنجاح",
+        message: 'تم إنشاء الحساب بنجاح',
       };
     }),
 
@@ -186,20 +182,18 @@ export const foundersRouter = router({
   /**
    * Get founder by ID
    */
-  getById: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      const founder = await getFounderById(input.id);
-      if (!founder) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "الحساب غير موجود",
-        });
-      }
+  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    const founder = await getFounderById(input.id);
+    if (!founder) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'الحساب غير موجود',
+      });
+    }
 
-      const { passwordHash, ...founderData } = founder;
-      return founderData;
-    }),
+    const { passwordHash, ...founderData } = founder;
+    return founderData;
+  }),
 
   /**
    * Update founder password
@@ -221,7 +215,7 @@ export const foundersRouter = router({
 
       return {
         success: true,
-        message: "تم تحديث كلمة المرور بنجاح",
+        message: 'تم تحديث كلمة المرور بنجاح',
       };
     }),
 
@@ -234,7 +228,7 @@ export const foundersRouter = router({
       await deactivateFounderAccount(input.founderId);
       return {
         success: true,
-        message: "تم تعطيل الحساب بنجاح",
+        message: 'تم تعطيل الحساب بنجاح',
       };
     }),
 
@@ -247,7 +241,7 @@ export const foundersRouter = router({
       await activateFounderAccount(input.founderId);
       return {
         success: true,
-        message: "تم تفعيل الحساب بنجاح",
+        message: 'تم تفعيل الحساب بنجاح',
       };
     }),
 
@@ -307,7 +301,7 @@ export const foundersRouter = router({
       return {
         success: true,
         newPassword,
-        message: "تم تجديد كلمة المرور بنجاح",
+        message: 'تم تجديد كلمة المرور بنجاح',
       };
     }),
 

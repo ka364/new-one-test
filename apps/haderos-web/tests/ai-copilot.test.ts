@@ -133,9 +133,7 @@ describe('AI Co-Pilot System - Unit Tests', () => {
       const calculateScore = (rec: { priority: number; roi: number }) =>
         rec.priority * 0.6 + rec.roi * 0.4;
 
-      const sorted = [...recommendations].sort(
-        (a, b) => calculateScore(b) - calculateScore(a)
-      );
+      const sorted = [...recommendations].sort((a, b) => calculateScore(b) - calculateScore(a));
 
       expect(sorted[0].title).toBe('High Priority');
       expect(sorted[2].title).toBe('Low Priority');
@@ -150,9 +148,7 @@ describe('AI Co-Pilot System - Unit Tests', () => {
       const calculateScore = (rec: { priority: number; roi: number }) =>
         rec.priority * 0.6 + rec.roi * 0.4;
 
-      const sorted = [...recommendations].sort(
-        (a, b) => calculateScore(b) - calculateScore(a)
-      );
+      const sorted = [...recommendations].sort((a, b) => calculateScore(b) - calculateScore(a));
 
       expect(sorted[0].title).toBe('High ROI');
     });

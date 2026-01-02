@@ -31,7 +31,7 @@ export class CODWorkflowService {
     codAmount: number;
   }) {
     const db = await requireDb();
-    
+
     const [order] = await db.insert(codOrders).values({
       orderId: orderData.orderId,
       customerName: orderData.customerName,
@@ -57,10 +57,10 @@ export class CODWorkflowService {
    */
   async updateStage(orderId: string, stage: string, data: any) {
     const db = await requireDb();
-    
+
     // Get current order
     const [order] = await db.select().from(codOrders).where(eq(codOrders.orderId, orderId));
-    
+
     if (!order) {
       throw new Error('الطلب غير موجود');
     }
@@ -73,7 +73,8 @@ export class CODWorkflowService {
     };
 
     // Update order
-    await db.update(codOrders)
+    await db
+      .update(codOrders)
       .set({
         stages,
         currentStage: stage,
@@ -82,13 +83,7 @@ export class CODWorkflowService {
       .where(eq(codOrders.orderId, orderId));
 
     // Log the update
-    await this.logTracking(
-      order.id,
-      stage,
-      'updated',
-      `Stage ${stage} updated`,
-      data.agentId
-    );
+    await this.logTracking(order.id, stage, 'updated', `Stage ${stage} updated`, data.agentId);
 
     // Send notifications
     await this.sendStageNotifications(orderId, stage, data);
@@ -101,15 +96,16 @@ export class CODWorkflowService {
    */
   async getTrackingStatus(orderId: string) {
     const db = await requireDb();
-    
+
     const [order] = await db.select().from(codOrders).where(eq(codOrders.orderId, orderId));
-    
+
     if (!order) {
       throw new Error('الطلب غير موجود');
     }
 
     // Get tracking logs
-    const logs = await db.select()
+    const logs = await db
+      .select()
       .from(trackingLogs)
       .where(eq(trackingLogs.codOrderId, order.id))
       .orderBy(desc(trackingLogs.createdAt));
@@ -141,7 +137,7 @@ export class CODWorkflowService {
     }
 
     // Add tracking logs
-    logs.forEach(log => {
+    logs.forEach((log) => {
       timeline.push({
         stage: log.stage,
         timestamp: log.createdAt,
@@ -168,7 +164,7 @@ export class CODWorkflowService {
     agentId?: string
   ) {
     const db = await requireDb();
-    
+
     await db.insert(trackingLogs).values({
       codOrderId,
       stage,
@@ -184,7 +180,7 @@ export class CODWorkflowService {
   private async sendStageNotifications(orderId: string, stage: string, data: any) {
     const db = await requireDb();
     const [order] = await db.select().from(codOrders).where(eq(codOrders.orderId, orderId));
-    
+
     if (!order) return;
 
     const notifications = [];
@@ -231,14 +227,15 @@ export class CODWorkflowService {
     const currentNotifications = order.notifications || [];
     const updatedNotifications = [
       ...currentNotifications,
-      ...notifications.map(n => ({
+      ...notifications.map((n) => ({
         ...n,
         sentAt: new Date().toISOString(),
         status: 'sent' as const,
       })),
     ];
 
-    await db.update(codOrders)
+    await db
+      .update(codOrders)
       .set({ notifications: updatedNotifications })
       .where(eq(codOrders.orderId, orderId));
   }
@@ -267,8 +264,9 @@ export class CODWorkflowService {
    */
   async generateReport(startDate: Date, endDate: Date) {
     const db = await requireDb();
-    
-    const ordersInRange = await db.select()
+
+    const ordersInRange = await db
+      .select()
       .from(codOrders)
       .where(
         and(
@@ -279,9 +277,7 @@ export class CODWorkflowService {
 
     const report = {
       totalOrders: ordersInRange.length,
-      totalCODValue: ordersInRange.reduce((sum, order) => 
-        sum + Number(order.codAmount || 0), 0
-      ),
+      totalCODValue: ordersInRange.reduce((sum, order) => sum + Number(order.codAmount || 0), 0),
       byStage: {} as Record<string, number>,
       byStatus: {} as Record<string, number>,
       collectionRate: 0,
@@ -289,7 +285,7 @@ export class CODWorkflowService {
     };
 
     // Group by stage
-    ordersInRange.forEach(order => {
+    ordersInRange.forEach((order) => {
       const stage = order.currentStage || 'unknown';
       report.byStage[stage] = (report.byStage[stage] || 0) + 1;
 
@@ -298,21 +294,16 @@ export class CODWorkflowService {
     });
 
     // Calculate rates
-    const collectedOrders = ordersInRange.filter(order => 
-      order.stages?.collection?.collected
+    const collectedOrders = ordersInRange.filter(
+      (order) => order.stages?.collection?.collected
     ).length;
 
-    const settledOrders = ordersInRange.filter(order => 
-      order.stages?.settlement?.settled
-    ).length;
+    const settledOrders = ordersInRange.filter((order) => order.stages?.settlement?.settled).length;
 
-    report.collectionRate = ordersInRange.length > 0 
-      ? (collectedOrders / ordersInRange.length) * 100 
-      : 0;
+    report.collectionRate =
+      ordersInRange.length > 0 ? (collectedOrders / ordersInRange.length) * 100 : 0;
 
-    report.settlementRate = collectedOrders > 0 
-      ? (settledOrders / collectedOrders) * 100 
-      : 0;
+    report.settlementRate = collectedOrders > 0 ? (settledOrders / collectedOrders) * 100 : 0;
 
     return report;
   }

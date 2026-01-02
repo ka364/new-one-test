@@ -90,7 +90,7 @@ Provide a ranked list with reasoning.`,
     }
 
     // 2. AI-powered security insights
-    const securityIssues = basicAnalysis.criticalIssues.filter(i => i.category === 'security');
+    const securityIssues = basicAnalysis.criticalIssues.filter((i) => i.category === 'security');
     if (securityIssues.length > 0) {
       const securityResult = await this.deepseek.findSecurityVulnerabilities(
         JSON.stringify(securityIssues, null, 2)
@@ -99,7 +99,7 @@ Provide a ranked list with reasoning.`,
     }
 
     // 3. AI-powered performance suggestions
-    const perfIssues = basicAnalysis.criticalIssues.filter(i => i.category === 'performance');
+    const perfIssues = basicAnalysis.criticalIssues.filter((i) => i.category === 'performance');
     if (perfIssues.length > 0) {
       const perfResult = await this.deepseek.suggestPerformanceImprovements(
         JSON.stringify(perfIssues, null, 2)
@@ -131,7 +131,10 @@ Provide a ranked list with reasoning.`,
   /**
    * مراجعة كود ذكية
    */
-  async smartCodeReview(filePath: string, code: string): Promise<{
+  async smartCodeReview(
+    filePath: string,
+    code: string
+  ): Promise<{
     review: string;
     issues: Array<{
       line: number;
@@ -158,7 +161,10 @@ Provide a ranked list with reasoning.`,
   /**
    * توليد اختبارات ذكية
    */
-  async smartTestGeneration(code: string, framework: string = 'vitest'): Promise<{
+  async smartTestGeneration(
+    code: string,
+    framework: string = 'vitest'
+  ): Promise<{
     tests: string;
     coverage: number;
     cost: number;
@@ -299,7 +305,7 @@ Provide a ranked list with reasoning.`,
     const describeCount = (tests.match(/describe\(/g) || []).length;
 
     // Simple heuristic: more tests = better coverage
-    return Math.min(100, (testCount * 10) + (describeCount * 20));
+    return Math.min(100, testCount * 10 + describeCount * 20);
   }
 
   private parseSecurityAnalysis(text: string): Array<{
@@ -330,7 +336,7 @@ Provide a ranked list with reasoning.`,
   private calculateSecurityScore(vulnerabilities: Array<any>): number {
     let score = 100;
 
-    vulnerabilities.forEach(vuln => {
+    vulnerabilities.forEach((vuln) => {
       if (vuln.severity === 'critical') score -= 20;
       else if (vuln.severity === 'high') score -= 10;
       else if (vuln.severity === 'medium') score -= 5;

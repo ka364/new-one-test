@@ -1,11 +1,24 @@
-import { TrendingUp, Users, DollarSign, Target, Rocket, Mail, Phone, CheckCircle2, ArrowRight } from "lucide-react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  TrendingUp,
+  Users,
+  DollarSign,
+  Target,
+  Rocket,
+  Mail,
+  Phone,
+  CheckCircle2,
+  ArrowRight,
+} from 'lucide-react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function InvestmentPitch() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12"
+      dir="rtl"
+    >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -13,13 +26,14 @@ export default function InvestmentPitch() {
             <Rocket className="w-4 h-4" />
             <span>فرصة استثمارية</span>
           </div>
-          
+
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             استثمر في مستقبل الأعمال الأخلاقية
           </h1>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            HaderOS ليس مجرد برنامج - إنه منصة تحويلية تجمع بين الذكاء الاصطناعي والامتثال الشرعي لخدمة ملايين الشركات في العالم الإسلامي
+            HaderOS ليس مجرد برنامج - إنه منصة تحويلية تجمع بين الذكاء الاصطناعي والامتثال الشرعي
+            لخدمة ملايين الشركات في العالم الإسلامي
           </p>
         </div>
 
@@ -68,11 +82,15 @@ export default function InvestmentPitch() {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center p-6 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                 <h3 className="text-4xl font-bold text-purple-600 mb-2">$2.4T</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">حجم سوق التمويل الإسلامي العالمي</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  حجم سوق التمويل الإسلامي العالمي
+                </p>
               </div>
               <div className="text-center p-6 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                 <h3 className="text-4xl font-bold text-blue-600 mb-2">1.8B</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">مسلم حول العالم (23% من السكان)</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  مسلم حول العالم (23% من السكان)
+                </p>
               </div>
               <div className="text-center p-6 bg-green-50 dark:bg-green-950/20 rounded-lg">
                 <h3 className="text-4xl font-bold text-green-600 mb-2">15%</h3>
@@ -80,7 +98,8 @@ export default function InvestmentPitch() {
               </div>
             </div>
             <p className="text-center text-gray-600 dark:text-gray-300">
-              <strong>الفرصة:</strong> لا يوجد حل تقني شامل يجمع بين الذكاء الاصطناعي والامتثال الشرعي في منصة واحدة
+              <strong>الفرصة:</strong> لا يوجد حل تقني شامل يجمع بين الذكاء الاصطناعي والامتثال
+              الشرعي في منصة واحدة
             </p>
           </CardContent>
         </Card>
@@ -99,7 +118,8 @@ export default function InvestmentPitch() {
                   <div>
                     <h4 className="font-semibold mb-1">محرك KAIA الفريد</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      أول محرك ذكاء اصطناعي متخصص في الامتثال الشرعي - تحليل تلقائي للمعاملات المالية
+                      أول محرك ذكاء اصطناعي متخصص في الامتثال الشرعي - تحليل تلقائي للمعاملات
+                      المالية
                     </p>
                   </div>
                 </div>
@@ -201,7 +221,8 @@ export default function InvestmentPitch() {
               </table>
             </div>
             <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-              <strong>نموذج الإيرادات:</strong> اشتراك شهري ($5K-$10K لكل شركة حسب الحجم) + رسوم على المعاملات (0.5%)
+              <strong>نموذج الإيرادات:</strong> اشتراك شهري ($5K-$10K لكل شركة حسب الحجم) + رسوم على
+              المعاملات (0.5%)
             </p>
           </CardContent>
         </Card>
@@ -251,19 +272,27 @@ export default function InvestmentPitch() {
             </div>
 
             <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-6">
-              <h4 className="font-semibold mb-3 text-green-700 dark:text-green-400">العائد المتوقع (ROI):</h4>
+              <h4 className="font-semibold mb-3 text-green-700 dark:text-green-400">
+                العائد المتوقع (ROI):
+              </h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span><strong>السنة 1:</strong> الوصول إلى $3M إيرادات سنوية (1.5x من الاستثمار)</span>
+                  <span>
+                    <strong>السنة 1:</strong> الوصول إلى $3M إيرادات سنوية (1.5x من الاستثمار)
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span><strong>السنة 2:</strong> الوصول إلى $12M إيرادات سنوية (6x من الاستثمار)</span>
+                  <span>
+                    <strong>السنة 2:</strong> الوصول إلى $12M إيرادات سنوية (6x من الاستثمار)
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span><strong>السنة 3:</strong> Exit محتمل بتقييم $50M+ (25x ROI)</span>
+                  <span>
+                    <strong>السنة 3:</strong> Exit محتمل بتقييم $50M+ (25x ROI)
+                  </span>
                 </li>
               </ul>
             </div>
@@ -298,7 +327,8 @@ export default function InvestmentPitch() {
                   <h4 className="font-semibold text-lg">فريق تقني متخصص</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Engineering Team</p>
                   <p className="text-sm">
-                    مطورون متخصصون في Python, TypeScript, Blockchain, ML/AI - تنفيذ سريع وجودة عالية.
+                    مطورون متخصصون في Python, TypeScript, Blockchain, ML/AI - تنفيذ سريع وجودة
+                    عالية.
                   </p>
                 </div>
               </div>
@@ -311,9 +341,10 @@ export default function InvestmentPitch() {
           <CardContent className="py-12 text-center">
             <h2 className="text-3xl font-bold mb-4">جاهز للانضمام إلينا؟</h2>
             <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-              دعنا نناقش كيف يمكنك أن تكون جزءاً من هذه الرحلة المثيرة. تواصل معنا اليوم لترتيب اجتماع.
+              دعنا نناقش كيف يمكنك أن تكون جزءاً من هذه الرحلة المثيرة. تواصل معنا اليوم لترتيب
+              اجتماع.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <a href="mailto:ahmed@haderosai.com">
                 <Button size="lg" variant="secondary" className="gap-2 w-full sm:w-auto">
@@ -322,7 +353,11 @@ export default function InvestmentPitch() {
                 </Button>
               </a>
               <a href="tel:+201234567890">
-                <Button size="lg" variant="outline" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30 w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30 w-full sm:w-auto"
+                >
                   <Phone className="w-5 h-5" />
                   +20 123 456 7890
                 </Button>

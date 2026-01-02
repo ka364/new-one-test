@@ -11,8 +11,8 @@
  * - Complete data flow
  */
 
-import { getDb } from "../db";
-import { sql } from "drizzle-orm";
+import { getDb } from '../db';
+import { sql } from 'drizzle-orm';
 import {
   conversations,
   conversationParticipants,
@@ -22,21 +22,21 @@ import {
   aiUsageTracking,
   subscriptionPlans,
   userSubscriptions,
-} from "../../drizzle/schema-messaging";
-import { randomUUID } from "crypto";
+} from '../../drizzle/schema-messaging';
+import { randomUUID } from 'crypto';
 
 // Factory configuration
 const FACTORIES = [
-  { id: 1, name: "مصنع القاهرة", path: "1", employees: 50, tier: "enterprise" },
-  { id: 2, name: "مصنع الجيزة", path: "2", employees: 40, tier: "professional" },
-  { id: 3, name: "مصنع الإسكندرية", path: "3", employees: 45, tier: "professional" },
-  { id: 4, name: "مصنع المنصورة", path: "4", employees: 30, tier: "basic" },
-  { id: 5, name: "مصنع طنطا", path: "5", employees: 35, tier: "professional" },
-  { id: 6, name: "مصنع أسيوط", path: "6", employees: 25, tier: "basic" },
-  { id: 7, name: "مصنع سوهاج", path: "7", employees: 20, tier: "basic" },
-  { id: 8, name: "مصنع بورسعيد", path: "8", employees: 30, tier: "professional" },
-  { id: 9, name: "مصنع الإسماعيلية", path: "9", employees: 28, tier: "basic" },
-  { id: 10, name: "مصنع دمياط", path: "10", employees: 22, tier: "basic" },
+  { id: 1, name: 'مصنع القاهرة', path: '1', employees: 50, tier: 'enterprise' },
+  { id: 2, name: 'مصنع الجيزة', path: '2', employees: 40, tier: 'professional' },
+  { id: 3, name: 'مصنع الإسكندرية', path: '3', employees: 45, tier: 'professional' },
+  { id: 4, name: 'مصنع المنصورة', path: '4', employees: 30, tier: 'basic' },
+  { id: 5, name: 'مصنع طنطا', path: '5', employees: 35, tier: 'professional' },
+  { id: 6, name: 'مصنع أسيوط', path: '6', employees: 25, tier: 'basic' },
+  { id: 7, name: 'مصنع سوهاج', path: '7', employees: 20, tier: 'basic' },
+  { id: 8, name: 'مصنع بورسعيد', path: '8', employees: 30, tier: 'professional' },
+  { id: 9, name: 'مصنع الإسماعيلية', path: '9', employees: 28, tier: 'basic' },
+  { id: 10, name: 'مصنع دمياط', path: '10', employees: 22, tier: 'basic' },
 ];
 
 const SUBSCRIPTION_TIERS = {
@@ -79,7 +79,7 @@ interface SimulationStats {
 }
 
 async function simulate10Factories() {
-  console.log("🏭 Starting 10-Factory Comprehensive Simulation...\n");
+  console.log('🏭 Starting 10-Factory Comprehensive Simulation...\n');
 
   const db = await getDb();
   const stats: SimulationStats = {
@@ -96,7 +96,7 @@ async function simulate10Factories() {
 
   try {
     // Step 1: Create subscription plans if not exist
-    console.log("📋 Step 1: Creating subscription plans...");
+    console.log('📋 Step 1: Creating subscription plans...');
     await createSubscriptionPlans(db);
 
     // Step 2: Simulate each factory
@@ -106,14 +106,14 @@ async function simulate10Factories() {
     }
 
     // Step 3: Generate summary report
-    console.log("\n" + "=".repeat(60));
-    console.log("📊 SIMULATION COMPLETE!");
-    console.log("=".repeat(60));
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 SIMULATION COMPLETE!');
+    console.log('='.repeat(60));
     printStats(stats);
 
     return stats;
   } catch (error) {
-    console.error("❌ Simulation failed:", error);
+    console.error('❌ Simulation failed:', error);
     throw error;
   }
 }
@@ -121,39 +121,39 @@ async function simulate10Factories() {
 async function createSubscriptionPlans(db: Awaited<ReturnType<typeof getDb>>) {
   const plans = [
     {
-      tier: "free",
-      name: "خطة مجانية",
-      description: "للتجربة والاستخدام المحدود",
+      tier: 'free',
+      name: 'خطة مجانية',
+      description: 'للتجربة والاستخدام المحدود',
       ...SUBSCRIPTION_TIERS.free,
-      availableModels: ["gpt-3.5-turbo"],
-      features: { teamMessaging: true, support: false, ai: "limited" },
+      availableModels: ['gpt-3.5-turbo'],
+      features: { teamMessaging: true, support: false, ai: 'limited' },
       isActive: true,
     },
     {
-      tier: "basic",
-      name: "خطة أساسية",
-      description: "للمصانع الصغيرة",
+      tier: 'basic',
+      name: 'خطة أساسية',
+      description: 'للمصانع الصغيرة',
       ...SUBSCRIPTION_TIERS.basic,
-      availableModels: ["gpt-3.5-turbo", "gpt-4"],
-      features: { teamMessaging: true, support: "limited", ai: "basic" },
+      availableModels: ['gpt-3.5-turbo', 'gpt-4'],
+      features: { teamMessaging: true, support: 'limited', ai: 'basic' },
       isActive: true,
     },
     {
-      tier: "professional",
-      name: "خطة احترافية",
-      description: "للمصانع المتوسطة",
+      tier: 'professional',
+      name: 'خطة احترافية',
+      description: 'للمصانع المتوسطة',
       ...SUBSCRIPTION_TIERS.professional,
-      availableModels: ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
-      features: { teamMessaging: true, support: true, ai: "professional" },
+      availableModels: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo'],
+      features: { teamMessaging: true, support: true, ai: 'professional' },
       isActive: true,
     },
     {
-      tier: "enterprise",
-      name: "خطة مؤسسات",
-      description: "للمصانع الكبيرة مع دعم مخصص",
+      tier: 'enterprise',
+      name: 'خطة مؤسسات',
+      description: 'للمصانع الكبيرة مع دعم مخصص',
       ...SUBSCRIPTION_TIERS.enterprise,
-      availableModels: ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "claude-3"],
-      features: { teamMessaging: true, support: "priority", ai: "unlimited" },
+      availableModels: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'claude-3'],
+      features: { teamMessaging: true, support: 'priority', ai: 'unlimited' },
       isActive: true,
     },
   ];
@@ -173,7 +173,7 @@ async function createSubscriptionPlans(db: Awaited<ReturnType<typeof getDb>>) {
 
 async function simulateFactory(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   stats: SimulationStats
 ) {
   stats.factoriesCreated++;
@@ -208,7 +208,9 @@ async function simulateFactory(
     await createAIConversation(db, factory, factoryUserIds, stats);
   }
 
-  console.log(`✅ Factory ${factory.id} complete: ${teamConversations} team chats, ${supportTickets} tickets, ${aiConversations} AI chats`);
+  console.log(
+    `✅ Factory ${factory.id} complete: ${teamConversations} team chats, ${supportTickets} tickets, ${aiConversations} AI chats`
+  );
 }
 
 async function getSubscriptionPlanId(
@@ -226,7 +228,7 @@ async function getSubscriptionPlanId(
 
 async function createFactorySubscription(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   planId: number,
   userId: number,
   stats: SimulationStats
@@ -239,12 +241,12 @@ async function createFactorySubscription(
     userId,
     organizationId: factory.id,
     planId,
-    status: "active",
-    billingCycle: "monthly",
+    status: 'active',
+    billingCycle: 'monthly',
     startDate: now,
     endDate,
     amount: SUBSCRIPTION_TIERS[factory.tier as keyof typeof SUBSCRIPTION_TIERS].monthlyPrice,
-    currency: "EGP",
+    currency: 'EGP',
     autoRenew: true,
   });
 
@@ -253,7 +255,7 @@ async function createFactorySubscription(
 
 async function initializeAIUsageTracking(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   userId: number,
   stats: SimulationStats
 ) {
@@ -280,20 +282,20 @@ async function initializeAIUsageTracking(
 
 async function createTeamConversation(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   userIds: number[],
   stats: SimulationStats
 ) {
   const conversationId = randomUUID();
 
   const topics = [
-    "اجتماع الإنتاج اليومي",
-    "تنسيق الشحنات",
-    "مشاكل جودة المنتج",
-    "طلبات جديدة",
-    "صيانة المعدات",
-    "تدريب الموظفين",
-    "تحديثات المخزون",
+    'اجتماع الإنتاج اليومي',
+    'تنسيق الشحنات',
+    'مشاكل جودة المنتج',
+    'طلبات جديدة',
+    'صيانة المعدات',
+    'تدريب الموظفين',
+    'تحديثات المخزون',
   ];
 
   const topic = topics[Math.floor(Math.random() * topics.length)];
@@ -301,7 +303,7 @@ async function createTeamConversation(
   // Create conversation
   await db.insert(conversations).values({
     id: conversationId,
-    type: "team",
+    type: 'team',
     title: `${topic} - ${factory.name}`,
     organizationId: factory.id,
     departmentId: `dept-${Math.floor(Math.random() * 5) + 1}`,
@@ -316,7 +318,7 @@ async function createTeamConversation(
     await db.insert(conversationParticipants).values({
       conversationId,
       userId,
-      role: userId === selectedUsers[0] ? "admin" : "member",
+      role: userId === selectedUsers[0] ? 'admin' : 'member',
     });
   }
 
@@ -331,14 +333,14 @@ async function createTeamConversation(
       conversationId,
       senderId,
       content: getRandomTeamMessage(),
-      contentType: "text",
+      contentType: 'text',
     });
 
     stats.messagesCreated++;
 
     // Random reactions (20% chance)
     if (Math.random() > 0.8) {
-      const emoji = ["👍", "❤️", "😊", "🎉", "✅"][Math.floor(Math.random() * 5)];
+      const emoji = ['👍', '❤️', '😊', '🎉', '✅'][Math.floor(Math.random() * 5)];
       await db.insert(messageReactions).values({
         messageId,
         userId: selectedUsers[Math.floor(Math.random() * selectedUsers.length)],
@@ -354,7 +356,7 @@ let ticketCounter = 0;
 
 async function createSupportTicket(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   userIds: number[],
   stats: SimulationStats
 ) {
@@ -362,17 +364,17 @@ async function createSupportTicket(
   const ticketNumber = `TICKET-${Date.now()}-${factory.id}-${++ticketCounter}`;
 
   const issues = [
-    "مشكلة في نظام الشحن",
-    "خطأ في حساب المصروفات",
-    "تحديث بيانات المنتج",
-    "مشكلة في الدفع",
-    "طلب ميزة جديدة",
-    "بطء في النظام",
-    "خطأ في التقارير",
+    'مشكلة في نظام الشحن',
+    'خطأ في حساب المصروفات',
+    'تحديث بيانات المنتج',
+    'مشكلة في الدفع',
+    'طلب ميزة جديدة',
+    'بطء في النظام',
+    'خطأ في التقارير',
   ];
 
-  const priorities = ["low", "medium", "high", "urgent"] as const;
-  const statuses = ["open", "in_progress", "resolved"] as const;
+  const priorities = ['low', 'medium', 'high', 'urgent'] as const;
+  const statuses = ['open', 'in_progress', 'resolved'] as const;
 
   const issue = issues[Math.floor(Math.random() * issues.length)];
   const priority = priorities[Math.floor(Math.random() * priorities.length)];
@@ -381,12 +383,12 @@ async function createSupportTicket(
   // Create support conversation
   await db.insert(conversations).values({
     id: ticketId,
-    type: "support",
+    type: 'support',
     title: issue,
     ticketNumber,
     ticketStatus: status,
     ticketPriority: priority,
-    ticketCategory: "technical",
+    ticketCategory: 'technical',
     createdById: userIds[0],
   });
 
@@ -394,7 +396,7 @@ async function createSupportTicket(
   await db.insert(conversationParticipants).values({
     conversationId: ticketId,
     userId: userIds[0],
-    role: "member",
+    role: 'member',
   });
 
   // Create ticket messages (3-10)
@@ -407,7 +409,7 @@ async function createSupportTicket(
       conversationId: ticketId,
       senderId: userIds[0],
       content: i % 2 === 0 ? getRandomCustomerMessage() : getRandomSupportMessage(),
-      contentType: "text",
+      contentType: 'text',
     });
 
     stats.messagesCreated++;
@@ -419,18 +421,18 @@ async function createSupportTicket(
 
 async function createAIConversation(
   db: Awaited<ReturnType<typeof getDb>>,
-  factory: typeof FACTORIES[0],
+  factory: (typeof FACTORIES)[0],
   userIds: number[],
   stats: SimulationStats
 ) {
   const conversationId = randomUUID();
 
   const aiTopics = [
-    "تحسين كفاءة الإنتاج",
-    "تحليل تكاليف المصروفات",
-    "استراتيجيات التسويق",
-    "إدارة المخزون الذكية",
-    "تحسين عمليات الشحن",
+    'تحسين كفاءة الإنتاج',
+    'تحليل تكاليف المصروفات',
+    'استراتيجيات التسويق',
+    'إدارة المخزون الذكية',
+    'تحسين عمليات الشحن',
   ];
 
   const topic = aiTopics[Math.floor(Math.random() * aiTopics.length)];
@@ -439,10 +441,10 @@ async function createAIConversation(
   // Create AI conversation
   await db.insert(conversations).values({
     id: conversationId,
-    type: "ai",
+    type: 'ai',
     title: `مساعد AI: ${topic}`,
     aiModel: model,
-    aiPersona: "business-advisor",
+    aiPersona: 'business-advisor',
     createdById: userIds[0],
   });
 
@@ -450,7 +452,7 @@ async function createAIConversation(
   await db.insert(conversationParticipants).values({
     conversationId,
     userId: userIds[0],
-    role: "admin",
+    role: 'admin',
   });
 
   // Create AI conversation messages (2-6 exchanges)
@@ -463,7 +465,7 @@ async function createAIConversation(
       conversationId,
       senderId: userIds[0],
       content: getRandomAIUserPrompt(),
-      contentType: "text",
+      contentType: 'text',
     });
     stats.messagesCreated++;
 
@@ -477,7 +479,7 @@ async function createAIConversation(
       conversationId,
       senderId: 1, // Use admin user as AI sender
       content: getRandomAIResponse(),
-      contentType: "text",
+      contentType: 'text',
       isAiGenerated: true,
       aiModel: model,
       aiTokens: tokens,
@@ -519,78 +521,80 @@ function getAIConversationsCount(tier: string): number {
 
 function getAIModelForTier(tier: string): string {
   const models = {
-    free: "gpt-3.5-turbo",
-    basic: "gpt-3.5-turbo",
-    professional: "gpt-4",
-    enterprise: "gpt-4-turbo",
+    free: 'gpt-3.5-turbo',
+    basic: 'gpt-3.5-turbo',
+    professional: 'gpt-4',
+    enterprise: 'gpt-4-turbo',
   };
-  return models[tier as keyof typeof models] || "gpt-3.5-turbo";
+  return models[tier as keyof typeof models] || 'gpt-3.5-turbo';
 }
 
 function getRandomTeamMessage(): string {
   const messages = [
-    "تم الانتهاء من المهمة بنجاح",
-    "نحتاج لمراجعة هذا الطلب",
-    "هل يمكننا تأجيل الاجتماع؟",
-    "الإنتاج اليوم تجاوز الهدف بنسبة 15%",
-    "لدينا مشكلة في المخزون",
-    "تم استلام الشحنة الجديدة",
-    "يرجى مراجعة التقرير المرفق",
+    'تم الانتهاء من المهمة بنجاح',
+    'نحتاج لمراجعة هذا الطلب',
+    'هل يمكننا تأجيل الاجتماع؟',
+    'الإنتاج اليوم تجاوز الهدف بنسبة 15%',
+    'لدينا مشكلة في المخزون',
+    'تم استلام الشحنة الجديدة',
+    'يرجى مراجعة التقرير المرفق',
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
 function getRandomCustomerMessage(): string {
   const messages = [
-    "لدي مشكلة في استخدام النظام",
-    "هل يمكن مساعدتي في هذا الأمر؟",
-    "لم أتلق البريد الإلكتروني المتوقع",
-    "كيف يمكنني تحديث البيانات؟",
-    "متى سيتم حل هذه المشكلة؟",
+    'لدي مشكلة في استخدام النظام',
+    'هل يمكن مساعدتي في هذا الأمر؟',
+    'لم أتلق البريد الإلكتروني المتوقع',
+    'كيف يمكنني تحديث البيانات؟',
+    'متى سيتم حل هذه المشكلة؟',
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
 function getRandomSupportMessage(): string {
   const messages = [
-    "شكراً للتواصل معنا، سأساعدك في حل المشكلة",
-    "هل يمكنك تزويدنا بمزيد من التفاصيل؟",
-    "تم حل المشكلة، يرجى التحقق",
-    "سنقوم بمتابعة هذا الأمر مع الفريق التقني",
-    "تم تصعيد المشكلة إلى الإدارة",
+    'شكراً للتواصل معنا، سأساعدك في حل المشكلة',
+    'هل يمكنك تزويدنا بمزيد من التفاصيل؟',
+    'تم حل المشكلة، يرجى التحقق',
+    'سنقوم بمتابعة هذا الأمر مع الفريق التقني',
+    'تم تصعيد المشكلة إلى الإدارة',
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
 function getRandomAIUserPrompt(): string {
   const prompts = [
-    "كيف يمكنني تحسين كفاءة خط الإنتاج؟",
-    "ما هي أفضل استراتيجية لخفض التكاليف؟",
-    "كيف أحلل بيانات المبيعات الشهرية؟",
-    "ما هي التوقعات للربع القادم؟",
-    "كيف أحسن إدارة المخزون؟",
+    'كيف يمكنني تحسين كفاءة خط الإنتاج؟',
+    'ما هي أفضل استراتيجية لخفض التكاليف؟',
+    'كيف أحلل بيانات المبيعات الشهرية؟',
+    'ما هي التوقعات للربع القادم؟',
+    'كيف أحسن إدارة المخزون؟',
   ];
   return prompts[Math.floor(Math.random() * prompts.length)];
 }
 
 function getRandomAIResponse(): string {
   const responses = [
-    "بناءً على تحليل البيانات، أنصح بـ...",
-    "يمكنك تحسين الكفاءة من خلال...",
-    "التوقعات تشير إلى...",
-    "الحل الأمثل هو...",
-    "لتحقيق أفضل النتائج، يجب...",
+    'بناءً على تحليل البيانات، أنصح بـ...',
+    'يمكنك تحسين الكفاءة من خلال...',
+    'التوقعات تشير إلى...',
+    'الحل الأمثل هو...',
+    'لتحقيق أفضل النتائج، يجب...',
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
 function printStats(stats: SimulationStats) {
-  console.log("\n📊 SIMULATION STATISTICS:");
-  console.log("─".repeat(60));
+  console.log('\n📊 SIMULATION STATISTICS:');
+  console.log('─'.repeat(60));
   console.log(`🏭 Factories Simulated:       ${stats.factoriesCreated}`);
   console.log(`👥 Users Created:             ${stats.usersCreated}`);
   console.log(`💬 Total Conversations:       ${stats.conversationsCreated}`);
-  console.log(`   - Team Conversations:      ${stats.conversationsCreated - stats.supportTicketsCreated - stats.aiMessagesCreated / 4}`);
+  console.log(
+    `   - Team Conversations:      ${stats.conversationsCreated - stats.supportTicketsCreated - stats.aiMessagesCreated / 4}`
+  );
   console.log(`   - Support Tickets:         ${stats.supportTicketsCreated}`);
   console.log(`   - AI Conversations:        ${Math.floor(stats.aiMessagesCreated / 4)}`);
   console.log(`📨 Total Messages:            ${stats.messagesCreated}`);
@@ -600,20 +604,20 @@ function printStats(stats: SimulationStats) {
   console.log(`🤖 AI Usage:`);
   console.log(`   - Total Tokens:            ${stats.totalAITokens.toLocaleString()}`);
   console.log(`   - Total Cost:              $${(stats.totalAICost / 100).toFixed(2)}`);
-  console.log("─".repeat(60));
-  console.log("\n✅ All 10 factories successfully simulated!");
-  console.log("🎉 Unified messaging system is fully operational!\n");
+  console.log('─'.repeat(60));
+  console.log('\n✅ All 10 factories successfully simulated!');
+  console.log('🎉 Unified messaging system is fully operational!\n');
 }
 
 // Run simulation
 if (import.meta.url === `file://${process.argv[1]}`) {
   simulate10Factories()
     .then(() => {
-      console.log("✅ Simulation script completed successfully");
+      console.log('✅ Simulation script completed successfully');
       process.exit(0);
     })
     .catch((error) => {
-      console.error("❌ Simulation script failed:", error);
+      console.error('❌ Simulation script failed:', error);
       process.exit(1);
     });
 }

@@ -8,7 +8,17 @@
  * them against Quranic principles for ethical governance.
  */
 
-import { pgTable, serial, varchar, text, integer, timestamp, jsonb, decimal, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  varchar,
+  text,
+  integer,
+  timestamp,
+  jsonb,
+  decimal,
+  boolean,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ========================================
@@ -34,11 +44,13 @@ export const modernBestPractices = pgTable('modern_best_practices', {
     kpis?: string[];
     benchmarks?: Record<string, number>;
   }>(),
-  caseStudies: jsonb('case_studies').$type<{
-    company?: string;
-    results?: string;
-    year?: number;
-  }[]>(),
+  caseStudies: jsonb('case_studies').$type<
+    {
+      company?: string;
+      results?: string;
+      year?: number;
+    }[]
+  >(),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -52,11 +64,13 @@ export const quranicPrinciples = pgTable('quranic_principles', {
   principleName: varchar('principle_name', { length: 100 }).notNull(),
   principleNameAr: varchar('principle_name_ar', { length: 100 }).notNull(),
   category: varchar('category', { length: 50 }).notNull(), // "core", "business", "hr", "finance", etc.
-  quranicVerses: jsonb('quranic_verses').notNull().$type<{
-    verse: string;
-    surah: string;
-    ayah?: number;
-  }[]>(),
+  quranicVerses: jsonb('quranic_verses').notNull().$type<
+    {
+      verse: string;
+      surah: string;
+      ayah?: number;
+    }[]
+  >(),
   checkCriteria: jsonb('check_criteria').$type<{
     mustHave?: string[];
     mustAvoid?: string[];

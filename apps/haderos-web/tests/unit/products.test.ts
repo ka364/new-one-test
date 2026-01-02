@@ -173,9 +173,7 @@ describe('Products Router - Unit Tests', () => {
     it('should throw error if product not found', async () => {
       mockDb.select.mockResolvedValueOnce([]);
 
-      await expect(caller.products.getProductById({ productId: 999 })).rejects.toThrow(
-        TRPCError
-      );
+      await expect(caller.products.getProductById({ productId: 999 })).rejects.toThrow(TRPCError);
     });
   });
 
@@ -217,10 +215,7 @@ describe('Products Router - Unit Tests', () => {
     it('should reject delete if product not found', async () => {
       mockDb.select.mockResolvedValueOnce([]);
 
-      await expect(caller.products.deleteProduct({ productId: 999 })).rejects.toThrow(
-        TRPCError
-      );
+      await expect(caller.products.deleteProduct({ productId: 999 })).rejects.toThrow(TRPCError);
     });
   });
 });
-

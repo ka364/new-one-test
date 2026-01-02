@@ -78,14 +78,14 @@ export interface WalletCredentials {
 }
 
 export interface WalletCustomer {
-  mobileNumber: string;       // رقم المحفظة
+  mobileNumber: string; // رقم المحفظة
   name?: string;
   nationalId?: string;
 }
 
 export interface WalletPaymentRequest {
-  amount: number;             // المبلغ بالجنيه
-  orderId: string;            // رقم الطلب
+  amount: number; // المبلغ بالجنيه
+  orderId: string; // رقم الطلب
   description?: string;
   customer: WalletCustomer;
   callbackUrl?: string;
@@ -122,7 +122,7 @@ export interface WalletTransaction {
 
 export interface WalletRefundRequest {
   transactionId: string;
-  amount?: number;            // للاسترجاع الجزئي
+  amount?: number; // للاسترجاع الجزئي
   reason?: string;
 }
 
@@ -260,7 +260,7 @@ export class VodafoneCashService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/payments`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -285,16 +285,19 @@ export class VodafoneCashService extends BaseWalletService {
   async verifyOTP(verification: WalletOTPVerification): Promise<WalletTransaction> {
     const token = await this.authenticate();
 
-    const response = await fetch(`${this.getApiUrl()}/payments/${verification.transactionId}/verify`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        otp: verification.otp,
-      }),
-    });
+    const response = await fetch(
+      `${this.getApiUrl()}/payments/${verification.transactionId}/verify`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          otp: verification.otp,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -310,7 +313,7 @@ export class VodafoneCashService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/payments/${transactionId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -328,7 +331,7 @@ export class VodafoneCashService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/refunds`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -352,12 +355,15 @@ export class VodafoneCashService extends BaseWalletService {
   async checkBalance(walletNumber: string): Promise<{ available: number; pending: number }> {
     const token = await this.authenticate();
 
-    const response = await fetch(`${this.getApiUrl()}/wallets/${this.validateMobileNumber(walletNumber)}/balance`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${this.getApiUrl()}/wallets/${this.validateMobileNumber(walletNumber)}/balance`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -385,7 +391,7 @@ export class OrangeMoneyService extends BaseWalletService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${this.credentials.apiKey}:${this.credentials.secretKey}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(`${this.credentials.apiKey}:${this.credentials.secretKey}`).toString('base64')}`,
       },
       body: 'grant_type=client_credentials',
     });
@@ -407,7 +413,7 @@ export class OrangeMoneyService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/mp/pay`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -436,16 +442,19 @@ export class OrangeMoneyService extends BaseWalletService {
   async verifyOTP(verification: WalletOTPVerification): Promise<WalletTransaction> {
     const token = await this.authenticate();
 
-    const response = await fetch(`${this.getApiUrl()}/mp/pay/${verification.transactionId}/confirm`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        otp: verification.otp,
-      }),
-    });
+    const response = await fetch(
+      `${this.getApiUrl()}/mp/pay/${verification.transactionId}/confirm`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          otp: verification.otp,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -461,7 +470,7 @@ export class OrangeMoneyService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/mp/pay/${transactionId}/status`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -479,7 +488,7 @@ export class OrangeMoneyService extends BaseWalletService {
     const response = await fetch(`${this.getApiUrl()}/mp/refund`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -551,10 +560,7 @@ export class UnifiedMobileWalletService {
   /**
    * Get payment status
    */
-  async getPaymentStatus(
-    mobileNumber: string,
-    transactionId: string
-  ): Promise<WalletTransaction> {
+  async getPaymentStatus(mobileNumber: string, transactionId: string): Promise<WalletTransaction> {
     const service = this.getProviderService(mobileNumber);
     return service.getPaymentStatus(transactionId);
   }
@@ -562,10 +568,7 @@ export class UnifiedMobileWalletService {
   /**
    * Process refund
    */
-  async refund(
-    mobileNumber: string,
-    request: WalletRefundRequest
-  ): Promise<WalletTransaction> {
+  async refund(mobileNumber: string, request: WalletRefundRequest): Promise<WalletTransaction> {
     const service = this.getProviderService(mobileNumber);
     return service.refund(request);
   }
@@ -601,7 +604,8 @@ export function createUnifiedWalletService(): UnifiedMobileWalletService {
         merchantCode: process.env.VODAFONE_CASH_MERCHANT_CODE || '',
         apiKey: process.env.VODAFONE_CASH_API_KEY || '',
         secretKey: process.env.VODAFONE_CASH_SECRET_KEY || '',
-        environment: (process.env.VODAFONE_CASH_ENVIRONMENT as 'production' | 'sandbox') || 'sandbox',
+        environment:
+          (process.env.VODAFONE_CASH_ENVIRONMENT as 'production' | 'sandbox') || 'sandbox',
       })
     );
   }
@@ -615,7 +619,8 @@ export function createUnifiedWalletService(): UnifiedMobileWalletService {
         merchantCode: process.env.ORANGE_MONEY_MERCHANT_CODE || '',
         apiKey: process.env.ORANGE_MONEY_API_KEY || '',
         secretKey: process.env.ORANGE_MONEY_SECRET_KEY || '',
-        environment: (process.env.ORANGE_MONEY_ENVIRONMENT as 'production' | 'sandbox') || 'sandbox',
+        environment:
+          (process.env.ORANGE_MONEY_ENVIRONMENT as 'production' | 'sandbox') || 'sandbox',
       })
     );
   }

@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { requireDb } from "../db";
-import { products } from "../../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
-import { applyDynamicPricing } from "../bio-modules/orders-bio-integration.js";
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { requireDb } from '../db';
+import { products } from '../../drizzle/schema';
+import { eq, desc } from 'drizzle-orm';
+import { applyDynamicPricing } from '../bio-modules/orders-bio-integration.js';
 
 export const productsRouter = router({
   // Get all products
@@ -22,14 +22,11 @@ export const productsRouter = router({
     .input(z.object({ productId: z.number() }))
     .query(async ({ input }) => {
       const db = await requireDb();
-      
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, input.productId));
+
+      const [product] = await db.select().from(products).where(eq(products.id, input.productId));
 
       if (!product) {
-        throw new Error("Product not found");
+        throw new Error('Product not found');
       }
 
       return product;
@@ -40,30 +37,29 @@ export const productsRouter = router({
     .input(
       z.object({
         productId: z.number(),
-        context: z.object({
-          customerHistory: z.number().optional(),
-          timeOfDay: z.number().optional(),
-          dayOfWeek: z.number().optional(),
-          currentDemand: z.enum(["low", "medium", "high"]).optional(),
-        }).optional(),
+        context: z
+          .object({
+            customerHistory: z.number().optional(),
+            timeOfDay: z.number().optional(),
+            dayOfWeek: z.number().optional(),
+            currentDemand: z.enum(['low', 'medium', 'high']).optional(),
+          })
+          .optional(),
       })
     )
     .query(async ({ input }) => {
       const db = await requireDb();
-      
+
       // Get product
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, input.productId));
+      const [product] = await db.select().from(products).where(eq(products.id, input.productId));
 
       if (!product) {
-        throw new Error("Product not found");
+        throw new Error('Product not found');
       }
 
       // Get base price
-      const basePrice = product.sellingPrice 
-        ? parseFloat(product.sellingPrice) 
+      const basePrice = product.sellingPrice
+        ? parseFloat(product.sellingPrice)
         : parseFloat(product.supplierPrice) * 1.3; // 30% markup if no selling price
 
       // Apply dynamic pricing with Chameleon
@@ -97,22 +93,20 @@ export const productsRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      
-      const result = await db
-        .insert(products)
-        .values({
-          modelCode: input.modelCode,
-          supplierPrice: input.supplierPrice.toString(),
-          sellingPrice: input.sellingPrice?.toString() || null,
-          category: input.category || null,
-          isActive: 1,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+
+      const result = await db.insert(products).values({
+        modelCode: input.modelCode,
+        supplierPrice: input.supplierPrice.toString(),
+        sellingPrice: input.sellingPrice?.toString() || null,
+        category: input.category || null,
+        isActive: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
       return {
         success: true,
-        message: "تم إنشاء المنتج بنجاح",
+        message: 'تم إنشاء المنتج بنجاح',
       };
     }),
 
@@ -130,25 +124,23 @@ export const productsRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      
+
       const updateData: any = {
         updatedAt: new Date().toISOString(),
       };
 
       if (input.modelCode !== undefined) updateData.modelCode = input.modelCode;
-      if (input.supplierPrice !== undefined) updateData.supplierPrice = input.supplierPrice.toString();
+      if (input.supplierPrice !== undefined)
+        updateData.supplierPrice = input.supplierPrice.toString();
       if (input.sellingPrice !== undefined) updateData.sellingPrice = input.sellingPrice.toString();
       if (input.category !== undefined) updateData.category = input.category;
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
 
-      await db
-        .update(products)
-        .set(updateData)
-        .where(eq(products.id, input.productId));
+      await db.update(products).set(updateData).where(eq(products.id, input.productId));
 
       return {
         success: true,
-        message: "تم تحديث المنتج بنجاح",
+        message: 'تم تحديث المنتج بنجاح',
       };
     }),
 
@@ -157,7 +149,7 @@ export const productsRouter = router({
     .input(z.object({ productId: z.number() }))
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      
+
       await db
         .update(products)
         .set({
@@ -168,7 +160,7 @@ export const productsRouter = router({
 
       return {
         success: true,
-        message: "تم حذف المنتج بنجاح",
+        message: 'تم حذف المنتج بنجاح',
       };
     }),
 });

@@ -9,13 +9,10 @@
  * 4. Manage inventory sync
  */
 
-import { db } from "../db";
-import {
-  marketerAccounts,
-  marketerShopifyStores
-} from "../../drizzle/schema-marketer-tools";
-import { products } from "../../drizzle/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { db } from '../db';
+import { marketerAccounts, marketerShopifyStores } from '../../drizzle/schema-marketer-tools';
+import { products } from '../../drizzle/schema';
+import { eq, and, sql } from 'drizzle-orm';
 
 interface ShopifyAuthConfig {
   shopDomain: string;
@@ -45,29 +42,29 @@ interface ShopifyProduct {
 }
 
 export class MarketerShopifyService {
-
   /**
    * Check if marketer can connect Shopify
    */
   async canConnectShopify(marketerId: number): Promise<{ canConnect: boolean; reason?: string }> {
-    const [marketer] = await db.select()
+    const [marketer] = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, marketerId))
       .limit(1);
 
     if (!marketer) {
-      return { canConnect: false, reason: "Marketer not found" };
+      return { canConnect: false, reason: 'Marketer not found' };
     }
 
     if (!marketer.canConnectShopify) {
       return {
         canConnect: false,
-        reason: "Shopify integration requires Gold tier or higher. Please upgrade your account."
+        reason: 'Shopify integration requires Gold tier or higher. Please upgrade your account.',
       };
     }
 
-    if (marketer.status !== "active") {
-      return { canConnect: false, reason: "Your account is not active" };
+    if (marketer.status !== 'active') {
+      return { canConnect: false, reason: 'Your account is not active' };
     }
 
     return { canConnect: true };
@@ -86,30 +83,34 @@ export class MarketerShopifyService {
     // Validate Shopify credentials
     const isValid = await this.validateShopifyCredentials(config);
     if (!isValid.valid) {
-      throw new Error(isValid.error || "Invalid Shopify credentials");
+      throw new Error(isValid.error || 'Invalid Shopify credentials');
     }
 
     // Extract store name from domain
     const storeName = config.shopDomain.replace('.myshopify.com', '');
 
     // Check if already connected
-    const existing = await db.select()
+    const existing = await db
+      .select()
       .from(marketerShopifyStores)
-      .where(and(
-        eq(marketerShopifyStores.marketerId, marketerId),
-        eq(marketerShopifyStores.shopifyDomain, config.shopDomain)
-      ))
+      .where(
+        and(
+          eq(marketerShopifyStores.marketerId, marketerId),
+          eq(marketerShopifyStores.shopifyDomain, config.shopDomain)
+        )
+      )
       .limit(1);
 
     if (existing.length > 0) {
       // Update existing connection
-      const [updated] = await db.update(marketerShopifyStores)
+      const [updated] = await db
+        .update(marketerShopifyStores)
         .set({
           accessToken: config.accessToken, // Should be encrypted
-          apiVersion: config.apiVersion || "2025-01",
-          status: "connected",
+          apiVersion: config.apiVersion || '2025-01',
+          status: 'connected',
           connectionError: null,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(marketerShopifyStores.id, existing[0].id))
         .returning();
@@ -119,16 +120,17 @@ export class MarketerShopifyService {
     }
 
     // Create new connection
-    const [store] = await db.insert(marketerShopifyStores)
+    const [store] = await db
+      .insert(marketerShopifyStores)
       .values({
         marketerId,
         storeName,
         storeUrl: `https://${config.shopDomain}`,
         shopifyDomain: config.shopDomain,
         accessToken: config.accessToken, // Should be encrypted
-        apiVersion: config.apiVersion || "2025-01",
-        scopes: ["read_products", "write_products", "read_orders", "read_inventory"],
-        status: "connected"
+        apiVersion: config.apiVersion || '2025-01',
+        scopes: ['read_products', 'write_products', 'read_orders', 'read_inventory'],
+        status: 'connected',
       })
       .returning();
 
@@ -139,15 +141,17 @@ export class MarketerShopifyService {
   /**
    * Validate Shopify credentials
    */
-  async validateShopifyCredentials(config: ShopifyAuthConfig): Promise<{ valid: boolean; error?: string }> {
+  async validateShopifyCredentials(
+    config: ShopifyAuthConfig
+  ): Promise<{ valid: boolean; error?: string }> {
     try {
       const url = `https://${config.shopDomain}/admin/api/${config.apiVersion || '2025-01'}/shop.json`;
 
       const response = await fetch(url, {
         headers: {
           'X-Shopify-Access-Token': config.accessToken,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -164,16 +168,16 @@ export class MarketerShopifyService {
    * Disconnect Shopify store
    */
   async disconnectShopifyStore(storeId: number, marketerId: number) {
-    const [disconnected] = await db.update(marketerShopifyStores)
+    const [disconnected] = await db
+      .update(marketerShopifyStores)
       .set({
-        status: "disconnected",
+        status: 'disconnected',
         accessToken: null,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
-      .where(and(
-        eq(marketerShopifyStores.id, storeId),
-        eq(marketerShopifyStores.marketerId, marketerId)
-      ))
+      .where(
+        and(eq(marketerShopifyStores.id, storeId), eq(marketerShopifyStores.marketerId, marketerId))
+      )
       .returning();
 
     if (!disconnected) {
@@ -188,7 +192,8 @@ export class MarketerShopifyService {
    * Get marketer's Shopify stores
    */
   async getMarketerShopifyStores(marketerId: number) {
-    return await db.select()
+    return await db
+      .select()
       .from(marketerShopifyStores)
       .where(eq(marketerShopifyStores.marketerId, marketerId));
   }
@@ -198,44 +203,47 @@ export class MarketerShopifyService {
    */
   async syncProductsToShopify(storeId: number, marketerId: number, productIds: number[]) {
     // Get store
-    const [store] = await db.select()
+    const [store] = await db
+      .select()
       .from(marketerShopifyStores)
-      .where(and(
-        eq(marketerShopifyStores.id, storeId),
-        eq(marketerShopifyStores.marketerId, marketerId)
-      ))
+      .where(
+        and(eq(marketerShopifyStores.id, storeId), eq(marketerShopifyStores.marketerId, marketerId))
+      )
       .limit(1);
 
     if (!store) {
-      throw new Error("Store not found");
+      throw new Error('Store not found');
     }
 
-    if (store.status !== "connected" || !store.accessToken) {
-      throw new Error("Store is not connected");
+    if (store.status !== 'connected' || !store.accessToken) {
+      throw new Error('Store is not connected');
     }
 
     // Get products to sync
-    const productsToSync = await db.select()
+    const productsToSync = await db
+      .select()
       .from(products)
       .where(sql`${products.id} = ANY(${productIds})`);
 
     if (productsToSync.length === 0) {
-      throw new Error("No products found to sync");
+      throw new Error('No products found to sync');
     }
 
     // Update status to syncing
-    await db.update(marketerShopifyStores)
-      .set({ status: "syncing", updatedAt: new Date() })
+    await db
+      .update(marketerShopifyStores)
+      .set({ status: 'syncing', updatedAt: new Date() })
       .where(eq(marketerShopifyStores.id, storeId));
 
     const results = {
       synced: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     // Get marketer info for pricing
-    const [marketer] = await db.select()
+    const [marketer] = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, marketerId))
       .limit(1);
@@ -253,15 +261,17 @@ export class MarketerShopifyService {
             product: {
               title: product.modelCode,
               body_html: `<p>High quality product from Haderos factory</p>`,
-              vendor: "Haderos",
-              product_type: product.category || "General",
-              variants: [{
-                price: marketerPrice.toFixed(2),
-                sku: product.modelCode,
-                inventory_management: "shopify",
-                inventory_policy: "deny"
-              }]
-            }
+              vendor: 'Haderos',
+              product_type: product.category || 'General',
+              variants: [
+                {
+                  price: marketerPrice.toFixed(2),
+                  sku: product.modelCode,
+                  inventory_management: 'shopify',
+                  inventory_policy: 'deny',
+                },
+              ],
+            },
           };
 
           const response = await fetch(
@@ -270,9 +280,9 @@ export class MarketerShopifyService {
               method: 'POST',
               headers: {
                 'X-Shopify-Access-Token': store.accessToken!,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               },
-              body: JSON.stringify(shopifyProduct)
+              body: JSON.stringify(shopifyProduct),
             }
           );
 
@@ -283,10 +293,11 @@ export class MarketerShopifyService {
             const currentMapping = (store.productMapping as any) || {};
             currentMapping[data.product.id] = product.id;
 
-            await db.update(marketerShopifyStores)
+            await db
+              .update(marketerShopifyStores)
               .set({
                 productMapping: currentMapping,
-                syncedProducts: sql`${marketerShopifyStores.syncedProducts} + 1`
+                syncedProducts: sql`${marketerShopifyStores.syncedProducts} + 1`,
               })
               .where(eq(marketerShopifyStores.id, storeId));
 
@@ -303,11 +314,12 @@ export class MarketerShopifyService {
       }
     } finally {
       // Update final status
-      await db.update(marketerShopifyStores)
+      await db
+        .update(marketerShopifyStores)
         .set({
-          status: "connected",
+          status: 'connected',
           lastSyncAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(marketerShopifyStores.id, storeId));
     }
@@ -320,16 +332,16 @@ export class MarketerShopifyService {
    * Fetch products from Shopify
    */
   async fetchShopifyProducts(storeId: number, marketerId: number): Promise<ShopifyProduct[]> {
-    const [store] = await db.select()
+    const [store] = await db
+      .select()
       .from(marketerShopifyStores)
-      .where(and(
-        eq(marketerShopifyStores.id, storeId),
-        eq(marketerShopifyStores.marketerId, marketerId)
-      ))
+      .where(
+        and(eq(marketerShopifyStores.id, storeId), eq(marketerShopifyStores.marketerId, marketerId))
+      )
       .limit(1);
 
-    if (!store || store.status !== "connected" || !store.accessToken) {
-      throw new Error("Store not found or not connected");
+    if (!store || store.status !== 'connected' || !store.accessToken) {
+      throw new Error('Store not found or not connected');
     }
 
     try {
@@ -338,8 +350,8 @@ export class MarketerShopifyService {
         {
           headers: {
             'X-Shopify-Access-Token': store.accessToken!,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -350,10 +362,11 @@ export class MarketerShopifyService {
       const data = await response.json();
 
       // Update total products count
-      await db.update(marketerShopifyStores)
+      await db
+        .update(marketerShopifyStores)
         .set({
           totalProducts: data.products?.length || 0,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(marketerShopifyStores.id, storeId));
 
@@ -367,16 +380,16 @@ export class MarketerShopifyService {
    * Get store sync status
    */
   async getStoreSyncStatus(storeId: number, marketerId: number) {
-    const [store] = await db.select()
+    const [store] = await db
+      .select()
       .from(marketerShopifyStores)
-      .where(and(
-        eq(marketerShopifyStores.id, storeId),
-        eq(marketerShopifyStores.marketerId, marketerId)
-      ))
+      .where(
+        and(eq(marketerShopifyStores.id, storeId), eq(marketerShopifyStores.marketerId, marketerId))
+      )
       .limit(1);
 
     if (!store) {
-      throw new Error("Store not found");
+      throw new Error('Store not found');
     }
 
     return {
@@ -386,7 +399,7 @@ export class MarketerShopifyService {
       totalOrders: store.totalOrders,
       syncedOrders: store.syncedOrders,
       lastSyncAt: store.lastSyncAt,
-      connectionError: store.connectionError
+      connectionError: store.connectionError,
     };
   }
 
@@ -395,7 +408,8 @@ export class MarketerShopifyService {
    */
   async handleOrderWebhook(shopifyDomain: string, orderData: any) {
     // Find store by domain
-    const [store] = await db.select()
+    const [store] = await db
+      .select()
       .from(marketerShopifyStores)
       .where(eq(marketerShopifyStores.shopifyDomain, shopifyDomain))
       .limit(1);
@@ -406,18 +420,20 @@ export class MarketerShopifyService {
     }
 
     // Update order count
-    await db.update(marketerShopifyStores)
+    await db
+      .update(marketerShopifyStores)
       .set({
         totalOrders: sql`${marketerShopifyStores.totalOrders} + 1`,
         syncedOrders: sql`${marketerShopifyStores.syncedOrders} + 1`,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(marketerShopifyStores.id, store.id));
 
     // Update marketer stats
     const orderTotal = Number(orderData.total_price || 0);
 
-    const [marketer] = await db.select()
+    const [marketer] = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, store.marketerId))
       .limit(1);
@@ -425,13 +441,14 @@ export class MarketerShopifyService {
     if (marketer) {
       const commission = orderTotal * (Number(marketer.commissionRate) / 100);
 
-      await db.update(marketerAccounts)
+      await db
+        .update(marketerAccounts)
         .set({
           totalSales: sql`${marketerAccounts.totalSales} + ${orderTotal}`,
           totalOrders: sql`${marketerAccounts.totalOrders} + 1`,
           pendingCommission: sql`${marketerAccounts.pendingCommission} + ${commission}`,
           totalCommission: sql`${marketerAccounts.totalCommission} + ${commission}`,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(marketerAccounts.id, store.marketerId));
     }
@@ -444,8 +461,9 @@ export class MarketerShopifyService {
    */
   generateOAuthUrl(marketerId: number, shopDomain: string): string {
     const clientId = process.env.SHOPIFY_CLIENT_ID;
-    const redirectUri = process.env.SHOPIFY_REDIRECT_URI || `${process.env.BASE_URL}/api/shopify/callback`;
-    const scopes = "read_products,write_products,read_orders,read_inventory";
+    const redirectUri =
+      process.env.SHOPIFY_REDIRECT_URI || `${process.env.BASE_URL}/api/shopify/callback`;
+    const scopes = 'read_products,write_products,read_orders,read_inventory';
     const state = Buffer.from(JSON.stringify({ marketerId, shopDomain })).toString('base64');
 
     return `https://${shopDomain}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}&state=${state}`;
@@ -462,13 +480,13 @@ export class MarketerShopifyService {
       const response = await fetch(`https://${shopDomain}/admin/oauth/access_token`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           client_id: clientId,
           client_secret: clientSecret,
-          code
-        })
+          code,
+        }),
       });
 
       if (!response.ok) {
@@ -481,7 +499,7 @@ export class MarketerShopifyService {
       return await this.connectShopifyStore(marketerId, {
         shopDomain,
         accessToken: data.access_token,
-        apiVersion: "2025-01"
+        apiVersion: '2025-01',
       });
     } catch (error) {
       throw new Error(`Failed to complete OAuth: ${error}`);

@@ -85,7 +85,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 25,
     },
     riskLevel: 'medium',
-    probability: 0.70,
+    probability: 0.7,
   },
 
   // 3. السيناريو القوي
@@ -111,7 +111,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 28,
     },
     riskLevel: 'medium',
-    probability: 0.50,
+    probability: 0.5,
   },
 
   // 4. السيناريو الأسي
@@ -137,7 +137,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 32,
     },
     riskLevel: 'high',
-    probability: 0.30,
+    probability: 0.3,
   },
 
   // 5. أفضل سيناريو
@@ -189,7 +189,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 10,
     },
     riskLevel: 'low',
-    probability: 0.10,
+    probability: 0.1,
   },
 
   // 7. الخط الأساسي
@@ -215,7 +215,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 22,
     },
     riskLevel: 'low',
-    probability: 0.90,
+    probability: 0.9,
   },
 
   // 8. الموسم المرتفع
@@ -241,7 +241,7 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
       profitability: 30,
     },
     riskLevel: 'medium',
-    probability: 0.60,
+    probability: 0.6,
   },
 ];
 
@@ -249,21 +249,21 @@ export const SIMULATION_SCENARIOS: Scenario[] = [
  * الحصول على سيناريو بالـ ID
  */
 export function getScenarioById(id: string): Scenario | undefined {
-  return SIMULATION_SCENARIOS.find(s => s.id === id);
+  return SIMULATION_SCENARIOS.find((s) => s.id === id);
 }
 
 /**
  * الحصول على السيناريوهات حسب مستوى المخاطر
  */
 export function getScenariosByRisk(riskLevel: 'low' | 'medium' | 'high'): Scenario[] {
-  return SIMULATION_SCENARIOS.filter(s => s.riskLevel === riskLevel);
+  return SIMULATION_SCENARIOS.filter((s) => s.riskLevel === riskLevel);
 }
 
 /**
  * الحصول على السيناريوهات الأكثر احتمالاً
  */
 export function getMostLikelyScenarios(threshold = 0.5): Scenario[] {
-  return SIMULATION_SCENARIOS.filter(s => s.probability >= threshold).sort(
+  return SIMULATION_SCENARIOS.filter((s) => s.probability >= threshold).sort(
     (a, b) => b.probability - a.probability
   );
 }
@@ -273,7 +273,7 @@ export function getMostLikelyScenarios(threshold = 0.5): Scenario[] {
  */
 export function compareScenarios(scenarioIds: string[]): any {
   const scenarios = scenarioIds
-    .map(id => getScenarioById(id))
+    .map((id) => getScenarioById(id))
     .filter((s): s is Scenario => s !== undefined);
 
   if (scenarios.length < 2) {
@@ -281,26 +281,26 @@ export function compareScenarios(scenarioIds: string[]): any {
   }
 
   return {
-    scenarios: scenarios.map(s => ({
+    scenarios: scenarios.map((s) => ({
       id: s.id,
       name: s.nameAr,
       risk: s.riskLevel,
       probability: s.probability,
     })),
     comparison: {
-      revenueGrowth: scenarios.map(s => ({
+      revenueGrowth: scenarios.map((s) => ({
         scenario: s.nameAr,
         value: s.expectedOutcome.revenueGrowth,
       })),
-      customerGrowth: scenarios.map(s => ({
+      customerGrowth: scenarios.map((s) => ({
         scenario: s.nameAr,
         value: s.expectedOutcome.customerGrowth,
       })),
-      marketShare: scenarios.map(s => ({
+      marketShare: scenarios.map((s) => ({
         scenario: s.nameAr,
         value: s.expectedOutcome.marketShare,
       })),
-      profitability: scenarios.map(s => ({
+      profitability: scenarios.map((s) => ({
         scenario: s.nameAr,
         value: s.expectedOutcome.profitability,
       })),
@@ -314,7 +314,7 @@ export function compareScenarios(scenarioIds: string[]): any {
  */
 function getBestScenario(scenarios: Scenario[]): any {
   // حساب النقاط لكل سيناريو
-  const scored = scenarios.map(s => {
+  const scored = scenarios.map((s) => {
     const score =
       s.expectedOutcome.revenueGrowth * 0.3 +
       s.expectedOutcome.customerGrowth * 0.2 +
@@ -365,7 +365,7 @@ export function scenarioSensitivityAnalysis(scenarioId: string): any {
     { name: 'معدل الفقد', key: 'churnRate', range: 0.25 },
   ];
 
-  return variables.map(v => {
+  return variables.map((v) => {
     const baseValue = scenario.assumptions[v.key as keyof ScenarioAssumptions] as number;
     const impact = calculateVariableImpact(v.key, baseValue, v.range, scenario);
 
@@ -381,7 +381,12 @@ export function scenarioSensitivityAnalysis(scenarioId: string): any {
 /**
  * حساب تأثير المتغير
  */
-function calculateVariableImpact(key: string, baseValue: number, range: number, scenario: Scenario): any {
+function calculateVariableImpact(
+  key: string,
+  baseValue: number,
+  range: number,
+  scenario: Scenario
+): any {
   const low = baseValue * (1 - range);
   const high = baseValue * (1 + range);
 

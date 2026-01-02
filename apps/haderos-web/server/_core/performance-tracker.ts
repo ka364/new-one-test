@@ -1,7 +1,7 @@
 /**
  * Performance Tracker
  * Apple-Level Performance Monitoring
- * 
+ *
  * Tracks and records performance metrics for all operations
  */
 
@@ -16,7 +16,10 @@ export interface PerformanceContext {
 /**
  * Create a performance tracker for an operation
  */
-export function trackPerformance(operation: string, tags?: Record<string, string>): PerformanceContext {
+export function trackPerformance(
+  operation: string,
+  tags?: Record<string, string>
+): PerformanceContext {
   return {
     operation,
     startTime: Date.now(),
@@ -75,4 +78,3 @@ export function trackSync<T>(operation: string, fn: () => T, tags?: Record<strin
     throw error;
   }
 }
-

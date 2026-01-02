@@ -166,7 +166,8 @@ export class OperationsReportService {
       deliveredShipments,
       inTransitShipments: Number(row?.in_transit || 0),
       averageDeliveryTime: Number(row?.avg_delivery_hours || 48),
-      onTimeDeliveryRate: totalShipments > 0 ? (deliveredShipments / totalShipments) * 0.92 * 100 : 0,
+      onTimeDeliveryRate:
+        totalShipments > 0 ? (deliveredShipments / totalShipments) * 0.92 * 100 : 0,
     };
   }
 
@@ -306,6 +307,6 @@ export class OperationsReportService {
       ['الشحن', 'معدل التسليم في الوقت %', report.shippingMetrics.onTimeDeliveryRate.toFixed(2)],
     ];
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(',')).join('\n');
   }
 }

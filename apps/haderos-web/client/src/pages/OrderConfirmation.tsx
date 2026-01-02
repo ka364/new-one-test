@@ -1,26 +1,27 @@
 // @ts-nocheck
-import { useEffect } from "react";
-import { useRoute, useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Package, MapPin, Phone, Mail, Loader2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { useEffect } from 'react';
+import { useRoute, useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2, Package, MapPin, Phone, Mail, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 export default function OrderConfirmation() {
-  const [, params] = useRoute("/order-confirmation/:orderId");
+  const [, params] = useRoute('/order-confirmation/:orderId');
   const [, setLocation] = useLocation();
-  
+
   const orderId = params?.orderId ? parseInt(params.orderId) : null;
 
-  const { data: order, isLoading, error } = trpc.orders.getOrderById.useQuery(
-    { orderId: orderId! },
-    { enabled: !!orderId }
-  );
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = trpc.orders.getOrderById.useQuery({ orderId: orderId! }, { enabled: !!orderId });
 
   useEffect(() => {
     if (!orderId) {
-      setLocation("/");
+      setLocation('/');
     }
   }, [orderId, setLocation]);
 
@@ -42,11 +43,9 @@ export default function OrderConfirmation() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h2 className="text-2xl font-bold mb-2 text-destructive">خطأ</h2>
             <p className="text-muted-foreground mb-6">
-              {error?.message || "لم يتم العثور على الطلب"}
+              {error?.message || 'لم يتم العثور على الطلب'}
             </p>
-            <Button onClick={() => setLocation("/")}>
-              العودة للصفحة الرئيسية
-            </Button>
+            <Button onClick={() => setLocation('/')}>العودة للصفحة الرئيسية</Button>
           </CardContent>
         </Card>
       </div>
@@ -59,9 +58,7 @@ export default function OrderConfirmation() {
       <div className="text-center mb-8">
         <CheckCircle2 className="h-20 w-20 text-green-600 mx-auto mb-4" />
         <h1 className="text-3xl font-bold mb-2">تم إنشاء الطلب بنجاح!</h1>
-        <p className="text-muted-foreground">
-          شكراً لك! تم استلام طلبك وسيتم معالجته قريباً
-        </p>
+        <p className="text-muted-foreground">شكراً لك! تم استلام طلبك وسيتم معالجته قريباً</p>
       </div>
 
       {/* Order Details */}
@@ -81,32 +78,32 @@ export default function OrderConfirmation() {
               <div>
                 <p className="text-sm text-muted-foreground">حالة الطلب</p>
                 <p className="font-medium">
-                  {order.status === "pending" && "قيد الانتظار"}
-                  {order.status === "confirmed" && "مؤكد"}
-                  {order.status === "processing" && "قيد المعالجة"}
-                  {order.status === "shipped" && "تم الشحن"}
-                  {order.status === "delivered" && "تم التوصيل"}
-                  {order.status === "cancelled" && "ملغي"}
+                  {order.status === 'pending' && 'قيد الانتظار'}
+                  {order.status === 'confirmed' && 'مؤكد'}
+                  {order.status === 'processing' && 'قيد المعالجة'}
+                  {order.status === 'shipped' && 'تم الشحن'}
+                  {order.status === 'delivered' && 'تم التوصيل'}
+                  {order.status === 'cancelled' && 'ملغي'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">حالة الدفع</p>
                 <p className="font-medium">
-                  {order.paymentStatus === "pending" && "قيد الانتظار"}
-                  {order.paymentStatus === "paid" && "مدفوع"}
-                  {order.paymentStatus === "failed" && "فشل"}
-                  {order.paymentStatus === "refunded" && "مسترد"}
+                  {order.paymentStatus === 'pending' && 'قيد الانتظار'}
+                  {order.paymentStatus === 'paid' && 'مدفوع'}
+                  {order.paymentStatus === 'failed' && 'فشل'}
+                  {order.paymentStatus === 'refunded' && 'مسترد'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">تاريخ الطلب</p>
                 <p className="font-medium">
-                  {new Date(order.createdAt).toLocaleDateString("ar-SA", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
+                  {new Date(order.createdAt).toLocaleDateString('ar-SA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </p>
               </div>
@@ -124,13 +121,9 @@ export default function OrderConfirmation() {
                 <div>
                   <p className="font-medium">{order.productName}</p>
                   {order.productDescription && (
-                    <p className="text-sm text-muted-foreground">
-                      {order.productDescription}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{order.productDescription}</p>
                   )}
-                  <p className="text-sm text-muted-foreground mt-1">
-                    الكمية: {order.quantity}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">الكمية: {order.quantity}</p>
                 </div>
                 <div className="text-left">
                   <p className="font-bold">{order.totalAmount} ج.م</p>
@@ -157,7 +150,7 @@ export default function OrderConfirmation() {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">الهاتف</p>
-                  <p className="font-medium">{order.customerPhone || "غير متوفر"}</p>
+                  <p className="font-medium">{order.customerPhone || 'غير متوفر'}</p>
                 </div>
               </div>
               {order.customerEmail && (
@@ -172,7 +165,7 @@ export default function OrderConfirmation() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">عنوان الشحن</p>
-              <p className="font-medium">{order.shippingAddress || "غير متوفر"}</p>
+              <p className="font-medium">{order.shippingAddress || 'غير متوفر'}</p>
             </div>
             {order.notes && (
               <div>
@@ -206,10 +199,8 @@ export default function OrderConfirmation() {
 
         {/* Actions */}
         <div className="flex gap-4 justify-center">
-          <Button onClick={() => setLocation("/nowshoes")}>
-            متابعة التسوق
-          </Button>
-          <Button variant="outline" onClick={() => setLocation("/")}>
+          <Button onClick={() => setLocation('/nowshoes')}>متابعة التسوق</Button>
+          <Button variant="outline" onClick={() => setLocation('/')}>
             العودة للصفحة الرئيسية
           </Button>
         </div>

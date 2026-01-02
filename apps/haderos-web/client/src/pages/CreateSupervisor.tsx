@@ -1,29 +1,38 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, UserPlus, Briefcase, Phone, Mail, DollarSign, Calendar, ArrowRight } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Link } from "wouter";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Users,
+  UserPlus,
+  Briefcase,
+  Phone,
+  Mail,
+  DollarSign,
+  Calendar,
+  ArrowRight,
+} from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Link } from 'wouter';
 
 export default function CreateSupervisor() {
   const [formData, setFormData] = useState({
-    fullName: "",
-    nationalId: "",
-    phoneNumber: "",
-    email: "",
-    jobTitle: "",
-    department: "",
-    salary: "",
+    fullName: '',
+    nationalId: '',
+    phoneNumber: '',
+    email: '',
+    jobTitle: '',
+    department: '',
+    salary: '',
     hireDate: new Date().toISOString().split('T')[0],
-    contractType: "permanent",
+    contractType: 'permanent',
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Get HR stats
   const { data: stats } = trpc.hr.stats.useQuery();
@@ -34,40 +43,40 @@ export default function CreateSupervisor() {
   // Create supervisor mutation
   const createSupervisor = trpc.hr.createSupervisor.useMutation({
     onSuccess: () => {
-      setSuccess("تم إنشاء حساب المشرف بنجاح! ✅");
-      setError("");
+      setSuccess('تم إنشاء حساب المشرف بنجاح! ✅');
+      setError('');
       setFormData({
-        fullName: "",
-        nationalId: "",
-        phoneNumber: "",
-        email: "",
-        jobTitle: "",
-        department: "",
-        salary: "",
+        fullName: '',
+        nationalId: '',
+        phoneNumber: '',
+        email: '',
+        jobTitle: '',
+        department: '',
+        salary: '',
         hireDate: new Date().toISOString().split('T')[0],
-        contractType: "permanent",
+        contractType: 'permanent',
       });
       refetchSupervisors();
     },
     onError: (err) => {
       setError(err.message);
-      setSuccess("");
+      setSuccess('');
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     // Validation
     if (!formData.fullName || !formData.nationalId || !formData.phoneNumber) {
-      setError("الرجاء ملء جميع الحقول المطلوبة");
+      setError('الرجاء ملء جميع الحقول المطلوبة');
       return;
     }
 
     if (formData.nationalId.length !== 14) {
-      setError("الرقم القومي يجب أن يكون 14 رقم");
+      setError('الرقم القومي يجب أن يكون 14 رقم');
       return;
     }
 
@@ -102,9 +111,7 @@ export default function CreateSupervisor() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{supervisorsCount}/7</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {remainingSupervisors} متبقي
-              </p>
+              <p className="text-xs text-gray-600 mt-1">{remainingSupervisors} متبقي</p>
             </CardContent>
           </Card>
 
@@ -115,9 +122,7 @@ export default function CreateSupervisor() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{stats?.employees || 0}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                موظف نشط
-              </p>
+              <p className="text-xs text-gray-600 mt-1">موظف نشط</p>
             </CardContent>
           </Card>
 
@@ -128,9 +133,7 @@ export default function CreateSupervisor() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600">{stats?.verified || 0}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                حساب معتمد
-              </p>
+              <p className="text-xs text-gray-600 mt-1">حساب معتمد</p>
             </CardContent>
           </Card>
         </div>
@@ -143,9 +146,7 @@ export default function CreateSupervisor() {
                 <UserPlus className="h-5 w-5" />
                 إضافة مشرف جديد
               </CardTitle>
-              <CardDescription>
-                يمكنك إضافة {remainingSupervisors} مشرف آخر
-              </CardDescription>
+              <CardDescription>يمكنك إضافة {remainingSupervisors} مشرف آخر</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -271,12 +272,8 @@ export default function CreateSupervisor() {
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={createSupervisor.isPending}
-                >
-                  {createSupervisor.isPending ? "جاري الإنشاء..." : "إنشاء حساب المشرف"}
+                <Button type="submit" className="w-full" disabled={createSupervisor.isPending}>
+                  {createSupervisor.isPending ? 'جاري الإنشاء...' : 'إنشاء حساب المشرف'}
                 </Button>
               </form>
             </CardContent>
@@ -315,13 +312,15 @@ export default function CreateSupervisor() {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                   >
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{supervisor.full_name || supervisor.fullName}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {supervisor.full_name || supervisor.fullName}
+                      </h3>
                       <p className="text-sm text-gray-600">
                         {supervisor.job_title || supervisor.jobTitle} - {supervisor.department}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        📱 {supervisor.phone_number || supervisor.phoneNumber} | 
-                        🆔 {supervisor.national_id || supervisor.nationalId}
+                        📱 {supervisor.phone_number || supervisor.phoneNumber} | 🆔{' '}
+                        {supervisor.national_id || supervisor.nationalId}
                       </p>
                     </div>
                     <div className="text-left">
@@ -329,7 +328,7 @@ export default function CreateSupervisor() {
                         الموظفين: {supervisor.children_count || supervisor.childrenCount || 0}/7
                       </div>
                       <div className="text-xs text-gray-500">
-                        {supervisor.is_active || supervisor.isActive ? "نشط" : "غير نشط"}
+                        {supervisor.is_active || supervisor.isActive ? 'نشط' : 'غير نشط'}
                       </div>
                     </div>
                   </div>

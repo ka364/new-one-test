@@ -5,20 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Printer, 
-  RefreshCw, 
-  Truck, 
-  Package, 
-  Phone, 
-  MapPin, 
+import {
+  Printer,
+  RefreshCw,
+  Truck,
+  Package,
+  Phone,
+  MapPin,
   Calendar,
   User,
   Mail,
   MessageSquare,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 
 export default function CODOrderDetailsPage() {
@@ -27,21 +27,25 @@ export default function CODOrderDetailsPage() {
   const orderId = params.id as string;
 
   // استخدام tRPC query
-  const { data: order, isLoading, refetch } = trpc.cod.getOrderById.useQuery({ 
-    id: parseInt(orderId) 
+  const {
+    data: order,
+    isLoading,
+    refetch,
+  } = trpc.cod.getOrderById.useQuery({
+    id: parseInt(orderId),
   });
-  
+
   // tRPC mutations
   const updateStatus = trpc.cod.updateOrderStatus.useMutation({
     onSuccess: () => {
       refetch();
-    }
+    },
   });
-  
+
   const createShipment = trpc.cod.createBostaShipment.useMutation({
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   if (isLoading) {
@@ -66,13 +70,17 @@ export default function CODOrderDetailsPage() {
 
   // استخراج بيانات الطلب
   const orderData = order?.order as any;
-  
+
   // استخراج بيانات العنوان
   const shippingAddress = (orderData?.shippingAddress as any) || {};
 
   // استخراج المراحل
-  const stages = orderData?.stages ? (typeof orderData.stages === 'string' ? JSON.parse(orderData.stages) : orderData.stages) : {};
-  
+  const stages = orderData?.stages
+    ? typeof orderData.stages === 'string'
+      ? JSON.parse(orderData.stages)
+      : orderData.stages
+    : {};
+
   // جدول المراحل
   const stageTitles = [
     'استلام الطلب',
@@ -82,7 +90,7 @@ export default function CODOrderDetailsPage() {
     'تخصيص الشحن',
     'تتبع التسليم',
     'التحصيل',
-    'التسوية'
+    'التسوية',
   ];
 
   // بناء عنوان كامل
@@ -93,8 +101,10 @@ export default function CODOrderDetailsPage() {
     shippingAddress.apartment && `شقة ${shippingAddress.apartment}`,
     shippingAddress.city,
     shippingAddress.governorate,
-    shippingAddress.notes
-  ].filter(Boolean).join('، ');
+    shippingAddress.notes,
+  ]
+    .filter(Boolean)
+    .join('، ');
 
   // حساب المرحلة الحالية
   const currentStageNum = parseInt(orderData?.currentStage || '1');
@@ -109,22 +119,23 @@ export default function CODOrderDetailsPage() {
           </h1>
           <p className="text-gray-600 flex items-center gap-2 mt-1">
             <Calendar className="w-4 h-4" />
-            تم الإنشاء في {new Date(orderData?.createdAt!).toLocaleDateString('ar-EG', {
+            تم الإنشاء في{' '}
+            {new Date(orderData?.createdAt!).toLocaleDateString('ar-EG', {
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
+              day: 'numeric',
             })}
           </p>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="gap-2">
             <Printer className="w-4 h-4" />
             طباعة
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2"
             onClick={() => refetch()}
             disabled={isLoading}
@@ -133,8 +144,8 @@ export default function CODOrderDetailsPage() {
             تحديث
           </Button>
           {!orderData?.trackingNumber && (
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className="gap-2"
               onClick={() => {
                 createShipment.mutate({ orderId: orderData?.id });
@@ -200,24 +211,30 @@ export default function CODOrderDetailsPage() {
                   <p className="text-sm text-gray-500 mb-1">العنوان الكامل</p>
                   <p className="font-medium leading-relaxed">{fullAddress || 'لا يوجد عنوان'}</p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3">
                   {shippingAddress.city && (
                     <div className="space-y-1">
                       <p className="text-xs text-gray-500">المدينة</p>
-                      <Badge variant="outline" className="font-normal">{shippingAddress.city}</Badge>
+                      <Badge variant="outline" className="font-normal">
+                        {shippingAddress.city}
+                      </Badge>
                     </div>
                   )}
                   {shippingAddress.governorate && (
                     <div className="space-y-1">
                       <p className="text-xs text-gray-500">المحافظة</p>
-                      <Badge variant="outline" className="font-normal">{shippingAddress.governorate}</Badge>
+                      <Badge variant="outline" className="font-normal">
+                        {shippingAddress.governorate}
+                      </Badge>
                     </div>
                   )}
                   {shippingAddress.area && (
                     <div className="space-y-1">
                       <p className="text-xs text-gray-500">المنطقة</p>
-                      <Badge variant="outline" className="font-normal">{shippingAddress.area}</Badge>
+                      <Badge variant="outline" className="font-normal">
+                        {shippingAddress.area}
+                      </Badge>
                     </div>
                   )}
                 </div>
@@ -253,12 +270,15 @@ export default function CODOrderDetailsPage() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-2">الحالة</p>
-                    <Badge 
+                    <Badge
                       variant={
-                        orderData?.status === 'completed' ? 'default' :
-                        orderData?.status === 'in_progress' ? 'secondary' :
-                        orderData?.status === 'cancelled' ? 'destructive' : 
-                        'outline'
+                        orderData?.status === 'completed'
+                          ? 'default'
+                          : orderData?.status === 'in_progress'
+                            ? 'secondary'
+                            : orderData?.status === 'cancelled'
+                              ? 'destructive'
+                              : 'outline'
                       }
                       className="text-sm px-3 py-1"
                     >
@@ -269,7 +289,7 @@ export default function CODOrderDetailsPage() {
                     <p className="text-sm text-gray-500 mb-2">المرحلة الحالية</p>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-primary transition-all duration-300"
                           style={{ width: `${(currentStageNum / 8) * 100}%` }}
                         ></div>
@@ -278,9 +298,7 @@ export default function CODOrderDetailsPage() {
                         {currentStageNum}/8
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {stageTitles[currentStageNum - 1]}
-                    </p>
+                    <p className="text-sm text-gray-600 mt-1">{stageTitles[currentStageNum - 1]}</p>
                   </div>
                 </div>
               </div>
@@ -325,12 +343,14 @@ export default function CODOrderDetailsPage() {
                   return (
                     <div key={stageNum} className="flex items-start gap-3">
                       <div className="flex flex-col items-center">
-                        <div className={`
+                        <div
+                          className={`
                           w-8 h-8 rounded-full flex items-center justify-center
                           ${isCompleted ? 'bg-green-500 text-white' : ''}
                           ${isCurrent ? 'bg-primary text-white' : ''}
                           ${isPending ? 'bg-gray-200 text-gray-500' : ''}
-                        `}>
+                        `}
+                        >
                           {isCompleted ? (
                             <CheckCircle className="w-5 h-5" />
                           ) : isCurrent ? (
@@ -340,19 +360,19 @@ export default function CODOrderDetailsPage() {
                           )}
                         </div>
                         {index < stageTitles.length - 1 && (
-                          <div className={`w-0.5 h-12 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`} />
+                          <div
+                            className={`w-0.5 h-12 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}
+                          />
                         )}
                       </div>
                       <div className="flex-1 pt-1">
-                        <p className={`font-medium ${isCurrent ? 'text-primary' : isCompleted ? 'text-gray-900' : 'text-gray-500'}`}>
+                        <p
+                          className={`font-medium ${isCurrent ? 'text-primary' : isCompleted ? 'text-gray-900' : 'text-gray-500'}`}
+                        >
                           {title}
                         </p>
-                        {isCompleted && (
-                          <p className="text-xs text-gray-500 mt-1">مكتمل</p>
-                        )}
-                        {isCurrent && (
-                          <p className="text-xs text-primary mt-1">جاري العمل</p>
-                        )}
+                        {isCompleted && <p className="text-xs text-gray-500 mt-1">مكتمل</p>}
+                        {isCurrent && <p className="text-xs text-primary mt-1">جاري العمل</p>}
                       </div>
                     </div>
                   );
@@ -370,13 +390,13 @@ export default function CODOrderDetailsPage() {
               <CardTitle>إجراءات سريعة</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => {
-                  updateStatus.mutate({ 
-                    id: orderData?.id, 
-                    status: 'in_progress' 
+                  updateStatus.mutate({
+                    id: orderData?.id,
+                    status: 'in_progress',
                   });
                 }}
                 disabled={updateStatus.isPending || orderData?.status === 'in_progress'}
@@ -384,13 +404,13 @@ export default function CODOrderDetailsPage() {
                 <Clock className="w-4 h-4" />
                 بدء المعالجة
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => {
-                  updateStatus.mutate({ 
-                    id: orderData?.id, 
-                    status: 'completed' 
+                  updateStatus.mutate({
+                    id: orderData?.id,
+                    status: 'completed',
                   });
                 }}
                 disabled={updateStatus.isPending || orderData?.status === 'completed'}
@@ -399,14 +419,14 @@ export default function CODOrderDetailsPage() {
                 إكمال الطلب
               </Button>
               <Separator />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start gap-2 text-red-600 hover:text-red-700"
                 onClick={() => {
                   if (confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) {
-                    updateStatus.mutate({ 
-                      id: orderData?.id, 
-                      status: 'cancelled' 
+                    updateStatus.mutate({
+                      id: orderData?.id,
+                      status: 'cancelled',
                     });
                   }
                 }}
@@ -428,7 +448,7 @@ export default function CODOrderDetailsPage() {
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((stageNum) => (
                   <Button
                     key={stageNum}
-                    variant={currentStageNum === stageNum ? "default" : "outline"}
+                    variant={currentStageNum === stageNum ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => {
                       // Update stage via API
@@ -482,7 +502,7 @@ function getStatusText(status: string): string {
     pending: 'قيد الانتظار',
     in_progress: 'قيد المعالجة',
     completed: 'مكتمل',
-    cancelled: 'ملغي'
+    cancelled: 'ملغي',
   };
   return statusMap[status] || status;
 }

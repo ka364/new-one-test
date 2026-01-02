@@ -108,36 +108,86 @@ export class CVParser {
   extractSkills(cvText: string): string[] {
     const skillKeywords = [
       // مهارات المبيعات
-      'sales', 'مبيعات', 'بيع', 'customer relations', 'علاقات عملاء',
-      'negotiation', 'تفاوض', 'closing', 'إغلاق صفقات',
+      'sales',
+      'مبيعات',
+      'بيع',
+      'customer relations',
+      'علاقات عملاء',
+      'negotiation',
+      'تفاوض',
+      'closing',
+      'إغلاق صفقات',
 
       // مهارات خدمة العملاء
-      'customer service', 'خدمة عملاء', 'support', 'دعم',
-      'communication', 'تواصل', 'problem solving', 'حل مشكلات',
+      'customer service',
+      'خدمة عملاء',
+      'support',
+      'دعم',
+      'communication',
+      'تواصل',
+      'problem solving',
+      'حل مشكلات',
 
       // مهارات المخازن
-      'warehouse', 'مخازن', 'inventory', 'مخزون',
-      'logistics', 'لوجستيات', 'stock management', 'إدارة مخزون',
+      'warehouse',
+      'مخازن',
+      'inventory',
+      'مخزون',
+      'logistics',
+      'لوجستيات',
+      'stock management',
+      'إدارة مخزون',
 
       // مهارات التوصيل
-      'delivery', 'توصيل', 'driving', 'قيادة',
-      'route planning', 'تخطيط مسارات', 'logistics', 'لوجستيات',
+      'delivery',
+      'توصيل',
+      'driving',
+      'قيادة',
+      'route planning',
+      'تخطيط مسارات',
+      'logistics',
+      'لوجستيات',
 
       // مهارات إدارية
-      'management', 'إدارة', 'leadership', 'قيادة',
-      'team building', 'بناء فريق', 'planning', 'تخطيط',
+      'management',
+      'إدارة',
+      'leadership',
+      'قيادة',
+      'team building',
+      'بناء فريق',
+      'planning',
+      'تخطيط',
 
       // مهارات تقنية
-      'programming', 'برمجة', 'javascript', 'typescript',
-      'react', 'node.js', 'database', 'قواعد بيانات',
+      'programming',
+      'برمجة',
+      'javascript',
+      'typescript',
+      'react',
+      'node.js',
+      'database',
+      'قواعد بيانات',
 
       // مهارات تسويقية
-      'marketing', 'تسويق', 'social media', 'سوشيال ميديا',
-      'content creation', 'إنشاء محتوى', 'SEO', 'analytics', 'تحليلات',
+      'marketing',
+      'تسويق',
+      'social media',
+      'سوشيال ميديا',
+      'content creation',
+      'إنشاء محتوى',
+      'SEO',
+      'analytics',
+      'تحليلات',
 
       // مهارات مالية
-      'finance', 'مالية', 'accounting', 'محاسبة',
-      'budgeting', 'ميزانية', 'financial analysis', 'تحليل مالي',
+      'finance',
+      'مالية',
+      'accounting',
+      'محاسبة',
+      'budgeting',
+      'ميزانية',
+      'financial analysis',
+      'تحليل مالي',
     ];
 
     const skills: string[] = [];
@@ -232,12 +282,12 @@ export class SkillMatcher {
     requiredSkills: string[],
     preferredSkills: string[]
   ): number {
-    const requiredMatches = requiredSkills.filter(skill =>
-      candidateSkills.some(cs => cs.toLowerCase().includes(skill.toLowerCase()))
+    const requiredMatches = requiredSkills.filter((skill) =>
+      candidateSkills.some((cs) => cs.toLowerCase().includes(skill.toLowerCase()))
     ).length;
 
-    const preferredMatches = preferredSkills.filter(skill =>
-      candidateSkills.some(cs => cs.toLowerCase().includes(skill.toLowerCase()))
+    const preferredMatches = preferredSkills.filter((skill) =>
+      candidateSkills.some((cs) => cs.toLowerCase().includes(skill.toLowerCase()))
     ).length;
 
     const requiredScore = (requiredMatches / requiredSkills.length) * 70;
@@ -274,24 +324,11 @@ export class SkillMatcher {
   /**
    * حساب نسبة تطابق التعليم
    */
-  calculateEducationMatch(
-    candidateEducation: string,
-    requiredEducation: string
-  ): number {
-    const educationLevels = [
-      'ثانوية عامة',
-      'دبلوم',
-      'بكالوريوس',
-      'ماجستير',
-      'دكتوراه',
-    ];
+  calculateEducationMatch(candidateEducation: string, requiredEducation: string): number {
+    const educationLevels = ['ثانوية عامة', 'دبلوم', 'بكالوريوس', 'ماجستير', 'دكتوراه'];
 
-    const candidateIndex = educationLevels.findIndex(e =>
-      candidateEducation.includes(e)
-    );
-    const requiredIndex = educationLevels.findIndex(e =>
-      requiredEducation.includes(e)
-    );
+    const candidateIndex = educationLevels.findIndex((e) => candidateEducation.includes(e));
+    const requiredIndex = educationLevels.findIndex((e) => requiredEducation.includes(e));
 
     if (candidateIndex === -1) return 50; // غير محدد
     if (candidateIndex >= requiredIndex) return 100;
@@ -320,7 +357,7 @@ export class SkillMatcher {
       requirements.minEducation
     );
 
-    const score = (skillsMatch * 0.5) + (experienceMatch * 0.3) + (educationMatch * 0.2);
+    const score = skillsMatch * 0.5 + experienceMatch * 0.3 + educationMatch * 0.2;
 
     let recommendation: 'strong' | 'moderate' | 'weak' | 'reject';
     let reasoning: string;
@@ -355,11 +392,8 @@ export class SkillMatcher {
   /**
    * ترتيب المرشحين حسب التطابق
    */
-  rankCandidates(
-    candidates: Candidate[],
-    requirements: JobRequirements
-  ): MatchResult[] {
-    const results = candidates.map(candidate => this.match(candidate, requirements));
+  rankCandidates(candidates: Candidate[], requirements: JobRequirements): MatchResult[] {
+    const results = candidates.map((candidate) => this.match(candidate, requirements));
     return results.sort((a, b) => b.score - a.score);
   }
 }
@@ -539,7 +573,7 @@ export class OnboardingManager {
     total: number;
     percentage: number;
   } {
-    const completed = tasks.filter(t => t.completed).length;
+    const completed = tasks.filter((t) => t.completed).length;
     const total = tasks.length;
     const percentage = (completed / total) * 100;
 
@@ -690,9 +724,7 @@ export class RecruitmentSystem {
 
     // إذا كان المرشح قوي، جدولة مقابلة تلقائياً
     if (matchResult.recommendation === 'strong') {
-      const interviewDate = await this.interviewScheduler.scheduleInterview(
-        candidate.id || 0
-      );
+      const interviewDate = await this.interviewScheduler.scheduleInterview(candidate.id || 0);
       candidate.interviewDate = interviewDate;
       candidate.status = RecruitmentStatus.INTERVIEW_SCHEDULED;
     }

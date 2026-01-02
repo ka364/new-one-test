@@ -9,10 +9,8 @@ describe('OrderService', () => {
       const orderData = {
         customerName: 'أحمد محمد',
         customerPhone: '01012345678',
-        items: [
-          { productId: 1, quantity: 2, price: 299.99 }
-        ],
-        totalAmount: 599.98
+        items: [{ productId: 1, quantity: 2, price: 299.99 }],
+        totalAmount: 599.98,
       };
 
       // Mock order creation
@@ -21,7 +19,7 @@ describe('OrderService', () => {
         orderNumber: 'ORD-2026-001',
         status: 'pending',
         ...orderData,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       expect(createdOrder.orderNumber).toMatch(/^ORD-\d{4}-\d+$/);
@@ -34,7 +32,7 @@ describe('OrderService', () => {
         customerName: 'أحمد',
         customerPhone: '01012345678',
         items: [],
-        totalAmount: 0
+        totalAmount: 0,
       };
 
       const validateOrder = (data: typeof orderData) => {
@@ -51,11 +49,11 @@ describe('OrderService', () => {
       const items = [
         { productId: 1, quantity: 2, price: 100 },
         { productId: 2, quantity: 1, price: 200 },
-        { productId: 3, quantity: 3, price: 50 }
+        { productId: 3, quantity: 3, price: 50 },
       ];
 
-      const calculateTotal = (items: typeof items[0][]) => {
-        return items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+      const calculateTotal = (items: (typeof items)[0][]) => {
+        return items.reduce((sum, item) => sum + item.quantity * item.price, 0);
       };
 
       expect(calculateTotal(items)).toBe(550); // (2*100) + (1*200) + (3*50)
@@ -64,13 +62,13 @@ describe('OrderService', () => {
 
   describe('Order Status Management', () => {
     const validTransitions: Record<string, string[]> = {
-      'pending': ['confirmed', 'cancelled'],
-      'confirmed': ['processing', 'cancelled'],
-      'processing': ['shipped', 'cancelled'],
-      'shipped': ['delivered', 'returned'],
-      'delivered': ['returned'],
-      'cancelled': [],
-      'returned': []
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['processing', 'cancelled'],
+      processing: ['shipped', 'cancelled'],
+      shipped: ['delivered', 'returned'],
+      delivered: ['returned'],
+      cancelled: [],
+      returned: [],
     };
 
     test('يجب السماح بالانتقال من pending إلى confirmed', () => {
@@ -111,7 +109,9 @@ describe('OrderService', () => {
     test('يجب توليد رقم طلب فريد', () => {
       const generateOrderNumber = () => {
         const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        const random = Math.floor(Math.random() * 1000000)
+          .toString()
+          .padStart(6, '0');
         return `ORD-${year}-${random}`;
       };
 

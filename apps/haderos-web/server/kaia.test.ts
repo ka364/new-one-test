@@ -89,7 +89,8 @@ describe('KAIA Ethical Governance Engine - Unit Tests', () => {
         const appliedRules = rules.filter((r) => amount > r.threshold);
         return {
           appliedRules,
-          highestAction: appliedRules.length > 0 ? appliedRules[appliedRules.length - 1].action : 'approve',
+          highestAction:
+            appliedRules.length > 0 ? appliedRules[appliedRules.length - 1].action : 'approve',
         };
       };
 
@@ -139,11 +140,7 @@ describe('KAIA Ethical Governance Engine - Unit Tests', () => {
 
   describe('Decision Reasoning', () => {
     it('should provide detailed decision reasoning', () => {
-      const generateReasoning = (
-        decision: string,
-        appliedRules: string[],
-        severity: string
-      ) => {
+      const generateReasoning = (decision: string, appliedRules: string[], severity: string) => {
         if (appliedRules.length === 0) {
           return 'Transaction approved - no rules triggered.';
         }
@@ -176,11 +173,7 @@ describe('KAIA Ethical Governance Engine - Unit Tests', () => {
 
   describe('Rule Logic Evaluation', () => {
     it('should evaluate greater than condition', () => {
-      const evaluateCondition = (
-        value: number,
-        operator: string,
-        threshold: number
-      ): boolean => {
+      const evaluateCondition = (value: number, operator: string, threshold: number): boolean => {
         switch (operator) {
           case '>':
             return value > threshold;

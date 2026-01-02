@@ -4,7 +4,15 @@
  */
 
 import { getDb } from '../db';
-import { users, orders, transactions, auditTrail, events, agentInsights, notifications } from '../../drizzle/schema';
+import {
+  users,
+  orders,
+  transactions,
+  auditTrail,
+  events,
+  agentInsights,
+  notifications,
+} from '../../drizzle/schema';
 import { sql } from 'drizzle-orm';
 
 async function checkData() {

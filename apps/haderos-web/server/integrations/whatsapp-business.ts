@@ -50,7 +50,7 @@ export interface WhatsAppCredentials {
 }
 
 export interface WhatsAppContact {
-  phoneNumber: string;        // Format: 201xxxxxxxxx (no + or spaces)
+  phoneNumber: string; // Format: 201xxxxxxxxx (no + or spaces)
   name?: string;
 }
 
@@ -228,9 +228,7 @@ export const NOW_SHOES_TEMPLATES = {
         type: 'button' as const,
         subType: 'url' as const,
         index: 0,
-        parameters: [
-          { type: 'text' as const, text: trackingUrl },
-        ],
+        parameters: [{ type: 'text' as const, text: trackingUrl }],
       },
     ],
   },
@@ -273,9 +271,7 @@ export const NOW_SHOES_TEMPLATES = {
     components: (otp: string) => [
       {
         type: 'body' as const,
-        parameters: [
-          { type: 'text' as const, text: otp },
-        ],
+        parameters: [{ type: 'text' as const, text: otp }],
       },
     ],
   },
@@ -296,9 +292,7 @@ export const NOW_SHOES_TEMPLATES = {
         type: 'button' as const,
         subType: 'url' as const,
         index: 0,
-        parameters: [
-          { type: 'text' as const, text: cartUrl },
-        ],
+        parameters: [{ type: 'text' as const, text: cartUrl }],
       },
     ],
   },
@@ -339,7 +333,7 @@ export class WhatsAppBusinessService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
+          Authorization: `Bearer ${this.credentials.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -372,7 +366,7 @@ export class WhatsAppBusinessService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
+          Authorization: `Bearer ${this.credentials.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -402,13 +396,15 @@ export class WhatsAppBusinessService {
   /**
    * Send interactive message (buttons or list)
    */
-  async sendInteractiveMessage(message: WhatsAppInteractiveMessage): Promise<WhatsAppMessageResponse> {
+  async sendInteractiveMessage(
+    message: WhatsAppInteractiveMessage
+  ): Promise<WhatsAppMessageResponse> {
     const response = await fetch(
       `${WHATSAPP_CONFIG.apiUrl}/${this.credentials.phoneNumberId}/messages`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
+          Authorization: `Bearer ${this.credentials.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -460,7 +456,7 @@ export class WhatsAppBusinessService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
+          Authorization: `Bearer ${this.credentials.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -485,21 +481,18 @@ export class WhatsAppBusinessService {
    * Mark message as read
    */
   async markAsRead(messageId: string): Promise<void> {
-    await fetch(
-      `${WHATSAPP_CONFIG.apiUrl}/${this.credentials.phoneNumberId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          status: 'read',
-          message_id: messageId,
-        }),
-      }
-    );
+    await fetch(`${WHATSAPP_CONFIG.apiUrl}/${this.credentials.phoneNumberId}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.credentials.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        status: 'read',
+        message_id: messageId,
+      }),
+    });
   }
 
   /**
@@ -516,7 +509,7 @@ export class WhatsAppBusinessService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
+          Authorization: `Bearer ${this.credentials.accessToken}`,
         },
         body: formData,
       }
@@ -535,15 +528,12 @@ export class WhatsAppBusinessService {
    * Get media URL
    */
   async getMediaUrl(mediaId: string): Promise<string> {
-    const response = await fetch(
-      `${WHATSAPP_CONFIG.mediaUrl}/${mediaId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.credentials.accessToken}`,
-        },
-      }
-    );
+    const response = await fetch(`${WHATSAPP_CONFIG.mediaUrl}/${mediaId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.credentials.accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json();

@@ -11,9 +11,9 @@ import { Package, CheckCircle } from 'lucide-react';
 
 export default function PreparationPage() {
   const confirmedOrders = [
-    { 
-      id: 'COD-1001', 
-      customer: 'أحمد محمد', 
+    {
+      id: 'COD-1001',
+      customer: 'أحمد محمد',
       product: 'حذاء رياضي - مقاس 42',
       quantity: 1,
       amount: 1500,
@@ -22,7 +22,7 @@ export default function PreparationPage() {
         { id: 2, item: 'فحص جودة المنتج', done: true },
         { id: 3, item: 'التغليف', done: false },
         { id: 4, item: 'إضافة الفاتورة', done: false },
-      ]
+      ],
     },
   ];
 
@@ -68,10 +68,7 @@ export default function PreparationPage() {
                   ))}
                 </div>
 
-                <Button 
-                  style={{ backgroundColor: '#C62822' }} 
-                  className="text-white w-full"
-                >
+                <Button style={{ backgroundColor: '#C62822' }} className="text-white w-full">
                   <CheckCircle className="h-4 w-4 ml-2" />
                   إكمال التجهيز
                 </Button>

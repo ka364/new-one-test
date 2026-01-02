@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -10,14 +10,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -25,35 +25,35 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Users, 
-  UserCheck, 
-  UserX, 
-  Shield, 
-  Search, 
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Users,
+  UserCheck,
+  UserX,
+  Shield,
+  Search,
   Filter,
   MoreVertical,
   Edit,
   Trash2,
   CheckCircle,
   XCircle,
-  Clock
-} from "lucide-react";
+  Clock,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 export default function AdminDashboard() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"user" | "admin" | undefined>();
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'user' | 'admin' | undefined>();
   const [statusFilter, setStatusFilter] = useState<boolean | undefined>();
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
   // Mutations
   const updateRole = trpc.admin.updateUserRole.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث دور المستخدم بنجاح");
+      toast.success('تم تحديث دور المستخدم بنجاح');
       refetch();
     },
     onError: (error) => {
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
 
   const toggleStatus = trpc.admin.toggleUserStatus.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة المستخدم بنجاح");
+      toast.success('تم تحديث حالة المستخدم بنجاح');
       refetch();
     },
     onError: (error) => {
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
 
   const deleteUser = trpc.admin.deleteUser.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف المستخدم بنجاح");
+      toast.success('تم حذف المستخدم بنجاح');
       refetch();
     },
     onError: (error) => {
@@ -99,21 +99,21 @@ export default function AdminDashboard() {
     },
   });
 
-  const handleRoleChange = (userId: number, newRole: "user" | "admin") => {
+  const handleRoleChange = (userId: number, newRole: 'user' | 'admin') => {
     if (confirm(`هل أنت متأكد من تغيير دور هذا المستخدم إلى "${newRole}"؟`)) {
       updateRole.mutate({ userId, role: newRole });
     }
   };
 
   const handleToggleStatus = (userId: number, currentStatus: boolean) => {
-    const action = currentStatus ? "تعطيل" : "تفعيل";
+    const action = currentStatus ? 'تعطيل' : 'تفعيل';
     if (confirm(`هل أنت متأكد من ${action} هذا المستخدم؟`)) {
       toggleStatus.mutate({ userId, isActive: !currentStatus });
     }
   };
 
   const handleDeleteUser = (userId: number) => {
-    if (confirm("هل أنت متأكد من حذف هذا المستخدم؟ سيتم تعطيل الحساب نهائياً.")) {
+    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟ سيتم تعطيل الحساب نهائياً.')) {
       deleteUser.mutate({ userId });
     }
   };
@@ -123,9 +123,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold">لوحة تحكم المسؤول</h1>
-        <p className="text-muted-foreground mt-2">
-          إدارة المستخدمين والأذونات والنظام
-        </p>
+        <p className="text-muted-foreground mt-2">إدارة المستخدمين والأذونات والنظام</p>
       </div>
 
       {/* Stats Cards */}
@@ -192,9 +190,9 @@ export default function AdminDashboard() {
             </div>
 
             <Select
-              value={roleFilter || "all"}
+              value={roleFilter || 'all'}
               onValueChange={(value) =>
-                setRoleFilter(value === "all" ? undefined : (value as "user" | "admin"))
+                setRoleFilter(value === 'all' ? undefined : (value as 'user' | 'admin'))
               }
             >
               <SelectTrigger className="w-full md:w-[180px]">
@@ -208,9 +206,9 @@ export default function AdminDashboard() {
             </Select>
 
             <Select
-              value={statusFilter === undefined ? "all" : statusFilter ? "active" : "inactive"}
+              value={statusFilter === undefined ? 'all' : statusFilter ? 'active' : 'inactive'}
               onValueChange={(value) =>
-                setStatusFilter(value === "all" ? undefined : value === "active")
+                setStatusFilter(value === 'all' ? undefined : value === 'active')
               }
             >
               <SelectTrigger className="w-full md:w-[180px]">
@@ -241,11 +239,11 @@ export default function AdminDashboard() {
               <TableBody>
                 {usersData?.users.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name || "غير محدد"}</TableCell>
-                    <TableCell>{user.email || "غير محدد"}</TableCell>
+                    <TableCell className="font-medium">{user.name || 'غير محدد'}</TableCell>
+                    <TableCell>{user.email || 'غير محدد'}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                        {user.role === "admin" ? "مسؤول" : "مستخدم"}
+                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                        {user.role === 'admin' ? 'مسؤول' : 'مستخدم'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -261,12 +259,8 @@ export default function AdminDashboard() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString("ar-EG")}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.lastSignedIn).toLocaleDateString("ar-EG")}
-                    </TableCell>
+                    <TableCell>{new Date(user.createdAt).toLocaleDateString('ar-EG')}</TableCell>
+                    <TableCell>{new Date(user.lastSignedIn).toLocaleDateString('ar-EG')}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -277,14 +271,11 @@ export default function AdminDashboard() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() =>
-                              handleRoleChange(
-                                user.id,
-                                user.role === "admin" ? "user" : "admin"
-                              )
+                              handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')
                             }
                           >
                             <Shield className="h-4 w-4 ml-2" />
-                            {user.role === "admin" ? "إزالة صلاحيات المسؤول" : "ترقية لمسؤول"}
+                            {user.role === 'admin' ? 'إزالة صلاحيات المسؤول' : 'ترقية لمسؤول'}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleToggleStatus(user.id, user.isActive)}

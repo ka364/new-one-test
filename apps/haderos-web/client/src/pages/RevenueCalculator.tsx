@@ -1,21 +1,21 @@
 // @ts-nocheck
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calculator, TrendingUp, DollarSign, Target, Percent } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calculator, TrendingUp, DollarSign, Target, Percent } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RevenueCalculator() {
-  const [adSpend, setAdSpend] = useState<string>("5000");
-  const [averageOrderValue, setAverageOrderValue] = useState<string>("700");
-  const [shipmentRate, setShipmentRate] = useState<string>("90");
-  const [deliverySuccessRate, setDeliverySuccessRate] = useState<string>("50");
+  const [adSpend, setAdSpend] = useState<string>('5000');
+  const [averageOrderValue, setAverageOrderValue] = useState<string>('700');
+  const [shipmentRate, setShipmentRate] = useState<string>('90');
+  const [deliverySuccessRate, setDeliverySuccessRate] = useState<string>('50');
 
   const { data: lastEfficiency } = trpc.metrics.getAdCampaignsByDate.useQuery({
-    date: new Date().toISOString().split("T")[0],
+    date: new Date().toISOString().split('T')[0],
   });
 
   const calculateRevenue = trpc.metrics.calculateExpectedRevenue.useQuery(
@@ -32,7 +32,7 @@ export default function RevenueCalculator() {
 
   const saveForecast = trpc.metrics.createForecast.useMutation({
     onSuccess: () => {
-      toast.success("تم حفظ التوقع بنجاح");
+      toast.success('تم حفظ التوقع بنجاح');
     },
     onError: (error) => {
       toast.error(`خطأ: ${error.message}`);
@@ -44,7 +44,7 @@ export default function RevenueCalculator() {
 
     const data = calculateRevenue.data;
     saveForecast.mutate({
-      date: new Date().toISOString().split("T")[0],
+      date: new Date().toISOString().split('T')[0],
       adSpend,
       lastCampaignEfficiency: data.costPerResult.toString(),
       expectedOrders: data.expectedOrders,
@@ -110,9 +110,7 @@ export default function RevenueCalculator() {
                 min="0"
                 max="100"
               />
-              <p className="text-xs text-muted-foreground">
-                نسبة الطلبات التي يتم شحنها فعلياً
-              </p>
+              <p className="text-xs text-muted-foreground">نسبة الطلبات التي يتم شحنها فعلياً</p>
             </div>
 
             <div className="space-y-2">
@@ -202,18 +200,28 @@ export default function RevenueCalculator() {
                   <h4 className="font-medium mb-2">التفاصيل:</h4>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>• الطلبات المتوقعة: {result.expectedOrders}</p>
-                    <p>• بعد الخروج ({shipmentRate}%): {Math.round(result.expectedOrders * parseFloat(shipmentRate) / 100)}</p>
-                    <p>• بعد التسليم ({deliverySuccessRate}%): {Math.round(result.expectedOrders * parseFloat(shipmentRate) / 100 * parseFloat(deliverySuccessRate) / 100)}</p>
+                    <p>
+                      • بعد الخروج ({shipmentRate}%):{' '}
+                      {Math.round((result.expectedOrders * parseFloat(shipmentRate)) / 100)}
+                    </p>
+                    <p>
+                      • بعد التسليم ({deliverySuccessRate}%):{' '}
+                      {Math.round(
+                        (((result.expectedOrders * parseFloat(shipmentRate)) / 100) *
+                          parseFloat(deliverySuccessRate)) /
+                          100
+                      )}
+                    </p>
                     <p>• التحصيل النهائي: {result.expectedRevenue.toLocaleString()} جنيه</p>
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleSaveForecast} 
+                <Button
+                  onClick={handleSaveForecast}
                   className="w-full"
                   disabled={saveForecast.isPending}
                 >
-                  {saveForecast.isPending ? "جاري الحفظ..." : "حفظ التوقع"}
+                  {saveForecast.isPending ? 'جاري الحفظ...' : 'حفظ التوقع'}
                 </Button>
               </>
             ) : (

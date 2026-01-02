@@ -1,9 +1,13 @@
 // @ts-nocheck
-import { requireDb } from "./db";
-import { monthlyEmployeeAccounts, employeeMonthlyData, accountGenerationLogs } from "../drizzle/schema";
-import { eq, and, lte } from "drizzle-orm";
-import bcrypt from "bcryptjs";
-import { nanoid } from "nanoid";
+import { requireDb } from './db';
+import {
+  monthlyEmployeeAccounts,
+  employeeMonthlyData,
+  accountGenerationLogs,
+} from '../drizzle/schema';
+import { eq, and, lte } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
+import { nanoid } from 'nanoid';
 
 /**
  * Generate monthly accounts for employees
@@ -14,7 +18,7 @@ export async function generateMonthlyAccounts(
   generatedBy: number
 ) {
   const db = await requireDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const accounts = [];
   const expiresAt = new Date(month + '-01');
@@ -68,10 +72,7 @@ export async function verifyEmployeeLogin(username: string, password: string) {
     .select()
     .from(monthlyEmployeeAccounts)
     .where(
-      and(
-        eq(monthlyEmployeeAccounts.username, username),
-        eq(monthlyEmployeeAccounts.isActive, 1)
-      )
+      and(eq(monthlyEmployeeAccounts.username, username), eq(monthlyEmployeeAccounts.isActive, 1))
     )
     .limit(1);
 
@@ -109,12 +110,7 @@ export async function getActiveAccountsForMonth(month: string) {
   return await db
     .select()
     .from(monthlyEmployeeAccounts)
-    .where(
-      and(
-        eq(monthlyEmployeeAccounts.month, month),
-        eq(monthlyEmployeeAccounts.isActive, 1)
-      )
-    );
+    .where(and(eq(monthlyEmployeeAccounts.month, month), eq(monthlyEmployeeAccounts.isActive, 1)));
 }
 
 /**
@@ -142,23 +138,16 @@ export async function expireOldAccounts() {
     .update(monthlyEmployeeAccounts)
     .set({ isActive: 0 })
     .where(
-      and(
-        eq(monthlyEmployeeAccounts.isActive, 1),
-        lte(monthlyEmployeeAccounts.expiresAt, now)
-      )
+      and(eq(monthlyEmployeeAccounts.isActive, 1), lte(monthlyEmployeeAccounts.expiresAt, now))
     );
 }
 
 /**
  * Submit employee data
  */
-export async function submitEmployeeData(
-  accountId: number,
-  dataType: string,
-  dataJson: any
-) {
+export async function submitEmployeeData(accountId: number, dataType: string, dataJson: any) {
   const db = await requireDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   await db.insert(employeeMonthlyData).values({
     accountId,

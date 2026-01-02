@@ -1,28 +1,29 @@
 // @ts-nocheck
-import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Bot, Send, User } from "lucide-react";
-import { Streamdown } from "streamdown";
-import { nanoid } from "nanoid";
+import { useState } from 'react';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Bot, Send, User } from 'lucide-react';
+import { Streamdown } from 'streamdown';
+import { nanoid } from 'nanoid';
 
 export default function AIChat() {
   const { user } = useAuth();
   const [conversationId] = useState(() => nanoid());
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
-  const { data: history, isLoading, refetch } = trpc.chat.getHistory.useQuery(
-    { conversationId },
-    { enabled: !!conversationId }
-  );
+  const {
+    data: history,
+    isLoading,
+    refetch,
+  } = trpc.chat.getHistory.useQuery({ conversationId }, { enabled: !!conversationId });
 
   const sendMessageMutation = trpc.chat.sendMessage.useMutation({
     onSuccess: () => {
-      setMessage("");
+      setMessage('');
       refetch();
     },
   });
@@ -37,7 +38,7 @@ export default function AIChat() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -71,22 +72,20 @@ export default function AIChat() {
               <div
                 key={msg.id}
                 className={`flex gap-3 ${
-                  msg.role === "assistant" ? "justify-start" : "justify-end"
+                  msg.role === 'assistant' ? 'justify-start' : 'justify-end'
                 }`}
               >
-                {msg.role === "assistant" && (
+                {msg.role === 'assistant' && (
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Bot className="h-4 w-4 text-primary" />
                   </div>
                 )}
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
-                    msg.role === "assistant"
-                      ? "bg-muted"
-                      : "bg-primary text-primary-foreground"
+                    msg.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'
                   }`}
                 >
-                  {msg.role === "assistant" ? (
+                  {msg.role === 'assistant' ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
                       <Streamdown>{msg.content}</Streamdown>
                     </div>
@@ -94,7 +93,7 @@ export default function AIChat() {
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
-                {msg.role === "user" && (
+                {msg.role === 'user' && (
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
                     <User className="h-4 w-4 text-primary-foreground" />
                   </div>
@@ -107,16 +106,16 @@ export default function AIChat() {
               <div className="space-y-2">
                 <h3 className="text-lg font-medium">ابدأ محادثة جديدة</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  يمكنك سؤالي عن أي شيء متعلق بأعمالك: التقارير المالية، تحليل المبيعات،
-                  التنبؤ بالطلب، أو حتى نصائح لتحسين الأداء
+                  يمكنك سؤالي عن أي شيء متعلق بأعمالك: التقارير المالية، تحليل المبيعات، التنبؤ
+                  بالطلب، أو حتى نصائح لتحسين الأداء
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-2xl">
                 {[
-                  "ما هو إجمالي إيراداتي هذا الشهر؟",
-                  "أعطني تحليل للمعاملات الأخيرة",
-                  "ما هي أكثر المنتجات مبيعاً؟",
-                  "هل هناك أي انتهاكات أخلاقية؟",
+                  'ما هو إجمالي إيراداتي هذا الشهر؟',
+                  'أعطني تحليل للمعاملات الأخيرة',
+                  'ما هي أكثر المنتجات مبيعاً؟',
+                  'هل هناك أي انتهاكات أخلاقية؟',
                 ].map((suggestion, i) => (
                   <Button
                     key={i}
@@ -142,11 +141,11 @@ export default function AIChat() {
                   <div className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce" />
                   <div
                     className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
+                    style={{ animationDelay: '0.1s' }}
                   />
                   <div
                     className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
+                    style={{ animationDelay: '0.2s' }}
                   />
                 </div>
               </div>

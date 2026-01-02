@@ -1,9 +1,9 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLoginUrl } from "@/const";
-import { Bot, Shield, TrendingUp, Zap, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { useAuth } from '@/_core/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getLoginUrl } from '@/const';
+import { Bot, Shield, TrendingUp, Zap, ArrowLeft } from 'lucide-react';
+import { Link } from 'wouter';
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
@@ -11,31 +11,35 @@ export default function Home() {
   const features = [
     {
       icon: Shield,
-      title: "حوكمة أخلاقية ذكية",
-      titleEn: "Ethical Governance",
-      description: "محرك KAIA يضمن التزام جميع المعاملات بالمبادئ الشرعية والأخلاقية",
-      descriptionEn: "KAIA engine ensures all transactions comply with Sharia and ethical principles"
+      title: 'حوكمة أخلاقية ذكية',
+      titleEn: 'Ethical Governance',
+      description: 'محرك KAIA يضمن التزام جميع المعاملات بالمبادئ الشرعية والأخلاقية',
+      descriptionEn:
+        'KAIA engine ensures all transactions comply with Sharia and ethical principles',
     },
     {
       icon: Bot,
-      title: "وكلاء ذكيين مستقلين",
-      titleEn: "Autonomous AI Agents",
-      description: "وكلاء متخصصون في التحليل المالي، التنبؤ بالطلب، وإدارة الحملات",
-      descriptionEn: "Specialized agents for financial analysis, demand forecasting, and campaign management"
+      title: 'وكلاء ذكيين مستقلين',
+      titleEn: 'Autonomous AI Agents',
+      description: 'وكلاء متخصصون في التحليل المالي، التنبؤ بالطلب، وإدارة الحملات',
+      descriptionEn:
+        'Specialized agents for financial analysis, demand forecasting, and campaign management',
     },
     {
       icon: TrendingUp,
-      title: "تحليلات متقدمة",
-      titleEn: "Advanced Analytics",
-      description: "رؤى تحليلية عميقة وتنبؤات دقيقة لدعم قراراتك التجارية",
-      descriptionEn: "Deep analytical insights and accurate predictions to support your business decisions"
+      title: 'تحليلات متقدمة',
+      titleEn: 'Advanced Analytics',
+      description: 'رؤى تحليلية عميقة وتنبؤات دقيقة لدعم قراراتك التجارية',
+      descriptionEn:
+        'Deep analytical insights and accurate predictions to support your business decisions',
     },
     {
       icon: Zap,
-      title: "أتمتة ذكية",
-      titleEn: "Smart Automation",
-      description: "نظام أحداث متقدم يعالج العمليات تلقائياً ويرسل التنبيهات الفورية",
-      descriptionEn: "Advanced event system that processes operations automatically and sends instant alerts"
+      title: 'أتمتة ذكية',
+      titleEn: 'Smart Automation',
+      description: 'نظام أحداث متقدم يعالج العمليات تلقائياً ويرسل التنبيهات الفورية',
+      descriptionEn:
+        'Advanced event system that processes operations automatically and sends instant alerts',
     },
   ];
 
@@ -53,9 +57,7 @@ export default function Home() {
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 منصة ذكية متكاملة لإدارة الأعمال مع حوكمة أخلاقية مدمجة ووكلاء ذكيين يعملون لصالحك
               </p>
-              <p className="text-sm text-muted-foreground">
-                HaderOS AI - Powered by haderosai.com
-              </p>
+              <p className="text-sm text-muted-foreground">HaderOS AI - Powered by haderosai.com</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -94,9 +96,7 @@ export default function Home() {
       <section className="py-24 bg-muted/50">
         <div className="container">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              مميزات النظام
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">مميزات النظام</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               نظام متكامل يجمع بين الذكاء الاصطناعي والحوكمة الأخلاقية لإدارة أعمالك بكفاءة
             </p>
@@ -135,9 +135,7 @@ export default function Home() {
         <div className="container">
           <Card className="border-2 border-primary bg-gradient-to-br from-primary/5 to-background">
             <CardContent className="p-12 text-center space-y-6">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                جاهز للبدء؟
-              </h2>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">جاهز للبدء؟</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 انضم إلى منصة HaderOS اليوم واستمتع بإدارة أعمالك بطريقة ذكية وأخلاقية
               </p>

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { requireDb } from "./db";
-import { sql } from "drizzle-orm";
+import { requireDb } from './db';
+import { sql } from 'drizzle-orm';
 
 export const otpDb = {
   // Generate 6-digit OTP
@@ -13,14 +13,14 @@ export const otpDb = {
     phoneNumber: string;
     email?: string;
     otpCode: string;
-    method: "email" | "sms";
+    method: 'email' | 'sms';
     expiresAt: Date;
     latitude?: number;
     longitude?: number;
     ipAddress?: string;
   }) => {
     const db = await requireDb();
-    if (!db) throw new Error("Database not available");
+    if (!db) throw new Error('Database not available');
     const result = await db.execute(sql`
       INSERT INTO otp_verifications (
         phone_number,
@@ -48,7 +48,7 @@ export const otpDb = {
   // Verify OTP
   verifyOTP: async (phoneNumber: string, otpCode: string) => {
     const db = await requireDb();
-    if (!db) throw new Error("Database not available");
+    if (!db) throw new Error('Database not available');
     // Check if OTP exists and not expired
     const result: any = await db.execute(sql`
       SELECT * FROM otp_verifications
@@ -63,25 +63,27 @@ export const otpDb = {
     if (!result || result.length === 0) {
       // Increment failed attempts
       const db2 = await getDb();
-      if (db2) await db2.execute(sql`
+      if (db2)
+        await db2.execute(sql`
         UPDATE otp_verifications
         SET verification_attempts = verification_attempts + 1
         WHERE phone_number = ${phoneNumber}
           AND verified_at IS NULL
       `);
-      return { success: false, message: "رمز OTP غير صحيح أو منتهي الصلاحية" };
+      return { success: false, message: 'رمز OTP غير صحيح أو منتهي الصلاحية' };
     }
 
     // Mark as verified
     const db3 = await getDb();
-    if (db3) await db3.execute(sql`
+    if (db3)
+      await db3.execute(sql`
       UPDATE otp_verifications
       SET verified_at = NOW()
       WHERE phone_number = ${phoneNumber}
         AND otp_code = ${otpCode}
     `);
 
-    return { success: true, message: "تم التحقق بنجاح" };
+    return { success: true, message: 'تم التحقق بنجاح' };
   },
 
   // Get OTP verification record
@@ -122,8 +124,8 @@ export const otpDb = {
   },
 
   // Determine OTP method based on employee count
-  getOTPMethod: async (): Promise<"email" | "sms"> => {
+  getOTPMethod: async (): Promise<'email' | 'sms'> => {
     const count = await otpDb.getEmployeeCount();
-    return count >= 25 ? "sms" : "email";
+    return count >= 25 ? 'sms' : 'email';
   },
 };

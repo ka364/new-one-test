@@ -11,7 +11,7 @@
  * - Q-Commerce Analytics
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Store,
   MapPin,
@@ -53,22 +53,22 @@ import {
   Target,
   Layers,
   Box,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -77,9 +77,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 // ============================================
 // TYPES
@@ -102,7 +102,7 @@ interface DarkStore {
   governorate: string;
   city: string;
   district: string;
-  status: "active" | "busy" | "maintenance" | "closed";
+  status: 'active' | 'busy' | 'maintenance' | 'closed';
   isOpen: boolean;
   currentOrdersCount: number;
   maxConcurrentOrders: number;
@@ -116,7 +116,7 @@ interface MicroZone {
   governorate: string;
   city: string;
   district: string;
-  deliverySpeed: "express" | "fast" | "standard" | "scheduled";
+  deliverySpeed: 'express' | 'fast' | 'standard' | 'scheduled';
   estimatedDeliveryMinutes: number;
   deliveryFee: number;
   freeDeliveryThreshold: number;
@@ -128,7 +128,7 @@ interface Holiday {
   code: string;
   nameAr: string;
   nameEn: string;
-  type: "religious" | "national" | "seasonal" | "special";
+  type: 'religious' | 'national' | 'seasonal' | 'special';
   themeColor: string;
   daysUntil?: number;
 }
@@ -145,25 +145,89 @@ interface Synonym {
 // ============================================
 
 const MOCK_CATEGORIES: Category[] = [
-  { id: "1", code: "GROCERY", nameAr: "البقالة", nameDarija: "البقالة", icon: "🛒", productsCount: 150, isActive: true },
-  { id: "2", code: "VEGETABLES", nameAr: "الخضروات", nameDarija: "خضار", icon: "🥬", productsCount: 80, isActive: true },
-  { id: "3", code: "FRUITS", nameAr: "الفواكه", nameDarija: "فاكهة", icon: "🍎", productsCount: 60, isActive: true },
-  { id: "4", code: "MEAT", nameAr: "اللحوم", nameDarija: "لحمة", icon: "🥩", productsCount: 45, isActive: true },
-  { id: "5", code: "DAIRY", nameAr: "الألبان", nameDarija: "لبن وجبنة", icon: "🧀", productsCount: 70, isActive: true },
-  { id: "6", code: "BAKERY", nameAr: "المخبوزات", nameDarija: "عيش وفينو", icon: "🍞", productsCount: 35, isActive: true },
-  { id: "7", code: "BEVERAGES", nameAr: "المشروبات", nameDarija: "مشروبات", icon: "🥤", productsCount: 90, isActive: true },
-  { id: "8", code: "CLEANING", nameAr: "منتجات التنظيف", nameDarija: "منظفات", icon: "🧹", productsCount: 55, isActive: true },
+  {
+    id: '1',
+    code: 'GROCERY',
+    nameAr: 'البقالة',
+    nameDarija: 'البقالة',
+    icon: '🛒',
+    productsCount: 150,
+    isActive: true,
+  },
+  {
+    id: '2',
+    code: 'VEGETABLES',
+    nameAr: 'الخضروات',
+    nameDarija: 'خضار',
+    icon: '🥬',
+    productsCount: 80,
+    isActive: true,
+  },
+  {
+    id: '3',
+    code: 'FRUITS',
+    nameAr: 'الفواكه',
+    nameDarija: 'فاكهة',
+    icon: '🍎',
+    productsCount: 60,
+    isActive: true,
+  },
+  {
+    id: '4',
+    code: 'MEAT',
+    nameAr: 'اللحوم',
+    nameDarija: 'لحمة',
+    icon: '🥩',
+    productsCount: 45,
+    isActive: true,
+  },
+  {
+    id: '5',
+    code: 'DAIRY',
+    nameAr: 'الألبان',
+    nameDarija: 'لبن وجبنة',
+    icon: '🧀',
+    productsCount: 70,
+    isActive: true,
+  },
+  {
+    id: '6',
+    code: 'BAKERY',
+    nameAr: 'المخبوزات',
+    nameDarija: 'عيش وفينو',
+    icon: '🍞',
+    productsCount: 35,
+    isActive: true,
+  },
+  {
+    id: '7',
+    code: 'BEVERAGES',
+    nameAr: 'المشروبات',
+    nameDarija: 'مشروبات',
+    icon: '🥤',
+    productsCount: 90,
+    isActive: true,
+  },
+  {
+    id: '8',
+    code: 'CLEANING',
+    nameAr: 'منتجات التنظيف',
+    nameDarija: 'منظفات',
+    icon: '🧹',
+    productsCount: 55,
+    isActive: true,
+  },
 ];
 
 const MOCK_DARK_STORES: DarkStore[] = [
   {
-    id: "ds1",
-    code: "DS-MAADI-001",
-    nameAr: "مخزن المعادي",
-    governorate: "القاهرة",
-    city: "المعادي",
-    district: "المعادي الجديدة",
-    status: "active",
+    id: 'ds1',
+    code: 'DS-MAADI-001',
+    nameAr: 'مخزن المعادي',
+    governorate: 'القاهرة',
+    city: 'المعادي',
+    district: 'المعادي الجديدة',
+    status: 'active',
     isOpen: true,
     currentOrdersCount: 5,
     maxConcurrentOrders: 20,
@@ -171,13 +235,13 @@ const MOCK_DARK_STORES: DarkStore[] = [
     driversCount: 4,
   },
   {
-    id: "ds2",
-    code: "DS-NASR-001",
-    nameAr: "مخزن مدينة نصر",
-    governorate: "القاهرة",
-    city: "مدينة نصر",
-    district: "الحي الثامن",
-    status: "active",
+    id: 'ds2',
+    code: 'DS-NASR-001',
+    nameAr: 'مخزن مدينة نصر',
+    governorate: 'القاهرة',
+    city: 'مدينة نصر',
+    district: 'الحي الثامن',
+    status: 'active',
     isOpen: true,
     currentOrdersCount: 12,
     maxConcurrentOrders: 25,
@@ -185,13 +249,13 @@ const MOCK_DARK_STORES: DarkStore[] = [
     driversCount: 6,
   },
   {
-    id: "ds3",
-    code: "DS-DOKKI-001",
-    nameAr: "مخزن الدقي",
-    governorate: "الجيزة",
-    city: "الدقي",
-    district: "الدقي",
-    status: "busy",
+    id: 'ds3',
+    code: 'DS-DOKKI-001',
+    nameAr: 'مخزن الدقي',
+    governorate: 'الجيزة',
+    city: 'الدقي',
+    district: 'الدقي',
+    status: 'busy',
     isOpen: true,
     currentOrdersCount: 18,
     maxConcurrentOrders: 20,
@@ -199,13 +263,13 @@ const MOCK_DARK_STORES: DarkStore[] = [
     driversCount: 5,
   },
   {
-    id: "ds4",
-    code: "DS-6OCT-001",
-    nameAr: "مخزن 6 أكتوبر",
-    governorate: "الجيزة",
-    city: "6 أكتوبر",
-    district: "الحي الأول",
-    status: "maintenance",
+    id: 'ds4',
+    code: 'DS-6OCT-001',
+    nameAr: 'مخزن 6 أكتوبر',
+    governorate: 'الجيزة',
+    city: '6 أكتوبر',
+    district: 'الحي الأول',
+    status: 'maintenance',
     isOpen: false,
     currentOrdersCount: 0,
     maxConcurrentOrders: 15,
@@ -215,28 +279,127 @@ const MOCK_DARK_STORES: DarkStore[] = [
 ];
 
 const MOCK_MICRO_ZONES: MicroZone[] = [
-  { id: "mz1", nameAr: "المعادي الجديدة", governorate: "القاهرة", city: "المعادي", district: "المعادي الجديدة", deliverySpeed: "express", estimatedDeliveryMinutes: 20, deliveryFee: 15, freeDeliveryThreshold: 200, isCovered: true },
-  { id: "mz2", nameAr: "الحي السابع - مدينة نصر", governorate: "القاهرة", city: "مدينة نصر", district: "الحي السابع", deliverySpeed: "fast", estimatedDeliveryMinutes: 35, deliveryFee: 20, freeDeliveryThreshold: 250, isCovered: true },
-  { id: "mz3", nameAr: "الدقي", governorate: "الجيزة", city: "الدقي", district: "الدقي", deliverySpeed: "fast", estimatedDeliveryMinutes: 40, deliveryFee: 20, freeDeliveryThreshold: 250, isCovered: true },
-  { id: "mz4", nameAr: "التجمع الأول", governorate: "القاهرة", city: "التجمع الخامس", district: "التجمع الأول", deliverySpeed: "standard", estimatedDeliveryMinutes: 60, deliveryFee: 30, freeDeliveryThreshold: 300, isCovered: true },
-  { id: "mz5", nameAr: "الشيخ زايد", governorate: "الجيزة", city: "الشيخ زايد", district: "الحي الأول", deliverySpeed: "standard", estimatedDeliveryMinutes: 55, deliveryFee: 25, freeDeliveryThreshold: 300, isCovered: true },
+  {
+    id: 'mz1',
+    nameAr: 'المعادي الجديدة',
+    governorate: 'القاهرة',
+    city: 'المعادي',
+    district: 'المعادي الجديدة',
+    deliverySpeed: 'express',
+    estimatedDeliveryMinutes: 20,
+    deliveryFee: 15,
+    freeDeliveryThreshold: 200,
+    isCovered: true,
+  },
+  {
+    id: 'mz2',
+    nameAr: 'الحي السابع - مدينة نصر',
+    governorate: 'القاهرة',
+    city: 'مدينة نصر',
+    district: 'الحي السابع',
+    deliverySpeed: 'fast',
+    estimatedDeliveryMinutes: 35,
+    deliveryFee: 20,
+    freeDeliveryThreshold: 250,
+    isCovered: true,
+  },
+  {
+    id: 'mz3',
+    nameAr: 'الدقي',
+    governorate: 'الجيزة',
+    city: 'الدقي',
+    district: 'الدقي',
+    deliverySpeed: 'fast',
+    estimatedDeliveryMinutes: 40,
+    deliveryFee: 20,
+    freeDeliveryThreshold: 250,
+    isCovered: true,
+  },
+  {
+    id: 'mz4',
+    nameAr: 'التجمع الأول',
+    governorate: 'القاهرة',
+    city: 'التجمع الخامس',
+    district: 'التجمع الأول',
+    deliverySpeed: 'standard',
+    estimatedDeliveryMinutes: 60,
+    deliveryFee: 30,
+    freeDeliveryThreshold: 300,
+    isCovered: true,
+  },
+  {
+    id: 'mz5',
+    nameAr: 'الشيخ زايد',
+    governorate: 'الجيزة',
+    city: 'الشيخ زايد',
+    district: 'الحي الأول',
+    deliverySpeed: 'standard',
+    estimatedDeliveryMinutes: 55,
+    deliveryFee: 25,
+    freeDeliveryThreshold: 300,
+    isCovered: true,
+  },
 ];
 
 const MOCK_HOLIDAYS: Holiday[] = [
-  { id: "h1", code: "RAMADAN", nameAr: "شهر رمضان", nameEn: "Ramadan", type: "religious", themeColor: "#1a5f2a" },
-  { id: "h2", code: "EID_FITR", nameAr: "عيد الفطر المبارك", nameEn: "Eid al-Fitr", type: "religious", themeColor: "#d4af37" },
-  { id: "h3", code: "MOTHERS_DAY", nameAr: "عيد الأم", nameEn: "Mother's Day", type: "special", themeColor: "#ff69b4", daysUntil: 15 },
-  { id: "h4", code: "BACK_TO_SCHOOL", nameAr: "موسم العودة للمدارس", nameEn: "Back to School", type: "seasonal", themeColor: "#4169e1" },
+  {
+    id: 'h1',
+    code: 'RAMADAN',
+    nameAr: 'شهر رمضان',
+    nameEn: 'Ramadan',
+    type: 'religious',
+    themeColor: '#1a5f2a',
+  },
+  {
+    id: 'h2',
+    code: 'EID_FITR',
+    nameAr: 'عيد الفطر المبارك',
+    nameEn: 'Eid al-Fitr',
+    type: 'religious',
+    themeColor: '#d4af37',
+  },
+  {
+    id: 'h3',
+    code: 'MOTHERS_DAY',
+    nameAr: 'عيد الأم',
+    nameEn: "Mother's Day",
+    type: 'special',
+    themeColor: '#ff69b4',
+    daysUntil: 15,
+  },
+  {
+    id: 'h4',
+    code: 'BACK_TO_SCHOOL',
+    nameAr: 'موسم العودة للمدارس',
+    nameEn: 'Back to School',
+    type: 'seasonal',
+    themeColor: '#4169e1',
+  },
 ];
 
 const MOCK_SYNONYMS: Synonym[] = [
-  { id: "s1", standardTerm: "bread", standardTermAr: "خبز", egyptianVariants: ["عيش", "عيش بلدي", "عيش فينو", "عيش شامي"] },
-  { id: "s2", standardTerm: "chicken", standardTermAr: "دجاج", egyptianVariants: ["فراخ", "فرخة"] },
-  { id: "s3", standardTerm: "milk", standardTermAr: "حليب", egyptianVariants: ["لبن", "لبنة"] },
-  { id: "s4", standardTerm: "tomato", standardTermAr: "طماطم", egyptianVariants: ["قوطة", "أوطة"] },
-  { id: "s5", standardTerm: "pasta", standardTermAr: "معكرونة", egyptianVariants: ["مكرونة", "مكرونه"] },
-  { id: "s6", standardTerm: "garlic", standardTermAr: "ثوم", egyptianVariants: ["توم", "تومة"] },
-  { id: "s7", standardTerm: "potato", standardTermAr: "بطاطا", egyptianVariants: ["بطاطس", "بطاطسة"] },
+  {
+    id: 's1',
+    standardTerm: 'bread',
+    standardTermAr: 'خبز',
+    egyptianVariants: ['عيش', 'عيش بلدي', 'عيش فينو', 'عيش شامي'],
+  },
+  { id: 's2', standardTerm: 'chicken', standardTermAr: 'دجاج', egyptianVariants: ['فراخ', 'فرخة'] },
+  { id: 's3', standardTerm: 'milk', standardTermAr: 'حليب', egyptianVariants: ['لبن', 'لبنة'] },
+  { id: 's4', standardTerm: 'tomato', standardTermAr: 'طماطم', egyptianVariants: ['قوطة', 'أوطة'] },
+  {
+    id: 's5',
+    standardTerm: 'pasta',
+    standardTermAr: 'معكرونة',
+    egyptianVariants: ['مكرونة', 'مكرونه'],
+  },
+  { id: 's6', standardTerm: 'garlic', standardTermAr: 'ثوم', egyptianVariants: ['توم', 'تومة'] },
+  {
+    id: 's7',
+    standardTerm: 'potato',
+    standardTermAr: 'بطاطا',
+    egyptianVariants: ['بطاطس', 'بطاطسة'],
+  },
 ];
 
 // ============================================
@@ -249,21 +412,21 @@ function StatCard({
   icon: Icon,
   trend,
   trendValue,
-  color = "blue",
+  color = 'blue',
 }: {
   title: string;
   value: string | number;
   icon: React.ElementType;
-  trend?: "up" | "down";
+  trend?: 'up' | 'down';
   trendValue?: string;
-  color?: "blue" | "green" | "purple" | "orange" | "red";
+  color?: 'blue' | 'green' | 'purple' | 'orange' | 'red';
 }) {
   const colorStyles = {
-    blue: "bg-blue-500/10 text-blue-600",
-    green: "bg-green-500/10 text-green-600",
-    purple: "bg-purple-500/10 text-purple-600",
-    orange: "bg-orange-500/10 text-orange-600",
-    red: "bg-red-500/10 text-red-600",
+    blue: 'bg-blue-500/10 text-blue-600',
+    green: 'bg-green-500/10 text-green-600',
+    purple: 'bg-purple-500/10 text-purple-600',
+    orange: 'bg-orange-500/10 text-orange-600',
+    red: 'bg-red-500/10 text-red-600',
   };
 
   return (
@@ -274,16 +437,22 @@ function StatCard({
             <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold mt-1">{value}</p>
             {trend && trendValue && (
-              <div className={cn(
-                "flex items-center gap-1 mt-1 text-xs",
-                trend === "up" ? "text-green-600" : "text-red-600"
-              )}>
-                {trend === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <div
+                className={cn(
+                  'flex items-center gap-1 mt-1 text-xs',
+                  trend === 'up' ? 'text-green-600' : 'text-red-600'
+                )}
+              >
+                {trend === 'up' ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
                 {trendValue}
               </div>
             )}
           </div>
-          <div className={cn("p-3 rounded-lg", colorStyles[color])}>
+          <div className={cn('p-3 rounded-lg', colorStyles[color])}>
             <Icon className="h-5 w-5" />
           </div>
         </div>
@@ -292,57 +461,57 @@ function StatCard({
   );
 }
 
-function DeliverySpeedBadge({ speed }: { speed: MicroZone["deliverySpeed"] }) {
+function DeliverySpeedBadge({ speed }: { speed: MicroZone['deliverySpeed'] }) {
   const styles = {
-    express: { bg: "bg-green-100 text-green-700", icon: Zap, label: "إكسبريس" },
-    fast: { bg: "bg-blue-100 text-blue-700", icon: Timer, label: "سريع" },
-    standard: { bg: "bg-gray-100 text-gray-700", icon: Clock, label: "عادي" },
-    scheduled: { bg: "bg-purple-100 text-purple-700", icon: Calendar, label: "مجدول" },
+    express: { bg: 'bg-green-100 text-green-700', icon: Zap, label: 'إكسبريس' },
+    fast: { bg: 'bg-blue-100 text-blue-700', icon: Timer, label: 'سريع' },
+    standard: { bg: 'bg-gray-100 text-gray-700', icon: Clock, label: 'عادي' },
+    scheduled: { bg: 'bg-purple-100 text-purple-700', icon: Calendar, label: 'مجدول' },
   };
 
   const style = styles[speed];
   const Icon = style.icon;
 
   return (
-    <Badge variant="secondary" className={cn("gap-1", style.bg)}>
+    <Badge variant="secondary" className={cn('gap-1', style.bg)}>
       <Icon className="h-3 w-3" />
       {style.label}
     </Badge>
   );
 }
 
-function StoreStatusBadge({ status }: { status: DarkStore["status"] }) {
+function StoreStatusBadge({ status }: { status: DarkStore['status'] }) {
   const styles = {
-    active: { bg: "bg-green-100 text-green-700", icon: CheckCircle, label: "نشط" },
-    busy: { bg: "bg-yellow-100 text-yellow-700", icon: AlertCircle, label: "مشغول" },
-    maintenance: { bg: "bg-orange-100 text-orange-700", icon: Settings, label: "صيانة" },
-    closed: { bg: "bg-red-100 text-red-700", icon: XCircle, label: "مغلق" },
+    active: { bg: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'نشط' },
+    busy: { bg: 'bg-yellow-100 text-yellow-700', icon: AlertCircle, label: 'مشغول' },
+    maintenance: { bg: 'bg-orange-100 text-orange-700', icon: Settings, label: 'صيانة' },
+    closed: { bg: 'bg-red-100 text-red-700', icon: XCircle, label: 'مغلق' },
   };
 
   const style = styles[status];
   const Icon = style.icon;
 
   return (
-    <Badge variant="secondary" className={cn("gap-1", style.bg)}>
+    <Badge variant="secondary" className={cn('gap-1', style.bg)}>
       <Icon className="h-3 w-3" />
       {style.label}
     </Badge>
   );
 }
 
-function HolidayTypeBadge({ type }: { type: Holiday["type"] }) {
+function HolidayTypeBadge({ type }: { type: Holiday['type'] }) {
   const styles = {
-    religious: { bg: "bg-green-100 text-green-700", icon: Moon, label: "ديني" },
-    national: { bg: "bg-red-100 text-red-700", icon: Star, label: "وطني" },
-    seasonal: { bg: "bg-blue-100 text-blue-700", icon: Sun, label: "موسمي" },
-    special: { bg: "bg-pink-100 text-pink-700", icon: Heart, label: "مناسبة خاصة" },
+    religious: { bg: 'bg-green-100 text-green-700', icon: Moon, label: 'ديني' },
+    national: { bg: 'bg-red-100 text-red-700', icon: Star, label: 'وطني' },
+    seasonal: { bg: 'bg-blue-100 text-blue-700', icon: Sun, label: 'موسمي' },
+    special: { bg: 'bg-pink-100 text-pink-700', icon: Heart, label: 'مناسبة خاصة' },
   };
 
   const style = styles[type];
   const Icon = style.icon;
 
   return (
-    <Badge variant="secondary" className={cn("gap-1", style.bg)}>
+    <Badge variant="secondary" className={cn('gap-1', style.bg)}>
       <Icon className="h-3 w-3" />
       {style.label}
     </Badge>
@@ -382,12 +551,7 @@ function OverviewTab() {
           trendValue="-15%"
           color="purple"
         />
-        <StatCard
-          title="مخازن نشطة"
-          value="3/4"
-          icon={Store}
-          color="orange"
-        />
+        <StatCard title="مخازن نشطة" value="3/4" icon={Store} color="orange" />
       </div>
 
       {/* Q-Commerce Metrics */}
@@ -443,8 +607,10 @@ function OverviewTab() {
             <div className="space-y-2">
               <p className="text-sm font-medium">أكثر المصطلحات بحثاً:</p>
               <div className="flex flex-wrap gap-2">
-                {["عيش", "فراخ", "لبن", "طماطم", "بطاطس"].map((term) => (
-                  <Badge key={term} variant="secondary">{term}</Badge>
+                {['عيش', 'فراخ', 'لبن', 'طماطم', 'بطاطس'].map((term) => (
+                  <Badge key={term} variant="secondary">
+                    {term}
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -464,13 +630,13 @@ function OverviewTab() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: "البقالة", orders: 380, revenue: "45,000 ج.م", color: "bg-blue-500" },
-                { name: "اللحوم", orders: 220, revenue: "55,000 ج.م", color: "bg-red-500" },
-                { name: "الألبان", orders: 180, revenue: "22,000 ج.م", color: "bg-yellow-500" },
-                { name: "المشروبات", orders: 150, revenue: "18,000 ج.م", color: "bg-green-500" },
+                { name: 'البقالة', orders: 380, revenue: '45,000 ج.م', color: 'bg-blue-500' },
+                { name: 'اللحوم', orders: 220, revenue: '55,000 ج.م', color: 'bg-red-500' },
+                { name: 'الألبان', orders: 180, revenue: '22,000 ج.م', color: 'bg-yellow-500' },
+                { name: 'المشروبات', orders: 150, revenue: '18,000 ج.م', color: 'bg-green-500' },
               ].map((category, index) => (
                 <div key={index} className="flex items-center gap-4">
-                  <div className={cn("w-2 h-8 rounded-full", category.color)} />
+                  <div className={cn('w-2 h-8 rounded-full', category.color)} />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{category.name}</span>
@@ -525,7 +691,7 @@ function OverviewTab() {
 }
 
 function CategoriesTab() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredCategories = MOCK_CATEGORIES.filter(
     (cat) =>
@@ -566,8 +732,8 @@ function CategoriesTab() {
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="text-4xl">{category.icon}</div>
-                <Badge variant={category.isActive ? "default" : "secondary"}>
-                  {category.isActive ? "نشط" : "معطل"}
+                <Badge variant={category.isActive ? 'default' : 'secondary'}>
+                  {category.isActive ? 'نشط' : 'معطل'}
                 </Badge>
               </div>
               <div className="mt-4">
@@ -597,7 +763,7 @@ function CategoriesTab() {
 }
 
 function SearchSynonymsTab() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="space-y-4">
@@ -631,10 +797,7 @@ function SearchSynonymsTab() {
         <CardContent className="p-0">
           <div className="divide-y">
             {MOCK_SYNONYMS.map((synonym) => (
-              <div
-                key={synonym.id}
-                className="p-4 hover:bg-muted/50 transition-colors"
-              >
+              <div key={synonym.id} className="p-4 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="text-center">
@@ -687,10 +850,10 @@ function SearchSynonymsTab() {
 }
 
 function DarkStoresTab() {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const filteredStores = MOCK_DARK_STORES.filter(
-    (store) => statusFilter === "all" || store.status === statusFilter
+    (store) => statusFilter === 'all' || store.status === statusFilter
   );
 
   return (
@@ -699,9 +862,7 @@ function DarkStoresTab() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">مخازن الظلام (Dark Stores)</h3>
-          <p className="text-sm text-muted-foreground">
-            إدارة المخازن الصغيرة للتوصيل السريع
-          </p>
+          <p className="text-sm text-muted-foreground">إدارة المخازن الصغيرة للتوصيل السريع</p>
         </div>
         <Button>
           <Plus className="h-4 w-4 ml-2" />
@@ -759,7 +920,9 @@ function DarkStoresTab() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">السعة</span>
-                  <span>{store.currentOrdersCount}/{store.maxConcurrentOrders}</span>
+                  <span>
+                    {store.currentOrdersCount}/{store.maxConcurrentOrders}
+                  </span>
                 </div>
                 <Progress
                   value={(store.currentOrdersCount / store.maxConcurrentOrders) * 100}
@@ -794,10 +957,10 @@ function DarkStoresTab() {
 }
 
 function MicroZonesTab() {
-  const [governorateFilter, setGovernorateFilter] = useState<string>("all");
+  const [governorateFilter, setGovernorateFilter] = useState<string>('all');
 
   const filteredZones = MOCK_MICRO_ZONES.filter(
-    (zone) => governorateFilter === "all" || zone.governorate === governorateFilter
+    (zone) => governorateFilter === 'all' || zone.governorate === governorateFilter
   );
 
   return (
@@ -806,9 +969,7 @@ function MicroZonesTab() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">مناطق التوصيل الصغيرة</h3>
-          <p className="text-sm text-muted-foreground">
-            إدارة مناطق التوصيل السريع
-          </p>
+          <p className="text-sm text-muted-foreground">إدارة مناطق التوصيل السريع</p>
         </div>
         <Button>
           <Plus className="h-4 w-4 ml-2" />
@@ -836,10 +997,7 @@ function MicroZonesTab() {
         <CardContent className="p-0">
           <div className="divide-y">
             {filteredZones.map((zone) => (
-              <div
-                key={zone.id}
-                className="p-4 hover:bg-muted/50 transition-colors"
-              >
+              <div key={zone.id} className="p-4 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="p-2 rounded-lg bg-muted">
@@ -871,8 +1029,8 @@ function MicroZonesTab() {
                       <p className="text-xs text-muted-foreground">توصيل مجاني</p>
                     </div>
 
-                    <Badge variant={zone.isCovered ? "default" : "secondary"}>
-                      {zone.isCovered ? "مغطاة" : "غير مغطاة"}
+                    <Badge variant={zone.isCovered ? 'default' : 'secondary'}>
+                      {zone.isCovered ? 'مغطاة' : 'غير مغطاة'}
                     </Badge>
 
                     <Button variant="ghost" size="sm">
@@ -923,9 +1081,7 @@ function HolidaysTab() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">الأعياد والمناسبات المصرية</h3>
-          <p className="text-sm text-muted-foreground">
-            إدارة العروض والحملات الموسمية
-          </p>
+          <p className="text-sm text-muted-foreground">إدارة العروض والحملات الموسمية</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
@@ -942,14 +1098,8 @@ function HolidaysTab() {
       {/* Holidays Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {MOCK_HOLIDAYS.map((holiday) => (
-          <Card
-            key={holiday.id}
-            className="hover:shadow-md transition-shadow overflow-hidden"
-          >
-            <div
-              className="h-2"
-              style={{ backgroundColor: holiday.themeColor }}
-            />
+          <Card key={holiday.id} className="hover:shadow-md transition-shadow overflow-hidden">
+            <div className="h-2" style={{ backgroundColor: holiday.themeColor }} />
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
@@ -993,8 +1143,20 @@ function HolidaysTab() {
         <CardContent>
           <div className="space-y-4">
             {[
-              { name: "عروض رمضان الكريم", discount: "20%", holiday: "رمضان", usageCount: 450, endDate: "30 مارس" },
-              { name: "عروض العيد", discount: "50 ج.م", holiday: "عيد الفطر", usageCount: 120, endDate: "5 أبريل" },
+              {
+                name: 'عروض رمضان الكريم',
+                discount: '20%',
+                holiday: 'رمضان',
+                usageCount: 450,
+                endDate: '30 مارس',
+              },
+              {
+                name: 'عروض العيد',
+                discount: '50 ج.م',
+                holiday: 'عيد الفطر',
+                usageCount: 120,
+                endDate: '5 أبريل',
+              },
             ].map((promo, index) => (
               <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">

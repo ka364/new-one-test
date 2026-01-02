@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, UserPlus, Download, CheckCircle2, Calendar, Users } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, UserPlus, Download, CheckCircle2, Calendar, Users } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function GenerateEmployeeAccounts() {
   const [month, setMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [employeeNames, setEmployeeNames] = useState("");
+  const [employeeNames, setEmployeeNames] = useState('');
   const [success, setSuccess] = useState(false);
   const [excelData, setExcelData] = useState<{ data: string; filename: string } | null>(null);
 
@@ -21,7 +21,7 @@ export default function GenerateEmployeeAccounts() {
     onSuccess: (data) => {
       setSuccess(true);
       setExcelData({ data: data.excelFile, filename: data.fileName });
-      setEmployeeNames("");
+      setEmployeeNames('');
       setTimeout(() => setSuccess(false), 5000);
     },
   });
@@ -35,14 +35,14 @@ export default function GenerateEmployeeAccounts() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const names = employeeNames
-      .split("\n")
-      .map(name => name.trim())
-      .filter(name => name.length > 0);
+      .split('\n')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
 
     if (names.length === 0) {
-      alert("الرجاء إدخال أسماء الموظفين");
+      alert('الرجاء إدخال أسماء الموظفين');
       return;
     }
 
@@ -55,12 +55,11 @@ export default function GenerateEmployeeAccounts() {
   const handleDownloadExcel = () => {
     if (!excelData) return;
 
-    const blob = new Blob(
-      [Uint8Array.from(atob(excelData.data), c => c.charCodeAt(0))],
-      { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
-    );
+    const blob = new Blob([Uint8Array.from(atob(excelData.data), (c) => c.charCodeAt(0))], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = excelData.filename;
     document.body.appendChild(a);
@@ -85,9 +84,7 @@ export default function GenerateEmployeeAccounts() {
           <Card>
             <CardHeader>
               <CardTitle>توليد حسابات جديدة</CardTitle>
-              <CardDescription>
-                إنشاء حسابات مؤقتة للموظفين لشهر محدد
-              </CardDescription>
+              <CardDescription>إنشاء حسابات مؤقتة للموظفين لشهر محدد</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -123,16 +120,10 @@ export default function GenerateEmployeeAccounts() {
                     required
                     disabled={generateMutation.isPending}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    💡 أدخل اسم كل موظف في سطر منفصل
-                  </p>
+                  <p className="text-xs text-muted-foreground">💡 أدخل اسم كل موظف في سطر منفصل</p>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={generateMutation.isPending}
-                >
+                <Button type="submit" className="w-full" disabled={generateMutation.isPending}>
                   {generateMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -165,9 +156,7 @@ export default function GenerateEmployeeAccounts() {
           <Card>
             <CardHeader>
               <CardTitle>الحسابات النشطة</CardTitle>
-              <CardDescription>
-                الحسابات النشطة لشهر {month}
-              </CardDescription>
+              <CardDescription>الحسابات النشطة لشهر {month}</CardDescription>
             </CardHeader>
             <CardContent>
               {activeAccountsQuery.isLoading ? (
@@ -189,7 +178,7 @@ export default function GenerateEmployeeAccounts() {
                       </div>
                       <div className="text-right text-xs text-gray-500">
                         <p>ينتهي في:</p>
-                        <p>{new Date(account.expiresAt).toLocaleDateString("ar-EG")}</p>
+                        <p>{new Date(account.expiresAt).toLocaleDateString('ar-EG')}</p>
                       </div>
                     </div>
                   ))}
@@ -208,9 +197,7 @@ export default function GenerateEmployeeAccounts() {
         <Card>
           <CardHeader>
             <CardTitle>سجل التوليد</CardTitle>
-            <CardDescription>
-              آخر عمليات إنشاء الحسابات
-            </CardDescription>
+            <CardDescription>آخر عمليات إنشاء الحسابات</CardDescription>
           </CardHeader>
           <CardContent>
             {logsQuery.isLoading ? (
@@ -228,13 +215,11 @@ export default function GenerateEmployeeAccounts() {
                       <Calendar className="w-4 h-4 text-blue-600" />
                       <div>
                         <p className="font-medium">شهر {log.month}</p>
-                        <p className="text-xs text-gray-600">
-                          {log.accountsGenerated} حساب
-                        </p>
+                        <p className="text-xs text-gray-600">{log.accountsGenerated} حساب</p>
                       </div>
                     </div>
                     <div className="text-xs text-gray-500">
-                      {new Date(log.createdAt).toLocaleDateString("ar-EG")}
+                      {new Date(log.createdAt).toLocaleDateString('ar-EG')}
                     </div>
                   </div>
                 ))}

@@ -121,12 +121,7 @@ describe('Chat Router - Unit Tests', () => {
         'application/x-sh',
       ];
 
-      const safeTypes = [
-        'application/pdf',
-        'image/png',
-        'image/jpeg',
-        'text/plain',
-      ];
+      const safeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'text/plain'];
 
       // Assuming a filter function
       const isSafeType = (type: string) => !dangerousTypes.includes(type);
@@ -155,11 +150,7 @@ describe('Chat Router - Unit Tests', () => {
     });
 
     it('should handle Arabic text correctly', () => {
-      const arabicMessages = [
-        'مرحبا بك في هاديروس',
-        'كيف حالك اليوم؟',
-        'شكراً جزيلاً',
-      ];
+      const arabicMessages = ['مرحبا بك في هاديروس', 'كيف حالك اليوم؟', 'شكراً جزيلاً'];
 
       arabicMessages.forEach((msg) => {
         expect(msg.length).toBeGreaterThan(0);
@@ -213,10 +204,12 @@ describe('Chat Router - Unit Tests', () => {
 
     it('should limit history to 50 messages', () => {
       const historyLimit = 50;
-      const messages = Array(100).fill(null).map((_, i) => ({
-        id: i + 1,
-        content: `Message ${i + 1}`,
-      }));
+      const messages = Array(100)
+        .fill(null)
+        .map((_, i) => ({
+          id: i + 1,
+          content: `Message ${i + 1}`,
+        }));
 
       const limited = messages.slice(0, historyLimit);
       expect(limited.length).toBe(50);

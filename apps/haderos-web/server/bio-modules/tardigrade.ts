@@ -1,13 +1,13 @@
 /**
  * Tardigrade Module - Extreme Resilience & Self-Healing
- * 
+ *
  * Inspired by: Water bear's survival in extreme conditions
  * Problem: System failures during crises
  * Solution: Cryptobiosis mode + self-healing mechanisms
  */
 
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface SystemHealth {
   overall: number; // 0-100
@@ -19,12 +19,12 @@ export interface SystemHealth {
     integrations: number;
   };
   issues: HealthIssue[];
-  status: "healthy" | "degraded" | "critical" | "cryptobiosis";
+  status: 'healthy' | 'degraded' | 'critical' | 'cryptobiosis';
 }
 
 export interface HealthIssue {
   component: string;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   detectedAt: Date;
   autoFixable: boolean;
@@ -34,7 +34,7 @@ export interface HealthIssue {
 export interface BackupSnapshot {
   id: string;
   timestamp: Date;
-  type: "full" | "incremental";
+  type: 'full' | 'incremental';
   size: number; // bytes
   components: string[];
   encrypted: boolean;
@@ -43,7 +43,7 @@ export interface BackupSnapshot {
 
 /**
  * Tardigrade Resilience Engine
- * 
+ *
  * Capabilities:
  * 1. Continuous health monitoring
  * 2. Automatic problem detection
@@ -75,7 +75,7 @@ export class TardigradeResilienceEngine {
       await this.performHealthCheck();
     }, this.HEALTH_CHECK_FREQUENCY);
 
-    console.log("[Tardigrade] Health monitoring started");
+    console.log('[Tardigrade] Health monitoring started');
   }
 
   /**
@@ -83,10 +83,10 @@ export class TardigradeResilienceEngine {
    */
   private startAutomatedBackups(): void {
     setInterval(async () => {
-      await this.createBackup("incremental");
+      await this.createBackup('incremental');
     }, this.BACKUP_FREQUENCY);
 
-    console.log("[Tardigrade] Automated backups started");
+    console.log('[Tardigrade] Automated backups started');
   }
 
   /**
@@ -96,13 +96,13 @@ export class TardigradeResilienceEngine {
     const eventBus = getEventBus();
 
     // Listen for critical errors
-    eventBus.on("*", async (event) => {
-      if (event.type.includes("error") && event.type.includes("critical")) {
+    eventBus.on('*', async (event) => {
+      if (event.type.includes('error') && event.type.includes('critical')) {
         await this.handleCriticalError(event);
       }
     });
 
-    console.log("[Tardigrade] Event handlers registered");
+    console.log('[Tardigrade] Event handlers registered');
   }
 
   /**
@@ -115,12 +115,12 @@ export class TardigradeResilienceEngine {
     const dbHealth = await this.checkDatabaseHealth();
     if (dbHealth < 100) {
       issues.push({
-        component: "database",
-        severity: dbHealth < 50 ? "critical" : dbHealth < 70 ? "high" : "medium",
+        component: 'database',
+        severity: dbHealth < 50 ? 'critical' : dbHealth < 70 ? 'high' : 'medium',
         description: `Database health: ${dbHealth}%`,
         detectedAt: new Date(),
         autoFixable: true,
-        fixed: false
+        fixed: false,
       });
     }
 
@@ -128,12 +128,12 @@ export class TardigradeResilienceEngine {
     const apiHealth = await this.checkAPIHealth();
     if (apiHealth < 100) {
       issues.push({
-        component: "api",
-        severity: apiHealth < 50 ? "critical" : apiHealth < 70 ? "high" : "medium",
+        component: 'api',
+        severity: apiHealth < 50 ? 'critical' : apiHealth < 70 ? 'high' : 'medium',
         description: `API health: ${apiHealth}%`,
         detectedAt: new Date(),
         autoFixable: true,
-        fixed: false
+        fixed: false,
       });
     }
 
@@ -141,12 +141,12 @@ export class TardigradeResilienceEngine {
     const eventBusHealth = await this.checkEventBusHealth();
     if (eventBusHealth < 100) {
       issues.push({
-        component: "eventBus",
-        severity: eventBusHealth < 50 ? "critical" : "medium",
+        component: 'eventBus',
+        severity: eventBusHealth < 50 ? 'critical' : 'medium',
         description: `Event Bus health: ${eventBusHealth}%`,
         detectedAt: new Date(),
         autoFixable: true,
-        fixed: false
+        fixed: false,
       });
     }
 
@@ -154,12 +154,12 @@ export class TardigradeResilienceEngine {
     const agentsHealth = await this.checkAgentsHealth();
     if (agentsHealth < 100) {
       issues.push({
-        component: "agents",
-        severity: "medium",
+        component: 'agents',
+        severity: 'medium',
         description: `Agents health: ${agentsHealth}%`,
         detectedAt: new Date(),
         autoFixable: true,
-        fixed: false
+        fixed: false,
       });
     }
 
@@ -167,12 +167,12 @@ export class TardigradeResilienceEngine {
     const integrationsHealth = await this.checkIntegrationsHealth();
     if (integrationsHealth < 100) {
       issues.push({
-        component: "integrations",
-        severity: "low",
+        component: 'integrations',
+        severity: 'low',
         description: `Integrations health: ${integrationsHealth}%`,
         detectedAt: new Date(),
         autoFixable: false,
-        fixed: false
+        fixed: false,
       });
     }
 
@@ -182,13 +182,13 @@ export class TardigradeResilienceEngine {
     );
 
     // Determine status
-    let status: SystemHealth["status"] = "healthy";
+    let status: SystemHealth['status'] = 'healthy';
     if (this.inCryptobiosis) {
-      status = "cryptobiosis";
+      status = 'cryptobiosis';
     } else if (overallHealth < this.CRITICAL_THRESHOLD) {
-      status = "critical";
+      status = 'critical';
     } else if (overallHealth < this.DEGRADED_THRESHOLD) {
-      status = "degraded";
+      status = 'degraded';
     }
 
     const health: SystemHealth = {
@@ -198,36 +198,36 @@ export class TardigradeResilienceEngine {
         api: apiHealth,
         eventBus: eventBusHealth,
         agents: agentsHealth,
-        integrations: integrationsHealth
+        integrations: integrationsHealth,
       },
       issues,
-      status
+      status,
     };
 
     // Handle critical health
-    if (status === "critical" && !this.inCryptobiosis) {
+    if (status === 'critical' && !this.inCryptobiosis) {
       await this.enterCryptobiosis(health);
-    } else if (status === "degraded") {
+    } else if (status === 'degraded') {
       await this.attemptSelfHealing(issues);
     }
 
     // Create insight if there are issues
     if (issues.length > 0) {
       await createAgentInsight({
-        agentType: "tardigrade",
-        insightType: "health_issues",
+        agentType: 'tardigrade',
+        insightType: 'health_issues',
         title: `🛡️ System Health: ${overallHealth}% (${status})`,
         titleAr: `🛡️ صحة النظام: ${overallHealth}٪ (${status})`,
         description: `Detected ${issues.length} health issues. Status: ${status}`,
         descriptionAr: `تم اكتشاف ${issues.length} مشاكل صحية. الحالة: ${status}`,
-        severity: status === "critical" ? "critical" : status === "degraded" ? "high" : "medium",
+        severity: status === 'critical' ? 'critical' : status === 'degraded' ? 'high' : 'medium',
         actionable: true,
         metadata: {
           overallHealth,
           status,
           issues: issues.length,
-          components: health.components
-        }
+          components: health.components,
+        },
       });
     }
 
@@ -239,8 +239,8 @@ export class TardigradeResilienceEngine {
    */
   private async checkDatabaseHealth(): Promise<number> {
     try {
-      const { db } = await import("../db");
-      const { sql } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
 
       // Simple query to check connection
       await db.execute(sql`SELECT 1`);
@@ -248,7 +248,7 @@ export class TardigradeResilienceEngine {
       // TODO: Check connection pool, query performance, etc.
       return 100;
     } catch (error) {
-      console.error("[Tardigrade] Database health check failed:", error);
+      console.error('[Tardigrade] Database health check failed:', error);
       return 0;
     }
   }
@@ -262,7 +262,7 @@ export class TardigradeResilienceEngine {
       // TODO: Implement actual health check endpoint
       return 100;
     } catch (error) {
-      console.error("[Tardigrade] API health check failed:", error);
+      console.error('[Tardigrade] API health check failed:', error);
       return 0;
     }
   }
@@ -276,7 +276,7 @@ export class TardigradeResilienceEngine {
       // Check if event bus is operational
       return 100;
     } catch (error) {
-      console.error("[Tardigrade] Event Bus health check failed:", error);
+      console.error('[Tardigrade] Event Bus health check failed:', error);
       return 0;
     }
   }
@@ -289,7 +289,7 @@ export class TardigradeResilienceEngine {
       // TODO: Check if all agents are running
       return 100;
     } catch (error) {
-      console.error("[Tardigrade] Agents health check failed:", error);
+      console.error('[Tardigrade] Agents health check failed:', error);
       return 80;
     }
   }
@@ -303,11 +303,12 @@ export class TardigradeResilienceEngine {
 
       // Check Shopify Integration
       try {
-        const { db } = await import("../db");
-        const { shopifyConfig } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../db');
+        const { shopifyConfig } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
-        const activeConfigs = await db.select()
+        const activeConfigs = await db
+          .select()
           .from(shopifyConfig)
           .where(eq(shopifyConfig.isActive, 1))
           .limit(1);
@@ -316,12 +317,12 @@ export class TardigradeResilienceEngine {
           const config = activeConfigs[0];
           const lastSync = config.lastSyncAt ? new Date(config.lastSyncAt) : null;
           const syncIntervalMs = (config.syncIntervalMinutes || 15) * 60 * 1000;
-          const isStale = lastSync && (Date.now() - lastSync.getTime() > syncIntervalMs * 3);
+          const isStale = lastSync && Date.now() - lastSync.getTime() > syncIntervalMs * 3;
 
           healthChecks.push({
-            name: "shopify",
+            name: 'shopify',
             healthy: !isStale,
-            weight: 30
+            weight: 30,
           });
         }
       } catch {
@@ -330,24 +331,22 @@ export class TardigradeResilienceEngine {
 
       // Check Bosta Integration
       try {
-        const { db } = await import("../db");
-        const { shippingPartners } = await import("../../drizzle/schema");
-        const { eq, and } = await import("drizzle-orm");
+        const { db } = await import('../db');
+        const { shippingPartners } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
 
-        const bostaPartner = await db.select()
+        const bostaPartner = await db
+          .select()
           .from(shippingPartners)
-          .where(and(
-            eq(shippingPartners.name, 'bosta'),
-            eq(shippingPartners.active, 1)
-          ))
+          .where(and(eq(shippingPartners.name, 'bosta'), eq(shippingPartners.active, 1)))
           .limit(1);
 
         if (bostaPartner.length > 0) {
           const partner = bostaPartner[0];
           healthChecks.push({
-            name: "bosta",
+            name: 'bosta',
             healthy: !partner.suspended,
-            weight: 25
+            weight: 25,
           });
         }
       } catch {
@@ -356,21 +355,22 @@ export class TardigradeResilienceEngine {
 
       // Check Shipping Partners Health
       try {
-        const { db } = await import("../db");
-        const { shippingPartners } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { db } = await import('../db');
+        const { shippingPartners } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
-        const activePartners = await db.select()
+        const activePartners = await db
+          .select()
           .from(shippingPartners)
           .where(eq(shippingPartners.active, 1));
 
-        const suspendedCount = activePartners.filter(p => p.suspended === 1).length;
+        const suspendedCount = activePartners.filter((p) => p.suspended === 1).length;
         const healthyPartners = activePartners.length - suspendedCount;
 
         healthChecks.push({
-          name: "shipping_partners",
+          name: 'shipping_partners',
           healthy: healthyPartners > 0 && suspendedCount < activePartners.length / 2,
-          weight: 25
+          weight: 25,
         });
       } catch {
         // Shipping partners not configured - skip
@@ -378,19 +378,20 @@ export class TardigradeResilienceEngine {
 
       // Check Marketer Landing Pages Integration (if exists)
       try {
-        const { db } = await import("../db");
-        const { marketerLandingPages } = await import("../../drizzle/schema-marketer-tools");
-        const { eq, and, gt } = await import("drizzle-orm");
+        const { db } = await import('../db');
+        const { marketerLandingPages } = await import('../../drizzle/schema-marketer-tools');
+        const { eq, and, gt } = await import('drizzle-orm');
 
-        const recentPages = await db.select()
+        const recentPages = await db
+          .select()
           .from(marketerLandingPages)
           .where(eq(marketerLandingPages.status, 'published'))
           .limit(1);
 
         healthChecks.push({
-          name: "marketer_landing_pages",
+          name: 'marketer_landing_pages',
           healthy: true,
-          weight: 20
+          weight: 20,
         });
       } catch {
         // Marketer tools not configured - skip
@@ -403,12 +404,12 @@ export class TardigradeResilienceEngine {
 
       const totalWeight = healthChecks.reduce((sum, check) => sum + check.weight, 0);
       const healthyWeight = healthChecks
-        .filter(check => check.healthy)
+        .filter((check) => check.healthy)
         .reduce((sum, check) => sum + check.weight, 0);
 
       return Math.floor((healthyWeight / totalWeight) * 100);
     } catch (error) {
-      console.error("[Tardigrade] Integrations health check failed:", error);
+      console.error('[Tardigrade] Integrations health check failed:', error);
       return 90;
     }
   }
@@ -424,16 +425,16 @@ export class TardigradeResilienceEngine {
         console.log(`[Tardigrade] Attempting to fix: ${issue.description}`);
 
         switch (issue.component) {
-          case "database":
+          case 'database':
             await this.healDatabase();
             break;
-          case "api":
+          case 'api':
             await this.healAPI();
             break;
-          case "eventBus":
+          case 'eventBus':
             await this.healEventBus();
             break;
-          case "agents":
+          case 'agents':
             await this.healAgents();
             break;
         }
@@ -451,27 +452,27 @@ export class TardigradeResilienceEngine {
    */
   private async healDatabase(): Promise<void> {
     try {
-      console.log("[Tardigrade] Attempting database healing...");
+      console.log('[Tardigrade] Attempting database healing...');
 
       // 1. Get fresh database connection
-      const { getDb, closeDb } = await import("../db");
+      const { getDb, closeDb } = await import('../db');
 
       // 2. Close existing connection
       await closeDb?.();
 
       // 3. Wait a moment for connection to fully close
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // 4. Get new connection
       const db = await getDb();
 
       // 5. Test the connection
-      const { sql } = await import("drizzle-orm");
+      const { sql } = await import('drizzle-orm');
       await db?.execute(sql`SELECT 1`);
 
-      console.log("[Tardigrade] Database healing successful - connection restored");
+      console.log('[Tardigrade] Database healing successful - connection restored');
     } catch (error) {
-      console.error("[Tardigrade] Database healing failed:", error);
+      console.error('[Tardigrade] Database healing failed:', error);
       throw error;
     }
   }
@@ -481,30 +482,32 @@ export class TardigradeResilienceEngine {
    */
   private async healAPI(): Promise<void> {
     try {
-      console.log("[Tardigrade] Attempting API healing...");
+      console.log('[Tardigrade] Attempting API healing...');
 
       // 1. Clear any in-memory caches
       if (global.gc) {
         global.gc();
-        console.log("[Tardigrade] Garbage collection triggered");
+        console.log('[Tardigrade] Garbage collection triggered');
       }
 
       // 2. Log memory usage
       const memUsage = process.memoryUsage();
-      console.log(`[Tardigrade] Memory usage - Heap: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB / ${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`);
+      console.log(
+        `[Tardigrade] Memory usage - Heap: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB / ${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`
+      );
 
       // 3. Emit healing event for any listeners
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "system.api.healed",
-        entityType: "system",
+        type: 'system.api.healed',
+        entityType: 'system',
         entityId: 0,
-        payload: { healedAt: new Date() }
+        payload: { healedAt: new Date() },
       });
 
-      console.log("[Tardigrade] API healing completed");
+      console.log('[Tardigrade] API healing completed');
     } catch (error) {
-      console.error("[Tardigrade] API healing failed:", error);
+      console.error('[Tardigrade] API healing failed:', error);
       throw error;
     }
   }
@@ -514,7 +517,7 @@ export class TardigradeResilienceEngine {
    */
   private async healEventBus(): Promise<void> {
     try {
-      console.log("[Tardigrade] Attempting Event Bus healing...");
+      console.log('[Tardigrade] Attempting Event Bus healing...');
 
       // 1. Get event bus instance
       const eventBus = getEventBus();
@@ -524,15 +527,15 @@ export class TardigradeResilienceEngine {
 
       // 3. Emit health check event to verify functionality
       await eventBus.emit({
-        type: "system.eventbus.healed",
-        entityType: "system",
+        type: 'system.eventbus.healed',
+        entityType: 'system',
         entityId: 0,
-        payload: { healedAt: new Date() }
+        payload: { healedAt: new Date() },
       });
 
-      console.log("[Tardigrade] Event Bus healing completed");
+      console.log('[Tardigrade] Event Bus healing completed');
     } catch (error) {
-      console.error("[Tardigrade] Event Bus healing failed:", error);
+      console.error('[Tardigrade] Event Bus healing failed:', error);
       throw error;
     }
   }
@@ -542,12 +545,12 @@ export class TardigradeResilienceEngine {
    */
   private async healAgents(): Promise<void> {
     try {
-      console.log("[Tardigrade] Attempting Agents healing...");
+      console.log('[Tardigrade] Attempting Agents healing...');
 
       // 1. Import and reinitialize key agents
-      const { getFinancialAgent } = await import("../agents/financialAgent");
-      const { getDemandPlannerAgent } = await import("../agents/demandPlannerAgent");
-      const { getCampaignOrchestratorAgent } = await import("../agents/campaignOrchestratorAgent");
+      const { getFinancialAgent } = await import('../agents/financialAgent');
+      const { getDemandPlannerAgent } = await import('../agents/demandPlannerAgent');
+      const { getCampaignOrchestratorAgent } = await import('../agents/campaignOrchestratorAgent');
 
       // 2. Trigger agent initialization (they use singleton pattern)
       getFinancialAgent();
@@ -557,18 +560,18 @@ export class TardigradeResilienceEngine {
       // 3. Emit agent healing event
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "system.agents.healed",
-        entityType: "system",
+        type: 'system.agents.healed',
+        entityType: 'system',
         entityId: 0,
         payload: {
           healedAt: new Date(),
-          agents: ["financial", "demandPlanner", "campaignOrchestrator"]
-        }
+          agents: ['financial', 'demandPlanner', 'campaignOrchestrator'],
+        },
       });
 
-      console.log("[Tardigrade] Agents healing completed");
+      console.log('[Tardigrade] Agents healing completed');
     } catch (error) {
-      console.error("[Tardigrade] Agents healing failed:", error);
+      console.error('[Tardigrade] Agents healing failed:', error);
       throw error;
     }
   }
@@ -579,7 +582,7 @@ export class TardigradeResilienceEngine {
   private async enterCryptobiosis(health: SystemHealth): Promise<void> {
     if (this.inCryptobiosis) return;
 
-    console.log("[Tardigrade] ⚠️ ENTERING CRYPTOBIOSIS MODE");
+    console.log('[Tardigrade] ⚠️ ENTERING CRYPTOBIOSIS MODE');
     this.inCryptobiosis = true;
 
     try {
@@ -587,7 +590,7 @@ export class TardigradeResilienceEngine {
       await this.saveState();
 
       // 2. Create emergency backup
-      await this.createBackup("full");
+      await this.createBackup('full');
 
       // 3. Minimize operations
       await this.minimizeOperations();
@@ -597,25 +600,25 @@ export class TardigradeResilienceEngine {
 
       // 5. Create critical alert
       await createAgentInsight({
-        agentType: "tardigrade",
-        insightType: "cryptobiosis_entered",
-        title: "🚨 CRYPTOBIOSIS MODE ACTIVATED",
-        titleAr: "🚨 تم تفعيل وضع السبات الحيوي",
+        agentType: 'tardigrade',
+        insightType: 'cryptobiosis_entered',
+        title: '🚨 CRYPTOBIOSIS MODE ACTIVATED',
+        titleAr: '🚨 تم تفعيل وضع السبات الحيوي',
         description: `System entered cryptobiosis mode due to critical health (${health.overall}%). Operations minimized.`,
         descriptionAr: `دخل النظام في وضع السبات الحيوي بسبب الحالة الحرجة (${health.overall}٪). تم تقليل العمليات.`,
-        severity: "critical",
+        severity: 'critical',
         actionable: true,
         metadata: {
           health: health.overall,
           issues: health.issues.length,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       // 6. Monitor conditions
       this.monitorRecoveryConditions();
     } catch (error) {
-      console.error("[Tardigrade] Error entering cryptobiosis:", error);
+      console.error('[Tardigrade] Error entering cryptobiosis:', error);
     }
   }
 
@@ -630,7 +633,7 @@ export class TardigradeResilienceEngine {
 
   private async saveState(): Promise<void> {
     try {
-      console.log("[Tardigrade] Saving system state...");
+      console.log('[Tardigrade] Saving system state...');
 
       // 1. Get current health snapshot
       const health = await this.performHealthCheck();
@@ -639,25 +642,29 @@ export class TardigradeResilienceEngine {
       this.savedState = {
         timestamp: new Date(),
         healthSnapshot: health,
-        activeProcesses: ["orders", "inventory", "messaging"]
+        activeProcesses: ['orders', 'inventory', 'messaging'],
       };
 
       // 3. Save critical state to database
-      const { db } = await import("../db");
-      const { sql } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
 
-      await db.execute(sql`
+      await db
+        .execute(
+          sql`
         INSERT INTO system_state_snapshots (snapshot_type, data, created_at)
         VALUES ('cryptobiosis_entry', ${JSON.stringify(this.savedState)}::jsonb, NOW())
         ON CONFLICT DO NOTHING
-      `).catch(() => {
-        // Table might not exist, log and continue
-        console.log("[Tardigrade] State saved to memory (table not available)");
-      });
+      `
+        )
+        .catch(() => {
+          // Table might not exist, log and continue
+          console.log('[Tardigrade] State saved to memory (table not available)');
+        });
 
-      console.log("[Tardigrade] State saved successfully");
+      console.log('[Tardigrade] State saved successfully');
     } catch (error) {
-      console.error("[Tardigrade] Error saving state:", error);
+      console.error('[Tardigrade] Error saving state:', error);
     }
   }
 
@@ -668,7 +675,7 @@ export class TardigradeResilienceEngine {
 
   private async minimizeOperations(): Promise<void> {
     try {
-      console.log("[Tardigrade] Minimizing operations...");
+      console.log('[Tardigrade] Minimizing operations...');
 
       // 1. Stop non-critical background jobs
       if (this.healthCheckInterval) {
@@ -679,24 +686,24 @@ export class TardigradeResilienceEngine {
       // 2. Emit event to pause non-critical services
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "system.operations.minimized",
-        entityType: "system",
+        type: 'system.operations.minimized',
+        entityType: 'system',
         entityId: 0,
         payload: {
           minimizedAt: new Date(),
           pausedServices: [
-            "marketing_automation",
-            "analytics_processing",
-            "report_generation",
-            "ai_suggestions"
-          ]
-        }
+            'marketing_automation',
+            'analytics_processing',
+            'report_generation',
+            'ai_suggestions',
+          ],
+        },
       });
 
       this.minimizedOperations = true;
-      console.log("[Tardigrade] Operations minimized - only critical services running");
+      console.log('[Tardigrade] Operations minimized - only critical services running');
     } catch (error) {
-      console.error("[Tardigrade] Error minimizing operations:", error);
+      console.error('[Tardigrade] Error minimizing operations:', error);
     }
   }
 
@@ -705,33 +712,28 @@ export class TardigradeResilienceEngine {
    */
   private async protectCriticalData(): Promise<void> {
     try {
-      console.log("[Tardigrade] Protecting critical data...");
+      console.log('[Tardigrade] Protecting critical data...');
 
       // 1. Create emergency backup
-      await this.createBackup("full");
+      await this.createBackup('full');
 
       // 2. Mark critical data as protected
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "system.data.protected",
-        entityType: "system",
+        type: 'system.data.protected',
+        entityType: 'system',
         entityId: 0,
         payload: {
           protectedAt: new Date(),
-          protectedEntities: [
-            "users",
-            "orders",
-            "payments",
-            "inventory"
-          ]
-        }
+          protectedEntities: ['users', 'orders', 'payments', 'inventory'],
+        },
       });
 
       // 3. Disable write operations to non-critical tables
-      console.log("[Tardigrade] Write operations restricted to critical tables only");
-      console.log("[Tardigrade] Critical data protection activated");
+      console.log('[Tardigrade] Write operations restricted to critical tables only');
+      console.log('[Tardigrade] Critical data protection activated');
     } catch (error) {
-      console.error("[Tardigrade] Error protecting critical data:", error);
+      console.error('[Tardigrade] Error protecting critical data:', error);
     }
   }
 
@@ -760,7 +762,7 @@ export class TardigradeResilienceEngine {
   private async exitCryptobiosis(): Promise<void> {
     if (!this.inCryptobiosis) return;
 
-    console.log("[Tardigrade] ✅ EXITING CRYPTOBIOSIS MODE");
+    console.log('[Tardigrade] ✅ EXITING CRYPTOBIOSIS MODE');
 
     try {
       // 1. Restore state
@@ -776,21 +778,21 @@ export class TardigradeResilienceEngine {
 
       // 4. Create recovery alert
       await createAgentInsight({
-        agentType: "tardigrade",
-        insightType: "cryptobiosis_exited",
-        title: "✅ System Recovered from Cryptobiosis",
-        titleAr: "✅ تم استعادة النظام من السبات الحيوي",
+        agentType: 'tardigrade',
+        insightType: 'cryptobiosis_exited',
+        title: '✅ System Recovered from Cryptobiosis',
+        titleAr: '✅ تم استعادة النظام من السبات الحيوي',
         description: `System successfully recovered. Current health: ${health.overall}%`,
         descriptionAr: `تم استعادة النظام بنجاح. الصحة الحالية: ${health.overall}٪`,
-        severity: "low",
+        severity: 'low',
         actionable: false,
         metadata: {
           health: health.overall,
-          recoveryTime: new Date()
-        }
+          recoveryTime: new Date(),
+        },
       });
     } catch (error) {
-      console.error("[Tardigrade] Error exiting cryptobiosis:", error);
+      console.error('[Tardigrade] Error exiting cryptobiosis:', error);
     }
   }
 
@@ -799,7 +801,7 @@ export class TardigradeResilienceEngine {
    */
   private async restoreState(): Promise<void> {
     // TODO: Restore saved state
-    console.log("[Tardigrade] State restored");
+    console.log('[Tardigrade] State restored');
   }
 
   /**
@@ -807,21 +809,21 @@ export class TardigradeResilienceEngine {
    */
   private async resumeOperations(): Promise<void> {
     // TODO: Resume all operations
-    console.log("[Tardigrade] Operations resumed");
+    console.log('[Tardigrade] Operations resumed');
   }
 
   /**
    * Create backup
    */
-  async createBackup(type: "full" | "incremental"): Promise<BackupSnapshot> {
+  async createBackup(type: 'full' | 'incremental'): Promise<BackupSnapshot> {
     const snapshot: BackupSnapshot = {
       id: `backup_${Date.now()}`,
       timestamp: new Date(),
       type,
       size: 0,
-      components: ["database", "config", "state"],
+      components: ['database', 'config', 'state'],
       encrypted: true,
-      location: `/backups/${type}_${Date.now()}.tar.gz`
+      location: `/backups/${type}_${Date.now()}.tar.gz`,
     };
 
     try {
@@ -831,7 +833,7 @@ export class TardigradeResilienceEngine {
 
       return snapshot;
     } catch (error) {
-      console.error("[Tardigrade] Backup failed:", error);
+      console.error('[Tardigrade] Backup failed:', error);
       throw error;
     }
   }
@@ -840,10 +842,10 @@ export class TardigradeResilienceEngine {
    * Handle critical error
    */
   private async handleCriticalError(event: any): Promise<void> {
-    console.error("[Tardigrade] Critical error detected:", event);
+    console.error('[Tardigrade] Critical error detected:', event);
 
     // Create emergency backup
-    await this.createBackup("full");
+    await this.createBackup('full');
 
     // Check if we need to enter cryptobiosis
     const health = await this.performHealthCheck();
@@ -865,7 +867,7 @@ export class TardigradeResilienceEngine {
     return {
       inCryptobiosis: this.inCryptobiosis,
       lastBackup: this.lastBackup,
-      health
+      health,
     };
   }
 }

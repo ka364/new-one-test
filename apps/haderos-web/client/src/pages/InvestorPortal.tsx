@@ -1,11 +1,14 @@
-import { Link } from "wouter";
-import { Rocket, Shield, TrendingUp, Users, ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from 'wouter';
+import { Rocket, Shield, TrendingUp, Users, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function InvestorPortal() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+      dir="rtl"
+    >
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
@@ -13,13 +16,14 @@ export default function InvestorPortal() {
             <Rocket className="w-4 h-4" />
             <span>مرحباً بك في HaderOS</span>
           </div>
-          
+
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             منصة الذكاء الاصطناعي الأخلاقية
           </h1>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            جرّب النظام بنفسك قبل اتخاذ قرار الاستثمار. استكشف كيف يعمل HaderOS في تحويل العمليات التجارية بشكل أخلاقي وذكي.
+            جرّب النظام بنفسك قبل اتخاذ قرار الاستثمار. استكشف كيف يعمل HaderOS في تحويل العمليات
+            التجارية بشكل أخلاقي وذكي.
           </p>
 
           <div className="flex gap-4 justify-center">
@@ -73,7 +77,8 @@ export default function InvestorPortal() {
               <Shield className="w-12 h-12 text-purple-600 mb-4" />
               <CardTitle>محرك KAIA للامتثال الشرعي</CardTitle>
               <CardDescription>
-                تحقق تلقائي من المعاملات المالية للتأكد من توافقها مع الشريعة الإسلامية. كشف الربا والغرر والميسر.
+                تحقق تلقائي من المعاملات المالية للتأكد من توافقها مع الشريعة الإسلامية. كشف الربا
+                والغرر والميسر.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -91,7 +96,8 @@ export default function InvestorPortal() {
               <TrendingUp className="w-12 h-12 text-blue-600 mb-4" />
               <CardTitle>تحليلات ذكية بالذكاء الاصطناعي</CardTitle>
               <CardDescription>
-                توقعات المبيعات، تحليل الطلب، تحسين الحملات التسويقية، وكشف الأنماط المالية تلقائياً.
+                توقعات المبيعات، تحليل الطلب، تحسين الحملات التسويقية، وكشف الأنماط المالية
+                تلقائياً.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -207,7 +213,11 @@ export default function InvestorPortal() {
               </Button>
             </Link>
             <Link href="/investor/pitch">
-              <Button size="lg" variant="outline" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30">
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/30"
+              >
                 <TrendingUp className="w-5 h-5" />
                 اقرأ عرض الاستثمار
               </Button>

@@ -1,82 +1,82 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Key, ArrowRight } from "lucide-react";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Mail, Key, ArrowRight } from 'lucide-react';
 
 export default function EmployeeForgotPassword() {
   const [, navigate] = useLocation();
-  const [step, setStep] = useState<"email" | "otp" | "password">("email");
-  const [username, setUsername] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [step, setStep] = useState<'email' | 'otp' | 'password'>('email');
+  const [username, setUsername] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [employeeId, setEmployeeId] = useState<number | null>(null);
 
   const requestResetMutation = trpc.employeeAuth.requestPasswordReset.useMutation({
     onSuccess: (data) => {
       if (data.success) {
         setEmployeeId(data.employeeId!);
-        setSuccess("تم إرسال رمز التحقق إلى بريدك الإلكتروني المسجل");
+        setSuccess('تم إرسال رمز التحقق إلى بريدك الإلكتروني المسجل');
         setTimeout(() => {
-          setStep("otp");
-          setSuccess("");
+          setStep('otp');
+          setSuccess('');
         }, 2000);
       } else {
-        setError(data.error || "فشل إرسال رمز التحقق");
+        setError(data.error || 'فشل إرسال رمز التحقق');
       }
     },
     onError: (err: any) => {
-      setError(err.message || "حدث خطأ في إرسال رمز التحقق");
+      setError(err.message || 'حدث خطأ في إرسال رمز التحقق');
     },
   });
 
   const verifyOtpMutation = trpc.employeeAuth.verifyResetOTP.useMutation({
     onSuccess: (data) => {
       if (data.success) {
-        setSuccess("تم التحقق بنجاح! يمكنك الآن تعيين كلمة مرور جديدة");
+        setSuccess('تم التحقق بنجاح! يمكنك الآن تعيين كلمة مرور جديدة');
         setTimeout(() => {
-          setStep("password");
-          setSuccess("");
+          setStep('password');
+          setSuccess('');
         }, 1500);
       } else {
-        setError(data.error || "رمز التحقق غير صحيح");
+        setError(data.error || 'رمز التحقق غير صحيح');
       }
     },
     onError: (err: any) => {
-      setError(err.message || "حدث خطأ في التحقق");
+      setError(err.message || 'حدث خطأ في التحقق');
     },
   });
 
   const resetPasswordMutation = trpc.employeeAuth.resetPassword.useMutation({
     onSuccess: (data) => {
       if (data.success) {
-        setSuccess("تم تغيير كلمة المرور بنجاح! جاري التحويل...");
+        setSuccess('تم تغيير كلمة المرور بنجاح! جاري التحويل...');
         setTimeout(() => {
-          navigate("/employee/login");
+          navigate('/employee/login');
         }, 2000);
       } else {
-        setError(data.error || "فشل تغيير كلمة المرور");
+        setError(data.error || 'فشل تغيير كلمة المرور');
       }
     },
     onError: (err: any) => {
-      setError(err.message || "حدث خطأ في تغيير كلمة المرور");
+      setError(err.message || 'حدث خطأ في تغيير كلمة المرور');
     },
   });
 
   const handleRequestReset = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     if (!username) {
-      setError("الرجاء إدخال اسم المستخدم");
+      setError('الرجاء إدخال اسم المستخدم');
       return;
     }
 
@@ -85,16 +85,16 @@ export default function EmployeeForgotPassword() {
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     if (!otp || otp.length !== 6) {
-      setError("الرجاء إدخال رمز التحقق المكون من 6 أرقام");
+      setError('الرجاء إدخال رمز التحقق المكون من 6 أرقام');
       return;
     }
 
     if (!employeeId) {
-      setError("حدث خطأ، الرجاء المحاولة مرة أخرى");
+      setError('حدث خطأ، الرجاء المحاولة مرة أخرى');
       return;
     }
 
@@ -103,31 +103,37 @@ export default function EmployeeForgotPassword() {
 
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     if (!newPassword || newPassword.length < 8) {
-      setError("كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+      setError('كلمة المرور يجب أن تكون 8 أحرف على الأقل');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("كلمات المرور غير متطابقة");
+      setError('كلمات المرور غير متطابقة');
       return;
     }
 
     if (!employeeId) {
-      setError("حدث خطأ، الرجاء المحاولة مرة أخرى");
+      setError('حدث خطأ، الرجاء المحاولة مرة أخرى');
       return;
     }
 
     resetPasswordMutation.mutate({ employeeId, newPassword });
   };
 
-  const isLoading = requestResetMutation.isPending || verifyOtpMutation.isPending || resetPasswordMutation.isPending;
+  const isLoading =
+    requestResetMutation.isPending ||
+    verifyOtpMutation.isPending ||
+    resetPasswordMutation.isPending;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4" dir="rtl">
+    <div
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4"
+      dir="rtl"
+    >
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
@@ -136,14 +142,14 @@ export default function EmployeeForgotPassword() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
-            {step === "email" && "نسيت كلمة المرور"}
-            {step === "otp" && "تحقق من البريد الإلكتروني"}
-            {step === "password" && "تعيين كلمة مرور جديدة"}
+            {step === 'email' && 'نسيت كلمة المرور'}
+            {step === 'otp' && 'تحقق من البريد الإلكتروني'}
+            {step === 'password' && 'تعيين كلمة مرور جديدة'}
           </CardTitle>
           <CardDescription>
-            {step === "email" && "أدخل اسم المستخدم لإرسال رمز التحقق"}
-            {step === "otp" && "أدخل رمز التحقق المرسل إلى بريدك"}
-            {step === "password" && "أدخل كلمة المرور الجديدة"}
+            {step === 'email' && 'أدخل اسم المستخدم لإرسال رمز التحقق'}
+            {step === 'otp' && 'أدخل رمز التحقق المرسل إلى بريدك'}
+            {step === 'password' && 'أدخل كلمة المرور الجديدة'}
           </CardDescription>
         </CardHeader>
 
@@ -161,7 +167,7 @@ export default function EmployeeForgotPassword() {
           )}
 
           {/* Step 1: Request Reset */}
-          {step === "email" && (
+          {step === 'email' && (
             <form onSubmit={handleRequestReset} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">اسم المستخدم</Label>
@@ -199,7 +205,7 @@ export default function EmployeeForgotPassword() {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => navigate("/employee/login")}
+                onClick={() => navigate('/employee/login')}
                 disabled={isLoading}
               >
                 العودة لتسجيل الدخول
@@ -208,7 +214,7 @@ export default function EmployeeForgotPassword() {
           )}
 
           {/* Step 2: Verify OTP */}
-          {step === "otp" && (
+          {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="otp">رمز التحقق (6 أرقام)</Label>
@@ -217,7 +223,7 @@ export default function EmployeeForgotPassword() {
                   type="text"
                   placeholder="123456"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="text-center text-2xl tracking-widest"
                   required
                   disabled={isLoading}
@@ -233,7 +239,7 @@ export default function EmployeeForgotPassword() {
                     جاري التحقق...
                   </>
                 ) : (
-                  "تحقق"
+                  'تحقق'
                 )}
               </Button>
 
@@ -241,7 +247,7 @@ export default function EmployeeForgotPassword() {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => setStep("email")}
+                onClick={() => setStep('email')}
                 disabled={isLoading}
               >
                 العودة
@@ -250,7 +256,7 @@ export default function EmployeeForgotPassword() {
           )}
 
           {/* Step 3: Reset Password */}
-          {step === "password" && (
+          {step === 'password' && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">كلمة المرور الجديدة</Label>
@@ -290,7 +296,7 @@ export default function EmployeeForgotPassword() {
                     جاري التغيير...
                   </>
                 ) : (
-                  "تغيير كلمة المرور"
+                  'تغيير كلمة المرور'
                 )}
               </Button>
             </form>

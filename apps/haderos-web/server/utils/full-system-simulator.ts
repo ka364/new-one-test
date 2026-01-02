@@ -4,10 +4,10 @@
  * يولد 1500 عملية بيع واقعية مع جميع البيانات المرتبطة
  */
 
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-import { getDb } from "../db";
+import { getDb } from '../db';
 import {
   users,
   orders,
@@ -16,9 +16,9 @@ import {
   events,
   notifications,
   agentInsights,
-  ethicalRules
-} from "../../drizzle/schema";
-import { sql } from "drizzle-orm";
+  ethicalRules,
+} from '../../drizzle/schema';
+import { sql } from 'drizzle-orm';
 
 // ========== تكوين المحاكاة ==========
 
@@ -30,18 +30,18 @@ const SIMULATION_CONFIG = {
 
   // نسب توزيع الطلبات
   ORDER_STATUS_DISTRIBUTION: {
-    completed: 0.75,      // 75% مكتملة
-    pending: 0.10,        // 10% قيد المعالجة
-    processing: 0.08,     // 8% تحت المعالجة
-    cancelled: 0.05,      // 5% ملغية
-    refunded: 0.02        // 2% مرتجعة
+    completed: 0.75, // 75% مكتملة
+    pending: 0.1, // 10% قيد المعالجة
+    processing: 0.08, // 8% تحت المعالجة
+    cancelled: 0.05, // 5% ملغية
+    refunded: 0.02, // 2% مرتجعة
   },
 
   // نطاقات الأسعار
   PRICE_RANGES: {
     min: 50,
     max: 5000,
-    average: 500
+    average: 500,
   },
 
   // أنواع المنتجات
@@ -55,7 +55,7 @@ const SIMULATION_CONFIG = {
     'تجميل',
     'أثاث',
     'ألعاب',
-    'إكسسوارات'
+    'إكسسوارات',
   ],
 
   // طرق الدفع
@@ -63,10 +63,22 @@ const SIMULATION_CONFIG = {
 
   // المحافظات المصرية
   GOVERNORATES: [
-    'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'الشرقية',
-    'القليوبية', 'كفر الشيخ', 'الغربية', 'المنوفية', 'البحيرة',
-    'الإسماعيلية', 'بورسعيد', 'السويس', 'دمياط', 'أسيوط'
-  ]
+    'القاهرة',
+    'الجيزة',
+    'الإسكندرية',
+    'الدقهلية',
+    'الشرقية',
+    'القليوبية',
+    'كفر الشيخ',
+    'الغربية',
+    'المنوفية',
+    'البحيرة',
+    'الإسماعيلية',
+    'بورسعيد',
+    'السويس',
+    'دمياط',
+    'أسيوط',
+  ],
 };
 
 // ========== مولدات البيانات ==========
@@ -86,7 +98,7 @@ class DataGenerator {
 
   private randomDate(daysAgo: number): Date {
     const now = new Date();
-    const date = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+    const date = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
     // إضافة وقت عشوائي خلال اليوم
     date.setHours(this.random(0, 23));
     date.setMinutes(this.random(0, 59));
@@ -96,21 +108,64 @@ class DataGenerator {
 
   generateEgyptianName(): { firstName: string; lastName: string } {
     const firstNames = [
-      'محمد', 'أحمد', 'علي', 'حسن', 'عمر', 'خالد', 'يوسف', 'كريم',
-      'فاطمة', 'عائشة', 'مريم', 'نور', 'سارة', 'دينا', 'هدى', 'ياسمين',
-      'عبدالله', 'إبراهيم', 'مصطفى', 'طارق', 'سامي', 'رامي', 'وليد',
-      'منى', 'نهى', 'رنا', 'شيماء', 'إيمان', 'سلمى', 'ريم'
+      'محمد',
+      'أحمد',
+      'علي',
+      'حسن',
+      'عمر',
+      'خالد',
+      'يوسف',
+      'كريم',
+      'فاطمة',
+      'عائشة',
+      'مريم',
+      'نور',
+      'سارة',
+      'دينا',
+      'هدى',
+      'ياسمين',
+      'عبدالله',
+      'إبراهيم',
+      'مصطفى',
+      'طارق',
+      'سامي',
+      'رامي',
+      'وليد',
+      'منى',
+      'نهى',
+      'رنا',
+      'شيماء',
+      'إيمان',
+      'سلمى',
+      'ريم',
     ];
 
     const lastNames = [
-      'محمود', 'السيد', 'عبدالرحمن', 'حسين', 'عثمان', 'صالح', 'فهمي',
-      'الشافعي', 'المصري', 'النجار', 'الحداد', 'العطار', 'البنا',
-      'عامر', 'منصور', 'سليمان', 'زكي', 'فوزي', 'شوقي', 'بدوي'
+      'محمود',
+      'السيد',
+      'عبدالرحمن',
+      'حسين',
+      'عثمان',
+      'صالح',
+      'فهمي',
+      'الشافعي',
+      'المصري',
+      'النجار',
+      'الحداد',
+      'العطار',
+      'البنا',
+      'عامر',
+      'منصور',
+      'سليمان',
+      'زكي',
+      'فوزي',
+      'شوقي',
+      'بدوي',
     ];
 
     return {
       firstName: this.randomChoice(firstNames),
-      lastName: this.randomChoice(lastNames)
+      lastName: this.randomChoice(lastNames),
     };
   }
 
@@ -141,7 +196,9 @@ class DataGenerator {
     const r = Math.random();
     let cumulative = 0;
 
-    for (const [status, probability] of Object.entries(SIMULATION_CONFIG.ORDER_STATUS_DISTRIBUTION)) {
+    for (const [status, probability] of Object.entries(
+      SIMULATION_CONFIG.ORDER_STATUS_DISTRIBUTION
+    )) {
       cumulative += probability;
       if (r <= cumulative) return status;
     }
@@ -182,7 +239,7 @@ export class FullSystemSimulator {
       console.error('   1. ملف .env موجود');
       console.error('   2. DATABASE_URL محدد في .env');
       console.error('   3. PostgreSQL يعمل');
-      throw new Error("Database connection failed");
+      throw new Error('Database connection failed');
     }
     console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
   }
@@ -202,7 +259,7 @@ export class FullSystemSimulator {
         name: `${name.firstName} ${name.lastName}`,
         email: this.generator.generateEmail(name),
         role: this.generator.randomChoice<any>(['employee', 'manager', 'admin']),
-        loginMethod: 'email'
+        loginMethod: 'email',
       });
     }
 
@@ -214,7 +271,7 @@ export class FullSystemSimulator {
         name: `${name.firstName} ${name.lastName}`,
         email: this.generator.generateEmail(name),
         role: 'customer',
-        loginMethod: this.generator.randomChoice<any>(['email', 'google', 'facebook'])
+        loginMethod: this.generator.randomChoice<any>(['email', 'google', 'facebook']),
       });
     }
 
@@ -258,7 +315,7 @@ export class FullSystemSimulator {
         paymentMethod: this.generator.randomChoice(SIMULATION_CONFIG.PAYMENT_METHODS),
         shippingAddress: `${this.generator.randomChoice(SIMULATION_CONFIG.GOVERNORATES)}, مصر`,
         createdAt,
-        updatedAt: new Date(createdAt.getTime() + this.generator.random(1, 48) * 60 * 60 * 1000)
+        updatedAt: new Date(createdAt.getTime() + this.generator.random(1, 48) * 60 * 60 * 1000),
       };
 
       try {
@@ -285,7 +342,13 @@ export class FullSystemSimulator {
 
   // ========== المرحلة 3: إنشاء المعاملات المالية ==========
 
-  async generateTransaction(orderId: number, userId: number, amount: number, status: string, createdAt: Date) {
+  async generateTransaction(
+    orderId: number,
+    userId: number,
+    amount: number,
+    status: string,
+    createdAt: Date
+  ) {
     const transactionData = {
       userId,
       orderId,
@@ -293,7 +356,7 @@ export class FullSystemSimulator {
       type: status === 'refunded' ? 'refund' : 'payment',
       status: status === 'completed' ? 'completed' : status === 'cancelled' ? 'failed' : 'pending',
       paymentMethod: this.generator.randomChoice(SIMULATION_CONFIG.PAYMENT_METHODS),
-      createdAt
+      createdAt,
     };
 
     try {
@@ -309,10 +372,17 @@ export class FullSystemSimulator {
     const employeeId = this.generator.randomChoice(this.employeeIds);
 
     // قرار KAIA (95% موافقة للطلبات الصغيرة، 85% للكبيرة)
-    const order = await this.db.query.orders.findFirst({ where: (orders: any, { eq }: any) => eq(orders.id, orderId) });
-    const kaiaDecision = parseFloat(order?.totalAmount || '0') < 1000
-      ? (Math.random() < 0.95 ? 'approved' : 'rejected')
-      : (Math.random() < 0.85 ? 'approved' : 'needs_review');
+    const order = await this.db.query.orders.findFirst({
+      where: (orders: any, { eq }: any) => eq(orders.id, orderId),
+    });
+    const kaiaDecision =
+      parseFloat(order?.totalAmount || '0') < 1000
+        ? Math.random() < 0.95
+          ? 'approved'
+          : 'rejected'
+        : Math.random() < 0.85
+          ? 'approved'
+          : 'needs_review';
 
     const auditData = {
       userId: employeeId,
@@ -320,7 +390,7 @@ export class FullSystemSimulator {
       relatedEntityType: 'order',
       relatedEntityId: orderId,
       kaiaDecision,
-      performedAt
+      performedAt,
     };
 
     try {
@@ -342,13 +412,14 @@ export class FullSystemSimulator {
       { type: 'shipping_dispatched', titleAr: 'تم شحن الطلب', priority: 'medium' },
       { type: 'order_delivered', titleAr: 'تم توصيل الطلب', priority: 'high' },
       { type: 'refund_requested', titleAr: 'طلب استرجاع', priority: 'high' },
-      { type: 'system_alert', titleAr: 'تنبيه النظام', priority: 'critical' }
+      { type: 'system_alert', titleAr: 'تنبيه النظام', priority: 'critical' },
     ];
 
     let eventsCreated = 0;
 
     // إنشاء حدث لكل طلب
-    for (const orderId of this.orderIds.slice(0, 500)) { // أول 500 طلب
+    for (const orderId of this.orderIds.slice(0, 500)) {
+      // أول 500 طلب
       const eventType = this.generator.randomChoice(eventTypes);
       const daysAgo = this.generator.random(0, SIMULATION_CONFIG.DAYS_TO_SIMULATE);
 
@@ -358,7 +429,7 @@ export class FullSystemSimulator {
         priority: eventType.priority,
         relatedEntityType: 'order',
         relatedEntityId: orderId,
-        createdAt: this.generator.randomDate(daysAgo)
+        createdAt: this.generator.randomDate(daysAgo),
       };
 
       try {
@@ -383,29 +454,29 @@ export class FullSystemSimulator {
         descriptionAr: 'تم اكتشاف أن {percentage}% من العملاء يشترون {category} في نهاية الأسبوع',
         agentType: 'Ant Colony',
         insightType: 'pattern',
-        priority: 'medium'
+        priority: 'medium',
       },
       {
         titleAr: 'فرصة لزيادة المبيعات',
         descriptionAr: 'يمكن زيادة المبيعات بنسبة {percentage}% من خلال تقديم عروض على {category}',
         agentType: 'Corvid',
         insightType: 'opportunity',
-        priority: 'high'
+        priority: 'high',
       },
       {
         titleAr: 'تحذير من انخفاض المخزون',
         descriptionAr: 'المخزون المتبقي من {category} قد ينفذ خلال {days} أيام',
         agentType: 'Arachnid',
         insightType: 'warning',
-        priority: 'critical'
+        priority: 'critical',
       },
       {
         titleAr: 'توصية بتحسين تجربة العميل',
         descriptionAr: 'تحسين وقت التوصيل في {governorate} قد يزيد رضا العملاء بنسبة {percentage}%',
         agentType: 'Mycelium',
         insightType: 'recommendation',
-        priority: 'medium'
-      }
+        priority: 'medium',
+      },
     ];
 
     let insightsCreated = 0;
@@ -429,7 +500,7 @@ export class FullSystemSimulator {
         priority: template.priority,
         status: this.generator.randomChoice<any>(['new', 'reviewed', 'implemented', 'dismissed']),
         insightData: {},
-        createdAt: this.generator.randomDate(daysAgo)
+        createdAt: this.generator.randomDate(daysAgo),
       };
 
       try {
@@ -462,12 +533,12 @@ export class FullSystemSimulator {
             'تم إتمام عملية بيع',
             'رؤية جديدة من النظام',
             'تحذير: مخزون منخفض',
-            'تقرير يومي جاهز'
+            'تقرير يومي جاهز',
           ]),
           message: 'تفاصيل الإشعار هنا...',
           type: this.generator.randomChoice<any>(['info', 'warning', 'success', 'error']),
           read: Math.random() > 0.3, // 70% مقروءة
-          createdAt: this.generator.randomDate(daysAgo)
+          createdAt: this.generator.randomDate(daysAgo),
         };
 
         try {
@@ -520,7 +591,6 @@ export class FullSystemSimulator {
 
       // عرض الإحصائيات
       await this.displayStatistics();
-
     } catch (error) {
       console.error('❌ خطأ في المحاكاة:', error);
       throw error;
@@ -545,7 +615,9 @@ export class FullSystemSimulator {
 
       console.log('🛒 الطلبات حسب الحالة:');
       orderStats.rows.forEach((row: any) => {
-        console.log(`   ${row.status}: ${row.count} طلب (${Number(row.total_revenue || 0).toFixed(2)} ج.م)`);
+        console.log(
+          `   ${row.status}: ${row.count} طلب (${Number(row.total_revenue || 0).toFixed(2)} ج.م)`
+        );
       });
 
       // إجمالي الإيرادات
@@ -555,7 +627,9 @@ export class FullSystemSimulator {
         WHERE status = 'completed'
       `);
 
-      console.log(`\n💰 إجمالي الإيرادات: ${Number(totalRevenue.rows[0]?.total || 0).toFixed(2)} ج.م`);
+      console.log(
+        `\n💰 إجمالي الإيرادات: ${Number(totalRevenue.rows[0]?.total || 0).toFixed(2)} ج.م`
+      );
 
       // متوسط قيمة الطلب
       const avgOrder = await this.db.execute(sql`
@@ -586,7 +660,6 @@ export class FullSystemSimulator {
       aiInsights.rows.forEach((row: any) => {
         console.log(`   ${row.agent_type}: ${row.count} رؤية`);
       });
-
     } catch (error) {
       console.error('خطأ في عرض الإحصائيات:', error);
     }

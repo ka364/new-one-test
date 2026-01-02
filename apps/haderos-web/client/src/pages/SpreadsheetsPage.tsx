@@ -6,7 +6,7 @@
  * with version history and comments
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Table2,
   Plus,
@@ -35,96 +35,98 @@ import {
   Grid3X3,
   BarChart3,
   PieChart,
-  LineChart
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+  LineChart,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 // Mock spreadsheet data
 const MOCK_SHEETS = [
   {
-    id: "1",
-    name: "ميزانية 2026",
-    type: "budgets",
-    lastModified: "منذ 5 دقائق",
+    id: '1',
+    name: 'ميزانية 2026',
+    type: 'budgets',
+    lastModified: 'منذ 5 دقائق',
     collaborators: [
-      { id: 1, name: "أحمد محمد", isOnline: true },
-      { id: 2, name: "سارة خالد", isOnline: true },
+      { id: 1, name: 'أحمد محمد', isOnline: true },
+      { id: 2, name: 'سارة خالد', isOnline: true },
     ],
     versionsCount: 15,
   },
   {
-    id: "2",
-    name: "مصروفات يناير",
-    type: "expenses",
-    lastModified: "منذ ساعة",
-    collaborators: [
-      { id: 1, name: "أحمد محمد", isOnline: true },
-    ],
+    id: '2',
+    name: 'مصروفات يناير',
+    type: 'expenses',
+    lastModified: 'منذ ساعة',
+    collaborators: [{ id: 1, name: 'أحمد محمد', isOnline: true }],
     versionsCount: 8,
   },
   {
-    id: "3",
-    name: "اشتراكات الخدمات",
-    type: "subscriptions",
-    lastModified: "منذ يومين",
-    collaborators: [
-      { id: 3, name: "محمود علي", isOnline: false },
-    ],
+    id: '3',
+    name: 'اشتراكات الخدمات',
+    type: 'subscriptions',
+    lastModified: 'منذ يومين',
+    collaborators: [{ id: 3, name: 'محمود علي', isOnline: false }],
     versionsCount: 3,
   },
 ];
 
 // Mock spreadsheet cells
-const COLUMNS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const ROWS = 20;
 
 const MOCK_CELL_DATA: Record<string, { value: string; style?: any }> = {
-  "A1": { value: "البند" },
-  "B1": { value: "يناير" },
-  "C1": { value: "فبراير" },
-  "D1": { value: "مارس" },
-  "E1": { value: "الإجمالي" },
-  "A2": { value: "المبيعات" },
-  "B2": { value: "50,000" },
-  "C2": { value: "55,000" },
-  "D2": { value: "60,000" },
-  "E2": { value: "=SUM(B2:D2)" },
-  "A3": { value: "المصروفات" },
-  "B3": { value: "30,000" },
-  "C3": { value: "32,000" },
-  "D3": { value: "35,000" },
-  "E3": { value: "=SUM(B3:D3)" },
-  "A4": { value: "صافي الربح" },
-  "B4": { value: "=B2-B3" },
-  "C4": { value: "=C2-C3" },
-  "D4": { value: "=D2-D3" },
-  "E4": { value: "=SUM(B4:D4)" },
+  A1: { value: 'البند' },
+  B1: { value: 'يناير' },
+  C1: { value: 'فبراير' },
+  D1: { value: 'مارس' },
+  E1: { value: 'الإجمالي' },
+  A2: { value: 'المبيعات' },
+  B2: { value: '50,000' },
+  C2: { value: '55,000' },
+  D2: { value: '60,000' },
+  E2: { value: '=SUM(B2:D2)' },
+  A3: { value: 'المصروفات' },
+  B3: { value: '30,000' },
+  C3: { value: '32,000' },
+  D3: { value: '35,000' },
+  E3: { value: '=SUM(B3:D3)' },
+  A4: { value: 'صافي الربح' },
+  B4: { value: '=B2-B3' },
+  C4: { value: '=C2-C3' },
+  D4: { value: '=D2-D3' },
+  E4: { value: '=SUM(B4:D4)' },
 };
 
 export default function SpreadsheetsPage() {
-  const [activeSheet, setActiveSheet] = useState<string | null>("1");
+  const [activeSheet, setActiveSheet] = useState<string | null>('1');
   const [selectedCell, setSelectedCell] = useState<string | null>(null);
-  const [cellInput, setCellInput] = useState("");
+  const [cellInput, setCellInput] = useState('');
   const [showVersions, setShowVersions] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
   const handleCellClick = (cellId: string) => {
     setSelectedCell(cellId);
-    setCellInput(MOCK_CELL_DATA[cellId]?.value || "");
+    setCellInput(MOCK_CELL_DATA[cellId]?.value || '');
   };
 
   const handleCellChange = (value: string) => {
@@ -139,7 +141,7 @@ export default function SpreadsheetsPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-green-600" />
-            <Select value={activeSheet || ""} onValueChange={setActiveSheet}>
+            <Select value={activeSheet || ''} onValueChange={setActiveSheet}>
               <SelectTrigger className="w-48 border-0 font-semibold">
                 <SelectValue placeholder="اختر جدول" />
               </SelectTrigger>
@@ -159,13 +161,15 @@ export default function SpreadsheetsPage() {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">متصلون:</span>
             <div className="flex -space-x-2">
-              {MOCK_SHEETS.find(s => s.id === activeSheet)?.collaborators.filter(c => c.isOnline).map((collab) => (
-                <Avatar key={collab.id} className="w-7 h-7 border-2 border-white">
-                  <AvatarFallback className="bg-blue-500 text-white text-xs">
-                    {collab.name[0]}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
+              {MOCK_SHEETS.find((s) => s.id === activeSheet)
+                ?.collaborators.filter((c) => c.isOnline)
+                .map((collab) => (
+                  <Avatar key={collab.id} className="w-7 h-7 border-2 border-white">
+                    <AvatarFallback className="bg-blue-500 text-white text-xs">
+                      {collab.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
             </div>
           </div>
         </div>
@@ -269,7 +273,9 @@ export default function SpreadsheetsPage() {
         {/* Cell Reference */}
         {selectedCell && (
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono">{selectedCell}</Badge>
+            <Badge variant="outline" className="font-mono">
+              {selectedCell}
+            </Badge>
             <Input
               value={cellInput}
               onChange={(e) => handleCellChange(e.target.value)}
@@ -317,13 +323,14 @@ export default function SpreadsheetsPage() {
                         key={cellId}
                         onClick={() => handleCellClick(cellId)}
                         className={cn(
-                          "w-24 h-8 border text-sm px-2 cursor-cell",
-                          isHeader && "bg-gray-50 dark:bg-gray-800 font-semibold",
-                          isSelected && "ring-2 ring-blue-500 ring-inset bg-blue-50 dark:bg-blue-900/30",
-                          cellData?.value?.startsWith("=") && "text-green-600 font-mono text-xs"
+                          'w-24 h-8 border text-sm px-2 cursor-cell',
+                          isHeader && 'bg-gray-50 dark:bg-gray-800 font-semibold',
+                          isSelected &&
+                            'ring-2 ring-blue-500 ring-inset bg-blue-50 dark:bg-blue-900/30',
+                          cellData?.value?.startsWith('=') && 'text-green-600 font-mono text-xs'
                         )}
                       >
-                        {cellData?.value || ""}
+                        {cellData?.value || ''}
                       </td>
                     );
                   })}
@@ -344,14 +351,21 @@ export default function SpreadsheetsPage() {
             </div>
             <div className="flex-1 overflow-auto p-2 space-y-2">
               {[
-                { version: 15, user: "أحمد محمد", time: "منذ 5 دقائق", changes: "تحديث أرقام المبيعات" },
-                { version: 14, user: "سارة خالد", time: "منذ ساعة", changes: "إضافة عمود مارس" },
-                { version: 13, user: "أحمد محمد", time: "منذ ساعتين", changes: "تصحيح الصيغ" },
+                {
+                  version: 15,
+                  user: 'أحمد محمد',
+                  time: 'منذ 5 دقائق',
+                  changes: 'تحديث أرقام المبيعات',
+                },
+                { version: 14, user: 'سارة خالد', time: 'منذ ساعة', changes: 'إضافة عمود مارس' },
+                { version: 13, user: 'أحمد محمد', time: 'منذ ساعتين', changes: 'تصحيح الصيغ' },
               ].map((v, i) => (
                 <Card key={i} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <Badge variant="outline" className="text-xs">v{v.version}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        v{v.version}
+                      </Badge>
                       <span className="text-xs text-gray-500">{v.time}</span>
                     </div>
                     <p className="text-sm font-medium">{v.changes}</p>
@@ -374,17 +388,32 @@ export default function SpreadsheetsPage() {
             </div>
             <div className="flex-1 overflow-auto p-2 space-y-2">
               {[
-                { cell: "B2", user: "سارة خالد", comment: "هل هذا الرقم صحيح؟", time: "منذ 10 دقائق", resolved: false },
-                { cell: "E4", user: "محمود علي", comment: "تم التأكد من الصيغة", time: "منذ ساعة", resolved: true },
+                {
+                  cell: 'B2',
+                  user: 'سارة خالد',
+                  comment: 'هل هذا الرقم صحيح؟',
+                  time: 'منذ 10 دقائق',
+                  resolved: false,
+                },
+                {
+                  cell: 'E4',
+                  user: 'محمود علي',
+                  comment: 'تم التأكد من الصيغة',
+                  time: 'منذ ساعة',
+                  resolved: true,
+                },
               ].map((c, i) => (
-                <Card key={i} className={cn(
-                  "cursor-pointer",
-                  c.resolved && "opacity-60"
-                )}>
+                <Card key={i} className={cn('cursor-pointer', c.resolved && 'opacity-60')}>
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <Badge variant="outline" className="font-mono text-xs">{c.cell}</Badge>
-                      {c.resolved && <Badge variant="secondary" className="text-xs">تم الحل</Badge>}
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {c.cell}
+                      </Badge>
+                      {c.resolved && (
+                        <Badge variant="secondary" className="text-xs">
+                          تم الحل
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm">{c.comment}</p>
                     <div className="flex items-center justify-between mt-2">

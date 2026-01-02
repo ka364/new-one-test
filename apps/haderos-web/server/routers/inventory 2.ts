@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
+import { z } from 'zod';
+import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
 import {
   distributeResources,
   checkInventoryAvailability,
@@ -7,7 +7,7 @@ import {
   makeDistributedDecision,
   delegateAuthority,
   getResourceInsights,
-} from "../bio-modules/inventory-bio-integration.js";
+} from '../bio-modules/inventory-bio-integration.js';
 
 export const inventoryRouter = router({
   // Distribute resources (Bio-Module: Mycelium)
@@ -56,15 +56,11 @@ export const inventoryRouter = router({
       z.object({
         productId: z.number(),
         quantity: z.number(),
-        urgency: z.enum(["low", "medium", "high", "urgent"]),
+        urgency: z.enum(['low', 'medium', 'high', 'urgent']),
       })
     )
     .mutation(async ({ input }) => {
-      const result = await requestReplenishment(
-        input.productId,
-        input.quantity,
-        input.urgency
-      );
+      const result = await requestReplenishment(input.productId, input.quantity, input.urgency);
       return result;
     }),
 
@@ -73,10 +69,10 @@ export const inventoryRouter = router({
     .input(
       z.object({
         decisionType: z.enum([
-          "order_approval",
-          "pricing_override",
-          "inventory_transfer",
-          "supplier_selection",
+          'order_approval',
+          'pricing_override',
+          'inventory_transfer',
+          'supplier_selection',
         ]),
         context: z.record(z.any()),
         requiredApprovers: z.array(z.string()).optional(),
@@ -98,10 +94,10 @@ export const inventoryRouter = router({
         fromEntity: z.string(),
         toEntity: z.string(),
         authority: z.enum([
-          "approve_orders",
-          "modify_prices",
-          "manage_inventory",
-          "select_suppliers",
+          'approve_orders',
+          'modify_prices',
+          'manage_inventory',
+          'select_suppliers',
         ]),
         duration: z.number(), // in hours
       })

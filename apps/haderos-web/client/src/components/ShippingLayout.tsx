@@ -78,18 +78,12 @@ export function ShippingLayout({ children }: ShippingLayoutProps) {
         <div className="p-6 border-b border-gray-200">
           <Link href="/shipping">
             <a className="flex items-center gap-3">
-              <img 
-                src="/brand/hader-logo-icon.png" 
-                alt="HADER" 
-                className="h-10 w-10"
-              />
+              <img src="/brand/hader-logo-icon.png" alt="HADER" className="h-10 w-10" />
               <div>
                 <div className="text-xl font-bold" style={{ color: '#C62822' }}>
                   HADER
                 </div>
-                <div className="text-xs text-gray-500">
-                  Proudly Made in Egypt
-                </div>
+                <div className="text-xs text-gray-500">Proudly Made in Egypt</div>
               </div>
             </a>
           </Link>
@@ -106,16 +100,13 @@ export function ShippingLayout({ children }: ShippingLayoutProps) {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
-                  
+
                   return (
                     <Link key={item.name} href={item.href}>
                       <a
                         className={`
                           flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                          ${active 
-                            ? 'bg-red-50 text-[#C62822]' 
-                            : 'text-gray-700 hover:bg-gray-50'
-                          }
+                          ${active ? 'bg-red-50 text-[#C62822]' : 'text-gray-700 hover:bg-gray-50'}
                         `}
                       >
                         <Icon className="h-5 w-5" />
@@ -139,17 +130,10 @@ export function ShippingLayout({ children }: ShippingLayoutProps) {
               <div className="text-sm font-medium text-gray-900 truncate">
                 {user?.name || 'مستخدم'}
               </div>
-              <div className="text-xs text-gray-500 truncate">
-                {user?.email || ''}
-              </div>
+              <div className="text-xs text-gray-500 truncate">{user?.email || ''}</div>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={logout}
-          >
+          <Button variant="outline" size="sm" className="w-full" onClick={logout}>
             <LogOut className="h-4 w-4 ml-2" />
             تسجيل الخروج
           </Button>
@@ -162,14 +146,10 @@ export function ShippingLayout({ children }: ShippingLayoutProps) {
         <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
           <div className="px-6 py-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                نظام إدارة الشحن
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                مرحباً بك في نظام HADER لإدارة الشحنات
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">نظام إدارة الشحن</h1>
+              <p className="text-sm text-gray-500 mt-1">مرحباً بك في نظام HADER لإدارة الشحنات</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {/* Notifications */}
               <Button variant="ghost" size="icon" className="relative">
@@ -189,9 +169,7 @@ export function ShippingLayout({ children }: ShippingLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </main>
     </div>
   );

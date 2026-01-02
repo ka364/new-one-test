@@ -1,13 +1,13 @@
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { requireDb } from "../db";
-import { orders } from "../../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
-import { 
-  validateOrderWithArachnid, 
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { requireDb } from '../db';
+import { orders } from '../../drizzle/schema';
+import { eq, desc } from 'drizzle-orm';
+import {
+  validateOrderWithArachnid,
   trackOrderLifecycle,
-  getOrderInsights 
-} from "../bio-modules/orders-bio-integration.js";
+  getOrderInsights,
+} from '../bio-modules/orders-bio-integration.js';
 
 export const ordersRouter = router({
   // Create new order
@@ -34,46 +34,44 @@ export const ordersRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const db = await requireDb();
-      
+
       // Generate unique order number
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      
+
       // Get user ID (default to 1 if not authenticated)
       const userId = ctx.user?.id || 1;
 
       // Create separate order for each item (based on current schema)
       const orderIds: number[] = [];
-      
+
       for (const item of input.items) {
         const itemDescription = [
           item.size ? `المقاس: ${item.size}` : null,
           item.color ? `اللون: ${item.color}` : null,
         ]
           .filter(Boolean)
-          .join(", ");
+          .join(', ');
 
-        const result = await db
-          .insert(orders)
-          .values({
-            orderNumber: `${orderNumber}-${orderIds.length + 1}`,
-            customerName: input.customerName,
-            customerEmail: input.customerEmail || null,
-            customerPhone: input.customerPhone || null,
-            productName: item.productName,
-            productDescription: itemDescription || null,
-            quantity: item.quantity,
-            unitPrice: item.price.toString(),
-            totalAmount: (item.price * item.quantity).toString(),
-            currency: "EGP",
-            status: "pending",
-            paymentStatus: "pending",
-            shippingAddress: input.shippingAddress,
-            notes: input.notes || null,
-            createdBy: userId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        
+        const result = await db.insert(orders).values({
+          orderNumber: `${orderNumber}-${orderIds.length + 1}`,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail || null,
+          customerPhone: input.customerPhone || null,
+          productName: item.productName,
+          productDescription: itemDescription || null,
+          quantity: item.quantity,
+          unitPrice: item.price.toString(),
+          totalAmount: (item.price * item.quantity).toString(),
+          currency: 'EGP',
+          status: 'pending',
+          paymentStatus: 'pending',
+          shippingAddress: input.shippingAddress,
+          notes: input.notes || null,
+          createdBy: userId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
         // Extract ID from result
         if (result && typeof result === 'object' && 'insertId' in result) {
           orderIds.push(Number(result.insertId));
@@ -92,13 +90,13 @@ export const ordersRouter = router({
       });
 
       // Track order lifecycle
-      await trackOrderLifecycle(orderIds[0], orderNumber, "created");
+      await trackOrderLifecycle(orderIds[0], orderNumber, 'created');
 
       return {
         success: true,
         orderId: orderIds[0],
         orderNumber,
-        message: "تم إنشاء الطلب بنجاح",
+        message: 'تم إنشاء الطلب بنجاح',
         validation: {
           isValid: validation.isValid,
           warnings: validation.warnings,
@@ -110,10 +108,7 @@ export const ordersRouter = router({
   // Get all orders (protected - admin only)
   getAllOrders: protectedProcedure.query(async () => {
     const db = await requireDb();
-    const allOrders = await db
-      .select()
-      .from(orders)
-      .orderBy(desc(orders.createdAt));
+    const allOrders = await db.select().from(orders).orderBy(desc(orders.createdAt));
     return allOrders;
   }),
 
@@ -122,14 +117,11 @@ export const ordersRouter = router({
     .input(z.object({ orderId: z.number() }))
     .query(async ({ input }) => {
       const db = await requireDb();
-      
-      const [order] = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.id, input.orderId));
+
+      const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
 
       if (!order) {
-        throw new Error("Order not found");
+        throw new Error('Order not found');
       }
 
       return order;
@@ -140,10 +132,10 @@ export const ordersRouter = router({
     .input(z.object({ orderNumber: z.string() }))
     .query(async ({ input }) => {
       const db = await requireDb();
-      
+
       // Get all orders with same base order number
       const baseOrderNumber = input.orderNumber.split('-').slice(0, -1).join('-');
-      
+
       const ordersList = await db
         .select()
         .from(orders)
@@ -158,29 +150,26 @@ export const ordersRouter = router({
       z.object({
         orderId: z.number(),
         status: z.enum([
-          "pending",
-          "confirmed",
-          "processing",
-          "shipped",
-          "delivered",
-          "cancelled",
-          "refunded",
+          'pending',
+          'confirmed',
+          'processing',
+          'shipped',
+          'delivered',
+          'cancelled',
+          'refunded',
         ]),
       })
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      
+
       // Get order to get orderNumber
-      const [order] = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.id, input.orderId));
+      const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
 
       if (!order) {
-        throw new Error("Order not found");
+        throw new Error('Order not found');
       }
-      
+
       await db
         .update(orders)
         .set({
@@ -190,12 +179,18 @@ export const ordersRouter = router({
         .where(eq(orders.id, input.orderId));
 
       // Track lifecycle with Bio-Modules
-      const lifecycleStatus = input.status as "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+      const lifecycleStatus = input.status as
+        | 'created'
+        | 'confirmed'
+        | 'processing'
+        | 'shipped'
+        | 'delivered'
+        | 'cancelled';
       await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
 
       return {
         success: true,
-        message: "تم تحديث حالة الطلب",
+        message: 'تم تحديث حالة الطلب',
       };
     }),
 
@@ -204,12 +199,12 @@ export const ordersRouter = router({
     .input(
       z.object({
         orderId: z.number(),
-        paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]),
+        paymentStatus: z.enum(['pending', 'paid', 'failed', 'refunded']),
       })
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      
+
       await db
         .update(orders)
         .set({
@@ -220,7 +215,7 @@ export const ordersRouter = router({
 
       return {
         success: true,
-        message: "تم تحديث حالة الدفع",
+        message: 'تم تحديث حالة الدفع',
       };
     }),
 

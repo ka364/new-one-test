@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -16,29 +16,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Search, Download, Eye, RefreshCw, TrendingUp, Users, DollarSign, Target } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import {
+  Search,
+  Download,
+  Eye,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Target,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Campaigns() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [platformFilter, setPlatformFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [platformFilter, setPlatformFilter] = useState<string>('all');
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -50,53 +53,49 @@ export default function Campaigns() {
     const matchesSearch =
       campaign.campaignName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       campaign.id.toString().includes(searchQuery);
-    const matchesStatus = statusFilter === "all" || campaign.status === statusFilter;
-    const matchesPlatform = platformFilter === "all" || campaign.type === platformFilter;
+    const matchesStatus = statusFilter === 'all' || campaign.status === statusFilter;
+    const matchesPlatform = platformFilter === 'all' || campaign.type === platformFilter;
     return matchesSearch && matchesStatus && matchesPlatform;
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      draft: "outline",
-      active: "default",
-      paused: "secondary",
-      completed: "secondary",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      draft: 'outline',
+      active: 'default',
+      paused: 'secondary',
+      completed: 'secondary',
+      cancelled: 'destructive',
     };
     return (
-      <Badge variant={variants[status] || "default"}>
-        {status === "draft" && "مسودة"}
-        {status === "active" && "نشطة"}
-        {status === "paused" && "متوقفة"}
-        {status === "completed" && "مكتملة"}
-        {status === "cancelled" && "ملغاة"}
+      <Badge variant={variants[status] || 'default'}>
+        {status === 'draft' && 'مسودة'}
+        {status === 'active' && 'نشطة'}
+        {status === 'paused' && 'متوقفة'}
+        {status === 'completed' && 'مكتملة'}
+        {status === 'cancelled' && 'ملغاة'}
       </Badge>
     );
   };
 
   const getPlatformBadge = (platform: string) => {
     const colors: Record<string, string> = {
-      facebook: "bg-blue-600",
-      instagram: "bg-pink-600",
-      tiktok: "bg-black",
-      google: "bg-green-600",
-      twitter: "bg-sky-500",
+      facebook: 'bg-blue-600',
+      instagram: 'bg-pink-600',
+      tiktok: 'bg-black',
+      google: 'bg-green-600',
+      twitter: 'bg-sky-500',
     };
-    return (
-      <Badge className={colors[platform] || "bg-gray-600"}>
-        {platform.toUpperCase()}
-      </Badge>
-    );
+    return <Badge className={colors[platform] || 'bg-gray-600'}>{platform.toUpperCase()}</Badge>;
   };
 
   const handleExport = () => {
     if (!filteredCampaigns || filteredCampaigns.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
+      toast.error('لا توجد بيانات للتصدير');
       return;
     }
 
     const csv = [
-      ["رقم الحملة", "الاسم", "المنصة", "الميزانية", "الإنفاق", "الحالة", "التاريخ"].join(","),
+      ['رقم الحملة', 'الاسم', 'المنصة', 'الميزانية', 'الإنفاق', 'الحالة', 'التاريخ'].join(','),
       ...filteredCampaigns.map((campaign) =>
         [
           campaign.id,
@@ -106,16 +105,16 @@ export default function Campaigns() {
           Number(campaign.spent).toFixed(2),
           campaign.status,
           new Date(campaign.startDate).toLocaleDateString(),
-        ].join(",")
+        ].join(',')
       ),
-    ].join("\n");
+    ].join('\n');
 
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `campaigns_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `campaigns_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    toast.success("تم تصدير البيانات بنجاح");
+    toast.success('تم تصدير البيانات بنجاح');
   };
 
   const handleViewDetails = (campaign: any) => {
@@ -127,7 +126,7 @@ export default function Campaigns() {
     const spentNum = Number(spent);
     const revenueNum = Number(revenue);
     if (spentNum === 0) return 0;
-    return ((revenueNum - spentNum) / spentNum * 100).toFixed(2);
+    return (((revenueNum - spentNum) / spentNum) * 100).toFixed(2);
   };
 
   if (isLoading) {
@@ -172,7 +171,7 @@ export default function Campaigns() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campaigns?.filter(c => c.status === "active").length || 0}
+              {campaigns?.filter((c) => c.status === 'active').length || 0}
             </div>
           </CardContent>
         </Card>
@@ -203,9 +202,7 @@ export default function Campaigns() {
       <Card>
         <CardHeader>
           <CardTitle>البحث والفلترة</CardTitle>
-          <CardDescription>
-            ابحث عن الحملات وفلترها حسب الحالة والمنصة
-          </CardDescription>
+          <CardDescription>ابحث عن الحملات وفلترها حسب الحالة والمنصة</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -253,9 +250,7 @@ export default function Campaigns() {
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            الحملات ({filteredCampaigns?.length || 0})
-          </CardTitle>
+          <CardTitle>الحملات ({filteredCampaigns?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -279,18 +274,14 @@ export default function Campaigns() {
                       <TableCell className="font-medium">#{campaign.id}</TableCell>
                       <TableCell className="font-medium">{campaign.campaignName}</TableCell>
                       <TableCell>{getPlatformBadge(campaign.type)}</TableCell>
-                      <TableCell>
-                        {Number(campaign.budget).toFixed(2)} ج.م
-                      </TableCell>
-                      <TableCell>
-                        {Number(campaign.spent).toFixed(2)} ج.م
-                      </TableCell>
+                      <TableCell>{Number(campaign.budget).toFixed(2)} ج.م</TableCell>
+                      <TableCell>{Number(campaign.spent).toFixed(2)} ج.م</TableCell>
                       <TableCell>{getStatusBadge(campaign.status)}</TableCell>
                       <TableCell>
                         {new Date(campaign.startDate).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
                         })}
                       </TableCell>
                       <TableCell>
@@ -324,9 +315,7 @@ export default function Campaigns() {
         <DialogContent className="max-w-3xl" dir="rtl">
           <DialogHeader>
             <DialogTitle>{selectedCampaign?.campaignName}</DialogTitle>
-            <DialogDescription>
-              تفاصيل الحملة ومقاييس الأداء
-            </DialogDescription>
+            <DialogDescription>تفاصيل الحملة ومقاييس الأداء</DialogDescription>
           </DialogHeader>
           {selectedCampaign && (
             <div className="space-y-6">
@@ -355,9 +344,9 @@ export default function Campaigns() {
                   <p className="text-sm font-medium text-muted-foreground">تاريخ البدء</p>
                   <p className="text-lg">
                     {new Date(selectedCampaign.startDate).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
                     })}
                   </p>
                 </div>
@@ -366,11 +355,11 @@ export default function Campaigns() {
                   <p className="text-lg">
                     {selectedCampaign.endDate
                       ? new Date(selectedCampaign.endDate).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         })
-                      : "مستمرة"}
+                      : 'مستمرة'}
                   </p>
                 </div>
               </div>
@@ -423,7 +412,7 @@ export default function Campaigns() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-green-600">
-                        {calculateROI(selectedCampaign.spent, selectedCampaign.revenue || "0")}%
+                        {calculateROI(selectedCampaign.spent, selectedCampaign.revenue || '0')}%
                       </div>
                     </CardContent>
                   </Card>
@@ -432,9 +421,7 @@ export default function Campaigns() {
 
               {selectedCampaign.metadata && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    معلومات إضافية
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">معلومات إضافية</p>
                   <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-48">
                     {JSON.stringify(selectedCampaign.metadata, null, 2)}
                   </pre>

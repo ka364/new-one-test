@@ -13,10 +13,10 @@ describe('Chat Router', () => {
         id: 1,
         openId: 'test-user',
         name: 'Test User',
-        role: 'user'
+        role: 'user',
       },
       req: {} as any,
-      res: {} as any
+      res: {} as any,
     } as Context;
 
     caller = appRouter.createCaller(mockContext);
@@ -25,7 +25,7 @@ describe('Chat Router', () => {
   describe('chat.test', () => {
     it('should test invokeLLM connection', async () => {
       const result = await caller.chat.test();
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.message).toContain('invokeLLM');
@@ -36,7 +36,7 @@ describe('Chat Router', () => {
     it('should send a message and get AI response', async () => {
       const result = await caller.chat.sendMessage({
         content: 'مرحباً، هذا اختبار',
-        files: []
+        files: [],
       });
 
       expect(result).toBeDefined();
@@ -48,16 +48,12 @@ describe('Chat Router', () => {
     });
 
     it('should reject empty message', async () => {
-      await expect(
-        caller.chat.sendMessage({ content: '' })
-      ).rejects.toThrow();
+      await expect(caller.chat.sendMessage({ content: '' })).rejects.toThrow();
     });
 
     it('should reject message longer than 2000 characters', async () => {
       const longMessage = 'a'.repeat(2001);
-      await expect(
-        caller.chat.sendMessage({ content: longMessage })
-      ).rejects.toThrow();
+      await expect(caller.chat.sendMessage({ content: longMessage })).rejects.toThrow();
     });
   });
 

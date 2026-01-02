@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import * as XLSX from "xlsx";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import * as XLSX from 'xlsx';
 import {
   generateMonthlyAccounts,
   verifyEmployeeLogin,
@@ -12,7 +12,7 @@ import {
   getEmployeeSubmissions,
   getAllSubmissionsForMonth,
   getGenerationLogs,
-} from "../db-employees";
+} from '../db-employees';
 
 export const employeesRouter = router({
   // Generate monthly accounts (Admin only)
@@ -25,40 +25,36 @@ export const employeesRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       // Only admin can generate accounts
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
-      const accounts = await generateMonthlyAccounts(
-        input.employeeNames,
-        input.month,
-        ctx.user.id
-      );
+      const accounts = await generateMonthlyAccounts(input.employeeNames, input.month, ctx.user.id);
 
       // Generate Excel file with credentials
       const workbook = XLSX.utils.book_new();
       const worksheetData = [
-        ["اسم الموظف", "اسم المستخدم", "كلمة المرور المؤقتة", "الشهر", "تاريخ الانتهاء"],
+        ['اسم الموظف', 'اسم المستخدم', 'كلمة المرور المؤقتة', 'الشهر', 'تاريخ الانتهاء'],
         ...accounts.map((acc: any) => [
           acc.employeeName,
           acc.username,
           acc.tempPassword,
           acc.month,
-          new Date(acc.expiresAt).toLocaleDateString("ar-EG"),
+          new Date(acc.expiresAt).toLocaleDateString('ar-EG'),
         ]),
       ];
 
       const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      XLSX.utils.book_append_sheet(workbook, worksheet, "حسابات الموظفين");
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'حسابات الموظفين');
 
       // Convert to buffer
       const excelBuffer = XLSX.write(workbook, {
-        type: "buffer",
-        bookType: "xlsx",
+        type: 'buffer',
+        bookType: 'xlsx',
       });
 
       // Convert buffer to base64 for download
-      const excelBase64 = excelBuffer.toString("base64");
+      const excelBase64 = excelBuffer.toString('base64');
 
       return {
         accounts: accounts.map((acc: any) => ({
@@ -86,8 +82,8 @@ export const employeesRouter = router({
 
       if (!account) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "اسم المستخدم أو كلمة المرور غير صحيحة، أو انتهت صلاحية الحساب",
+          code: 'UNAUTHORIZED',
+          message: 'اسم المستخدم أو كلمة المرور غير صحيحة، أو انتهت صلاحية الحساب',
         });
       }
 
@@ -103,8 +99,8 @@ export const employeesRouter = router({
   getActiveAccounts: protectedProcedure
     .input(z.object({ month: z.string() }))
     .query(async ({ input, ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
       return await getActiveAccountsForMonth(input.month);
@@ -114,8 +110,8 @@ export const employeesRouter = router({
   deactivateAccount: protectedProcedure
     .input(z.object({ accountId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
       await deactivateAccount(input.accountId);
@@ -124,8 +120,8 @@ export const employeesRouter = router({
 
   // Auto-expire old accounts (Admin only)
   expireOldAccounts: protectedProcedure.mutation(async ({ ctx }) => {
-    if (ctx.user.role !== "admin") {
-      throw new TRPCError({ code: "FORBIDDEN" });
+    if (ctx.user.role !== 'admin') {
+      throw new TRPCError({ code: 'FORBIDDEN' });
     }
 
     await expireOldAccounts();
@@ -142,11 +138,7 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const data = await submitEmployeeData(
-        input.accountId,
-        input.dataType,
-        input.dataJson
-      );
+      const data = await submitEmployeeData(input.accountId, input.dataType, input.dataJson);
 
       return data;
     }),
@@ -162,8 +154,8 @@ export const employeesRouter = router({
   getAllSubmissions: protectedProcedure
     .input(z.object({ month: z.string() }))
     .query(async ({ input, ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
       return await getAllSubmissionsForMonth(input.month);
@@ -173,8 +165,8 @@ export const employeesRouter = router({
   getGenerationLogs: protectedProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(async ({ input, ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
       return await getGenerationLogs(input.limit);
@@ -196,16 +188,16 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const { generateOTP, saveOTP, saveEmployeeEmail } = await import("../_core/otp");
-      const { sendEmailVerificationOTP } = await import("../_core/email");
+      const { generateOTP, saveOTP, saveEmployeeEmail } = await import('../_core/otp');
+      const { sendEmailVerificationOTP } = await import('../_core/email');
 
       // Verify login credentials first
       const employee = await verifyEmployeeLogin(input.username, input.password);
 
       if (!employee) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Invalid username or password",
+          code: 'UNAUTHORIZED',
+          message: 'Invalid username or password',
         });
       }
 
@@ -221,7 +213,7 @@ export const employeesRouter = router({
 
       return {
         success: true,
-        message: "OTP sent to your email",
+        message: 'OTP sent to your email',
       };
     }),
 
@@ -236,13 +228,13 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const { verifyOTP, markEmailVerified } = await import("../_core/otp");
+      const { verifyOTP, markEmailVerified } = await import('../_core/otp');
 
       const result = await verifyOTP(input.username, input.otpCode);
 
       if (!result.valid) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: 'BAD_REQUEST',
           message: result.message,
         });
       }
@@ -252,7 +244,7 @@ export const employeesRouter = router({
 
       return {
         success: true,
-        message: "Email verified successfully",
+        message: 'Email verified successfully',
       };
     }),
 
@@ -267,16 +259,17 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const { generateOTP, saveOTP, getEmployeeEmail, hasVerifiedEmail } = await import("../_core/otp");
-      const { sendOTPEmail } = await import("../_core/email");
+      const { generateOTP, saveOTP, getEmployeeEmail, hasVerifiedEmail } =
+        await import('../_core/otp');
+      const { sendOTPEmail } = await import('../_core/email');
 
       // Verify login credentials
       const employee = await verifyEmployeeLogin(input.username, input.password);
 
       if (!employee) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Invalid username or password",
+          code: 'UNAUTHORIZED',
+          message: 'Invalid username or password',
         });
       }
 
@@ -287,7 +280,7 @@ export const employeesRouter = router({
         return {
           success: false,
           requiresEmailSetup: true,
-          message: "Please register your email first",
+          message: 'Please register your email first',
         };
       }
 
@@ -296,8 +289,8 @@ export const employeesRouter = router({
 
       if (!email) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "No email found for this account",
+          code: 'BAD_REQUEST',
+          message: 'No email found for this account',
         });
       }
 
@@ -311,7 +304,7 @@ export const employeesRouter = router({
       return {
         success: true,
         requiresOTP: true,
-        message: "OTP sent to your email",
+        message: 'OTP sent to your email',
       };
     }),
 
@@ -326,13 +319,13 @@ export const employeesRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const { verifyOTP } = await import("../_core/otp");
+      const { verifyOTP } = await import('../_core/otp');
 
       const result = await verifyOTP(input.username, input.otpCode);
 
       if (!result.valid) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: 'BAD_REQUEST',
           message: result.message,
         });
       }
@@ -343,8 +336,8 @@ export const employeesRouter = router({
 
       if (!emp) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Employee not found",
+          code: 'NOT_FOUND',
+          message: 'Employee not found',
         });
       }
 

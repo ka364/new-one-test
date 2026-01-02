@@ -89,10 +89,34 @@ export default function ShippingOverview() {
     cairo: { normal: 25, large: 30, xlarge: 35, xxl: 103, bulky: 461, huge: 461, furniture: 0 },
     alex: { normal: 30, large: 35, xlarge: 40, xxl: 108, bulky: 471, huge: 471, furniture: 0 },
     delta: { normal: 35, large: 40, xlarge: 45, xxl: 113, bulky: 481, huge: 481, furniture: 0 },
-    north_upper: { normal: 95, large: 100, xlarge: 105, xxl: 118, bulky: 486, huge: 486, furniture: 0 },
-    south_upper: { normal: 95, large: 100, xlarge: 105, xxl: 128, bulky: 486, huge: 486, furniture: 0 },
+    north_upper: {
+      normal: 95,
+      large: 100,
+      xlarge: 105,
+      xxl: 118,
+      bulky: 486,
+      huge: 486,
+      furniture: 0,
+    },
+    south_upper: {
+      normal: 95,
+      large: 100,
+      xlarge: 105,
+      xxl: 128,
+      bulky: 486,
+      huge: 486,
+      furniture: 0,
+    },
     sinai: { normal: 95, large: 100, xlarge: 105, xxl: 133, bulky: 486, huge: 486, furniture: 0 },
-    north_coast: { normal: 95, large: 100, xlarge: 105, xxl: 193, bulky: 486, huge: 486, furniture: 0 },
+    north_coast: {
+      normal: 95,
+      large: 100,
+      xlarge: 105,
+      xxl: 193,
+      bulky: 486,
+      huge: 486,
+      furniture: 0,
+    },
   };
 
   return (
@@ -107,15 +131,9 @@ export default function ShippingOverview() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
-                        {stat.title}
-                      </p>
-                      <h3 className="text-2xl font-bold mt-2">
-                        {stat.value}
-                      </h3>
-                      <p className="text-sm text-green-600 mt-1">
-                        {stat.change} من الشهر الماضي
-                      </p>
+                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                      <h3 className="text-2xl font-bold mt-2">{stat.value}</h3>
+                      <p className="text-sm text-green-600 mt-1">{stat.change} من الشهر الماضي</p>
                     </div>
                     <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg`}>
                       <Icon className="h-6 w-6" />
@@ -147,9 +165,7 @@ export default function ShippingOverview() {
                       <Star
                         key={i}
                         className={`h-6 w-6 ${
-                          i < tier.stars
-                            ? 'text-yellow-500 fill-yellow-500'
-                            : 'text-gray-300'
+                          i < tier.stars ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
                         }`}
                       />
                     ))}
@@ -192,9 +208,7 @@ export default function ShippingOverview() {
               </TabsList>
 
               <TabsContent value="calculator" className="mt-6">
-                <div className="text-center py-12 text-gray-500">
-                  حاسبة الأسعار قريباً...
-                </div>
+                <div className="text-center py-12 text-gray-500">حاسبة الأسعار قريباً...</div>
               </TabsContent>
 
               <TabsContent value="table" className="mt-6">
@@ -221,9 +235,7 @@ export default function ShippingOverview() {
                           <td className="border border-gray-200 p-3">
                             <div className="font-medium">{size.name}</div>
                             {size.dimensions && (
-                              <div className="text-xs text-gray-500">
-                                {size.dimensions}
-                              </div>
+                              <div className="text-xs text-gray-500">{size.dimensions}</div>
                             )}
                           </td>
                           {regions.map((region) => (
@@ -264,8 +276,8 @@ export default function ShippingOverview() {
                     <div>
                       <h4 className="font-medium text-amber-900">أحجام الشحنات</h4>
                       <p className="text-sm text-amber-700 mt-1">
-                        40 × 35 سم: حجم صغير ومتوسط | 45 × 50 سم: حجم كبير (L) | 
-                        55 × 60 سم: حجم أكبر (XL) | 100 × 50 سم: كبيس أبيض (XXL)
+                        40 × 35 سم: حجم صغير ومتوسط | 45 × 50 سم: حجم كبير (L) | 55 × 60 سم: حجم
+                        أكبر (XL) | 100 × 50 سم: كبيس أبيض (XXL)
                       </p>
                     </div>
                   </div>
@@ -283,17 +295,39 @@ export default function ShippingOverview() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { id: 'SH-2025-001', customer: 'أحمد محمد', status: 'delivered', time: 'منذ ساعتين' },
-                { id: 'SH-2025-002', customer: 'فاطمة علي', status: 'in_transit', time: 'منذ 3 ساعات' },
-                { id: 'SH-2025-003', customer: 'محمود حسن', status: 'pending', time: 'منذ 5 ساعات' },
+                {
+                  id: 'SH-2025-001',
+                  customer: 'أحمد محمد',
+                  status: 'delivered',
+                  time: 'منذ ساعتين',
+                },
+                {
+                  id: 'SH-2025-002',
+                  customer: 'فاطمة علي',
+                  status: 'in_transit',
+                  time: 'منذ 3 ساعات',
+                },
+                {
+                  id: 'SH-2025-003',
+                  customer: 'محمود حسن',
+                  status: 'pending',
+                  time: 'منذ 5 ساعات',
+                },
               ].map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div
+                  key={activity.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-lg ${
-                      activity.status === 'delivered' ? 'bg-green-100' :
-                      activity.status === 'in_transit' ? 'bg-orange-100' :
-                      'bg-gray-100'
-                    }`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        activity.status === 'delivered'
+                          ? 'bg-green-100'
+                          : activity.status === 'in_transit'
+                            ? 'bg-orange-100'
+                            : 'bg-gray-100'
+                      }`}
+                    >
                       {activity.status === 'delivered' ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       ) : activity.status === 'in_transit' ? (

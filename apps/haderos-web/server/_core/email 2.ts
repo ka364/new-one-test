@@ -60,7 +60,9 @@ export async function sendEmailVerificationOTP(
   employeeName: string
 ): Promise<boolean> {
   if (!SENDGRID_API_KEY) {
-    console.log(`[Email] Would send verification OTP ${otpCode} to ${email} (SendGrid not configured)`);
+    console.log(
+      `[Email] Would send verification OTP ${otpCode} to ${email} (SendGrid not configured)`
+    );
     return false;
   }
 
@@ -80,7 +82,10 @@ export async function sendEmailVerificationOTP(
     console.log(`[Email] Verification OTP sent successfully to ${email}`);
     return true;
   } catch (error: any) {
-    console.error('[Email] Failed to send verification OTP:', error.response?.body || error.message);
+    console.error(
+      '[Email] Failed to send verification OTP:',
+      error.response?.body || error.message
+    );
     return false;
   }
 }

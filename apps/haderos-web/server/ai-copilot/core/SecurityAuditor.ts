@@ -64,7 +64,7 @@ export class SecurityAuditor {
       score,
       vulnerabilities: vulnerabilities.slice(0, 50),
       recommendations,
-      criticalIssues: vulnerabilities.filter(v => v.severity === 'critical'),
+      criticalIssues: vulnerabilities.filter((v) => v.severity === 'critical'),
     };
   }
 
@@ -226,10 +226,7 @@ export class SecurityAuditor {
    */
   private async checkDependencies(vulnerabilities: SecurityVulnerability[]): Promise<void> {
     try {
-      const packageJson = await readFile(
-        path.join(this.projectRoot, 'package.json'),
-        'utf-8'
-      );
+      const packageJson = await readFile(path.join(this.projectRoot, 'package.json'), 'utf-8');
       const pkg = JSON.parse(packageJson);
 
       // Check for known vulnerable packages (simplified)
@@ -358,7 +355,7 @@ export class SecurityAuditor {
   ): SecurityRecommendation[] {
     const recommendations: SecurityRecommendation[] = [];
 
-    const categories = new Set(vulnerabilities.map(v => v.category));
+    const categories = new Set(vulnerabilities.map((v) => v.category));
 
     if (categories.has('sql_injection')) {
       recommendations.push({

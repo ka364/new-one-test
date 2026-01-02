@@ -194,7 +194,7 @@ export class HRReportService {
 
     const totalPayroll = totalEmployees * averageSalary;
     const socialInsurance = totalPayroll * 0.26; // 26% تأمينات
-    const taxes = totalPayroll * 0.10; // 10% ضرائب
+    const taxes = totalPayroll * 0.1; // 10% ضرائب
 
     return {
       period: `${startDate.toLocaleDateString('ar-EG')} - ${endDate.toLocaleDateString('ar-EG')}`,
@@ -272,6 +272,6 @@ export class HRReportService {
       ['متوسط مدة الخدمة (سنوات)', report.averageTenure.toFixed(1)],
     ];
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(',')).join('\n');
   }
 }

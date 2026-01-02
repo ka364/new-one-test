@@ -1,6 +1,6 @@
 /**
  * BioModuleFactory - State Machine
- * 
+ *
  * Manages the lifecycle of bio-modules through the 5-step process.
  * Enforces quality gates, tracks deliverables, and prevents invalid transitions.
  */
@@ -19,10 +19,10 @@ import {
   FactoryConfig,
   CommandResult,
   HADERPhase,
-  StepConfig
-} from "./types";
-import { stepConfigurations } from "./step-configs";
-import { bioModuleDefinitions } from "./bio-modules";
+  StepConfig,
+} from './types';
+import { stepConfigurations } from './step-configs';
+import { bioModuleDefinitions } from './bio-modules';
 
 /**
  * BioModuleFactory - Main State Machine
@@ -41,7 +41,7 @@ export class BioModuleFactory {
       notifyOnSubmission: true,
       notifyOnReview: true,
       notifyOnQualityGateFail: true,
-      ...config
+      ...config,
     };
   }
 
@@ -59,7 +59,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Module "${moduleName}" already exists`,
-        errors: ["Module already initialized"]
+        errors: ['Module already initialized'],
       };
     }
 
@@ -69,7 +69,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Unknown organism: ${organism}`,
-        errors: ["Invalid bio-organism"]
+        errors: ['Invalid bio-organism'],
       };
     }
 
@@ -84,13 +84,13 @@ export class BioModuleFactory {
         [ModuleStep.ARCHITECTURE_DESIGN]: StepStatus.NOT_STARTED,
         [ModuleStep.DEVELOPMENT]: StepStatus.NOT_STARTED,
         [ModuleStep.TESTING]: StepStatus.NOT_STARTED,
-        [ModuleStep.DOCUMENTATION]: StepStatus.NOT_STARTED
+        [ModuleStep.DOCUMENTATION]: StepStatus.NOT_STARTED,
       },
       completedSteps: [],
       deliverables: {},
       startDate: now,
       stepStartDates: {
-        [ModuleStep.BIOLOGICAL_STUDY]: now
+        [ModuleStep.BIOLOGICAL_STUDY]: now,
       },
       stepCompletionDates: {},
       assignedDevelopers,
@@ -98,7 +98,7 @@ export class BioModuleFactory {
       qualityChecksFailed: [],
       createdAt: now,
       updatedAt: now,
-      createdBy
+      createdBy,
     };
 
     // Initialize deliverables for step 1
@@ -119,8 +119,8 @@ export class BioModuleFactory {
         moduleName,
         organism,
         currentStep: ModuleStep.BIOLOGICAL_STUDY,
-        bioModule
-      }
+        bioModule,
+      },
     };
   }
 
@@ -134,15 +134,13 @@ export class BioModuleFactory {
   /**
    * Submit a deliverable for the current step
    */
-  async submitDeliverable(
-    submission: ModuleSubmission
-  ): Promise<CommandResult> {
+  async submitDeliverable(submission: ModuleSubmission): Promise<CommandResult> {
     const state = this.modules.get(submission.moduleName);
     if (!state) {
       return {
         success: false,
         message: `Module "${submission.moduleName}" not found`,
-        errors: ["Module not initialized"]
+        errors: ['Module not initialized'],
       };
     }
 
@@ -151,7 +149,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Cannot submit for step ${submission.step}. Current step is ${state.currentStep}`,
-        errors: ["Step mismatch"]
+        errors: ['Step mismatch'],
       };
     }
 
@@ -161,7 +159,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Deliverable "${submission.deliverableId}" not found`,
-        errors: ["Invalid deliverable ID"]
+        errors: ['Invalid deliverable ID'],
       };
     }
 
@@ -182,22 +180,20 @@ export class BioModuleFactory {
     return {
       success: true,
       message: `Deliverable "${deliverable.name}" submitted successfully`,
-      data: { deliverable }
+      data: { deliverable },
     };
   }
 
   /**
    * Review a submitted deliverable
    */
-  async reviewDeliverable(
-    review: ModuleReview
-  ): Promise<CommandResult> {
+  async reviewDeliverable(review: ModuleReview): Promise<CommandResult> {
     const state = this.modules.get(review.moduleName);
     if (!state) {
       return {
         success: false,
         message: `Module "${review.moduleName}" not found`,
-        errors: ["Module not initialized"]
+        errors: ['Module not initialized'],
       };
     }
 
@@ -206,7 +202,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Deliverable "${review.deliverableId}" not found`,
-        errors: ["Invalid deliverable ID"]
+        errors: ['Invalid deliverable ID'],
       };
     }
 
@@ -214,7 +210,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Deliverable "${deliverable.name}" has not been submitted yet`,
-        errors: ["Deliverable not submitted"]
+        errors: ['Deliverable not submitted'],
       };
     }
 
@@ -237,8 +233,8 @@ export class BioModuleFactory {
     // Check if all deliverables for current step are approved
     const stepConfig = stepConfigurations.get(state.currentStep)!;
     const allApproved = stepConfig.deliverables
-      .filter(d => d.required)
-      .every(d => state.deliverables[d.id].approvedAt);
+      .filter((d) => d.required)
+      .every((d) => state.deliverables[d.id].approvedAt);
 
     if (allApproved && this.config.autoAdvanceOnApproval) {
       return await this.advanceToNextStep(review.moduleName, review.reviewedBy);
@@ -246,52 +242,49 @@ export class BioModuleFactory {
 
     return {
       success: true,
-      message: review.approved 
+      message: review.approved
         ? `Deliverable "${deliverable.name}" approved`
         : `Deliverable "${deliverable.name}" rejected`,
-      data: { deliverable, allApproved }
+      data: { deliverable, allApproved },
     };
   }
 
   /**
    * Advance to the next step (with quality gates)
    */
-  async advanceToNextStep(
-    moduleName: string,
-    advancedBy: string
-  ): Promise<CommandResult> {
+  async advanceToNextStep(moduleName: string, advancedBy: string): Promise<CommandResult> {
     const state = this.modules.get(moduleName);
     if (!state) {
       return {
         success: false,
         message: `Module "${moduleName}" not found`,
-        errors: ["Module not initialized"]
+        errors: ['Module not initialized'],
       };
     }
 
     // Check if all required deliverables are approved
     const currentStepConfig = stepConfigurations.get(state.currentStep)!;
-    const requiredDeliverables = currentStepConfig.deliverables.filter(d => d.required);
+    const requiredDeliverables = currentStepConfig.deliverables.filter((d) => d.required);
     const unapprovedDeliverables = requiredDeliverables.filter(
-      d => !state.deliverables[d.id].approvedAt
+      (d) => !state.deliverables[d.id].approvedAt
     );
 
     if (unapprovedDeliverables.length > 0) {
       return {
         success: false,
         message: `Cannot advance: ${unapprovedDeliverables.length} required deliverable(s) not approved`,
-        errors: unapprovedDeliverables.map(d => `"${d.name}" not approved`),
-        data: { unapprovedDeliverables }
+        errors: unapprovedDeliverables.map((d) => `"${d.name}" not approved`),
+        data: { unapprovedDeliverables },
       };
     }
 
     // Run quality gates
     const qualityResults = await this.runQualityGates(state, currentStepConfig);
-    const failedGates = qualityResults.filter(r => !r.result.passed && r.gate.blocking);
+    const failedGates = qualityResults.filter((r) => !r.result.passed && r.gate.blocking);
 
     if (failedGates.length > 0) {
       // Record failed gates
-      failedGates.forEach(f => {
+      failedGates.forEach((f) => {
         if (!state.qualityChecksFailed.includes(f.gate.id)) {
           state.qualityChecksFailed.push(f.gate.id);
         }
@@ -304,13 +297,13 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Cannot advance: ${failedGates.length} quality gate(s) failed`,
-        errors: failedGates.map(f => f.result.message),
-        data: { failedGates }
+        errors: failedGates.map((f) => f.result.message),
+        data: { failedGates },
       };
     }
 
     // Record passed gates
-    qualityResults.forEach(r => {
+    qualityResults.forEach((r) => {
       if (r.result.passed && !state.qualityChecksPassed.includes(r.gate.id)) {
         state.qualityChecksPassed.push(r.gate.id);
       }
@@ -331,13 +324,13 @@ export class BioModuleFactory {
         message: `🎉 Module "${moduleName}" completed! All 5 steps finished.`,
         data: {
           completedAt: state.actualCompletionDate,
-          totalDuration: this.calculateDuration(state.startDate, state.actualCompletionDate)
-        }
+          totalDuration: this.calculateDuration(state.startDate, state.actualCompletionDate),
+        },
       };
     }
 
     // Advance to next step
-    const nextStep = state.currentStep + 1 as ModuleStep;
+    const nextStep = (state.currentStep + 1) as ModuleStep;
     state.currentStep = nextStep;
     state.stepStatuses[nextStep] = StepStatus.IN_PROGRESS;
     state.stepStartDates[nextStep] = new Date();
@@ -355,8 +348,8 @@ export class BioModuleFactory {
       message: `Advanced to Step ${nextStep}: ${nextStepConfig.title}`,
       data: {
         currentStep: nextStep,
-        stepConfig: nextStepConfig
-      }
+        stepConfig: nextStepConfig,
+      },
     };
   }
 
@@ -369,7 +362,7 @@ export class BioModuleFactory {
       return {
         success: false,
         message: `Module "${moduleName}" not found`,
-        errors: ["Module not initialized"]
+        errors: ['Module not initialized'],
       };
     }
 
@@ -383,11 +376,11 @@ export class BioModuleFactory {
 
     // Calculate deliverable completion
     const totalDeliverables = Object.keys(state.deliverables).length;
-    const approvedDeliverables = Object.values(state.deliverables)
-      .filter(d => d.approvedAt).length;
-    const deliverableProgress = totalDeliverables > 0
-      ? (approvedDeliverables / totalDeliverables) * 100
-      : 0;
+    const approvedDeliverables = Object.values(state.deliverables).filter(
+      (d) => d.approvedAt
+    ).length;
+    const deliverableProgress =
+      totalDeliverables > 0 ? (approvedDeliverables / totalDeliverables) * 100 : 0;
 
     // Calculate duration
     const durationDays = this.calculateDuration(
@@ -415,8 +408,8 @@ export class BioModuleFactory {
         reviewer: state.reviewer,
         stepStatuses: state.stepStatuses,
         qualityChecksPassed: state.qualityChecksPassed.length,
-        qualityChecksFailed: state.qualityChecksFailed.length
-      }
+        qualityChecksFailed: state.qualityChecksFailed.length,
+      },
     };
   }
 
@@ -424,7 +417,7 @@ export class BioModuleFactory {
    * List all modules
    */
   listModules(): CommandResult {
-    const modules = Array.from(this.modules.values()).map(state => ({
+    const modules = Array.from(this.modules.values()).map((state) => ({
       moduleName: state.moduleName,
       organism: state.organism,
       currentStep: state.currentStep,
@@ -433,13 +426,13 @@ export class BioModuleFactory {
       durationDays: this.calculateDuration(
         state.startDate,
         state.actualCompletionDate || new Date()
-      )
+      ),
     }));
 
     return {
       success: true,
       message: `Found ${modules.length} module(s)`,
-      data: { modules }
+      data: { modules },
     };
   }
 
@@ -459,10 +452,7 @@ export class BioModuleFactory {
     return results;
   }
 
-  private async createModuleStructure(
-    moduleName: string,
-    organism: BioOrganism
-  ): Promise<void> {
+  private async createModuleStructure(moduleName: string, organism: BioOrganism): Promise<void> {
     // Create directory structure:
     // modules/{moduleName}/
     //   ├── docs/

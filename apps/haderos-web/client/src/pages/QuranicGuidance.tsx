@@ -6,7 +6,7 @@
  * based on business context and management situations
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   BookOpen,
   Search,
@@ -22,55 +22,61 @@ import {
   Banknote,
   Scale,
   HandCoins,
-  MessageSquareQuote
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+  MessageSquareQuote,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 // Quick context presets
 const CONTEXT_PRESETS = [
   {
-    id: "hiring",
-    label: "توظيف موظف جديد",
+    id: 'hiring',
+    label: 'توظيف موظف جديد',
     icon: Users,
-    context: "أريد توظيف موظف جديد وأريد إرشادات أخلاقية"
+    context: 'أريد توظيف موظف جديد وأريد إرشادات أخلاقية',
   },
   {
-    id: "finance",
-    label: "قرار مالي",
+    id: 'finance',
+    label: 'قرار مالي',
     icon: Banknote,
-    context: "أتخذ قراراً مالياً مهماً في الشركة"
+    context: 'أتخذ قراراً مالياً مهماً في الشركة',
   },
   {
-    id: "contract",
-    label: "توقيع عقد",
+    id: 'contract',
+    label: 'توقيع عقد',
     icon: Scale,
-    context: "على وشك توقيع عقد تجاري جديد"
+    context: 'على وشك توقيع عقد تجاري جديد',
   },
   {
-    id: "meeting",
-    label: "اجتماع فريق",
+    id: 'meeting',
+    label: 'اجتماع فريق',
     icon: Building2,
-    context: "سأعقد اجتماع فريق لمناقشة استراتيجية جديدة"
+    context: 'سأعقد اجتماع فريق لمناقشة استراتيجية جديدة',
   },
   {
-    id: "customer",
-    label: "خدمة العملاء",
+    id: 'customer',
+    label: 'خدمة العملاء',
     icon: HandCoins,
-    context: "أريد تحسين تجربة العملاء"
+    context: 'أريد تحسين تجربة العملاء',
   },
   {
-    id: "challenge",
-    label: "مواجهة تحدي",
+    id: 'challenge',
+    label: 'مواجهة تحدي',
     icon: Lightbulb,
-    context: "أواجه تحدياً صعباً في العمل"
+    context: 'أواجه تحدياً صعباً في العمل',
   },
 ];
 
@@ -78,37 +84,39 @@ const CONTEXT_PRESETS = [
 const SAMPLE_VERSES = [
   {
     id: 1,
-    surahName: "Al-Baqarah",
-    surahNameAr: "البقرة",
+    surahName: 'Al-Baqarah',
+    surahNameAr: 'البقرة',
     ayahNumber: 282,
-    verseText: "يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا تَدَايَنتُم بِدَيْنٍ إِلَىٰ أَجَلٍ مُّسَمًّى فَاكْتُبُوهُ",
+    verseText:
+      'يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا تَدَايَنتُم بِدَيْنٍ إِلَىٰ أَجَلٍ مُّسَمًّى فَاكْتُبُوهُ',
     applicationContext: {
-      situationDescription: "Documentation of financial agreements",
-      situationDescriptionAr: "توثيق الاتفاقيات المالية والعقود"
-    }
+      situationDescription: 'Documentation of financial agreements',
+      situationDescriptionAr: 'توثيق الاتفاقيات المالية والعقود',
+    },
   },
   {
     id: 2,
-    surahName: "An-Nisa",
-    surahNameAr: "النساء",
+    surahName: 'An-Nisa',
+    surahNameAr: 'النساء',
     ayahNumber: 58,
-    verseText: "إِنَّ اللَّهَ يَأْمُرُكُمْ أَن تُؤَدُّوا الْأَمَانَاتِ إِلَىٰ أَهْلِهَا وَإِذَا حَكَمْتُم بَيْنَ النَّاسِ أَن تَحْكُمُوا بِالْعَدْلِ",
+    verseText:
+      'إِنَّ اللَّهَ يَأْمُرُكُمْ أَن تُؤَدُّوا الْأَمَانَاتِ إِلَىٰ أَهْلِهَا وَإِذَا حَكَمْتُم بَيْنَ النَّاسِ أَن تَحْكُمُوا بِالْعَدْلِ',
     applicationContext: {
-      situationDescription: "Trust and justice in dealings",
-      situationDescriptionAr: "الأمانة والعدل في التعاملات"
-    }
+      situationDescription: 'Trust and justice in dealings',
+      situationDescriptionAr: 'الأمانة والعدل في التعاملات',
+    },
   },
   {
     id: 3,
-    surahName: "Ash-Shura",
-    surahNameAr: "الشورى",
+    surahName: 'Ash-Shura',
+    surahNameAr: 'الشورى',
     ayahNumber: 38,
-    verseText: "وَأَمْرُهُمْ شُورَىٰ بَيْنَهُمْ",
+    verseText: 'وَأَمْرُهُمْ شُورَىٰ بَيْنَهُمْ',
     applicationContext: {
-      situationDescription: "Consultation in decision making",
-      situationDescriptionAr: "الشورى في اتخاذ القرارات"
-    }
-  }
+      situationDescription: 'Consultation in decision making',
+      situationDescriptionAr: 'الشورى في اتخاذ القرارات',
+    },
+  },
 ];
 
 type GuidanceResult = {
@@ -131,12 +139,12 @@ type GuidanceResult = {
 
 export default function QuranicGuidance() {
   const [loading, setLoading] = useState(false);
-  const [context, setContext] = useState("");
-  const [area, setArea] = useState("general");
+  const [context, setContext] = useState('');
+  const [area, setArea] = useState('general');
   const [result, setResult] = useState<GuidanceResult | null>(null);
   const [savedVerses, setSavedVerses] = useState<number[]>([]);
 
-  const handlePresetClick = (preset: typeof CONTEXT_PRESETS[0]) => {
+  const handlePresetClick = (preset: (typeof CONTEXT_PRESETS)[0]) => {
     setContext(preset.context);
     handleSearch(preset.context);
   };
@@ -144,7 +152,7 @@ export default function QuranicGuidance() {
   const handleSearch = async (searchContext?: string) => {
     const contextToSearch = searchContext || context;
     if (!contextToSearch.trim()) {
-      toast.error("الرجاء إدخال السياق أولاً");
+      toast.error('الرجاء إدخال السياق أولاً');
       return;
     }
 
@@ -153,36 +161,39 @@ export default function QuranicGuidance() {
     // Simulate API call - in production use trpc
     setTimeout(() => {
       setResult({
-        verses: SAMPLE_VERSES.map(v => ({
+        verses: SAMPLE_VERSES.map((v) => ({
           ...v,
-          reference: `${v.surahNameAr} ${v.ayahNumber}`
+          reference: `${v.surahNameAr} ${v.ayahNumber}`,
         })),
-        matchedKeywords: ["العدل", "الأمانة", "الشورى"],
-        contextTypes: ["decision_making", "finance"]
+        matchedKeywords: ['العدل', 'الأمانة', 'الشورى'],
+        contextTypes: ['decision_making', 'finance'],
       });
       setLoading(false);
-      toast.success("تم العثور على إرشادات قرآنية");
+      toast.success('تم العثور على إرشادات قرآنية');
     }, 1500);
   };
 
   const handleSaveVerse = (verseId: number) => {
     if (savedVerses.includes(verseId)) {
-      setSavedVerses(savedVerses.filter(id => id !== verseId));
-      toast.info("تم إزالة الآية من المحفوظات");
+      setSavedVerses(savedVerses.filter((id) => id !== verseId));
+      toast.info('تم إزالة الآية من المحفوظات');
     } else {
       setSavedVerses([...savedVerses, verseId]);
-      toast.success("تم حفظ الآية");
+      toast.success('تم حفظ الآية');
     }
   };
 
   const handleShareVerse = (verse: any) => {
     const text = `${verse.verseText}\n\n${verse.reference}\n\nمن تطبيق HADEROS`;
     navigator.clipboard.writeText(text);
-    toast.success("تم نسخ الآية للمشاركة");
+    toast.success('تم نسخ الآية للمشاركة');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8"
+      dir="rtl"
+    >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-10">
@@ -214,9 +225,7 @@ export default function QuranicGuidance() {
                   <Lightbulb className="w-5 h-5 text-amber-500" />
                   سياقات سريعة
                 </CardTitle>
-                <CardDescription>
-                  اختر سياقاً شائعاً للحصول على إرشادات فورية
-                </CardDescription>
+                <CardDescription>اختر سياقاً شائعاً للحصول على إرشادات فورية</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -302,7 +311,11 @@ export default function QuranicGuidance() {
                 {/* Keywords */}
                 <div className="flex flex-wrap gap-2 justify-center">
                   {result.matchedKeywords.map((keyword, index) => (
-                    <Badge key={index} variant="secondary" className="bg-emerald-100 text-emerald-700">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="bg-emerald-100 text-emerald-700"
+                    >
                       {keyword}
                     </Badge>
                   ))}
@@ -317,9 +330,7 @@ export default function QuranicGuidance() {
                         <Badge variant="outline" className="text-emerald-700 border-emerald-300">
                           {verse.reference}
                         </Badge>
-                        <span className="text-sm text-gray-500">
-                          {verse.surahName}
-                        </span>
+                        <span className="text-sm text-gray-500">{verse.surahName}</span>
                       </div>
 
                       {/* Verse Text */}
@@ -353,16 +364,14 @@ export default function QuranicGuidance() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleSaveVerse(verse.id)}
-                            className={savedVerses.includes(verse.id) ? "text-amber-600" : ""}
+                            className={savedVerses.includes(verse.id) ? 'text-amber-600' : ''}
                           >
-                            <Bookmark className={`w-4 h-4 ml-1 ${savedVerses.includes(verse.id) ? "fill-current" : ""}`} />
+                            <Bookmark
+                              className={`w-4 h-4 ml-1 ${savedVerses.includes(verse.id) ? 'fill-current' : ''}`}
+                            />
                             حفظ
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleShareVerse(verse)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleShareVerse(verse)}>
                             <Share2 className="w-4 h-4 ml-1" />
                             مشاركة
                           </Button>
@@ -389,16 +398,20 @@ export default function QuranicGuidance() {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {["البقرة", "النساء", "المائدة", "الأنفال", "التوبة", "الشورى"].map((surah, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="h-20 flex flex-col items-center justify-center gap-1"
-                    >
-                      <span className="text-lg font-bold">{surah}</span>
-                      <span className="text-xs text-gray-500">{Math.floor(Math.random() * 20) + 5} آية إدارية</span>
-                    </Button>
-                  ))}
+                  {['البقرة', 'النساء', 'المائدة', 'الأنفال', 'التوبة', 'الشورى'].map(
+                    (surah, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="h-20 flex flex-col items-center justify-center gap-1"
+                      >
+                        <span className="text-lg font-bold">{surah}</span>
+                        <span className="text-xs text-gray-500">
+                          {Math.floor(Math.random() * 20) + 5} آية إدارية
+                        </span>
+                      </Button>
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -410,7 +423,9 @@ export default function QuranicGuidance() {
           <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200">
             <CardContent className="pt-6 text-center">
               <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">150+</div>
-              <div className="text-sm text-emerald-600 dark:text-emerald-500">آية متعلقة بالأعمال</div>
+              <div className="text-sm text-emerald-600 dark:text-emerald-500">
+                آية متعلقة بالأعمال
+              </div>
             </CardContent>
           </Card>
           <Card className="bg-teal-50 dark:bg-teal-900/20 border-teal-200">

@@ -65,7 +65,7 @@ export class CustomerModel {
    * محاكاة قرار الشراء
    */
   willPurchase(marketConditions: MarketConditions): boolean {
-    const baseProbability = this.loyalty * this.purchaseFrequency / 2;
+    const baseProbability = (this.loyalty * this.purchaseFrequency) / 2;
     const seasonalFactor = marketConditions.seasonality;
     const competitionFactor = 1 - marketConditions.competitionIntensity * 0.3;
     const priceFactor = 1 - marketConditions.priceIndex * 0.2;
@@ -344,7 +344,7 @@ export class ModelFactory {
     const distribution = {
       junior: 0.4,
       mid: 0.35,
-      senior: 0.20,
+      senior: 0.2,
       manager: 0.05,
     };
 
@@ -403,9 +403,7 @@ export async function runIntegratedSimulation(months: number = 12): Promise<any>
       // فحص الفقد
       if (customer.willChurn()) {
         // العميل غادر - استبداله بعميل جديد
-        const newCustomer = new CustomerModel(
-          Math.random() < 0.5 ? 'budget' : 'mid-tier'
-        );
+        const newCustomer = new CustomerModel(Math.random() < 0.5 ? 'budget' : 'mid-tier');
         customers[customers.indexOf(customer)] = newCustomer;
       }
     }

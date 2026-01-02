@@ -10,17 +10,17 @@
  * - COD
  */
 
-import { db } from "../db";
+import { db } from '../db';
 import {
   paymentProviders,
   paymentTransactions,
   paymentRefunds,
   paymentWebhooks,
-  DEFAULT_PAYMENT_PROVIDERS
-} from "../../drizzle/schema-payments";
-import { orders } from "../../drizzle/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
-import { InstaPayService, createInstaPayService } from "../integrations/instapay";
+  DEFAULT_PAYMENT_PROVIDERS,
+} from '../../drizzle/schema-payments';
+import { orders } from '../../drizzle/schema';
+import { eq, and, sql, desc } from 'drizzle-orm';
+import { InstaPayService, createInstaPayService } from '../integrations/instapay';
 
 // ============================================
 // TYPES
@@ -81,7 +81,8 @@ export class UnifiedPaymentService {
    * Get available payment providers
    */
   async getAvailableProviders(amount?: number) {
-    let query = db.select()
+    let query = db
+      .select()
       .from(paymentProviders)
       .where(eq(paymentProviders.isActive, true))
       .orderBy(paymentProviders.displayOrder);
@@ -90,7 +91,7 @@ export class UnifiedPaymentService {
 
     // Filter by amount if provided
     if (amount) {
-      return providers.filter(p => {
+      return providers.filter((p) => {
         const min = Number(p.minAmount) || 0;
         const max = Number(p.maxAmount) || Infinity;
         return amount >= min && amount <= max;
@@ -109,7 +110,7 @@ export class UnifiedPaymentService {
     const minFee = Number(provider.minFee) || 0;
     const maxFee = provider.maxFee ? Number(provider.maxFee) : Infinity;
 
-    let fee = fixedFee + (amount * percentageFee);
+    let fee = fixedFee + amount * percentageFee;
     fee = Math.max(fee, minFee);
     fee = Math.min(fee, maxFee);
 
@@ -130,12 +131,12 @@ export class UnifiedPaymentService {
    */
   async createPayment(request: PaymentRequest): Promise<PaymentResult> {
     // Get provider
-    const [provider] = await db.select()
+    const [provider] = await db
+      .select()
       .from(paymentProviders)
-      .where(and(
-        eq(paymentProviders.code, request.providerCode),
-        eq(paymentProviders.isActive, true)
-      ))
+      .where(
+        and(eq(paymentProviders.code, request.providerCode), eq(paymentProviders.isActive, true))
+      )
       .limit(1);
 
     if (!provider) {
@@ -147,7 +148,9 @@ export class UnifiedPaymentService {
     const maxAmount = Number(provider.maxAmount) || Infinity;
 
     if (request.amount < minAmount || request.amount > maxAmount) {
-      throw new Error(`Amount must be between ${minAmount} and ${maxAmount} EGP for ${provider.name}`);
+      throw new Error(
+        `Amount must be between ${minAmount} and ${maxAmount} EGP for ${provider.name}`
+      );
     }
 
     // Calculate fee
@@ -157,7 +160,8 @@ export class UnifiedPaymentService {
     // Create transaction record
     const transactionNumber = this.generateTransactionNumber();
 
-    const [transaction] = await db.insert(paymentTransactions)
+    const [transaction] = await db
+      .insert(paymentTransactions)
       .values({
         transactionNumber,
         orderId: request.orderId,
@@ -165,10 +169,10 @@ export class UnifiedPaymentService {
         providerId: provider.id,
         providerCode: provider.code,
         amount: String(request.amount),
-        currency: request.currency || "EGP",
+        currency: request.currency || 'EGP',
         fee: String(fee),
         netAmount: String(netAmount),
-        status: "pending",
+        status: 'pending',
         customerName: request.customer.name,
         customerPhone: request.customer.phone,
         customerEmail: request.customer.email,
@@ -181,23 +185,23 @@ export class UnifiedPaymentService {
       let result: Partial<PaymentResult> = {};
 
       switch (provider.type) {
-        case "instant_payment":
+        case 'instant_payment':
           result = await this.processInstaPay(transaction, request, provider);
           break;
 
-        case "mobile_wallet":
+        case 'mobile_wallet':
           result = await this.processMobileWallet(transaction, request, provider);
           break;
 
-        case "card":
+        case 'card':
           result = await this.processCard(transaction, request, provider);
           break;
 
-        case "reference_code":
+        case 'reference_code':
           result = await this.processFawry(transaction, request, provider);
           break;
 
-        case "cash":
+        case 'cash':
           result = await this.processCOD(transaction, request);
           break;
 
@@ -206,7 +210,8 @@ export class UnifiedPaymentService {
       }
 
       // Update transaction with provider response
-      await db.update(paymentTransactions)
+      await db
+        .update(paymentTransactions)
         .set({
           providerTransactionId: result.providerTransactionId,
           paymentUrl: result.paymentUrl,
@@ -214,7 +219,7 @@ export class UnifiedPaymentService {
           deepLink: result.deepLink,
           referenceCode: result.referenceCode,
           referenceExpiry: result.referenceExpiry,
-          status: "processing",
+          status: 'processing',
           updatedAt: new Date(),
         })
         .where(eq(paymentTransactions.id, transaction.id));
@@ -223,15 +228,15 @@ export class UnifiedPaymentService {
         success: true,
         transactionId: transaction.id,
         transactionNumber: transaction.transactionNumber,
-        status: "processing",
+        status: 'processing',
         ...result,
       };
-
     } catch (error: any) {
       // Update transaction with error
-      await db.update(paymentTransactions)
+      await db
+        .update(paymentTransactions)
         .set({
-          status: "failed",
+          status: 'failed',
           failureReason: error.message,
           failedAt: new Date(),
           updatedAt: new Date(),
@@ -242,7 +247,7 @@ export class UnifiedPaymentService {
         success: false,
         transactionId: transaction.id,
         transactionNumber: transaction.transactionNumber,
-        status: "failed",
+        status: 'failed',
         error: error.message,
       };
     }
@@ -257,7 +262,7 @@ export class UnifiedPaymentService {
     provider: typeof paymentProviders.$inferSelect
   ): Promise<Partial<PaymentResult>> {
     if (!this.instaPayService) {
-      throw new Error("InstaPay is not configured");
+      throw new Error('InstaPay is not configured');
     }
 
     const response = await this.instaPayService.createPayment({
@@ -300,37 +305,37 @@ export class UnifiedPaymentService {
     }
 
     // Step 1: Get auth token
-    const authResponse = await fetch("https://accept.paymob.com/api/auth/tokens", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ api_key: config.apiKey }),
     });
 
     if (!authResponse.ok) {
-      throw new Error("Paymob authentication failed");
+      throw new Error('Paymob authentication failed');
     }
 
     const { token } = await authResponse.json();
 
     // Step 2: Create order
-    const orderResponse = await fetch("https://accept.paymob.com/api/ecommerce/orders", {
-      method: "POST",
+    const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         auth_token: token,
         delivery_needed: false,
         amount_cents: Math.round(request.amount * 100),
-        currency: "EGP",
+        currency: 'EGP',
         merchant_order_id: request.orderNumber,
         items: [],
       }),
     });
 
     if (!orderResponse.ok) {
-      throw new Error("Paymob order creation failed");
+      throw new Error('Paymob order creation failed');
     }
 
     const orderData = await orderResponse.json();
@@ -338,60 +343,63 @@ export class UnifiedPaymentService {
     // Step 3: Get payment key
     const walletIntegrationId = this.getWalletIntegrationId(provider.code, config);
 
-    const paymentKeyResponse = await fetch("https://accept.paymob.com/api/acceptance/payment_keys", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        auth_token: token,
-        amount_cents: Math.round(request.amount * 100),
-        expiration: 3600,
-        order_id: orderData.id,
-        billing_data: {
-          first_name: request.customer.name.split(" ")[0] || "Customer",
-          last_name: request.customer.name.split(" ").slice(1).join(" ") || "Customer",
-          phone_number: request.customer.phone,
-          email: request.customer.email || "customer@example.com",
-          apartment: "NA",
-          floor: "NA",
-          street: "NA",
-          building: "NA",
-          shipping_method: "NA",
-          postal_code: "NA",
-          city: "Cairo",
-          country: "EG",
-          state: "NA",
+    const paymentKeyResponse = await fetch(
+      'https://accept.paymob.com/api/acceptance/payment_keys',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        currency: "EGP",
-        integration_id: walletIntegrationId,
-      }),
-    });
+        body: JSON.stringify({
+          auth_token: token,
+          amount_cents: Math.round(request.amount * 100),
+          expiration: 3600,
+          order_id: orderData.id,
+          billing_data: {
+            first_name: request.customer.name.split(' ')[0] || 'Customer',
+            last_name: request.customer.name.split(' ').slice(1).join(' ') || 'Customer',
+            phone_number: request.customer.phone,
+            email: request.customer.email || 'customer@example.com',
+            apartment: 'NA',
+            floor: 'NA',
+            street: 'NA',
+            building: 'NA',
+            shipping_method: 'NA',
+            postal_code: 'NA',
+            city: 'Cairo',
+            country: 'EG',
+            state: 'NA',
+          },
+          currency: 'EGP',
+          integration_id: walletIntegrationId,
+        }),
+      }
+    );
 
     if (!paymentKeyResponse.ok) {
-      throw new Error("Paymob payment key generation failed");
+      throw new Error('Paymob payment key generation failed');
     }
 
     const { token: paymentKey } = await paymentKeyResponse.json();
 
     // Step 4: Initiate wallet payment
-    const walletResponse = await fetch("https://accept.paymob.com/api/acceptance/payments/pay", {
-      method: "POST",
+    const walletResponse = await fetch('https://accept.paymob.com/api/acceptance/payments/pay', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         source: {
           identifier: request.customer.phone,
-          subtype: "WALLET",
+          subtype: 'WALLET',
         },
         payment_token: paymentKey,
       }),
     });
 
     if (!walletResponse.ok) {
-      throw new Error("Wallet payment initiation failed");
+      throw new Error('Wallet payment initiation failed');
     }
 
     const walletData = await walletResponse.json();
@@ -408,13 +416,13 @@ export class UnifiedPaymentService {
    */
   private getWalletIntegrationId(providerCode: string, config: any): number {
     switch (providerCode) {
-      case "vodafone_cash":
+      case 'vodafone_cash':
         return config.vodafoneIntegrationId;
-      case "orange_cash":
+      case 'orange_cash':
         return config.orangeIntegrationId;
-      case "etisalat_cash":
+      case 'etisalat_cash':
         return config.etisalatIntegrationId;
-      case "we_pay":
+      case 'we_pay':
         return config.wePayIntegrationId;
       default:
         return config.walletIntegrationId;
@@ -432,27 +440,27 @@ export class UnifiedPaymentService {
     const config = provider.config as any;
 
     if (!config?.apiKey || !config?.iframeId) {
-      throw new Error("Paymob card payment is not configured");
+      throw new Error('Paymob card payment is not configured');
     }
 
     // Step 1: Get auth token
-    const authResponse = await fetch("https://accept.paymob.com/api/auth/tokens", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ api_key: config.apiKey }),
     });
 
     const { token } = await authResponse.json();
 
     // Step 2: Create order
-    const orderResponse = await fetch("https://accept.paymob.com/api/ecommerce/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         auth_token: token,
         delivery_needed: false,
         amount_cents: Math.round(request.amount * 100),
-        currency: "EGP",
+        currency: 'EGP',
         merchant_order_id: request.orderNumber,
         items: [],
       }),
@@ -461,33 +469,36 @@ export class UnifiedPaymentService {
     const orderData = await orderResponse.json();
 
     // Step 3: Get payment key
-    const paymentKeyResponse = await fetch("https://accept.paymob.com/api/acceptance/payment_keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        auth_token: token,
-        amount_cents: Math.round(request.amount * 100),
-        expiration: 3600,
-        order_id: orderData.id,
-        billing_data: {
-          first_name: request.customer.name.split(" ")[0] || "Customer",
-          last_name: request.customer.name.split(" ").slice(1).join(" ") || "Customer",
-          phone_number: request.customer.phone,
-          email: request.customer.email || "customer@example.com",
-          apartment: "NA",
-          floor: "NA",
-          street: "NA",
-          building: "NA",
-          shipping_method: "NA",
-          postal_code: "NA",
-          city: "Cairo",
-          country: "EG",
-          state: "NA",
-        },
-        currency: "EGP",
-        integration_id: config.cardIntegrationId,
-      }),
-    });
+    const paymentKeyResponse = await fetch(
+      'https://accept.paymob.com/api/acceptance/payment_keys',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auth_token: token,
+          amount_cents: Math.round(request.amount * 100),
+          expiration: 3600,
+          order_id: orderData.id,
+          billing_data: {
+            first_name: request.customer.name.split(' ')[0] || 'Customer',
+            last_name: request.customer.name.split(' ').slice(1).join(' ') || 'Customer',
+            phone_number: request.customer.phone,
+            email: request.customer.email || 'customer@example.com',
+            apartment: 'NA',
+            floor: 'NA',
+            street: 'NA',
+            building: 'NA',
+            shipping_method: 'NA',
+            postal_code: 'NA',
+            city: 'Cairo',
+            country: 'EG',
+            state: 'NA',
+          },
+          currency: 'EGP',
+          integration_id: config.cardIntegrationId,
+        }),
+      }
+    );
 
     const { token: paymentKey } = await paymentKeyResponse.json();
 
@@ -511,11 +522,12 @@ export class UnifiedPaymentService {
     const config = provider.config as any;
 
     if (!config?.merchantCode) {
-      throw new Error("Fawry is not configured");
+      throw new Error('Fawry is not configured');
     }
 
     // Generate reference code
-    const referenceCode = `FWRY${Date.now()}${Math.random().toString(36).substring(2, 6)}`.toUpperCase();
+    const referenceCode =
+      `FWRY${Date.now()}${Math.random().toString(36).substring(2, 6)}`.toUpperCase();
     const expiryHours = 48;
     const referenceExpiry = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
 
@@ -547,9 +559,15 @@ export class UnifiedPaymentService {
   /**
    * Handle webhook from payment provider
    */
-  async handleWebhook(provider: string, eventType: string, payload: any, signature?: string): Promise<void> {
+  async handleWebhook(
+    provider: string,
+    eventType: string,
+    payload: any,
+    signature?: string
+  ): Promise<void> {
     // Log webhook
-    const [webhook] = await db.insert(paymentWebhooks)
+    const [webhook] = await db
+      .insert(paymentWebhooks)
       .values({
         provider,
         eventType,
@@ -563,14 +581,16 @@ export class UnifiedPaymentService {
       // Find transaction
       let transactionId: number | undefined;
 
-      if (provider === "instapay" && payload.orderId) {
-        const [tx] = await db.select()
+      if (provider === 'instapay' && payload.orderId) {
+        const [tx] = await db
+          .select()
           .from(paymentTransactions)
           .where(eq(paymentTransactions.orderNumber, payload.orderId))
           .limit(1);
         transactionId = tx?.id;
-      } else if (provider === "paymob" && payload.obj?.order?.merchant_order_id) {
-        const [tx] = await db.select()
+      } else if (provider === 'paymob' && payload.obj?.order?.merchant_order_id) {
+        const [tx] = await db
+          .select()
           .from(paymentTransactions)
           .where(eq(paymentTransactions.orderNumber, payload.obj.order.merchant_order_id))
           .limit(1);
@@ -579,7 +599,8 @@ export class UnifiedPaymentService {
 
       if (transactionId) {
         // Update webhook with transaction reference
-        await db.update(paymentWebhooks)
+        await db
+          .update(paymentWebhooks)
           .set({ transactionId })
           .where(eq(paymentWebhooks.id, webhook.id));
 
@@ -587,28 +608,31 @@ export class UnifiedPaymentService {
         const newStatus = this.mapEventToStatus(provider, eventType, payload);
 
         if (newStatus) {
-          await db.update(paymentTransactions)
+          await db
+            .update(paymentTransactions)
             .set({
               status: newStatus,
-              completedAt: newStatus === "completed" ? new Date() : undefined,
-              failedAt: newStatus === "failed" ? new Date() : undefined,
-              failureReason: newStatus === "failed" ? payload.failure_reason : undefined,
+              completedAt: newStatus === 'completed' ? new Date() : undefined,
+              failedAt: newStatus === 'failed' ? new Date() : undefined,
+              failureReason: newStatus === 'failed' ? payload.failure_reason : undefined,
               providerResponse: payload,
               updatedAt: new Date(),
             })
             .where(eq(paymentTransactions.id, transactionId));
 
           // Update order status if payment completed
-          if (newStatus === "completed") {
-            const [tx] = await db.select()
+          if (newStatus === 'completed') {
+            const [tx] = await db
+              .select()
               .from(paymentTransactions)
               .where(eq(paymentTransactions.id, transactionId))
               .limit(1);
 
             if (tx) {
-              await db.update(orders)
+              await db
+                .update(orders)
                 .set({
-                  paymentStatus: "paid",
+                  paymentStatus: 'paid',
                   updatedAt: new Date(),
                 })
                 .where(eq(orders.id, tx.orderId));
@@ -618,16 +642,17 @@ export class UnifiedPaymentService {
       }
 
       // Mark webhook as processed
-      await db.update(paymentWebhooks)
+      await db
+        .update(paymentWebhooks)
         .set({
           processed: true,
           processedAt: new Date(),
         })
         .where(eq(paymentWebhooks.id, webhook.id));
-
     } catch (error: any) {
       // Log error
-      await db.update(paymentWebhooks)
+      await db
+        .update(paymentWebhooks)
         .set({
           error: error.message,
           retryCount: sql`${paymentWebhooks.retryCount} + 1`,
@@ -642,19 +667,24 @@ export class UnifiedPaymentService {
    * Map webhook event to transaction status
    */
   private mapEventToStatus(provider: string, eventType: string, payload: any): string | null {
-    if (provider === "instapay") {
+    if (provider === 'instapay') {
       switch (eventType) {
-        case "payment.completed": return "completed";
-        case "payment.failed": return "failed";
-        case "payment.expired": return "failed";
-        case "refund.completed": return "refunded";
-        default: return null;
+        case 'payment.completed':
+          return 'completed';
+        case 'payment.failed':
+          return 'failed';
+        case 'payment.expired':
+          return 'failed';
+        case 'refund.completed':
+          return 'refunded';
+        default:
+          return null;
       }
     }
 
-    if (provider === "paymob") {
-      if (payload.obj?.success === true) return "completed";
-      if (payload.obj?.success === false) return "failed";
+    if (provider === 'paymob') {
+      if (payload.obj?.success === true) return 'completed';
+      if (payload.obj?.success === false) return 'failed';
       return null;
     }
 
@@ -665,13 +695,14 @@ export class UnifiedPaymentService {
    * Get transaction status
    */
   async getTransactionStatus(transactionId: number) {
-    const [transaction] = await db.select()
+    const [transaction] = await db
+      .select()
       .from(paymentTransactions)
       .where(eq(paymentTransactions.id, transactionId))
       .limit(1);
 
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new Error('Transaction not found');
     }
 
     return {
@@ -692,25 +723,29 @@ export class UnifiedPaymentService {
   /**
    * Process refund
    */
-  async refund(request: RefundRequest): Promise<{ success: boolean; refundId?: number; error?: string }> {
-    const [transaction] = await db.select()
+  async refund(
+    request: RefundRequest
+  ): Promise<{ success: boolean; refundId?: number; error?: string }> {
+    const [transaction] = await db
+      .select()
       .from(paymentTransactions)
       .where(eq(paymentTransactions.id, request.transactionId))
       .limit(1);
 
     if (!transaction) {
-      throw new Error("Transaction not found");
+      throw new Error('Transaction not found');
     }
 
-    if (transaction.status !== "completed") {
-      throw new Error("Can only refund completed transactions");
+    if (transaction.status !== 'completed') {
+      throw new Error('Can only refund completed transactions');
     }
 
     const refundAmount = request.amount || Number(transaction.amount);
     const refundNumber = `REF-${Date.now().toString(36)}`.toUpperCase();
 
     // Create refund record
-    const [refund] = await db.insert(paymentRefunds)
+    const [refund] = await db
+      .insert(paymentRefunds)
       .values({
         refundNumber,
         transactionId: transaction.id,
@@ -718,13 +753,13 @@ export class UnifiedPaymentService {
         refundAmount: String(refundAmount),
         reason: request.reason,
         requestedBy: request.requestedBy,
-        status: "pending",
+        status: 'pending',
       })
       .returning();
 
     try {
       // Process refund with provider
-      if (transaction.providerCode === "instapay" && this.instaPayService) {
+      if (transaction.providerCode === 'instapay' && this.instaPayService) {
         await this.instaPayService.refund({
           transactionId: transaction.providerTransactionId!,
           amount: refundAmount,
@@ -734,17 +769,20 @@ export class UnifiedPaymentService {
       // Add other provider refund logic here
 
       // Update refund status
-      await db.update(paymentRefunds)
+      await db
+        .update(paymentRefunds)
         .set({
-          status: "completed",
+          status: 'completed',
           completedAt: new Date(),
           updatedAt: new Date(),
         })
         .where(eq(paymentRefunds.id, refund.id));
 
       // Update transaction status
-      const newStatus = refundAmount >= Number(transaction.amount) ? "refunded" : "partially_refunded";
-      await db.update(paymentTransactions)
+      const newStatus =
+        refundAmount >= Number(transaction.amount) ? 'refunded' : 'partially_refunded';
+      await db
+        .update(paymentTransactions)
         .set({
           status: newStatus,
           updatedAt: new Date(),
@@ -752,11 +790,11 @@ export class UnifiedPaymentService {
         .where(eq(paymentTransactions.id, transaction.id));
 
       return { success: true, refundId: refund.id };
-
     } catch (error: any) {
-      await db.update(paymentRefunds)
+      await db
+        .update(paymentRefunds)
         .set({
-          status: "failed",
+          status: 'failed',
           failureReason: error.message,
           failedAt: new Date(),
           updatedAt: new Date(),
@@ -772,29 +810,29 @@ export class UnifiedPaymentService {
    */
   async initializeProviders(): Promise<void> {
     for (const provider of DEFAULT_PAYMENT_PROVIDERS) {
-      const existing = await db.select()
+      const existing = await db
+        .select()
         .from(paymentProviders)
         .where(eq(paymentProviders.code, provider.code))
         .limit(1);
 
       if (existing.length === 0) {
-        await db.insert(paymentProviders)
-          .values({
-            code: provider.code,
-            name: provider.name,
-            nameAr: provider.nameAr,
-            type: provider.type,
-            fixedFee: String(provider.fixedFee),
-            percentageFee: String(provider.percentageFee),
-            minAmount: String(provider.minAmount),
-            maxAmount: String(provider.maxAmount),
-            displayOrder: provider.displayOrder,
-            isActive: true,
-          });
+        await db.insert(paymentProviders).values({
+          code: provider.code,
+          name: provider.name,
+          nameAr: provider.nameAr,
+          type: provider.type,
+          fixedFee: String(provider.fixedFee),
+          percentageFee: String(provider.percentageFee),
+          minAmount: String(provider.minAmount),
+          maxAmount: String(provider.maxAmount),
+          displayOrder: provider.displayOrder,
+          isActive: true,
+        });
       }
     }
 
-    console.log("✅ Payment providers initialized");
+    console.log('✅ Payment providers initialized');
   }
 }
 

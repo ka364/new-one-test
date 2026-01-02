@@ -4,22 +4,22 @@
  * Core engine for applying Sharia-compliant and ethical rules to business decisions
  */
 
-import { EthicalRule, Transaction } from "../../drizzle/schema";
-import { getActiveEthicalRules } from "../db";
+import { EthicalRule, Transaction } from '../../drizzle/schema';
+import { getActiveEthicalRules } from '../db';
 
 export interface KAIADecision {
   approved: boolean;
-  decision: "approved" | "rejected" | "flagged" | "review_required";
+  decision: 'approved' | 'rejected' | 'flagged' | 'review_required';
   appliedRules: Array<{
     ruleId: number;
     ruleName: string;
-    result: "pass" | "fail" | "warning";
+    result: 'pass' | 'fail' | 'warning';
     reason: string;
     reasonAr?: string;
   }>;
   overallReason: string;
   overallReasonAr?: string;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   requiresHumanReview: boolean;
 }
 
@@ -50,7 +50,7 @@ export class KAIAEngine {
       this.lastRulesUpdate = new Date();
       console.log(`[KAIA] Loaded ${this.rules.length} active ethical rules`);
     } catch (error) {
-      console.error("[KAIA] Failed to load ethical rules:", error);
+      console.error('[KAIA] Failed to load ethical rules:', error);
       this.rules = [];
     }
   }
@@ -59,8 +59,10 @@ export class KAIAEngine {
    * Refresh rules if cache is stale
    */
   private async refreshRulesIfNeeded() {
-    if (!this.lastRulesUpdate || 
-        Date.now() - this.lastRulesUpdate.getTime() > this.RULES_CACHE_TTL) {
+    if (
+      !this.lastRulesUpdate ||
+      Date.now() - this.lastRulesUpdate.getTime() > this.RULES_CACHE_TTL
+    ) {
       await this.loadRules();
     }
   }
@@ -72,14 +74,14 @@ export class KAIAEngine {
     await this.refreshRulesIfNeeded();
 
     const context: EvaluationContext = { transaction };
-    const appliedRules: KAIADecision["appliedRules"] = [];
-    let highestSeverity: KAIADecision["severity"] = "low";
+    const appliedRules: KAIADecision['appliedRules'] = [];
+    let highestSeverity: KAIADecision['severity'] = 'low';
     let requiresReview = false;
 
     // Apply each rule
     for (const rule of this.rules) {
       const ruleResult = this.evaluateRule(rule, context);
-      
+
       if (ruleResult) {
         appliedRules.push(ruleResult);
 
@@ -89,27 +91,27 @@ export class KAIAEngine {
         }
 
         // Check if review is required
-        if (rule.requiresReview && ruleResult.result !== "pass") {
+        if (rule.requiresReview && ruleResult.result !== 'pass') {
           requiresReview = true;
         }
       }
     }
 
     // Determine overall decision
-    const hasFailures = appliedRules.some(r => r.result === "fail");
-    const hasWarnings = appliedRules.some(r => r.result === "warning");
+    const hasFailures = appliedRules.some((r) => r.result === 'fail');
+    const hasWarnings = appliedRules.some((r) => r.result === 'warning');
 
-    let decision: KAIADecision["decision"];
+    let decision: KAIADecision['decision'];
     let approved: boolean;
 
     if (hasFailures) {
-      decision = requiresReview ? "review_required" : "rejected";
+      decision = requiresReview ? 'review_required' : 'rejected';
       approved = false;
     } else if (hasWarnings) {
-      decision = "flagged";
+      decision = 'flagged';
       approved = true; // Approved with warnings
     } else {
-      decision = "approved";
+      decision = 'approved';
       approved = true;
     }
 
@@ -124,7 +126,7 @@ export class KAIAEngine {
       overallReason,
       overallReasonAr,
       severity: highestSeverity,
-      requiresHumanReview: requiresReview || decision === "review_required"
+      requiresHumanReview: requiresReview || decision === 'review_required',
     };
   }
 
@@ -132,43 +134,43 @@ export class KAIAEngine {
    * Evaluate a single rule against the context
    */
   private evaluateRule(
-    rule: EthicalRule, 
+    rule: EthicalRule,
     context: EvaluationContext
-  ): KAIADecision["appliedRules"][0] | null {
+  ): KAIADecision['appliedRules'][0] | null {
     try {
       const { conditions, action } = rule.ruleLogic;
-      
+
       // Evaluate all conditions
-      const conditionResults = conditions.map(condition => 
+      const conditionResults = conditions.map((condition) =>
         this.evaluateCondition(condition, context)
       );
 
       // All conditions must pass for the rule to apply
-      const allConditionsMet = conditionResults.every(r => r);
+      const allConditionsMet = conditionResults.every((r) => r);
 
       if (!allConditionsMet) {
         return null; // Rule doesn't apply to this context
       }
 
       // Determine result based on action
-      let result: "pass" | "fail" | "warning";
+      let result: 'pass' | 'fail' | 'warning';
       let reason: string;
       let reasonAr: string;
 
       switch (action) {
-        case "reject":
-          result = "fail";
+        case 'reject':
+          result = 'fail';
           reason = rule.ruleDescription;
           reasonAr = rule.ruleDescriptionAr || reason;
           break;
-        case "flag":
-          result = "warning";
+        case 'flag':
+          result = 'warning';
           reason = `Warning: ${rule.ruleDescription}`;
           reasonAr = `تحذير: ${rule.ruleDescriptionAr || rule.ruleDescription}`;
           break;
-        case "approve":
+        case 'approve':
         default:
-          result = "pass";
+          result = 'pass';
           reason = `Complies with: ${rule.ruleName}`;
           reasonAr = `متوافق مع: ${rule.ruleNameAr || rule.ruleName}`;
           break;
@@ -179,7 +181,7 @@ export class KAIAEngine {
         ruleName: rule.ruleName,
         result,
         reason,
-        reasonAr
+        reasonAr,
       };
     } catch (error) {
       console.error(`[KAIA] Error evaluating rule ${rule.id}:`, error);
@@ -195,37 +197,37 @@ export class KAIAEngine {
     context: EvaluationContext
   ): boolean {
     const { field, operator, value } = condition;
-    
+
     // Get the actual value from context
     const actualValue = this.getFieldValue(field, context);
 
     // Evaluate based on operator
     switch (operator) {
-      case "equals":
-      case "==":
+      case 'equals':
+      case '==':
         return actualValue === value;
-      case "not_equals":
-      case "!=":
+      case 'not_equals':
+      case '!=':
         return actualValue !== value;
-      case "greater_than":
-      case ">":
+      case 'greater_than':
+      case '>':
         return Number(actualValue) > Number(value);
-      case "less_than":
-      case "<":
+      case 'less_than':
+      case '<':
         return Number(actualValue) < Number(value);
-      case "greater_than_or_equal":
-      case ">=":
+      case 'greater_than_or_equal':
+      case '>=':
         return Number(actualValue) >= Number(value);
-      case "less_than_or_equal":
-      case "<=":
+      case 'less_than_or_equal':
+      case '<=':
         return Number(actualValue) <= Number(value);
-      case "contains":
+      case 'contains':
         return String(actualValue).includes(String(value));
-      case "not_contains":
+      case 'not_contains':
         return !String(actualValue).includes(String(value));
-      case "in":
+      case 'in':
         return Array.isArray(value) && value.includes(actualValue);
-      case "not_in":
+      case 'not_in':
         return Array.isArray(value) && !value.includes(actualValue);
       default:
         console.warn(`[KAIA] Unknown operator: ${operator}`);
@@ -238,11 +240,11 @@ export class KAIAEngine {
    */
   private getFieldValue(field: string, context: EvaluationContext): any {
     // Support nested field access with dot notation
-    const parts = field.split(".");
+    const parts = field.split('.');
     let value: any = context;
 
     for (const part of parts) {
-      if (value && typeof value === "object" && part in value) {
+      if (value && typeof value === 'object' && part in value) {
         value = value[part];
       } else {
         return undefined;
@@ -256,8 +258,8 @@ export class KAIAEngine {
    * Compare severity levels
    */
   private compareSeverity(
-    severity1: "low" | "medium" | "high" | "critical",
-    severity2: "low" | "medium" | "high" | "critical"
+    severity1: 'low' | 'medium' | 'high' | 'critical',
+    severity2: 'low' | 'medium' | 'high' | 'critical'
   ): number {
     const levels = { low: 1, medium: 2, high: 3, critical: 4 };
     return levels[severity1] - levels[severity2];
@@ -267,18 +269,18 @@ export class KAIAEngine {
    * Generate overall reason in English
    */
   private generateOverallReason(
-    decision: KAIADecision["decision"],
-    appliedRules: KAIADecision["appliedRules"]
+    decision: KAIADecision['decision'],
+    appliedRules: KAIADecision['appliedRules']
   ): string {
-    const failures = appliedRules.filter(r => r.result === "fail");
-    const warnings = appliedRules.filter(r => r.result === "warning");
+    const failures = appliedRules.filter((r) => r.result === 'fail');
+    const warnings = appliedRules.filter((r) => r.result === 'warning');
 
-    if (decision === "rejected") {
-      return `Transaction rejected due to ${failures.length} ethical rule violation(s): ${failures.map(r => r.ruleName).join(", ")}`;
-    } else if (decision === "review_required") {
+    if (decision === 'rejected') {
+      return `Transaction rejected due to ${failures.length} ethical rule violation(s): ${failures.map((r) => r.ruleName).join(', ')}`;
+    } else if (decision === 'review_required') {
       return `Transaction requires human review due to ${failures.length} critical rule violation(s)`;
-    } else if (decision === "flagged") {
-      return `Transaction approved with ${warnings.length} warning(s): ${warnings.map(r => r.ruleName).join(", ")}`;
+    } else if (decision === 'flagged') {
+      return `Transaction approved with ${warnings.length} warning(s): ${warnings.map((r) => r.ruleName).join(', ')}`;
     } else {
       return `Transaction approved - complies with all ${appliedRules.length} applicable ethical rules`;
     }
@@ -288,17 +290,17 @@ export class KAIAEngine {
    * Generate overall reason in Arabic
    */
   private generateOverallReasonAr(
-    decision: KAIADecision["decision"],
-    appliedRules: KAIADecision["appliedRules"]
+    decision: KAIADecision['decision'],
+    appliedRules: KAIADecision['appliedRules']
   ): string {
-    const failures = appliedRules.filter(r => r.result === "fail");
-    const warnings = appliedRules.filter(r => r.result === "warning");
+    const failures = appliedRules.filter((r) => r.result === 'fail');
+    const warnings = appliedRules.filter((r) => r.result === 'warning');
 
-    if (decision === "rejected") {
+    if (decision === 'rejected') {
       return `تم رفض المعاملة بسبب ${failures.length} انتهاك للقواعد الأخلاقية`;
-    } else if (decision === "review_required") {
+    } else if (decision === 'review_required') {
       return `تتطلب المعاملة مراجعة بشرية بسبب ${failures.length} انتهاك حرج للقواعد`;
-    } else if (decision === "flagged") {
+    } else if (decision === 'flagged') {
       return `تمت الموافقة على المعاملة مع ${warnings.length} تحذير`;
     } else {
       return `تمت الموافقة على المعاملة - متوافقة مع جميع القواعد الأخلاقية المطبقة (${appliedRules.length})`;
@@ -310,8 +312,11 @@ export class KAIAEngine {
    */
   async isTransactionShariaCompliant(transaction: Partial<Transaction>): Promise<boolean> {
     const decision = await this.evaluateTransaction(transaction);
-    return decision.approved && !decision.appliedRules.some(r => 
-      r.result === "fail" && r.ruleName.toLowerCase().includes("sharia")
+    return (
+      decision.approved &&
+      !decision.appliedRules.some(
+        (r) => r.result === 'fail' && r.ruleName.toLowerCase().includes('sharia')
+      )
     );
   }
 

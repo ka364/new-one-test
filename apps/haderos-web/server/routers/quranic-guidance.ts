@@ -16,7 +16,10 @@ import { eq, and, sql, desc, inArray } from 'drizzle-orm';
 /**
  * Context Matcher - Simple algorithm to match business context with relevant verses
  */
-function matchContextToVerses(context: string, area?: string): {
+function matchContextToVerses(
+  context: string,
+  area?: string
+): {
   keywords: string[];
   contextTypes: string[];
 } {
@@ -27,13 +30,22 @@ function matchContextToVerses(context: string, area?: string): {
   const contextTypes: string[] = [];
 
   // HR contexts
-  if (contextLower.includes('hire') || contextLower.includes('employ') || contextLower.includes('recruit')) {
+  if (
+    contextLower.includes('hire') ||
+    contextLower.includes('employ') ||
+    contextLower.includes('recruit')
+  ) {
     keywords.push('الصدق', 'الأمانة', 'حسن المعاملة');
     contextTypes.push('hiring', 'employee_relations');
   }
 
   // Finance contexts
-  if (contextLower.includes('finance') || contextLower.includes('money') || contextLower.includes('payment') || areaLower === 'finance') {
+  if (
+    contextLower.includes('finance') ||
+    contextLower.includes('money') ||
+    contextLower.includes('payment') ||
+    areaLower === 'finance'
+  ) {
     keywords.push('الربا', 'المال', 'العدل في التجارة');
     contextTypes.push('financial_decision', 'finance');
   }
@@ -45,31 +57,51 @@ function matchContextToVerses(context: string, area?: string): {
   }
 
   // Decision making contexts
-  if (contextLower.includes('decision') || contextLower.includes('meeting') || contextLower.includes('strategy')) {
+  if (
+    contextLower.includes('decision') ||
+    contextLower.includes('meeting') ||
+    contextLower.includes('strategy')
+  ) {
     keywords.push('الشورى', 'المشاورة', 'القرار');
     contextTypes.push('team_meeting', 'decision_making', 'strategy_planning');
   }
 
   // Quality and measurement
-  if (contextLower.includes('quality') || contextLower.includes('measure') || contextLower.includes('product')) {
+  if (
+    contextLower.includes('quality') ||
+    contextLower.includes('measure') ||
+    contextLower.includes('product')
+  ) {
     keywords.push('الميزان', 'القسط', 'العدل في التجارة');
     contextTypes.push('quality_control', 'fair_measurement');
   }
 
   // Customer service
-  if (contextLower.includes('customer') || contextLower.includes('service') || contextLower.includes('client')) {
+  if (
+    contextLower.includes('customer') ||
+    contextLower.includes('service') ||
+    contextLower.includes('client')
+  ) {
     keywords.push('حسن المعاملة', 'الكلام الطيب', 'الإحسان');
     contextTypes.push('customer_service', 'customer_relations');
   }
 
   // Leadership
-  if (contextLower.includes('lead') || contextLower.includes('manage') || contextLower.includes('team')) {
+  if (
+    contextLower.includes('lead') ||
+    contextLower.includes('manage') ||
+    contextLower.includes('team')
+  ) {
     keywords.push('القيادة', 'الشورى', 'العدل');
     contextTypes.push('leadership', 'team_consultation');
   }
 
   // Challenges and difficulties
-  if (contextLower.includes('challenge') || contextLower.includes('difficult') || contextLower.includes('problem')) {
+  if (
+    contextLower.includes('challenge') ||
+    contextLower.includes('difficult') ||
+    contextLower.includes('problem')
+  ) {
     keywords.push('الصبر', 'المثابرة', 'التفاؤل');
     contextTypes.push('challenges', 'persistence', 'resilience');
   }
@@ -110,18 +142,13 @@ export const quranicGuidanceRouter = router({
         })
         .from(managementApplications)
         .innerJoin(quranicVerses, eq(managementApplications.verseId, quranicVerses.id))
-        .where(
-          inArray(managementApplications.contextType, contextTypes)
-        )
+        .where(inArray(managementApplications.contextType, contextTypes))
         .orderBy(desc(managementApplications.relevanceScore))
         .limit(3);
 
       // If no specific application matches, search by keywords
       if (relevantVerses.length === 0) {
-        const allVerses = await db
-          .select()
-          .from(quranicVerses)
-          .limit(100);
+        const allVerses = await db.select().from(quranicVerses).limit(100);
 
         // Simple keyword matching
         const matchedVerses = allVerses.filter((verse) => {
@@ -271,17 +298,13 @@ export const quranicGuidanceRouter = router({
    * Get guidance statistics
    */
   getStatistics: publicProcedure.query(async () => {
-    const totalVerses = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(quranicVerses);
+    const totalVerses = await db.select({ count: sql<number>`count(*)` }).from(quranicVerses);
 
     const totalApplications = await db
       .select({ count: sql<number>`count(*)` })
       .from(managementApplications);
 
-    const totalInteractions = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(guidanceLog);
+    const totalInteractions = await db.select({ count: sql<number>`count(*)` }).from(guidanceLog);
 
     const mostUsedVerses = await db
       .select({

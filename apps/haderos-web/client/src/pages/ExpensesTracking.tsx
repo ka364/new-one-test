@@ -1,8 +1,8 @@
-import { CreditCard, TrendingDown, PieChart as PieChartIcon, DollarSign } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, TrendingDown, PieChart as PieChartIcon, DollarSign } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
+import { trpc } from '@/lib/trpc';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
 
@@ -14,7 +14,7 @@ export default function ExpensesTracking() {
       style: 'currency',
       currency: 'EGP',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -22,10 +22,10 @@ export default function ExpensesTracking() {
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
 
   // Prepare pie chart data
-  const pieData = expenses.map(item => ({
+  const pieData = expenses.map((item) => ({
     name: item.category,
     value: item.amount,
-    percentage: totalExpenses > 0 ? (item.amount / totalExpenses) * 100 : 0
+    percentage: totalExpenses > 0 ? (item.amount / totalExpenses) * 100 : 0,
   }));
 
   return (
@@ -34,9 +34,7 @@ export default function ExpensesTracking() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">تتبع المصروفات</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            تحليل شامل للمصروفات حسب الفئة
-          </p>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">تحليل شامل للمصروفات حسب الفئة</p>
         </div>
 
         {/* Summary Card */}
@@ -45,17 +43,13 @@ export default function ExpensesTracking() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl">إجمالي المصروفات (الشهر الحالي)</CardTitle>
-                <CardDescription className="mt-2">
-                  مجموع جميع المصروفات التشغيلية
-                </CardDescription>
+                <CardDescription className="mt-2">مجموع جميع المصروفات التشغيلية</CardDescription>
               </div>
               <CreditCard className="w-12 h-12 text-red-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-red-600">
-              {formatCurrency(totalExpenses)}
-            </div>
+            <div className="text-4xl font-bold text-red-600">{formatCurrency(totalExpenses)}</div>
           </CardContent>
         </Card>
 
@@ -65,9 +59,7 @@ export default function ExpensesTracking() {
           <Card>
             <CardHeader>
               <CardTitle>توزيع المصروفات</CardTitle>
-              <CardDescription>
-                نسبة كل فئة من إجمالي المصروفات
-              </CardDescription>
+              <CardDescription>نسبة كل فئة من إجمالي المصروفات</CardDescription>
             </CardHeader>
             <CardContent>
               {expensesBreakdown.isLoading ? (
@@ -91,16 +83,16 @@ export default function ExpensesTracking() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px',
-                        direction: 'rtl'
+                        direction: 'rtl',
                       }}
                       formatter={(value: number) => formatCurrency(value)}
                     />
-                    <Legend 
+                    <Legend
                       wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
                       formatter={(value) => value}
                     />
@@ -119,17 +111,18 @@ export default function ExpensesTracking() {
             <Card>
               <CardHeader>
                 <CardTitle>المصروفات حسب الفئة</CardTitle>
-                <CardDescription>
-                  تفصيل المصروفات لكل فئة
-                </CardDescription>
+                <CardDescription>تفصيل المصروفات لكل فئة</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {expenses.map((expense, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
+                        <div
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
                         <div>
@@ -146,7 +139,7 @@ export default function ExpensesTracking() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {expenses.length === 0 && !expensesBreakdown.isLoading && (
                     <div className="text-center py-8 text-gray-500">
                       لا توجد مصروفات مسجلة للشهر الحالي
@@ -162,9 +155,7 @@ export default function ExpensesTracking() {
         <Card>
           <CardHeader>
             <CardTitle>جدول المصروفات التفصيلي</CardTitle>
-            <CardDescription>
-              قائمة كاملة بجميع المصروفات
-            </CardDescription>
+            <CardDescription>قائمة كاملة بجميع المصروفات</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -180,8 +171,8 @@ export default function ExpensesTracking() {
                   {expenses.map((expense, index) => (
                     <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="py-3 px-4 flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
+                        <div
+                          className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
                         {expense.category}
@@ -197,9 +188,7 @@ export default function ExpensesTracking() {
                   {expenses.length > 0 && (
                     <tr className="border-t-2 font-bold">
                       <td className="py-3 px-4">الإجمالي</td>
-                      <td className="py-3 px-4 text-red-600">
-                        {formatCurrency(totalExpenses)}
-                      </td>
+                      <td className="py-3 px-4 text-red-600">{formatCurrency(totalExpenses)}</td>
                       <td className="py-3 px-4">100%</td>
                     </tr>
                   )}

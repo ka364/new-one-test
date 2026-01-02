@@ -29,19 +29,26 @@ export default function ShippingAllocationPage() {
                 <MapPin className="h-5 w-5" />
                 <span>القاهرة - مدينة نصر</span>
               </div>
-              
+
               <div className="space-y-2">
                 <p className="font-bold">شركات الشحن المتاحة:</p>
                 <div className="grid gap-2">
                   {['Bosta', 'Aramex', 'DHL'].map((company) => (
-                    <div key={company} className="p-3 border rounded-lg flex items-center justify-between">
+                    <div
+                      key={company}
+                      className="p-3 border rounded-lg flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
                         <Truck className="h-5 w-5" />
                         <span className="font-medium">{company}</span>
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-600">30 ج.م</span>
-                        <Button size="sm" style={{ backgroundColor: '#C62822' }} className="text-white">
+                        <Button
+                          size="sm"
+                          style={{ backgroundColor: '#C62822' }}
+                          className="text-white"
+                        >
                           اختيار
                         </Button>
                       </div>

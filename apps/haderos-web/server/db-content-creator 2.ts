@@ -1,4 +1,4 @@
-import { getDb } from "./db";
+import { getDb } from './db';
 import {
   productImageRequests,
   InsertProductImageRequest,
@@ -8,8 +8,8 @@ import {
   InsertContentTemplate,
   teamNotifications,
   InsertTeamNotification,
-} from "../drizzle/schema-content-creator";
-import { eq, desc, and, gte, lte, like, or } from "drizzle-orm";
+} from '../drizzle/schema-content-creator';
+import { eq, desc, and, gte, lte, like, or } from 'drizzle-orm';
 
 // ============================================
 // PRODUCT IMAGE REQUESTS
@@ -60,32 +60,28 @@ export async function getImageRequestsByStatus(status: string, limit = 100) {
 
 export async function createImageRequest(data: InsertProductImageRequest) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return await db.insert(productImageRequests).values(data);
 }
 
-export async function updateImageRequestStatus(
-  id: number,
-  status: string,
-  assignedTo?: number
-) {
+export async function updateImageRequestStatus(id: number, status: string, assignedTo?: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const updateData: any = {
     status,
     updatedAt: new Date(),
   };
-  
+
   if (assignedTo) {
     updateData.assignedTo = assignedTo;
     updateData.assignedAt = new Date();
   }
-  
-  if (status === "completed") {
+
+  if (status === 'completed') {
     updateData.completedAt = new Date();
   }
-  
+
   return await db
     .update(productImageRequests)
     .set(updateData)
@@ -97,13 +93,13 @@ export async function addCompletedImages(
   images: Array<{ url: string; filename: string; uploadedAt: string; notes?: string }>
 ) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   return await db
     .update(productImageRequests)
     .set({
       completedImages: images as any,
-      status: "review" as any,
+      status: 'review' as any,
       updatedAt: new Date(),
     })
     .where(eq(productImageRequests.id, id));
@@ -111,14 +107,14 @@ export async function addCompletedImages(
 
 export async function rateImageRequest(id: number, rating: number, feedback?: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   return await db
     .update(productImageRequests)
     .set({
       rating,
       feedback,
-      status: "completed",
+      status: 'completed',
       completedAt: new Date(),
       updatedAt: new Date(),
     })
@@ -142,11 +138,7 @@ export async function getAllContentCalendar(limit = 100) {
 export async function getContentCalendarById(id: number) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db
-    .select()
-    .from(contentCalendar)
-    .where(eq(contentCalendar.id, id))
-    .limit(1);
+  const result = await db.select().from(contentCalendar).where(eq(contentCalendar.id, id)).limit(1);
   return result[0] || null;
 }
 
@@ -178,27 +170,24 @@ export async function getContentCalendarByUser(userId: number, limit = 50) {
 
 export async function createContentCalendar(data: InsertContentCalendar) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return await db.insert(contentCalendar).values(data);
 }
 
 export async function updateContentCalendarStatus(id: number, status: string) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const updateData: any = {
     status,
     updatedAt: new Date(),
   };
-  
-  if (status === "published") {
+
+  if (status === 'published') {
     updateData.publishedDate = new Date();
   }
-  
-  return await db
-    .update(contentCalendar)
-    .set(updateData)
-    .where(eq(contentCalendar.id, id));
+
+  return await db.update(contentCalendar).set(updateData).where(eq(contentCalendar.id, id));
 }
 
 export async function updateContentMetrics(
@@ -212,8 +201,8 @@ export async function updateContentMetrics(
   }
 ) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   return await db
     .update(contentCalendar)
     .set({
@@ -255,28 +244,23 @@ export async function getContentTemplatesByCategory(category: string) {
   return await db
     .select()
     .from(contentTemplates)
-    .where(
-      and(
-        eq(contentTemplates.category, category),
-        eq(contentTemplates.isActive, true)
-      )
-    )
+    .where(and(eq(contentTemplates.category, category), eq(contentTemplates.isActive, true)))
     .orderBy(desc(contentTemplates.usageCount));
 }
 
 export async function createContentTemplate(data: InsertContentTemplate) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return await db.insert(contentTemplates).values(data);
 }
 
 export async function incrementTemplateUsage(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const template = await getContentTemplateById(id);
   if (!template) return;
-  
+
   return await db
     .update(contentTemplates)
     .set({
@@ -318,25 +302,20 @@ export async function getUnreadNotifications(userId: number) {
   return await db
     .select()
     .from(teamNotifications)
-    .where(
-      and(
-        eq(teamNotifications.toUserId, userId),
-        eq(teamNotifications.isRead, false)
-      )
-    )
+    .where(and(eq(teamNotifications.toUserId, userId), eq(teamNotifications.isRead, false)))
     .orderBy(desc(teamNotifications.createdAt));
 }
 
 export async function createTeamNotification(data: InsertTeamNotification) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return await db.insert(teamNotifications).values(data);
 }
 
 export async function markNotificationAsRead(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   return await db
     .update(teamNotifications)
     .set({
@@ -348,8 +327,8 @@ export async function markNotificationAsRead(id: number) {
 
 export async function markAllNotificationsAsRead(userId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   return await db
     .update(teamNotifications)
     .set({

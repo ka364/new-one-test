@@ -10,7 +10,7 @@ describe('PaymentService', () => {
         orderId: 1,
         amount: 599.99,
         provider: 'instapay',
-        customerPhone: '01012345678'
+        customerPhone: '01012345678',
       };
 
       const createdPayment = {
@@ -18,7 +18,7 @@ describe('PaymentService', () => {
         transactionId: 'TXN-2026-001',
         status: 'pending',
         ...paymentData,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       expect(createdPayment.transactionId).toMatch(/^TXN-\d{4}-\d+$/);
@@ -40,7 +40,14 @@ describe('PaymentService', () => {
     });
 
     test('يجب رفض بوابة دفع غير مدعومة', () => {
-      const supportedProviders = ['cod', 'instapay', 'paymob', 'fawry', 'vodafone_cash', 'orange_money'];
+      const supportedProviders = [
+        'cod',
+        'instapay',
+        'paymob',
+        'fawry',
+        'vodafone_cash',
+        'orange_money',
+      ];
 
       const validateProvider = (provider: string) => {
         if (!supportedProviders.includes(provider)) {
@@ -58,12 +65,12 @@ describe('PaymentService', () => {
 
   describe('Payment Status Management', () => {
     const validTransitions: Record<string, string[]> = {
-      'pending': ['processing', 'failed', 'cancelled'],
-      'processing': ['completed', 'failed'],
-      'completed': ['refunded'],
-      'failed': ['pending'], // Retry allowed
-      'cancelled': [],
-      'refunded': []
+      pending: ['processing', 'failed', 'cancelled'],
+      processing: ['completed', 'failed'],
+      completed: ['refunded'],
+      failed: ['pending'], // Retry allowed
+      cancelled: [],
+      refunded: [],
     };
 
     test('يجب السماح بالانتقال من pending إلى processing', () => {
@@ -124,17 +131,17 @@ describe('PaymentService', () => {
 
   describe('Fee Calculation', () => {
     const providerFees: Record<string, { percentage: number; fixed: number }> = {
-      'cod': { percentage: 0, fixed: 0 },
-      'instapay': { percentage: 0.5, fixed: 0 },
-      'paymob': { percentage: 2.5, fixed: 1 },
-      'fawry': { percentage: 1.5, fixed: 2 }
+      cod: { percentage: 0, fixed: 0 },
+      instapay: { percentage: 0.5, fixed: 0 },
+      paymob: { percentage: 2.5, fixed: 1 },
+      fawry: { percentage: 1.5, fixed: 2 },
     };
 
     test('يجب حساب رسوم COD بصفر', () => {
       const calculateFee = (amount: number, provider: string) => {
         const fee = providerFees[provider];
         if (!fee) return 0;
-        return (amount * fee.percentage / 100) + fee.fixed;
+        return (amount * fee.percentage) / 100 + fee.fixed;
       };
 
       expect(calculateFee(100, 'cod')).toBe(0);
@@ -144,7 +151,7 @@ describe('PaymentService', () => {
       const calculateFee = (amount: number, provider: string) => {
         const fee = providerFees[provider];
         if (!fee) return 0;
-        return (amount * fee.percentage / 100) + fee.fixed;
+        return (amount * fee.percentage) / 100 + fee.fixed;
       };
 
       expect(calculateFee(1000, 'instapay')).toBe(5); // 0.5% of 1000
@@ -154,7 +161,7 @@ describe('PaymentService', () => {
       const calculateFee = (amount: number, provider: string) => {
         const fee = providerFees[provider];
         if (!fee) return 0;
-        return (amount * fee.percentage / 100) + fee.fixed;
+        return (amount * fee.percentage) / 100 + fee.fixed;
       };
 
       expect(calculateFee(1000, 'paymob')).toBe(26); // 2.5% of 1000 + 1
@@ -171,7 +178,7 @@ describe('PaymentService', () => {
           paymentId: payment.id,
           refundAmount,
           status: 'pending',
-          createdAt: new Date()
+          createdAt: new Date(),
         };
       };
 

@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -18,9 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Package,
   Truck,
@@ -34,58 +34,61 @@ import {
   User,
   Calendar,
   DollarSign,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function Shipments() {
-  const [activeTab, setActiveTab] = useState("all");
-  const [selectedCarrier, setSelectedCarrier] = useState<string>("");
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedCarrier, setSelectedCarrier] = useState<string>('');
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Mock data - will be replaced with real tRPC data
   const shipments = [
     {
-      id: "1",
-      trackingNumber: "NOW-12345",
-      carrier: "Bosta",
-      customerName: "أحمد محمد",
-      phone: "01012345678",
-      address: "القاهرة، مصر الجديدة",
-      status: "delivered",
+      id: '1',
+      trackingNumber: 'NOW-12345',
+      carrier: 'Bosta',
+      customerName: 'أحمد محمد',
+      phone: '01012345678',
+      address: 'القاهرة، مصر الجديدة',
+      status: 'delivered',
       cod: 450,
-      createdAt: "2025-12-18",
+      createdAt: '2025-12-18',
     },
     {
-      id: "2",
-      trackingNumber: "NOW-12346",
-      carrier: "J&T",
-      customerName: "فاطمة علي",
-      phone: "01123456789",
-      address: "الجيزة، المهندسين",
-      status: "in_transit",
+      id: '2',
+      trackingNumber: 'NOW-12346',
+      carrier: 'J&T',
+      customerName: 'فاطمة علي',
+      phone: '01123456789',
+      address: 'الجيزة، المهندسين',
+      status: 'in_transit',
       cod: 380,
-      createdAt: "2025-12-18",
+      createdAt: '2025-12-18',
     },
     {
-      id: "3",
-      trackingNumber: "NOW-12347",
-      carrier: "GT Express",
-      customerName: "محمود حسن",
-      phone: "01234567890",
-      address: "الإسكندرية، سموحة",
-      status: "pending",
+      id: '3',
+      trackingNumber: 'NOW-12347',
+      carrier: 'GT Express',
+      customerName: 'محمود حسن',
+      phone: '01234567890',
+      address: 'الإسكندرية، سموحة',
+      status: 'pending',
       cod: 520,
-      createdAt: "2025-12-17",
+      createdAt: '2025-12-17',
     },
   ];
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      pending: { label: "قيد الانتظار", variant: "secondary" },
-      picked_up: { label: "تم الاستلام", variant: "default" },
-      in_transit: { label: "في الطريق", variant: "default" },
-      delivered: { label: "تم التوصيل", variant: "outline" },
-      cancelled: { label: "ملغي", variant: "destructive" },
-      returned: { label: "مرتجع", variant: "destructive" },
+    const variants: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
+      pending: { label: 'قيد الانتظار', variant: 'secondary' },
+      picked_up: { label: 'تم الاستلام', variant: 'default' },
+      in_transit: { label: 'في الطريق', variant: 'default' },
+      delivered: { label: 'تم التوصيل', variant: 'outline' },
+      cancelled: { label: 'ملغي', variant: 'destructive' },
+      returned: { label: 'مرتجع', variant: 'destructive' },
     };
     const config = variants[status] || variants.pending;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -93,16 +96,12 @@ export default function Shipments() {
 
   const getCarrierBadge = (carrier: string) => {
     const colors: Record<string, string> = {
-      Bosta: "bg-blue-100 text-blue-800",
-      "J&T": "bg-red-100 text-red-800",
-      "GT Express": "bg-green-100 text-green-800",
-      Eshhnly: "bg-purple-100 text-purple-800",
+      Bosta: 'bg-blue-100 text-blue-800',
+      'J&T': 'bg-red-100 text-red-800',
+      'GT Express': 'bg-green-100 text-green-800',
+      Eshhnly: 'bg-purple-100 text-purple-800',
     };
-    return (
-      <Badge className={colors[carrier] || "bg-gray-100 text-gray-800"}>
-        {carrier}
-      </Badge>
-    );
+    return <Badge className={colors[carrier] || 'bg-gray-100 text-gray-800'}>{carrier}</Badge>;
   };
 
   return (
@@ -116,10 +115,7 @@ export default function Shipments() {
               إدارة جميع الشحنات عبر Bosta، J&T، GT Express، واشحنلي
             </p>
           </div>
-          <Button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="gap-2"
-          >
+          <Button onClick={() => setShowCreateForm(!showCreateForm)} className="gap-2">
             <Plus className="w-4 h-4" />
             شحنة جديدة
           </Button>
@@ -233,15 +229,12 @@ export default function Shipments() {
                 <Plus className="w-4 h-4 ml-2" />
                 إنشاء الشحنة
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateForm(false)}
-              >
+              <Button variant="outline" onClick={() => setShowCreateForm(false)}>
                 إلغاء
               </Button>
             </div>
 
-            {selectedCarrier === "bosta" || selectedCarrier === "jnt" ? (
+            {selectedCarrier === 'bosta' || selectedCarrier === 'jnt' ? (
               <p className="text-sm text-green-600 mt-4">
                 ✅ سيتم إنشاء الشحنة تلقائياً عبر API وطباعة البوليصة
               </p>
@@ -329,9 +322,7 @@ export default function Shipments() {
                 <TableBody>
                   {shipments.map((shipment) => (
                     <TableRow key={shipment.id}>
-                      <TableCell className="font-medium">
-                        {shipment.trackingNumber}
-                      </TableCell>
+                      <TableCell className="font-medium">{shipment.trackingNumber}</TableCell>
                       <TableCell>{getCarrierBadge(shipment.carrier)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -348,15 +339,11 @@ export default function Shipments() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span className="max-w-xs truncate">
-                            {shipment.address}
-                          </span>
+                          <span className="max-w-xs truncate">{shipment.address}</span>
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(shipment.status)}</TableCell>
-                      <TableCell className="font-semibold">
-                        {shipment.cod} ج.م
-                      </TableCell>
+                      <TableCell className="font-semibold">{shipment.cod} ج.م</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-gray-400" />

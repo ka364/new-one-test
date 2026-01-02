@@ -1,7 +1,7 @@
 /**
  * Integration Test: Egyptian Customer Journey
  * اختبار تكامل: رحلة العميل المصري الكاملة
- * 
+ *
  * يختبر رحلة عميل مصرية كاملة:
  * 1. تصفح المنتجات
  * 2. إنشاء طلب
@@ -29,7 +29,7 @@ const createMockContext = (user?: { id: number; role?: string }) => ({
 
 describe('Integration: Egyptian Customer Journey', () => {
   let caller: ReturnType<typeof appRouter.createCaller>;
-  
+
   beforeEach(() => {
     caller = appRouter.createCaller(createMockContext());
   });
@@ -226,4 +226,3 @@ describe('Integration: Egyptian Customer Journey', () => {
     expect(cancelledOrder.status).toBe('cancelled');
   });
 });
-

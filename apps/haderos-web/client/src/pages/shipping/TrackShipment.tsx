@@ -175,7 +175,9 @@ export default function TrackShipmentPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-full ${getStatusColor(shipmentData.status)} flex items-center justify-center`}>
+                    <div
+                      className={`w-16 h-16 rounded-full ${getStatusColor(shipmentData.status)} flex items-center justify-center`}
+                    >
                       <TruckIcon className="h-8 w-8 text-white" />
                     </div>
                     <div>
@@ -183,7 +185,8 @@ export default function TrackShipmentPage() {
                         {shipmentData.trackingNumber}
                       </h3>
                       <p className="text-gray-600 mt-1">
-                        الموقع الحالي: <span className="font-medium">{shipmentData.currentLocation}</span>
+                        الموقع الحالي:{' '}
+                        <span className="font-medium">{shipmentData.currentLocation}</span>
                       </p>
                     </div>
                   </div>
@@ -231,11 +234,15 @@ export default function TrackShipmentPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">التوصيل المتوقع: {shipmentData.estimatedDelivery}</span>
+                    <span className="text-gray-600">
+                      التوصيل المتوقع: {shipmentData.estimatedDelivery}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-gray-400" />
-                    <span className="font-bold text-green-600">{shipmentData.codAmount.toLocaleString()} ج.م</span>
+                    <span className="font-bold text-green-600">
+                      {shipmentData.codAmount.toLocaleString()} ج.م
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -294,11 +301,15 @@ export default function TrackShipmentPage() {
                         <div
                           className={`
                             relative z-10 w-8 h-8 rounded-full flex items-center justify-center
-                            ${event.completed
-                              ? 'bg-green-500'
-                              : index === shipmentData.events.findIndex((e: TrackingEvent) => !e.completed)
-                              ? 'bg-orange-500 animate-pulse'
-                              : 'bg-gray-300'
+                            ${
+                              event.completed
+                                ? 'bg-green-500'
+                                : index ===
+                                    shipmentData.events.findIndex(
+                                      (e: TrackingEvent) => !e.completed
+                                    )
+                                  ? 'bg-orange-500 animate-pulse'
+                                  : 'bg-gray-300'
                             }
                           `}
                         >
@@ -313,7 +324,9 @@ export default function TrackShipmentPage() {
                         <div className="flex-1 pb-6">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h4 className={`font-bold ${event.completed ? 'text-gray-900' : 'text-gray-500'}`}>
+                              <h4
+                                className={`font-bold ${event.completed ? 'text-gray-900' : 'text-gray-500'}`}
+                              >
                                 {event.status}
                               </h4>
                               <p className="text-sm text-gray-600 mt-1">{event.description}</p>
@@ -344,12 +357,8 @@ export default function TrackShipmentPage() {
           <Card>
             <CardContent className="p-12 text-center">
               <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ابحث عن شحنتك
-              </h3>
-              <p className="text-gray-500">
-                أدخل رقم التتبع في الأعلى لمتابعة حالة شحنتك
-              </p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">ابحث عن شحنتك</h3>
+              <p className="text-gray-500">أدخل رقم التتبع في الأعلى لمتابعة حالة شحنتك</p>
             </CardContent>
           </Card>
         )}

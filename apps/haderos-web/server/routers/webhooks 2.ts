@@ -3,10 +3,10 @@
  * APIs for monitoring Shopify webhooks and recent orders
  */
 
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { requireDb } from "../db";
-import { sql } from "drizzle-orm";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { requireDb } from '../db';
+import { sql } from 'drizzle-orm';
 
 export const webhooksRouter = router({
   /**
@@ -14,7 +14,7 @@ export const webhooksRouter = router({
    */
   getStats: protectedProcedure.query(async () => {
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     // Get total webhooks
     const [totalResult]: any = await db.execute(
@@ -53,7 +53,7 @@ export const webhooksRouter = router({
       total,
       success,
       failed,
-      successRate: total > 0 ? ((success / total) * 100).toFixed(1) : "0",
+      successRate: total > 0 ? ((success / total) * 100).toFixed(1) : '0',
       last24h,
       topicStats: topicStats || [],
     };
@@ -71,7 +71,7 @@ export const webhooksRouter = router({
     )
     .query(async ({ input }: any) => {
       const db = await requireDb();
-      if (!db) throw new Error("Database connection failed");
+      if (!db) throw new Error('Database connection failed');
 
       let query = sql`
         SELECT 
@@ -102,7 +102,7 @@ export const webhooksRouter = router({
     )
     .query(async ({ input }: any) => {
       const db = await requireDb();
-      if (!db) throw new Error("Database connection failed");
+      if (!db) throw new Error('Database connection failed');
 
       const [orders]: any = await db.execute(sql`
         SELECT 
@@ -123,7 +123,7 @@ export const webhooksRouter = router({
    */
   getActivityTimeline: protectedProcedure.query(async () => {
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     const [timeline]: any = await db.execute(sql`
       SELECT 
@@ -145,12 +145,10 @@ export const webhooksRouter = router({
    */
   getOrderStats: protectedProcedure.query(async () => {
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     // Total orders
-    const [totalResult]: any = await db.execute(
-      sql`SELECT COUNT(*) as total FROM shopify_orders`
-    );
+    const [totalResult]: any = await db.execute(sql`SELECT COUNT(*) as total FROM shopify_orders`);
     const total = totalResult[0]?.total || 0;
 
     // Orders today

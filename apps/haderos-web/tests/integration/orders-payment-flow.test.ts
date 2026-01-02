@@ -1,12 +1,12 @@
 /**
  * Integration Test: Orders + Payment Flow
  * اختبار تكامل: رحلة الطلب والدفع الكاملة
- * 
+ *
  * يختبر التكامل بين:
  * - orders.ts (96.5%)
  * - payment.ts (96.5%)
  * - Bio-Modules Integration
- * 
+ *
  * تشغيل الاختبار:
  * npm run test tests/integration/orders-payment-flow.test.ts
  */
@@ -30,7 +30,7 @@ const createMockContext = (user?: { id: number; role?: string }) => ({
 
 describe('Integration: Orders + Payment Flow', () => {
   let caller: ReturnType<typeof appRouter.createCaller>;
-  
+
   beforeEach(() => {
     caller = appRouter.createCaller(createMockContext());
   });
@@ -334,7 +334,7 @@ describe('Integration: Orders + Payment Flow', () => {
       // This test verifies that Corvid is tracking failures
       // In a real scenario, we would check the Bio-Modules logs
       // For now, we just verify the system doesn't crash
-      
+
       const orderResult = await caller.orders.createOrder.mutate({
         customerName: 'Test User',
         customerPhone: '01012345678',
@@ -358,7 +358,7 @@ describe('Integration: Orders + Payment Flow', () => {
     it('should handle database errors gracefully', async () => {
       // This would require mocking database to fail
       // For now, we test with invalid data
-      
+
       await expect(
         caller.orders.createOrder.mutate({
           customerName: '',
@@ -373,7 +373,7 @@ describe('Integration: Orders + Payment Flow', () => {
     it('should handle Bio-Modules failures gracefully', async () => {
       // Even if Bio-Modules fail, order should still be created
       // This is tested by the graceful degradation in the code
-      
+
       const orderResult = await caller.orders.createOrder.mutate({
         customerName: 'Test User',
         customerPhone: '01012345678',
@@ -455,4 +455,3 @@ describe('Integration: Orders + Payment Flow', () => {
     });
   });
 });
-

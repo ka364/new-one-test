@@ -70,7 +70,8 @@ export class SystemAnalyzer {
     const largestFiles: FileInfo[] = [];
     const warnings: Warning[] = [];
 
-    for (const file of files.slice(0, 100)) { // Sample first 100 files
+    for (const file of files.slice(0, 100)) {
+      // Sample first 100 files
       const ext = path.extname(file);
       filesByType[ext] = (filesByType[ext] || 0) + 1;
 
@@ -233,10 +234,7 @@ export class SystemAnalyzer {
     security: number;
   }> {
     try {
-      const packageJson = await readFile(
-        path.join(this.projectRoot, 'package.json'),
-        'utf-8'
-      );
+      const packageJson = await readFile(path.join(this.projectRoot, 'package.json'), 'utf-8');
       const pkg = JSON.parse(packageJson);
 
       const deps = {

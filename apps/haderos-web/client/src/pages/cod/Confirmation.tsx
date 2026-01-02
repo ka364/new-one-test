@@ -28,11 +28,13 @@ export default function ConfirmationPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-bold">{order.id}</h3>
-                    <p className="text-gray-600">{order.customer} - {order.city}</p>
+                    <p className="text-gray-600">
+                      {order.customer} - {order.city}
+                    </p>
                   </div>
                   <Badge className="bg-orange-500">قيد الانتظار</Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-500">رقم الهاتف</p>
@@ -46,7 +48,7 @@ export default function ConfirmationPage() {
                     <p className="font-bold text-green-600">{order.amount.toLocaleString()} ج.م</p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button style={{ backgroundColor: '#C62822' }} className="text-white flex-1">
                     <Phone className="h-4 w-4 ml-2" />
@@ -64,7 +66,7 @@ export default function ConfirmationPage() {
             </Card>
           ))}
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>إحصائيات التأكيد</CardTitle>

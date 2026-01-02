@@ -13,14 +13,14 @@ export async function initializeDatabase() {
 
   try {
     console.log('🔍 Checking database tables...');
-    
+
     // Create haderos schema if it doesn't exist
     await pool.query(`CREATE SCHEMA IF NOT EXISTS haderos`);
     console.log('  ✓ haderos schema created/verified');
-    
+
     // Set search_path to haderos schema
     await pool.query(`SET search_path TO haderos`);
-    
+
     // Check if events table exists (our main table)
     const checkResult = await pool.query(`
       SELECT table_name 
@@ -28,15 +28,15 @@ export async function initializeDatabase() {
       WHERE table_schema = 'haderos' 
       AND table_name = 'events'
     `);
-    
+
     if (checkResult.rows.length > 0) {
       console.log('✅ Database tables already exist, skipping initialization');
       await pool.end();
       return;
     }
-    
+
     console.log('📋 Creating database tables in haderos schema...');
-    
+
     // Create users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -51,7 +51,7 @@ export async function initializeDatabase() {
       )
     `);
     console.log('  ✓ users table created');
-    
+
     // Create events table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS events (
@@ -63,7 +63,7 @@ export async function initializeDatabase() {
       )
     `);
     console.log('  ✓ events table created');
-    
+
     // Create products table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS products (
@@ -80,7 +80,7 @@ export async function initializeDatabase() {
       )
     `);
     console.log('  ✓ products table created');
-    
+
     // Create orders table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -95,7 +95,7 @@ export async function initializeDatabase() {
       )
     `);
     console.log('  ✓ orders table created');
-    
+
     // Create transactions table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS transactions (
@@ -109,16 +109,18 @@ export async function initializeDatabase() {
       )
     `);
     console.log('  ✓ transactions table created');
-    
+
     // Create indexes
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(transaction_type)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(transaction_type)`
+    );
     console.log('  ✓ indexes created');
-    
+
     // Insert initial test data
     await pool.query(`
       INSERT INTO users (open_id, name, email, role) VALUES
@@ -127,18 +129,17 @@ export async function initializeDatabase() {
       ON CONFLICT (open_id) DO NOTHING
     `);
     console.log('  ✓ test users created');
-    
+
     await pool.query(`
       INSERT INTO products (name, name_ar, description, price, stock, category) VALUES
       ('Test Product 1', 'منتج تجريبي 1', 'Test product description', 99.99, 10, 'shoes'),
       ('Test Product 2', 'منتج تجريبي 2', 'Another test product', 149.99, 5, 'shoes')
     `);
     console.log('  ✓ test products created');
-    
+
     console.log('🎉 Database initialization completed successfully!');
-    
+
     await pool.end();
-    
   } catch (error) {
     console.error('❌ Error initializing database:', error);
     await pool.end();

@@ -1,18 +1,24 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Download, Search, Package, TruckIcon, Calendar } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Download, Search, Package, TruckIcon, Calendar } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function ShipmentTracking() {
-  const [company, setCompany] = useState<string>("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [search, setSearch] = useState("");
+  const [company, setCompany] = useState<string>('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const limit = 50;
 
@@ -29,12 +35,11 @@ export default function ShipmentTracking() {
 
   const exportMutation = trpc.shipments.export.useMutation({
     onSuccess: (data) => {
-      const blob = new Blob(
-        [Uint8Array.from(atob(data.excelFile), c => c.charCodeAt(0))],
-        { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
-      );
+      const blob = new Blob([Uint8Array.from(atob(data.excelFile), (c) => c.charCodeAt(0))], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = data.filename;
       document.body.appendChild(a);
@@ -54,10 +59,10 @@ export default function ShipmentTracking() {
   };
 
   const handleReset = () => {
-    setCompany("");
-    setStartDate("");
-    setEndDate("");
-    setSearch("");
+    setCompany('');
+    setStartDate('');
+    setEndDate('');
+    setSearch('');
     setPage(0);
   };
 
@@ -72,10 +77,7 @@ export default function ShipmentTracking() {
               إدارة ومتابعة جميع الشحنات من الشركات الثلاث
             </p>
           </div>
-          <Button
-            onClick={handleExport}
-            disabled={exportMutation.isPending}
-          >
+          <Button onClick={handleExport} disabled={exportMutation.isPending}>
             {exportMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -104,18 +106,23 @@ export default function ShipmentTracking() {
               </CardContent>
             </Card>
 
-            {statsQuery.data.byCompany && (statsQuery.data.byCompany as any[]).map((stat: any) => (
-              <Card key={stat.company}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground capitalize">
-                    {stat.company === 'bosta' ? 'Bosta' : stat.company === 'gt_express' ? 'GT Express' : 'Eshhnly'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.count}</div>
-                </CardContent>
-              </Card>
-            ))}
+            {statsQuery.data.byCompany &&
+              (statsQuery.data.byCompany as any[]).map((stat: any) => (
+                <Card key={stat.company}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground capitalize">
+                      {stat.company === 'bosta'
+                        ? 'Bosta'
+                        : stat.company === 'gt_express'
+                          ? 'GT Express'
+                          : 'Eshhnly'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.count}</div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         )}
 
@@ -123,9 +130,7 @@ export default function ShipmentTracking() {
         <Card>
           <CardHeader>
             <CardTitle>فلترة الشحنات</CardTitle>
-            <CardDescription>
-              ابحث وفلتر الشحنات حسب الشركة والتاريخ
-            </CardDescription>
+            <CardDescription>ابحث وفلتر الشحنات حسب الشركة والتاريخ</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-4">
@@ -155,11 +160,7 @@ export default function ShipmentTracking() {
 
               <div className="space-y-2">
                 <Label>إلى تاريخ</Label>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
 
               <div className="space-y-2">
@@ -173,15 +174,14 @@ export default function ShipmentTracking() {
                     className="pr-10"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">ابحث في جميع الحقول: اسم العميل، رقم الهاتف، رقم التتبع، رقم الطلب</p>
+                <p className="text-xs text-muted-foreground">
+                  ابحث في جميع الحقول: اسم العميل، رقم الهاتف، رقم التتبع، رقم الطلب
+                </p>
               </div>
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleReset}
-              >
+              <Button variant="outline" onClick={handleReset}>
                 إعادة تعيين
               </Button>
             </div>
@@ -193,7 +193,7 @@ export default function ShipmentTracking() {
           <CardHeader>
             <CardTitle>قائمة الشحنات</CardTitle>
             <CardDescription>
-              {shipmentsQuery.data ? `${shipmentsQuery.data.total} شحنة` : "جاري التحميل..."}
+              {shipmentsQuery.data ? `${shipmentsQuery.data.total} شحنة` : 'جاري التحميل...'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -224,23 +224,36 @@ export default function ShipmentTracking() {
                         <tr key={shipment.id} className="border-b hover:bg-muted/50">
                           <td className="p-3 text-sm">{page * limit + index + 1}</td>
                           <td className="p-3">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              shipment.company === 'bosta' ? 'bg-blue-100 text-blue-800' :
-                              shipment.company === 'gt_express' ? 'bg-green-100 text-green-800' :
-                              'bg-purple-100 text-purple-800'
-                            }`}>
-                              {shipment.company === 'bosta' ? 'Bosta' : 
-                               shipment.company === 'gt_express' ? 'GT' : 'Eshhnly'}
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                shipment.company === 'bosta'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : shipment.company === 'gt_express'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-purple-800'
+                              }`}
+                            >
+                              {shipment.company === 'bosta'
+                                ? 'Bosta'
+                                : shipment.company === 'gt_express'
+                                  ? 'GT'
+                                  : 'Eshhnly'}
                             </span>
                           </td>
-                          <td className="p-3 text-sm font-mono">{shipment.tracking_number || '-'}</td>
+                          <td className="p-3 text-sm font-mono">
+                            {shipment.tracking_number || '-'}
+                          </td>
                           <td className="p-3 text-sm font-mono">{shipment.order_number || '-'}</td>
                           <td className="p-3 text-sm">{shipment.customer_name || '-'}</td>
-                          <td className="p-3 text-sm" dir="ltr">{shipment.customer_phone || '-'}</td>
+                          <td className="p-3 text-sm" dir="ltr">
+                            {shipment.customer_phone || '-'}
+                          </td>
                           <td className="p-3 text-sm">{shipment.quantity || 0}</td>
                           <td className="p-3 text-sm">{shipment.amount || 0} ج.م</td>
                           <td className="p-3 text-sm">
-                            {shipment.shipment_date ? new Date(shipment.shipment_date).toLocaleDateString('ar-EG') : '-'}
+                            {shipment.shipment_date
+                              ? new Date(shipment.shipment_date).toLocaleDateString('ar-EG')
+                              : '-'}
                           </td>
                         </tr>
                       ))}
@@ -251,13 +264,15 @@ export default function ShipmentTracking() {
                 {/* Pagination */}
                 <div className="mt-4 flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
-                    عرض {page * limit + 1} - {Math.min((page + 1) * limit, shipmentsQuery.data.total)} من {shipmentsQuery.data.total}
+                    عرض {page * limit + 1} -{' '}
+                    {Math.min((page + 1) * limit, shipmentsQuery.data.total)} من{' '}
+                    {shipmentsQuery.data.total}
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setPage(p => Math.max(0, p - 1))}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
                       disabled={page === 0}
                     >
                       السابق
@@ -265,7 +280,7 @@ export default function ShipmentTracking() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setPage(p => p + 1)}
+                      onClick={() => setPage((p) => p + 1)}
                       disabled={!shipmentsQuery.data.hasMore}
                     >
                       التالي

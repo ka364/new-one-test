@@ -105,11 +105,7 @@ class CacheManager {
   /**
    * Get or set (lazy loading)
    */
-  async getOrSet<T>(
-    key: string,
-    factory: () => Promise<T>,
-    ttlSeconds = 300
-  ): Promise<T> {
+  async getOrSet<T>(key: string, factory: () => Promise<T>, ttlSeconds = 300): Promise<T> {
     const cached = this.get<T>(key);
 
     if (cached !== null) {
@@ -126,22 +122,21 @@ class CacheManager {
 export const cache = new CacheManager();
 
 // Clean expired entries every 5 minutes
-setInterval(() => {
-  const cleaned = cache.cleanExpired();
-  if (cleaned > 0) {
-    console.log(`[CACHE] Cleaned ${cleaned} expired entries`);
-  }
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    const cleaned = cache.cleanExpired();
+    if (cleaned > 0) {
+      console.log(`[CACHE] Cleaned ${cleaned} expired entries`);
+    }
+  },
+  5 * 60 * 1000
+);
 
 /**
  * Cache decorator for functions
  */
 export function Cacheable(ttlSeconds = 300) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

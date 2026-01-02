@@ -4,16 +4,16 @@
  * Analyzes financial transactions, detects patterns, and forecasts cash flows
  */
 
-import { Event } from "../../drizzle/schema";
-import { 
-  getAllTransactions, 
+import { Event } from '../../drizzle/schema';
+import {
+  getAllTransactions,
   getTransactionsByDateRange,
   createAgentInsight,
-  createNotification
-} from "../db";
-import { getEventBus } from "../events/eventBus";
-import { evaluateTransactionWithKAIA } from "../kaia/engine";
-import { notifyOwner } from "../_core/notification";
+  createNotification,
+} from '../db';
+import { getEventBus } from '../events/eventBus';
+import { evaluateTransactionWithKAIA } from '../kaia/engine';
+import { notifyOwner } from '../_core/notification';
 
 export interface CashFlowForecast {
   period: string;
@@ -24,7 +24,7 @@ export interface CashFlowForecast {
 }
 
 export interface FinancialPattern {
-  type: "recurring_income" | "recurring_expense" | "anomaly" | "trend";
+  type: 'recurring_income' | 'recurring_expense' | 'anomaly' | 'trend';
   description: string;
   descriptionAr: string;
   amount: number;
@@ -50,21 +50,21 @@ export class FinancialAgent {
     const eventBus = getEventBus();
 
     // Handle transaction created events
-    eventBus.subscribe("transaction.created", async (event: Event) => {
+    eventBus.subscribe('transaction.created', async (event: Event) => {
       await this.handleTransactionCreated(event);
     });
 
     // Handle transaction updated events
-    eventBus.subscribe("transaction.updated", async (event: Event) => {
+    eventBus.subscribe('transaction.updated', async (event: Event) => {
       await this.handleTransactionUpdated(event);
     });
 
     // Handle financial threshold exceeded events
-    eventBus.subscribe("financial.threshold_exceeded", async (event: Event) => {
+    eventBus.subscribe('financial.threshold_exceeded', async (event: Event) => {
       await this.handleThresholdExceeded(event);
     });
 
-    console.log("[FinancialAgent] Event handlers registered");
+    console.log('[FinancialAgent] Event handlers registered');
   }
 
   /**
@@ -81,7 +81,7 @@ export class FinancialAgent {
 
       // Evaluate with KAIA
       const kaiaDecision = await evaluateTransactionWithKAIA(transaction);
-      
+
       if (!kaiaDecision.approved) {
         await this.notifyEthicalViolation(transaction, kaiaDecision);
       }
@@ -94,7 +94,7 @@ export class FinancialAgent {
 
       console.log(`[FinancialAgent] Processed transaction ${transaction.id}`);
     } catch (error) {
-      console.error("[FinancialAgent] Error handling transaction created:", error);
+      console.error('[FinancialAgent] Error handling transaction created:', error);
     }
   }
 
@@ -107,7 +107,7 @@ export class FinancialAgent {
       console.log(`[FinancialAgent] Transaction ${transaction.id} updated`);
       // Additional logic for updates can be added here
     } catch (error) {
-      console.error("[FinancialAgent] Error handling transaction updated:", error);
+      console.error('[FinancialAgent] Error handling transaction updated:', error);
     }
   }
 
@@ -117,22 +117,22 @@ export class FinancialAgent {
   private async handleThresholdExceeded(event: Event) {
     try {
       const { type, value, threshold } = event.eventData;
-      
+
       await createAgentInsight({
-        agentType: "financial",
-        insightType: "threshold_alert",
+        agentType: 'financial',
+        insightType: 'threshold_alert',
         title: `Financial Threshold Exceeded: ${type}`,
         titleAr: `تجاوز الحد المالي: ${type}`,
         description: `The ${type} has exceeded the threshold of ${threshold}. Current value: ${value}`,
         descriptionAr: `تجاوز ${type} الحد المسموح به ${threshold}. القيمة الحالية: ${value}`,
         insightData: { type, value, threshold },
-        priority: "high",
-        status: "new"
+        priority: 'high',
+        status: 'new',
       });
 
       console.log(`[FinancialAgent] Threshold exceeded alert created`);
     } catch (error) {
-      console.error("[FinancialAgent] Error handling threshold exceeded:", error);
+      console.error('[FinancialAgent] Error handling threshold exceeded:', error);
     }
   }
 
@@ -144,27 +144,27 @@ export class FinancialAgent {
       // Notify owner
       await notifyOwner({
         title: `Large Transaction Detected: $${transaction.amount}`,
-        content: `A large ${transaction.type} transaction of $${transaction.amount} was created.\n\nTransaction: ${transaction.transactionNumber}\nDescription: ${transaction.description || "N/A"}`
+        content: `A large ${transaction.type} transaction of $${transaction.amount} was created.\n\nTransaction: ${transaction.transactionNumber}\nDescription: ${transaction.description || 'N/A'}`,
       });
 
       // Create insight
       await createAgentInsight({
-        agentType: "financial",
-        insightType: "large_transaction",
+        agentType: 'financial',
+        insightType: 'large_transaction',
         title: `Large Transaction: $${transaction.amount}`,
         titleAr: `معاملة كبيرة: $${transaction.amount}`,
         description: `A large ${transaction.type} transaction was detected`,
         descriptionAr: `تم اكتشاف معاملة ${transaction.type} كبيرة`,
         insightData: { transaction },
-        priority: "high",
-        status: "new",
-        relatedEntityType: "transaction",
-        relatedEntityId: transaction.id
+        priority: 'high',
+        status: 'new',
+        relatedEntityType: 'transaction',
+        relatedEntityId: transaction.id,
       });
 
       console.log(`[FinancialAgent] Large transaction notification sent`);
     } catch (error) {
-      console.error("[FinancialAgent] Error notifying large transaction:", error);
+      console.error('[FinancialAgent] Error notifying large transaction:', error);
     }
   }
 
@@ -176,27 +176,27 @@ export class FinancialAgent {
       // Notify owner
       await notifyOwner({
         title: `Ethical Violation Detected`,
-        content: `Transaction ${transaction.transactionNumber} failed ethical compliance check.\n\nReason: ${kaiaDecision.overallReason}\n\nAction Required: Review and approve/reject manually.`
+        content: `Transaction ${transaction.transactionNumber} failed ethical compliance check.\n\nReason: ${kaiaDecision.overallReason}\n\nAction Required: Review and approve/reject manually.`,
       });
 
       // Create insight
       await createAgentInsight({
-        agentType: "financial",
-        insightType: "ethical_violation",
+        agentType: 'financial',
+        insightType: 'ethical_violation',
         title: `Ethical Violation in Transaction ${transaction.transactionNumber}`,
         titleAr: `انتهاك أخلاقي في المعاملة ${transaction.transactionNumber}`,
         description: kaiaDecision.overallReason,
         descriptionAr: kaiaDecision.overallReasonAr,
         insightData: { transaction, kaiaDecision },
-        priority: "critical",
-        status: "new",
-        relatedEntityType: "transaction",
-        relatedEntityId: transaction.id
+        priority: 'critical',
+        status: 'new',
+        relatedEntityType: 'transaction',
+        relatedEntityId: transaction.id,
       });
 
       console.log(`[FinancialAgent] Ethical violation notification sent`);
     } catch (error) {
-      console.error("[FinancialAgent] Error notifying ethical violation:", error);
+      console.error('[FinancialAgent] Error notifying ethical violation:', error);
     }
   }
 
@@ -212,7 +212,7 @@ export class FinancialAgent {
 
       const recentTransactions = await getTransactionsByDateRange(startDate, endDate);
       const sameTypeTransactions = recentTransactions.filter(
-        t => t.type === transaction.type && t.id !== transaction.id
+        (t) => t.type === transaction.type && t.id !== transaction.id
       );
 
       if (sameTypeTransactions.length < 5) {
@@ -220,7 +220,7 @@ export class FinancialAgent {
       }
 
       // Calculate mean and standard deviation
-      const amounts = sameTypeTransactions.map(t => Number(t.amount));
+      const amounts = sameTypeTransactions.map((t) => Number(t.amount));
       const mean = amounts.reduce((a, b) => a + b, 0) / amounts.length;
       const variance = amounts.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / amounts.length;
       const stdDev = Math.sqrt(variance);
@@ -231,7 +231,7 @@ export class FinancialAgent {
 
       return zScore > this.ANOMALY_THRESHOLD;
     } catch (error) {
-      console.error("[FinancialAgent] Error detecting anomaly:", error);
+      console.error('[FinancialAgent] Error detecting anomaly:', error);
       return false;
     }
   }
@@ -242,22 +242,22 @@ export class FinancialAgent {
   private async notifyAnomaly(transaction: any) {
     try {
       await createAgentInsight({
-        agentType: "financial",
-        insightType: "anomaly_detected",
+        agentType: 'financial',
+        insightType: 'anomaly_detected',
         title: `Anomaly Detected in Transaction ${transaction.transactionNumber}`,
         titleAr: `تم اكتشاف شذوذ في المعاملة ${transaction.transactionNumber}`,
         description: `This transaction amount (${transaction.amount}) is significantly different from recent similar transactions`,
         descriptionAr: `مبلغ هذه المعاملة (${transaction.amount}) يختلف بشكل كبير عن المعاملات المماثلة الأخيرة`,
         insightData: { transaction },
-        priority: "medium",
-        status: "new",
-        relatedEntityType: "transaction",
-        relatedEntityId: transaction.id
+        priority: 'medium',
+        status: 'new',
+        relatedEntityType: 'transaction',
+        relatedEntityId: transaction.id,
       });
 
       console.log(`[FinancialAgent] Anomaly notification created`);
     } catch (error) {
-      console.error("[FinancialAgent] Error notifying anomaly:", error);
+      console.error('[FinancialAgent] Error notifying anomaly:', error);
     }
   }
 
@@ -282,29 +282,33 @@ export class FinancialAgent {
         const period = forecastDate.toISOString().slice(0, 7); // YYYY-MM
 
         // Calculate average income and expenses
-        const incomeTransactions = historicalTransactions.filter(t => t.type === "income");
-        const expenseTransactions = historicalTransactions.filter(t => t.type === "expense");
+        const incomeTransactions = historicalTransactions.filter((t) => t.type === 'income');
+        const expenseTransactions = historicalTransactions.filter((t) => t.type === 'expense');
 
-        const avgIncome = incomeTransactions.length > 0
-          ? incomeTransactions.reduce((sum, t) => sum + Number(t.amount), 0) / incomeTransactions.length
-          : 0;
+        const avgIncome =
+          incomeTransactions.length > 0
+            ? incomeTransactions.reduce((sum, t) => sum + Number(t.amount), 0) /
+              incomeTransactions.length
+            : 0;
 
-        const avgExpenses = expenseTransactions.length > 0
-          ? expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0) / expenseTransactions.length
-          : 0;
+        const avgExpenses =
+          expenseTransactions.length > 0
+            ? expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0) /
+              expenseTransactions.length
+            : 0;
 
         forecasts.push({
           period,
           predictedIncome: avgIncome,
           predictedExpenses: avgExpenses,
           predictedNetFlow: avgIncome - avgExpenses,
-          confidence: 0.7 // Simple confidence score
+          confidence: 0.7, // Simple confidence score
         });
       }
 
       return forecasts;
     } catch (error) {
-      console.error("[FinancialAgent] Error forecasting cash flow:", error);
+      console.error('[FinancialAgent] Error forecasting cash flow:', error);
       return [];
     }
   }
@@ -325,9 +329,9 @@ export class FinancialAgent {
 
       // Detect recurring transactions (simplified)
       const transactionsByDescription = new Map<string, any[]>();
-      
-      transactions.forEach(t => {
-        const desc = t.description || "Unknown";
+
+      transactions.forEach((t) => {
+        const desc = t.description || 'Unknown';
         if (!transactionsByDescription.has(desc)) {
           transactionsByDescription.set(desc, []);
         }
@@ -341,19 +345,19 @@ export class FinancialAgent {
           const type = txns[0].type;
 
           patterns.push({
-            type: type === "income" ? "recurring_income" : "recurring_expense",
+            type: type === 'income' ? 'recurring_income' : 'recurring_expense',
             description: `Recurring ${type}: ${desc}`,
-            descriptionAr: `${type === "income" ? "دخل متكرر" : "مصروف متكرر"}: ${desc}`,
+            descriptionAr: `${type === 'income' ? 'دخل متكرر' : 'مصروف متكرر'}: ${desc}`,
             amount: avgAmount,
             frequency: `${txns.length} times in 3 months`,
-            confidence: 0.8
+            confidence: 0.8,
           });
         }
       });
 
       return patterns;
     } catch (error) {
-      console.error("[FinancialAgent] Error detecting patterns:", error);
+      console.error('[FinancialAgent] Error detecting patterns:', error);
       return [];
     }
   }
@@ -366,11 +370,11 @@ export class FinancialAgent {
       const transactions = await getTransactionsByDateRange(startDate, endDate);
 
       const income = transactions
-        .filter(t => t.type === "income")
+        .filter((t) => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
       const expenses = transactions
-        .filter(t => t.type === "expense")
+        .filter((t) => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
       const netFlow = income - expenses;
@@ -378,17 +382,19 @@ export class FinancialAgent {
       return {
         period: {
           start: startDate.toISOString().slice(0, 10),
-          end: endDate.toISOString().slice(0, 10)
+          end: endDate.toISOString().slice(0, 10),
         },
         totalIncome: income,
         totalExpenses: expenses,
         netFlow,
         transactionCount: transactions.length,
-        avgTransactionSize: transactions.length > 0 ? 
-          transactions.reduce((sum, t) => sum + Number(t.amount), 0) / transactions.length : 0
+        avgTransactionSize:
+          transactions.length > 0
+            ? transactions.reduce((sum, t) => sum + Number(t.amount), 0) / transactions.length
+            : 0,
       };
     } catch (error) {
-      console.error("[FinancialAgent] Error generating summary:", error);
+      console.error('[FinancialAgent] Error generating summary:', error);
       return null;
     }
   }

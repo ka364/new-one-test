@@ -1,5 +1,5 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
@@ -8,8 +8,8 @@ const execAsync = promisify(exec);
  * يستخدم rclone المُعد مسبقاً للتفاعل مع Google Drive
  */
 
-const RCLONE_CONFIG = "/home/ubuntu/.gdrive-rclone.ini";
-const REMOTE_NAME = "manus_google_drive";
+const RCLONE_CONFIG = '/home/ubuntu/.gdrive-rclone.ini';
+const REMOTE_NAME = 'manus_google_drive';
 
 interface GoogleDriveFile {
   name: string;
@@ -25,7 +25,7 @@ interface GoogleDriveFile {
 export async function createFolder(folderPath: string): Promise<void> {
   const remotePath = `${REMOTE_NAME}:${folderPath}`;
   const command = `rclone mkdir "${remotePath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     await execAsync(command);
   } catch (error) {
@@ -36,13 +36,10 @@ export async function createFolder(folderPath: string): Promise<void> {
 /**
  * رفع ملف إلى Google Drive
  */
-export async function uploadFile(
-  localFilePath: string,
-  remotePath: string
-): Promise<string> {
+export async function uploadFile(localFilePath: string, remotePath: string): Promise<string> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
   const command = `rclone copy "${localFilePath}" "${remoteFullPath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     await execAsync(command);
     return remotePath;
@@ -62,23 +59,23 @@ export async function createGoogleSheet(
   data: string[][]
 ): Promise<{ path: string; link: string }> {
   // تحويل البيانات إلى CSV
-  const csvContent = data.map(row => row.join(',')).join('\n');
-  
+  const csvContent = data.map((row) => row.join(',')).join('\n');
+
   // حفظ مؤقتاً
   const tempFile = `/tmp/${sheetName}-${Date.now()}.csv`;
   const fs = await import('fs/promises');
   await fs.writeFile(tempFile, csvContent);
-  
+
   // رفع إلى Google Drive
   const remotePath = `${folderPath}/${sheetName}.csv`;
   await uploadFile(tempFile, remotePath);
-  
+
   // حذف الملف المؤقت
   await fs.unlink(tempFile);
-  
+
   // الحصول على رابط المشاركة
   const link = await getShareableLink(remotePath);
-  
+
   return { path: remotePath, link };
 }
 
@@ -88,7 +85,7 @@ export async function createGoogleSheet(
 export async function getShareableLink(remotePath: string): Promise<string> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
   const command = `rclone link "${remoteFullPath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     const { stdout } = await execAsync(command);
     return stdout.trim();
@@ -100,13 +97,10 @@ export async function getShareableLink(remotePath: string): Promise<string> {
 /**
  * قراءة محتوى ملف من Google Drive
  */
-export async function downloadFile(
-  remotePath: string,
-  localPath: string
-): Promise<void> {
+export async function downloadFile(remotePath: string, localPath: string): Promise<void> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
   const command = `rclone copy "${remoteFullPath}" "${localPath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     await execAsync(command);
   } catch (error) {
@@ -120,7 +114,7 @@ export async function downloadFile(
 export async function listFiles(folderPath: string): Promise<GoogleDriveFile[]> {
   const remotePath = `${REMOTE_NAME}:${folderPath}`;
   const command = `rclone lsjson "${remotePath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     const { stdout } = await execAsync(command);
     const files = JSON.parse(stdout);
@@ -142,7 +136,7 @@ export async function listFiles(folderPath: string): Promise<GoogleDriveFile[]> 
 export async function deleteFile(remotePath: string): Promise<void> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
   const command = `rclone delete "${remoteFullPath}" --config ${RCLONE_CONFIG}`;
-  
+
   try {
     await execAsync(command);
   } catch (error) {
@@ -154,14 +148,11 @@ export async function deleteFile(remotePath: string): Promise<void> {
  * إنشاء مسار منظم للملفات
  * Format: YYYY-MM-DD/username/HH-MM-SS-filename.ext
  */
-export function generateOrganizedPath(
-  username: string,
-  filename: string
-): string {
+export function generateOrganizedPath(username: string, filename: string): string {
   const now = new Date();
   const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
   const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
-  
+
   return `${date}/${username}/${time}-${filename}`;
 }
 
@@ -179,10 +170,10 @@ export async function createInvoice(
 ): Promise<{ path: string; link: string }> {
   const sheetName = `Invoice-${invoiceData.invoiceNumber}`;
   const folderPath = generateOrganizedPath(username, '').split('/').slice(0, 2).join('/');
-  
+
   // إنشاء المجلد إذا لم يكن موجوداً
   await createFolder(folderPath);
-  
+
   // بناء بيانات الفاتورة
   const data = [
     ['Invoice Number', invoiceData.invoiceNumber],
@@ -190,7 +181,7 @@ export async function createInvoice(
     ['Date', new Date().toLocaleDateString('ar-EG')],
     [],
     ['Item', 'Quantity', 'Price', 'Total'],
-    ...invoiceData.items.map(item => [
+    ...invoiceData.items.map((item) => [
       item.name,
       item.quantity.toString(),
       item.price.toString(),
@@ -199,7 +190,7 @@ export async function createInvoice(
     [],
     ['Total', '', '', invoiceData.total.toString()],
   ];
-  
+
   return await createGoogleSheet(sheetName, folderPath, data);
 }
 
@@ -215,15 +206,15 @@ export async function createDailyReport(
 ): Promise<{ path: string; link: string }> {
   const sheetName = `Daily-Report-${reportData.date}`;
   const folderPath = generateOrganizedPath(username, '').split('/').slice(0, 2).join('/');
-  
+
   await createFolder(folderPath);
-  
+
   const data = [
     ['Daily Report', reportData.date],
     [],
     ['Metric', 'Value'],
-    ...reportData.metrics.map(metric => [metric.name, metric.value]),
+    ...reportData.metrics.map((metric) => [metric.name, metric.value]),
   ];
-  
+
   return await createGoogleSheet(sheetName, folderPath, data);
 }

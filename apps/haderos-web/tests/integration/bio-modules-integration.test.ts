@@ -1,7 +1,7 @@
 /**
  * Integration Test: Bio-Modules Integration
  * اختبار تكامل: Bio-Modules مع Orders و Payment
- * 
+ *
  * يختبر:
  * - Arachnid (Fraud Detection)
  * - Corvid (Learning from Failures)
@@ -28,7 +28,7 @@ const createMockContext = (user?: { id: number; role?: string }) => ({
 
 describe('Integration: Bio-Modules Integration', () => {
   let caller: ReturnType<typeof appRouter.createCaller>;
-  
+
   beforeEach(() => {
     caller = appRouter.createCaller(createMockContext());
   });
@@ -167,7 +167,7 @@ describe('Integration: Bio-Modules Integration', () => {
     it('should continue even if Bio-Modules fail', async () => {
       // Order should be created even if Bio-Modules fail
       // This is tested by the graceful degradation in the code
-      
+
       const orderResult = await caller.orders.createOrder.mutate({
         customerName: 'Test User',
         customerPhone: '01012345678',
@@ -211,7 +211,7 @@ describe('Integration: Bio-Modules Integration', () => {
     it('should integrate with inventory distribution', async () => {
       // This would require inventory router
       // For now, we verify the integration point exists
-      
+
       const orderResult = await caller.orders.createOrder.mutate({
         customerName: 'Test User',
         customerPhone: '01012345678',
@@ -236,7 +236,7 @@ describe('Integration: Bio-Modules Integration', () => {
     it('should integrate dynamic pricing in products', async () => {
       // First, get all products to find a valid productId
       const products = await caller.products.getAllProducts.query();
-      
+
       if (products.length > 0) {
         // Test dynamic pricing through products router
         const priceResult = await caller.products.getDynamicPrice.query({
@@ -258,4 +258,3 @@ describe('Integration: Bio-Modules Integration', () => {
     });
   });
 });
-

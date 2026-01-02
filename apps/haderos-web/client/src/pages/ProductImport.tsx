@@ -4,7 +4,14 @@
  */
 
 import { useState } from 'react';
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, Download } from 'lucide-react';
+import {
+  Upload,
+  FileSpreadsheet,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Download,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,11 +53,11 @@ export default function ProductImport() {
     try {
       const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
       const gidMatch = url.match(/[#&]gid=([0-9]+)/);
-      
+
       if (match) {
         return {
           sheetId: match[1],
-          gid: gidMatch ? gidMatch[1] : '0'
+          gid: gidMatch ? gidMatch[1] : '0',
         };
       }
       return null;
@@ -74,10 +81,10 @@ export default function ProductImport() {
     try {
       // TODO: Call preview API
       // const result = await trpc.productImport.previewFromSheet.mutate(ids);
-      
+
       // Mock preview for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const mockPreview: ImportPreview = {
         totalRows: 1019,
         validProducts: 985,
@@ -86,15 +93,13 @@ export default function ProductImport() {
         preview: {
           valid: [
             { modelCode: 'HK02', nameAr: 'حذاء رياضي', costPrice: 195, retailPrice: 450 },
-            { modelCode: 'MKF02', nameAr: 'حذاء كاجوال', costPrice: 180, retailPrice: 380 }
+            { modelCode: 'MKF02', nameAr: 'حذاء كاجوال', costPrice: 180, retailPrice: 380 },
           ],
-          invalid: [
-            { modelCode: 'INVALID', error: 'سعر التكلفة أكبر من سعر البيع' }
-          ],
-          parseErrors: []
-        }
+          invalid: [{ modelCode: 'INVALID', error: 'سعر التكلفة أكبر من سعر البيع' }],
+          parseErrors: [],
+        },
       };
-      
+
       setPreview(mockPreview);
     } catch (err) {
       setError('فشل تحميل البيانات. تأكد من أن الملف عام (Public)');
@@ -120,18 +125,18 @@ export default function ProductImport() {
       //   migrateImages,
       //   skipExisting
       // });
-      
+
       // Mock import for now
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       const mockResult: ImportResult = {
         totalRows: 1019,
         imported: 950,
         skipped: 35,
         failed: 0,
-        errors: []
+        errors: [],
       };
-      
+
       setImportResult(mockResult);
       setPreview(null);
     } catch (err) {
@@ -147,12 +152,8 @@ export default function ProductImport() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            استيراد المنتجات
-          </h1>
-          <p className="text-gray-600">
-            استيراد المنتجات من Google Sheets إلى قاعدة البيانات
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">استيراد المنتجات</h1>
+          <p className="text-gray-600">استيراد المنتجات من Google Sheets إلى قاعدة البيانات</p>
         </div>
 
         {/* Input Form */}
@@ -235,23 +236,23 @@ export default function ProductImport() {
         {preview && (
           <Card className="p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4">نتائج المعاينة</h2>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-blue-50 p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-blue-600">{preview.totalRows}</div>
                 <div className="text-sm text-gray-600">إجمالي الصفوف</div>
               </div>
-              
+
               <div className="bg-green-50 p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-green-600">{preview.validProducts}</div>
                 <div className="text-sm text-gray-600">منتجات صحيحة</div>
               </div>
-              
+
               <div className="bg-yellow-50 p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-yellow-600">{preview.invalidProducts}</div>
                 <div className="text-sm text-gray-600">منتجات خاطئة</div>
               </div>
-              
+
               <div className="bg-red-50 p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-red-600">{preview.parseErrors}</div>
                 <div className="text-sm text-gray-600">أخطاء قراءة</div>
@@ -266,7 +267,10 @@ export default function ProductImport() {
                 </h3>
                 <div className="space-y-2">
                   {preview.preview.valid.map((product, index) => (
-                    <div key={index} className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
+                    <div
+                      key={index}
+                      className="bg-green-50 p-3 rounded-lg flex justify-between items-center"
+                    >
                       <div>
                         <span className="font-semibold">{product.modelCode}</span>
                         <span className="text-gray-600 mr-2">{product.nameAr}</span>
@@ -325,23 +329,23 @@ export default function ProductImport() {
               <CheckCircle2 className="text-green-600 w-8 h-8" />
               <h2 className="text-2xl font-bold text-green-900">تم الاستيراد بنجاح!</h2>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-white p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-gray-900">{importResult.totalRows}</div>
                 <div className="text-sm text-gray-600">إجمالي</div>
               </div>
-              
+
               <div className="bg-white p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-green-600">{importResult.imported}</div>
                 <div className="text-sm text-gray-600">تم الاستيراد</div>
               </div>
-              
+
               <div className="bg-white p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-yellow-600">{importResult.skipped}</div>
                 <div className="text-sm text-gray-600">تم التخطي</div>
               </div>
-              
+
               <div className="bg-white p-4 rounded-lg text-center">
                 <div className="text-3xl font-bold text-red-600">{importResult.failed}</div>
                 <div className="text-sm text-gray-600">فشل</div>
@@ -349,13 +353,15 @@ export default function ProductImport() {
             </div>
 
             <div className="flex gap-4">
-              <Button onClick={() => {
-                setImportResult(null);
-                setSheetUrl('');
-              }}>
+              <Button
+                onClick={() => {
+                  setImportResult(null);
+                  setSheetUrl('');
+                }}
+              >
                 استيراد جديد
               </Button>
-              <Button variant="outline" onClick={() => window.location.href = '/products'}>
+              <Button variant="outline" onClick={() => (window.location.href = '/products')}>
                 عرض المنتجات
               </Button>
             </div>
@@ -369,7 +375,10 @@ export default function ProductImport() {
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-purple-600 font-bold">1.</span>
-                <span>تأكد من أن Google Sheet يحتوي على الأعمدة المطلوبة (كود الموديل، الأسعار، المقاسات، الألوان)</span>
+                <span>
+                  تأكد من أن Google Sheet يحتوي على الأعمدة المطلوبة (كود الموديل، الأسعار،
+                  المقاسات، الألوان)
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-purple-600 font-bold">2.</span>

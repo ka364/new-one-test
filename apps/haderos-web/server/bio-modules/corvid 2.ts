@@ -1,14 +1,14 @@
 /**
  * Corvid Module - Crow Intelligence & Meta-Learning
- * 
+ *
  * Inspired by: Crow's remarkable memory and problem-solving
  * Problem: Systems repeat the same errors
  * Solution: Learn from mistakes and prevent recurrence
  */
 
-import { Event } from "../../drizzle/schema";
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import { Event } from '../../drizzle/schema';
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface ErrorPattern {
   id: string;
@@ -18,7 +18,7 @@ export interface ErrorPattern {
   occurrences: number;
   firstSeen: Date;
   lastSeen: Date;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   preventionRule?: PreventionRule;
 }
 
@@ -27,7 +27,7 @@ export interface PreventionRule {
   name: string;
   description: string;
   condition: string; // JSON logic
-  action: "block" | "warn" | "log";
+  action: 'block' | 'warn' | 'log';
   active: boolean;
   createdFrom: string; // Error pattern ID
   successRate: number; // 0-1
@@ -38,12 +38,12 @@ export interface LearningInsight {
   pattern: ErrorPattern;
   recommendation: string;
   confidence: number;
-  impact: "low" | "medium" | "high";
+  impact: 'low' | 'medium' | 'high';
 }
 
 /**
  * Enhanced Corvid Learning Engine
- * 
+ *
  * Capabilities:
  * 1. Pattern extraction from errors
  * 2. Prevention rule generation
@@ -67,9 +67,9 @@ export class CorvidLearningEngine {
    */
   private async loadErrorMemory(): Promise<void> {
     try {
-      const { db } = await import("../db");
-      const { events } = await import("../../drizzle/schema");
-      const { eq, gte } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { events } = await import('../../drizzle/schema');
+      const { eq, gte } = await import('drizzle-orm');
 
       // Load error events from last 90 days
       const ninetyDaysAgo = new Date();
@@ -78,20 +78,18 @@ export class CorvidLearningEngine {
       const errorEvents = await db
         .select()
         .from(events)
-        .where(
-          gte(events.createdAt, ninetyDaysAgo)
-        );
+        .where(gte(events.createdAt, ninetyDaysAgo));
 
       // Extract patterns
       for (const event of errorEvents) {
-        if (event.type.includes("error") || event.type.includes("failed")) {
+        if (event.type.includes('error') || event.type.includes('failed')) {
           await this.extractPattern(event);
         }
       }
 
       console.log(`[Corvid] Loaded ${this.errorMemory.size} error patterns from memory`);
     } catch (error) {
-      console.error("[Corvid] Error loading error memory:", error);
+      console.error('[Corvid] Error loading error memory:', error);
     }
   }
 
@@ -103,7 +101,7 @@ export class CorvidLearningEngine {
       // TODO: Load from prevention_rules table when implemented
       console.log(`[Corvid] Loaded ${this.preventionRules.size} prevention rules`);
     } catch (error) {
-      console.error("[Corvid] Error loading prevention rules:", error);
+      console.error('[Corvid] Error loading prevention rules:', error);
     }
   }
 
@@ -114,13 +112,13 @@ export class CorvidLearningEngine {
     const eventBus = getEventBus();
 
     // Listen for all error events
-    eventBus.on("*", async (event: Event) => {
-      if (event.type.includes("error") || event.type.includes("failed")) {
+    eventBus.on('*', async (event: Event) => {
+      if (event.type.includes('error') || event.type.includes('failed')) {
         await this.recordError(event);
       }
     });
 
-    console.log("[Corvid] Event handlers registered");
+    console.log('[Corvid] Event handlers registered');
   }
 
   /**
@@ -140,19 +138,19 @@ export class CorvidLearningEngine {
 
           // Create insight
           await createAgentInsight({
-            agentType: "corvid",
-            insightType: "prevention_rule_created",
+            agentType: 'corvid',
+            insightType: 'prevention_rule_created',
             title: `🧠 New Prevention Rule: ${rule.name}`,
             titleAr: `🧠 قاعدة وقائية جديدة: ${rule.name}`,
             description: `Created prevention rule from ${pattern.occurrences} similar errors: ${rule.description}`,
             descriptionAr: `تم إنشاء قاعدة وقائية من ${pattern.occurrences} أخطاء مشابهة: ${rule.description}`,
-            severity: "medium",
+            severity: 'medium',
             actionable: true,
             metadata: {
               ruleId: rule.id,
               patternId: pattern.id,
-              occurrences: pattern.occurrences
-            }
+              occurrences: pattern.occurrences,
+            },
           });
 
           console.log(`[Corvid] Created prevention rule: ${rule.name}`);
@@ -165,17 +163,17 @@ export class CorvidLearningEngine {
       // Emit learning event
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "corvid.learned",
+        type: 'corvid.learned',
         entityId: event.id,
-        entityType: "event",
+        entityType: 'event',
         payload: {
           patternId: pattern.id,
           occurrences: pattern.occurrences,
-          hasRule: !!pattern.preventionRule
-        }
+          hasRule: !!pattern.preventionRule,
+        },
       });
     } catch (error) {
-      console.error("[Corvid] Error recording error:", error);
+      console.error('[Corvid] Error recording error:', error);
     }
   }
 
@@ -203,7 +201,7 @@ export class CorvidLearningEngine {
         occurrences: 1,
         firstSeen: new Date(),
         lastSeen: new Date(),
-        severity: this.determineSeverity(event)
+        severity: this.determineSeverity(event),
       };
     }
 
@@ -217,9 +215,9 @@ export class CorvidLearningEngine {
     const parts = [
       event.type,
       event.entityType,
-      JSON.stringify(this.extractKeyFeatures(event.payload as Record<string, any>))
+      JSON.stringify(this.extractKeyFeatures(event.payload as Record<string, any>)),
     ];
-    return Buffer.from(parts.join("|")).toString("base64").substring(0, 32);
+    return Buffer.from(parts.join('|')).toString('base64').substring(0, 32);
   }
 
   /**
@@ -230,9 +228,10 @@ export class CorvidLearningEngine {
 
     // Extract error type
     if (payload.error) {
-      features.errorType = typeof payload.error === "string" 
-        ? payload.error.split(":")[0] 
-        : payload.error.name || "Unknown";
+      features.errorType =
+        typeof payload.error === 'string'
+          ? payload.error.split(':')[0]
+          : payload.error.name || 'Unknown';
     }
 
     // Extract error code
@@ -259,45 +258,45 @@ export class CorvidLearningEngine {
   private extractPatternString(event: Event): string {
     const payload = event.payload as Record<string, any>;
     const features = this.extractKeyFeatures(payload);
-    
+
     const parts: string[] = [];
-    
+
     if (features.errorType) {
       parts.push(`Error: ${features.errorType}`);
     }
-    
+
     if (features.operation) {
       parts.push(`during ${features.operation}`);
     }
-    
+
     if (features.entityType) {
       parts.push(`on ${features.entityType}`);
     }
 
-    return parts.join(" ") || event.type;
+    return parts.join(' ') || event.type;
   }
 
   /**
    * Determine severity from event
    */
-  private determineSeverity(event: Event): ErrorPattern["severity"] {
+  private determineSeverity(event: Event): ErrorPattern['severity'] {
     const payload = event.payload as Record<string, any>;
 
     // Check for critical keywords
-    const criticalKeywords = ["crash", "fatal", "critical", "security"];
+    const criticalKeywords = ['crash', 'fatal', 'critical', 'security'];
     const eventStr = JSON.stringify(payload).toLowerCase();
 
-    if (criticalKeywords.some(keyword => eventStr.includes(keyword))) {
-      return "critical";
+    if (criticalKeywords.some((keyword) => eventStr.includes(keyword))) {
+      return 'critical';
     }
 
     // Check for high severity keywords
-    const highKeywords = ["failed", "error", "exception"];
-    if (highKeywords.some(keyword => eventStr.includes(keyword))) {
-      return "high";
+    const highKeywords = ['failed', 'error', 'exception'];
+    if (highKeywords.some((keyword) => eventStr.includes(keyword))) {
+      return 'high';
     }
 
-    return "medium";
+    return 'medium';
   }
 
   /**
@@ -314,16 +313,16 @@ export class CorvidLearningEngine {
         name: `Prevent: ${pattern.pattern}`,
         description: `Automatically prevent errors matching pattern: ${pattern.pattern}`,
         condition,
-        action: pattern.severity === "critical" ? "block" : "warn",
+        action: pattern.severity === 'critical' ? 'block' : 'warn',
         active: true,
         createdFrom: pattern.id,
         successRate: 0,
-        applicationsCount: 0
+        applicationsCount: 0,
       };
 
       return rule;
     } catch (error) {
-      console.error("[Corvid] Error generating prevention rule:", error);
+      console.error('[Corvid] Error generating prevention rule:', error);
       return null;
     }
   }
@@ -333,32 +332,32 @@ export class CorvidLearningEngine {
    */
   private extractCondition(pattern: ErrorPattern): string {
     const features = this.extractKeyFeatures(pattern.context);
-    
+
     // Build JSON logic condition
     const conditions: any[] = [];
 
     if (features.errorType) {
       conditions.push({
-        "==": [{ "var": "error.type" }, features.errorType]
+        '==': [{ var: 'error.type' }, features.errorType],
       });
     }
 
     if (features.operation) {
       conditions.push({
-        "==": [{ "var": "operation" }, features.operation]
+        '==': [{ var: 'operation' }, features.operation],
       });
     }
 
     if (features.entityType) {
       conditions.push({
-        "==": [{ "var": "entityType" }, features.entityType]
+        '==': [{ var: 'entityType' }, features.entityType],
       });
     }
 
-    if (conditions.length === 0) return "";
+    if (conditions.length === 0) return '';
 
     return JSON.stringify({
-      "and": conditions
+      and: conditions,
     });
   }
 
@@ -379,9 +378,9 @@ export class CorvidLearningEngine {
       const matches = await this.evaluateRule(rule, operation);
 
       if (matches) {
-        if (rule.action === "block") {
+        if (rule.action === 'block') {
           violations.push(rule);
-        } else if (rule.action === "warn") {
+        } else if (rule.action === 'warn') {
           warnings.push(rule);
         }
 
@@ -393,14 +392,17 @@ export class CorvidLearningEngine {
     return {
       allowed: violations.length === 0,
       violations,
-      warnings
+      warnings,
     };
   }
 
   /**
    * Evaluate rule against operation
    */
-  private async evaluateRule(rule: PreventionRule, operation: Record<string, any>): Promise<boolean> {
+  private async evaluateRule(
+    rule: PreventionRule,
+    operation: Record<string, any>
+  ): Promise<boolean> {
     try {
       // Parse condition
       const condition = JSON.parse(rule.condition);
@@ -408,7 +410,7 @@ export class CorvidLearningEngine {
       // Simple JSON logic evaluation
       return this.evaluateJsonLogic(condition, operation);
     } catch (error) {
-      console.error("[Corvid] Error evaluating rule:", error);
+      console.error('[Corvid] Error evaluating rule:', error);
       return false;
     }
   }
@@ -417,7 +419,7 @@ export class CorvidLearningEngine {
    * Simple JSON logic evaluator
    */
   private evaluateJsonLogic(logic: any, data: any): boolean {
-    if (typeof logic !== "object") return false;
+    if (typeof logic !== 'object') return false;
 
     // Handle "and" operator
     if (logic.and) {
@@ -430,8 +432,8 @@ export class CorvidLearningEngine {
     }
 
     // Handle "==" operator
-    if (logic["=="]) {
-      const [left, right] = logic["=="];
+    if (logic['==']) {
+      const [left, right] = logic['=='];
       const leftValue = this.resolveValue(left, data);
       const rightValue = this.resolveValue(right, data);
       return leftValue === rightValue;
@@ -444,11 +446,11 @@ export class CorvidLearningEngine {
    * Resolve value from JSON logic
    */
   private resolveValue(value: any, data: any): any {
-    if (typeof value !== "object") return value;
+    if (typeof value !== 'object') return value;
 
     // Handle "var" operator
     if (value.var) {
-      const path = value.var.split(".");
+      const path = value.var.split('.');
       let result = data;
       for (const key of path) {
         result = result?.[key];
@@ -471,7 +473,12 @@ export class CorvidLearningEngine {
           pattern,
           recommendation: `Create prevention rule for: ${pattern.pattern}`,
           confidence: Math.min(pattern.occurrences / 10, 1),
-          impact: pattern.severity === "critical" ? "high" : pattern.severity === "high" ? "medium" : "low"
+          impact:
+            pattern.severity === 'critical'
+              ? 'high'
+              : pattern.severity === 'high'
+                ? 'medium'
+                : 'low',
         });
       }
     }
@@ -488,16 +495,17 @@ export class CorvidLearningEngine {
     activeRules: number;
     averageSuccessRate: number;
   } {
-    const activeRules = Array.from(this.preventionRules.values()).filter(r => r.active);
-    const avgSuccessRate = activeRules.length > 0
-      ? activeRules.reduce((sum, r) => sum + r.successRate, 0) / activeRules.length
-      : 0;
+    const activeRules = Array.from(this.preventionRules.values()).filter((r) => r.active);
+    const avgSuccessRate =
+      activeRules.length > 0
+        ? activeRules.reduce((sum, r) => sum + r.successRate, 0) / activeRules.length
+        : 0;
 
     return {
       totalPatterns: this.errorMemory.size,
       totalRules: this.preventionRules.size,
       activeRules: activeRules.length,
-      averageSuccessRate: avgSuccessRate
+      averageSuccessRate: avgSuccessRate,
     };
   }
 }

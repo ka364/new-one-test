@@ -1,10 +1,23 @@
-import { useEffect, useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Activity, CheckCircle2, XCircle, Clock, TrendingUp, Package } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Activity, CheckCircle2, XCircle, Clock, TrendingUp, Package } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function WebhookMonitoring() {
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -50,8 +63,12 @@ export default function WebhookMonitoring() {
           <p className="text-muted-foreground">مراقبة حية لـ webhooks و الطلبات من Shopify</p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={autoRefresh ? "default" : "outline"} className="cursor-pointer" onClick={() => setAutoRefresh(!autoRefresh)}>
-            {autoRefresh ? "تحديث تلقائي" : "إيقاف التحديث"}
+          <Badge
+            variant={autoRefresh ? 'default' : 'outline'}
+            className="cursor-pointer"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+          >
+            {autoRefresh ? 'تحديث تلقائي' : 'إيقاف التحديث'}
           </Badge>
         </div>
       </div>
@@ -65,9 +82,7 @@ export default function WebhookMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.total || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              آخر 24 ساعة: {stats?.last24h || 0}
-            </p>
+            <p className="text-xs text-muted-foreground">آخر 24 ساعة: {stats?.last24h || 0}</p>
           </CardContent>
         </Card>
 
@@ -78,9 +93,7 @@ export default function WebhookMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats?.success || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              نسبة النجاح: {stats?.successRate || 0}%
-            </p>
+            <p className="text-xs text-muted-foreground">نسبة النجاح: {stats?.successRate || 0}%</p>
           </CardContent>
         </Card>
 
@@ -91,9 +104,7 @@ export default function WebhookMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats?.failed || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              تحتاج إلى مراجعة
-            </p>
+            <p className="text-xs text-muted-foreground">تحتاج إلى مراجعة</p>
           </CardContent>
         </Card>
 
@@ -104,9 +115,7 @@ export default function WebhookMonitoring() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{orderStats?.today || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              إجمالي: {orderStats?.total || 0}
-            </p>
+            <p className="text-xs text-muted-foreground">إجمالي: {orderStats?.total || 0}</p>
           </CardContent>
         </Card>
       </div>
@@ -136,23 +145,31 @@ export default function WebhookMonitoring() {
               {orders && orders.length > 0 ? (
                 orders.map((order: any) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_name || `#${order.order_number}`}</TableCell>
-                    <TableCell>{order.email || "غير محدد"}</TableCell>
+                    <TableCell className="font-medium">
+                      {order.order_name || `#${order.order_number}`}
+                    </TableCell>
+                    <TableCell>{order.email || 'غير محدد'}</TableCell>
                     <TableCell>
                       {parseFloat(order.total_price).toFixed(2)} {order.currency}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={order.financial_status === "paid" ? "default" : "secondary"}>
-                        {order.financial_status === "paid" ? "مدفوع" : order.financial_status || "معلق"}
+                      <Badge variant={order.financial_status === 'paid' ? 'default' : 'secondary'}>
+                        {order.financial_status === 'paid'
+                          ? 'مدفوع'
+                          : order.financial_status || 'معلق'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={order.fulfillment_status === "fulfilled" ? "default" : "outline"}>
-                        {order.fulfillment_status === "fulfilled" ? "تم الشحن" : order.fulfillment_status || "لم يشحن"}
+                      <Badge
+                        variant={order.fulfillment_status === 'fulfilled' ? 'default' : 'outline'}
+                      >
+                        {order.fulfillment_status === 'fulfilled'
+                          ? 'تم الشحن'
+                          : order.fulfillment_status || 'لم يشحن'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(order.created_at).toLocaleString("ar-EG")}
+                      {new Date(order.created_at).toLocaleString('ar-EG')}
                     </TableCell>
                   </TableRow>
                 ))
@@ -179,7 +196,10 @@ export default function WebhookMonitoring() {
               </CardTitle>
               <CardDescription>آخر الأحداث الواردة من Shopify</CardDescription>
             </div>
-            <Select value={selectedTopic} onValueChange={(value) => setSelectedTopic(value === "all" ? undefined : value)}>
+            <Select
+              value={selectedTopic}
+              onValueChange={(value) => setSelectedTopic(value === 'all' ? undefined : value)}
+            >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="كل الأنواع" />
               </SelectTrigger>
@@ -211,12 +231,18 @@ export default function WebhookMonitoring() {
                   <TableRow key={log.id}>
                     <TableCell>
                       <Badge variant="outline">
-                        {log.topic === "orders/create" && "طلب جديد"}
-                        {log.topic === "orders/update" && "تحديث طلب"}
-                        {log.topic === "orders/cancelled" && "إلغاء طلب"}
-                        {log.topic === "orders/fulfilled" && "شحن طلب"}
-                        {log.topic === "inventory_levels/update" && "تحديث مخزون"}
-                        {!["orders/create", "orders/update", "orders/cancelled", "orders/fulfilled", "inventory_levels/update"].includes(log.topic) && log.topic}
+                        {log.topic === 'orders/create' && 'طلب جديد'}
+                        {log.topic === 'orders/update' && 'تحديث طلب'}
+                        {log.topic === 'orders/cancelled' && 'إلغاء طلب'}
+                        {log.topic === 'orders/fulfilled' && 'شحن طلب'}
+                        {log.topic === 'inventory_levels/update' && 'تحديث مخزون'}
+                        {![
+                          'orders/create',
+                          'orders/update',
+                          'orders/cancelled',
+                          'orders/fulfilled',
+                          'inventory_levels/update',
+                        ].includes(log.topic) && log.topic}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{log.shopify_id}</TableCell>
@@ -237,7 +263,7 @@ export default function WebhookMonitoring() {
                       <Badge variant="secondary">{log.retry_count || 0}</Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(log.created_at).toLocaleString("ar-EG")}
+                      {new Date(log.created_at).toLocaleString('ar-EG')}
                     </TableCell>
                   </TableRow>
                 ))

@@ -124,15 +124,16 @@ After using all codes, you'll need to disable and re-enable 2FA.
               <Shield className="h-6 w-6 text-green-600" />
               المصادقة الثنائية مُفعّلة
             </CardTitle>
-            <CardDescription>
-              حسابك محمي بطبقة أمان إضافية
-            </CardDescription>
+            <CardDescription>حسابك محمي بطبقة أمان إضافية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>آخر استخدام:</strong> {status.lastUsed ? new Date(status.lastUsed).toLocaleString('ar') : 'لم يتم الاستخدام بعد'}
+                <strong>آخر استخدام:</strong>{' '}
+                {status.lastUsed
+                  ? new Date(status.lastUsed).toLocaleString('ar')
+                  : 'لم يتم الاستخدام بعد'}
                 <br />
                 <strong>رموز احتياطية متبقية:</strong> {status.backupCodesRemaining}
               </AlertDescription>
@@ -151,11 +152,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
                 />
               </div>
 
-              <Button
-                type="submit"
-                variant="destructive"
-                disabled={disableMutation.isPending}
-              >
+              <Button type="submit" variant="destructive" disabled={disableMutation.isPending}>
                 {disableMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 تعطيل المصادقة الثنائية
               </Button>
@@ -176,9 +173,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
               <Shield className="h-6 w-6" />
               إعداد المصادقة الثنائية
             </CardTitle>
-            <CardDescription>
-              احم حسابك بطبقة أمان إضافية باستخدام تطبيق المصادقة
-            </CardDescription>
+            <CardDescription>احم حسابك بطبقة أمان إضافية باستخدام تطبيق المصادقة</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
@@ -216,18 +211,12 @@ After using all codes, you'll need to disable and re-enable 2FA.
         <Card>
           <CardHeader>
             <CardTitle>مسح رمز QR</CardTitle>
-            <CardDescription>
-              استخدم تطبيق المصادقة لمسح الرمز التالي
-            </CardDescription>
+            <CardDescription>استخدم تطبيق المصادقة لمسح الرمز التالي</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center space-y-4">
               {qrCode && (
-                <img
-                  src={qrCode}
-                  alt="QR Code"
-                  className="border rounded-lg p-4 bg-white"
-                />
+                <img src={qrCode} alt="QR Code" className="border rounded-lg p-4 bg-white" />
               )}
 
               <div className="w-full space-y-2">
@@ -260,9 +249,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
         <Card>
           <CardHeader>
             <CardTitle>التحقق من الرمز</CardTitle>
-            <CardDescription>
-              أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة
-            </CardDescription>
+            <CardDescription>أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleVerify} className="space-y-4">
@@ -320,27 +307,21 @@ After using all codes, you'll need to disable and re-enable 2FA.
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>مهم جداً:</strong> كل رمز يمكن استخدامه مرة واحدة فقط. لن تتمكن من رؤية هذه الرموز مرة أخرى!
+                <strong>مهم جداً:</strong> كل رمز يمكن استخدامه مرة واحدة فقط. لن تتمكن من رؤية هذه
+                الرموز مرة أخرى!
               </AlertDescription>
             </Alert>
 
             <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-lg">
               {backupCodes.map((code, i) => (
-                <div
-                  key={i}
-                  className="font-mono text-sm bg-white p-2 rounded border text-center"
-                >
+                <div key={i} className="font-mono text-sm bg-white p-2 rounded border text-center">
                   {code}
                 </div>
               ))}
             </div>
 
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleCopyBackupCodes}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={handleCopyBackupCodes} className="flex-1">
                 {copiedCodes ? (
                   <Check className="mr-2 h-4 w-4" />
                 ) : (
@@ -348,11 +329,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
                 )}
                 نسخ الرموز
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleDownloadBackupCodes}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={handleDownloadBackupCodes} className="flex-1">
                 تحميل
               </Button>
             </div>
@@ -372,9 +349,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
               <Shield className="h-6 w-6 text-green-600" />
               تم التفعيل بنجاح!
             </CardTitle>
-            <CardDescription>
-              حسابك الآن محمي بالمصادقة الثنائية
-            </CardDescription>
+            <CardDescription>حسابك الآن محمي بالمصادقة الثنائية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <Alert className="bg-green-50 border-green-200">
@@ -394,7 +369,7 @@ After using all codes, you'll need to disable and re-enable 2FA.
               </ul>
             </div>
 
-            <Button onClick={() => window.location.href = '/dashboard'} className="w-full">
+            <Button onClick={() => (window.location.href = '/dashboard')} className="w-full">
               العودة إلى لوحة التحكم
             </Button>
           </CardContent>

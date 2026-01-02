@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -19,29 +19,32 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { DollarSign, CreditCard, Banknote, Plus, CheckCircle2, Clock } from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+} from '@/components/ui/dialog';
+import { DollarSign, CreditCard, Banknote, Plus, CheckCircle2, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 export default function CollectionsTracking() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Fetch shipping companies for collection
   const { data: companies } = trpc.shipping.getAllCompanies.useQuery();
 
   // Fetch pending collections
-  const { data: pendingCollections, isLoading: pendingLoading } = trpc.collections.getPending.useQuery();
+  const { data: pendingCollections, isLoading: pendingLoading } =
+    trpc.collections.getPending.useQuery();
 
   // Fetch total collection by date
-  const { data: totalCollection } = trpc.collections.getTotalByDate.useQuery({ date: selectedDate });
+  const { data: totalCollection } = trpc.collections.getTotalByDate.useQuery({
+    date: selectedDate,
+  });
 
   const confirmCollection = trpc.collections.confirm.useMutation({
     onSuccess: () => {
-      toast.success("تم تأكيد التحصيل بنجاح");
+      toast.success('تم تأكيد التحصيل بنجاح');
     },
     onError: (error) => {
       toast.error(`خطأ: ${error.message}`);
@@ -73,11 +76,9 @@ export default function CollectionsTracking() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>تسجيل تحصيل جديد</DialogTitle>
-              <DialogDescription>
-                سجل التحصيلات النقدية أو التحويلات البنكية
-              </DialogDescription>
+              <DialogDescription>سجل التحصيلات النقدية أو التحويلات البنكية</DialogDescription>
             </DialogHeader>
-            <CreateCollectionForm 
+            <CreateCollectionForm
               companies={companies || []}
               onSuccess={() => setIsCreateDialogOpen(false)}
             />
@@ -96,7 +97,7 @@ export default function CollectionsTracking() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">
-              {totalCollection?.total || "0"} جنيه
+              {totalCollection?.total || '0'} جنيه
             </div>
           </CardContent>
         </Card>
@@ -110,7 +111,7 @@ export default function CollectionsTracking() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">
-              {totalCollection?.cash || "0"} جنيه
+              {totalCollection?.cash || '0'} جنيه
             </div>
           </CardContent>
         </Card>
@@ -124,7 +125,7 @@ export default function CollectionsTracking() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-purple-600">
-              {totalCollection?.bank || "0"} جنيه
+              {totalCollection?.bank || '0'} جنيه
             </div>
           </CardContent>
         </Card>
@@ -143,7 +144,10 @@ export default function CollectionsTracking() {
           {pendingLoading ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={i}
+                  className="animate-pulse flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="space-y-2 flex-1">
                     <div className="h-4 bg-gray-200 rounded w-1/4"></div>
                     <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -155,23 +159,27 @@ export default function CollectionsTracking() {
           ) : pendingCollections && pendingCollections.length > 0 ? (
             <div className="space-y-4">
               {pendingCollections.map((collection: any) => (
-                <div key={collection.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div
+                  key={collection.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      {collection.collectionType === "cash" ? (
+                      {collection.collectionType === 'cash' ? (
                         <Banknote className="h-4 w-4 text-blue-600" />
                       ) : (
                         <CreditCard className="h-4 w-4 text-purple-600" />
                       )}
-                      <span className="font-medium text-lg">
-                        {collection.amount} جنيه
-                      </span>
-                      <Badge variant={collection.collectionType === "cash" ? "default" : "secondary"}>
-                        {collection.collectionType === "cash" ? "نقدي" : "بنكي"}
+                      <span className="font-medium text-lg">{collection.amount} جنيه</span>
+                      <Badge
+                        variant={collection.collectionType === 'cash' ? 'default' : 'secondary'}
+                      >
+                        {collection.collectionType === 'cash' ? 'نقدي' : 'بنكي'}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {collection.companyName} • {format(new Date(collection.collectionDate), "PPP", { locale: ar })}
+                      {collection.companyName} •{' '}
+                      {format(new Date(collection.collectionDate), 'PPP', { locale: ar })}
                     </p>
                     {collection.receiptNumber && (
                       <p className="text-xs text-muted-foreground">
@@ -224,7 +232,8 @@ function CompanyCollectionSummary({ company, date }: { company: any; date: strin
     endDate: date,
   });
 
-  const total = collections?.reduce((sum: number, col: any) => sum + parseFloat(col.amount), 0) || 0;
+  const total =
+    collections?.reduce((sum: number, col: any) => sum + parseFloat(col.amount), 0) || 0;
   const confirmed = collections?.filter((col: any) => col.isConfirmed).length || 0;
   const pending = collections?.filter((col: any) => !col.isConfirmed).length || 0;
 
@@ -244,26 +253,26 @@ function CompanyCollectionSummary({ company, date }: { company: any; date: strin
   );
 }
 
-function CreateCollectionForm({ 
-  companies, 
-  onSuccess 
-}: { 
-  companies: any[]; 
+function CreateCollectionForm({
+  companies,
+  onSuccess,
+}: {
+  companies: any[];
   onSuccess: () => void;
 }) {
   const [formData, setFormData] = useState({
-    collectionType: "cash" as "cash" | "bank_transfer",
-    companyId: "",
-    amount: "",
-    collectionDate: new Date().toISOString().split("T")[0],
-    receiptNumber: "",
-    bankReference: "",
-    notes: "",
+    collectionType: 'cash' as 'cash' | 'bank_transfer',
+    companyId: '',
+    amount: '',
+    collectionDate: new Date().toISOString().split('T')[0],
+    receiptNumber: '',
+    bankReference: '',
+    notes: '',
   });
 
   const createCollection = trpc.collections.create.useMutation({
     onSuccess: () => {
-      toast.success("تم تسجيل التحصيل بنجاح");
+      toast.success('تم تسجيل التحصيل بنجاح');
       onSuccess();
     },
     onError: (error) => {
@@ -291,7 +300,7 @@ function CreateCollectionForm({
           <Label htmlFor="collectionType">نوع التحصيل *</Label>
           <Select
             value={formData.collectionType}
-            onValueChange={(value: "cash" | "bank_transfer") => 
+            onValueChange={(value: 'cash' | 'bank_transfer') =>
               setFormData({ ...formData, collectionType: value })
             }
           >
@@ -347,7 +356,7 @@ function CreateCollectionForm({
           />
         </div>
 
-        {formData.collectionType === "cash" ? (
+        {formData.collectionType === 'cash' ? (
           <div className="space-y-2">
             <Label htmlFor="receiptNumber">رقم الإيصال</Label>
             <Input
@@ -382,7 +391,7 @@ function CreateCollectionForm({
           إلغاء
         </Button>
         <Button type="submit" disabled={createCollection.isPending}>
-          {createCollection.isPending ? "جاري التسجيل..." : "تسجيل تحصيل"}
+          {createCollection.isPending ? 'جاري التسجيل...' : 'تسجيل تحصيل'}
         </Button>
       </div>
     </form>

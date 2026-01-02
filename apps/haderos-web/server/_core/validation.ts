@@ -41,32 +41,36 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-export const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: emailSchema,
-  password: passwordSchema,
-  confirmPassword: z.string(),
-  phone: phoneSchema.optional(),
-  terms: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the terms and conditions',
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+    phone: phoneSchema.optional(),
+    terms: z.boolean().refine((val) => val === true, {
+      message: 'You must accept the terms and conditions',
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export const resetPasswordSchema = z.object({
   email: emailSchema,
 });
 
-export const newPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const newPasswordSchema = z
+  .object({
+    token: z.string().min(1, 'Token is required'),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 // ============================================
 // EMPLOYEE SCHEMAS
@@ -146,11 +150,13 @@ export const createProductSchema = z.object({
   tags: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
   weight: z.number().positive().optional(),
-  dimensions: z.object({
-    length: z.number().positive().optional(),
-    width: z.number().positive().optional(),
-    height: z.number().positive().optional(),
-  }).optional(),
+  dimensions: z
+    .object({
+      length: z.number().positive().optional(),
+      width: z.number().positive().optional(),
+      height: z.number().positive().optional(),
+    })
+    .optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();
@@ -201,17 +207,19 @@ export const createExpenseSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const createBudgetSchema = z.object({
-  name: z.string().min(1, 'Budget name is required'),
-  category: z.string().optional(),
-  amount: positiveIntSchema,
-  period: z.enum(['monthly', 'quarterly', 'yearly']),
-  startDate: dateSchema,
-  endDate: dateSchema,
-}).refine((data) => data.endDate > data.startDate, {
-  message: 'End date must be after start date',
-  path: ['endDate'],
-});
+export const createBudgetSchema = z
+  .object({
+    name: z.string().min(1, 'Budget name is required'),
+    category: z.string().optional(),
+    amount: positiveIntSchema,
+    period: z.enum(['monthly', 'quarterly', 'yearly']),
+    startDate: dateSchema,
+    endDate: dateSchema,
+  })
+  .refine((data) => data.endDate > data.startDate, {
+    message: 'End date must be after start date',
+    path: ['endDate'],
+  });
 
 // ============================================
 // PAGINATION SCHEMA
@@ -240,7 +248,10 @@ export const searchSchema = z.object({
 
 export const fileUploadSchema = z.object({
   fileName: z.string().min(1, 'File name is required'),
-  fileSize: z.number().positive().max(10 * 1024 * 1024, 'File size must not exceed 10MB'),
+  fileSize: z
+    .number()
+    .positive()
+    .max(10 * 1024 * 1024, 'File size must not exceed 10MB'),
   fileType: z.enum([
     'image/jpeg',
     'image/png',
@@ -257,30 +268,36 @@ export const fileUploadSchema = z.object({
 // CAMPAIGN SCHEMA
 // ============================================
 
-export const createCampaignSchema = z.object({
-  name: z.string().min(2, 'Campaign name must be at least 2 characters'),
-  description: z.string().optional(),
-  type: z.enum(['email', 'sms', 'push', 'social', 'multi-channel']),
-  status: z.enum(['draft', 'scheduled', 'active', 'paused', 'completed']).optional(),
-  startDate: dateSchema,
-  endDate: dateSchema.optional(),
-  budget: positiveIntSchema.optional(),
-  targetAudience: z.object({
-    ageRange: z.tuple([nonNegativeIntSchema, nonNegativeIntSchema]).optional(),
-    gender: z.enum(['male', 'female', 'all']).optional(),
-    location: z.array(z.string()).optional(),
-    interests: z.array(z.string()).optional(),
-  }).optional(),
-  content: z.object({
-    subject: z.string().optional(),
-    body: z.string().optional(),
-    cta: z.string().optional(),
-    images: z.array(urlSchema).optional(),
-  }).optional(),
-}).refine((data) => !data.endDate || data.endDate > data.startDate, {
-  message: 'End date must be after start date',
-  path: ['endDate'],
-});
+export const createCampaignSchema = z
+  .object({
+    name: z.string().min(2, 'Campaign name must be at least 2 characters'),
+    description: z.string().optional(),
+    type: z.enum(['email', 'sms', 'push', 'social', 'multi-channel']),
+    status: z.enum(['draft', 'scheduled', 'active', 'paused', 'completed']).optional(),
+    startDate: dateSchema,
+    endDate: dateSchema.optional(),
+    budget: positiveIntSchema.optional(),
+    targetAudience: z
+      .object({
+        ageRange: z.tuple([nonNegativeIntSchema, nonNegativeIntSchema]).optional(),
+        gender: z.enum(['male', 'female', 'all']).optional(),
+        location: z.array(z.string()).optional(),
+        interests: z.array(z.string()).optional(),
+      })
+      .optional(),
+    content: z
+      .object({
+        subject: z.string().optional(),
+        body: z.string().optional(),
+        cta: z.string().optional(),
+        images: z.array(urlSchema).optional(),
+      })
+      .optional(),
+  })
+  .refine((data) => !data.endDate || data.endDate > data.startDate, {
+    message: 'End date must be after start date',
+    path: ['endDate'],
+  });
 
 // ============================================
 // VALIDATION HELPER FUNCTIONS
@@ -289,7 +306,10 @@ export const createCampaignSchema = z.object({
 /**
  * Validate data against schema
  */
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): {
+export function validate<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown
+): {
   success: boolean;
   data?: T;
   errors?: z.ZodError;

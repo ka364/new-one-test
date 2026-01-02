@@ -3,8 +3,8 @@
  * All database operations for Shopify integration
  */
 
-import { requireDb } from "./db";
-import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
+import { requireDb } from './db';
+import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
 
 // Note: Shopify tables are defined in drizzle/schema.ts
 // We'll reference them through the schema imports
@@ -28,7 +28,7 @@ export async function createShopifyProductMapping(data: {
   status?: string;
 }) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(sql`
     INSERT INTO shopify_products (
@@ -50,7 +50,7 @@ export async function createShopifyProductMapping(data: {
 
 export async function getShopifyProductByLocalId(localProductId: number) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_products WHERE local_product_id = ${localProductId} LIMIT 1`
@@ -61,7 +61,7 @@ export async function getShopifyProductByLocalId(localProductId: number) {
 
 export async function getShopifyProductByShopifyId(shopifyProductId: string) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_products WHERE shopify_product_id = ${shopifyProductId} LIMIT 1`
@@ -81,35 +81,35 @@ export async function updateShopifyProductSync(
   }
 ) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const updates: string[] = [];
   const args: any[] = [];
 
   if (data.inventoryQuantity !== undefined) {
-    updates.push("inventory_quantity = ?");
+    updates.push('inventory_quantity = ?');
     args.push(data.inventoryQuantity);
   }
   if (data.price !== undefined) {
-    updates.push("price = ?");
+    updates.push('price = ?');
     args.push(data.price);
   }
   if (data.status) {
-    updates.push("status = ?");
+    updates.push('status = ?');
     args.push(data.status);
   }
   if (data.syncStatus) {
-    updates.push("sync_status = ?");
+    updates.push('sync_status = ?');
     args.push(data.syncStatus);
   }
   if (data.syncError !== undefined) {
-    updates.push("sync_error = ?");
+    updates.push('sync_error = ?');
     args.push(data.syncError);
   }
 
-  updates.push("last_synced_at = NOW()");
+  updates.push('last_synced_at = NOW()');
 
-  const updateQuery = `UPDATE shopify_products SET ${updates.join(", ")} WHERE shopify_product_id = '${shopifyProductId}'`;
+  const updateQuery = `UPDATE shopify_products SET ${updates.join(', ')} WHERE shopify_product_id = '${shopifyProductId}'`;
   const result: any = await db.execute(sql.raw(updateQuery));
 
   return result;
@@ -117,7 +117,7 @@ export async function updateShopifyProductSync(
 
 export async function getAllShopifyProducts() {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_products ORDER BY created_at DESC`
@@ -150,11 +150,11 @@ export async function createShopifyOrder(data: {
   shopifyUpdatedAt?: Date;
 }) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const shippingAddressJson = data.shippingAddress ? JSON.stringify(data.shippingAddress) : null;
   const lineItemsJson = data.lineItems ? JSON.stringify(data.lineItems) : null;
-  
+
   // Build customer data JSON
   const customerData = JSON.stringify({
     first_name: data.customerFirstName || null,
@@ -185,7 +185,7 @@ export async function createShopifyOrder(data: {
 
 export async function getShopifyOrderByShopifyId(shopifyOrderId: string) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_orders WHERE shopify_order_id = ${shopifyOrderId} LIMIT 1`
@@ -206,39 +206,39 @@ export async function updateShopifyOrder(
   }
 ) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const updates: string[] = [];
   const args: any[] = [];
 
   if (data.financialStatus) {
-    updates.push("financial_status = ?");
+    updates.push('financial_status = ?');
     args.push(data.financialStatus);
   }
   if (data.fulfillmentStatus) {
-    updates.push("fulfillment_status = ?");
+    updates.push('fulfillment_status = ?');
     args.push(data.fulfillmentStatus);
   }
   if (data.localOrderId) {
-    updates.push("local_order_id = ?");
+    updates.push('local_order_id = ?');
     args.push(data.localOrderId);
   }
   if (data.shippingCompany) {
-    updates.push("shipping_company = ?");
+    updates.push('shipping_company = ?');
     args.push(data.shippingCompany);
   }
   if (data.trackingNumber) {
-    updates.push("tracking_number = ?");
+    updates.push('tracking_number = ?');
     args.push(data.trackingNumber);
   }
   if (data.processedAt) {
-    updates.push("processed_at = ?");
+    updates.push('processed_at = ?');
     args.push(data.processedAt);
   }
 
-  updates.push("updated_at = NOW()");
+  updates.push('updated_at = NOW()');
 
-  const updateQuery = `UPDATE shopify_orders SET ${updates.join(", ")} WHERE shopify_order_id = '${shopifyOrderId}'`;
+  const updateQuery = `UPDATE shopify_orders SET ${updates.join(', ')} WHERE shopify_order_id = '${shopifyOrderId}'`;
   const result: any = await db.execute(sql.raw(updateQuery));
 
   return result;
@@ -246,7 +246,7 @@ export async function updateShopifyOrder(
 
 export async function getAllShopifyOrders(limit: number = 100) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_orders ORDER BY created_at DESC LIMIT ${limit}`
@@ -257,7 +257,7 @@ export async function getAllShopifyOrders(limit: number = 100) {
 
 export async function getUnprocessedShopifyOrders() {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_orders WHERE processed_at IS NULL ORDER BY created_at ASC`
@@ -282,10 +282,10 @@ export async function createSyncLog(data: {
   duration?: number;
 }) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const errorDetailsJson = data.errorDetails ? JSON.stringify(data.errorDetails) : null;
-  
+
   const result: any = await db.execute(sql`
     INSERT INTO shopify_sync_logs (
       sync_type, direction, status,
@@ -303,7 +303,7 @@ export async function createSyncLog(data: {
 
 export async function getSyncLogs(limit: number = 50) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_sync_logs ORDER BY created_at DESC LIMIT ${limit}`
@@ -323,11 +323,11 @@ export async function createWebhookLog(data: {
   headers?: any;
 }) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const payloadJson = JSON.stringify(data.payload);
   const headersJson = data.headers ? JSON.stringify(data.headers) : null;
-  
+
   const result: any = await db.execute(sql`
     INSERT INTO shopify_webhook_logs (
       topic, shopify_id, payload, headers
@@ -341,7 +341,7 @@ export async function createWebhookLog(data: {
 
 export async function markWebhookProcessed(id: number, error?: string) {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(sql`
     UPDATE shopify_webhook_logs 
@@ -354,7 +354,7 @@ export async function markWebhookProcessed(id: number, error?: string) {
 
 export async function getUnprocessedWebhooks() {
   const db = await requireDb();
-  if (!db) throw new Error("Database connection failed");
+  if (!db) throw new Error('Database connection failed');
 
   const result: any = await db.execute(
     sql`SELECT * FROM shopify_webhook_logs WHERE processed = false ORDER BY created_at ASC`

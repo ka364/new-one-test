@@ -699,7 +699,9 @@ export const dashboardsRouter = router({
       const generator = new DashboardGenerator();
 
       const timeRange = {
-        start: input.startDate ? new Date(input.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        start: input.startDate
+          ? new Date(input.startDate)
+          : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: input.endDate ? new Date(input.endDate) : new Date(),
       };
 
@@ -720,7 +722,9 @@ export const dashboardsRouter = router({
       const generator = new DashboardGenerator();
 
       const timeRange = {
-        start: input.startDate ? new Date(input.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        start: input.startDate
+          ? new Date(input.startDate)
+          : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: input.endDate ? new Date(input.endDate) : new Date(),
       };
 
@@ -741,7 +745,9 @@ export const dashboardsRouter = router({
       const generator = new DashboardGenerator();
 
       const timeRange = {
-        start: input.startDate ? new Date(input.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        start: input.startDate
+          ? new Date(input.startDate)
+          : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: input.endDate ? new Date(input.endDate) : new Date(),
       };
 

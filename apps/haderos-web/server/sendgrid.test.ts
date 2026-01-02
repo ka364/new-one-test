@@ -19,7 +19,7 @@ describe('SendGrid Integration', () => {
 
   it('should test SendGrid connection successfully', async () => {
     const result = await testSendGridConnection();
-    
+
     expect(result).toBeDefined();
     expect(result.success).toBe(true);
     expect(result.message).toBe('SendGrid connection successful');
@@ -31,7 +31,7 @@ describe('SendGrid Integration', () => {
     const testName = 'Test User';
 
     const result = await sendOTPEmail(testEmail, testOTP, testName);
-    
+
     expect(result).toBe(true);
   }, 15000); // 15 second timeout for API call
 });

@@ -7,13 +7,7 @@
       "server/_core"
     ],
     "includePattern": "\\.(js|ts)$",
-    "exclude": [
-      "node_modules",
-      "dist",
-      "build",
-      "**/*.test.ts",
-      "**/tests/**"
-    ]
+    "exclude": ["node_modules", "dist", "build", "**/*.test.ts", "**/tests/**"]
   },
   "opts": {
     "destination": "./docs/api",
@@ -21,9 +15,7 @@
     "template": "node_modules/docdash",
     "readme": "./docs/README.md"
   },
-  "plugins": [
-    "plugins/markdown"
-  ],
+  "plugins": ["plugins/markdown"],
   "templates": {
     "cleverLinks": true,
     "monospaceLinks": true
@@ -33,4 +25,3 @@
     "dictionaries": ["jsdoc", "closure"]
   }
 }
-

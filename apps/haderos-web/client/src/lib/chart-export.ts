@@ -18,20 +18,13 @@ export class ChartExporter {
   /**
    * Export chart element to PNG
    */
-  async exportToPNG(
-    elementId: string,
-    options: ExportOptions = {}
-  ): Promise<void> {
+  async exportToPNG(elementId: string, options: ExportOptions = {}): Promise<void> {
     const element = document.getElementById(elementId);
     if (!element) {
       throw new Error(`Element with id "${elementId}" not found`);
     }
 
-    const {
-      filename = 'chart.png',
-      quality = 0.95,
-      scale = 2,
-    } = options;
+    const { filename = 'chart.png', quality = 0.95, scale = 2 } = options;
 
     try {
       const canvas = await html2canvas(element, {
@@ -60,20 +53,13 @@ export class ChartExporter {
   /**
    * Export chart element to JPEG
    */
-  async exportToJPEG(
-    elementId: string,
-    options: ExportOptions = {}
-  ): Promise<void> {
+  async exportToJPEG(elementId: string, options: ExportOptions = {}): Promise<void> {
     const element = document.getElementById(elementId);
     if (!element) {
       throw new Error(`Element with id "${elementId}" not found`);
     }
 
-    const {
-      filename = 'chart.jpg',
-      quality = 0.95,
-      scale = 2,
-    } = options;
+    const { filename = 'chart.jpg', quality = 0.95, scale = 2 } = options;
 
     try {
       const canvas = await html2canvas(element, {
@@ -102,20 +88,13 @@ export class ChartExporter {
   /**
    * Export chart element to PDF
    */
-  async exportToPDF(
-    elementId: string,
-    options: ExportOptions = {}
-  ): Promise<void> {
+  async exportToPDF(elementId: string, options: ExportOptions = {}): Promise<void> {
     const element = document.getElementById(elementId);
     if (!element) {
       throw new Error(`Element with id "${elementId}" not found`);
     }
 
-    const {
-      filename = 'chart.pdf',
-      title = 'تحليل البيانات - HADEROS',
-      scale = 2,
-    } = options;
+    const { filename = 'chart.pdf', title = 'تحليل البيانات - HADEROS', scale = 2 } = options;
 
     try {
       const canvas = await html2canvas(element, {
@@ -192,12 +171,9 @@ export class ChartExporter {
       pdf.setFontSize(20);
       pdf.text(title, 105, 50, { align: 'center' });
       pdf.setFontSize(12);
-      pdf.text(
-        `تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG')}`,
-        105,
-        60,
-        { align: 'center' }
-      );
+      pdf.text(`تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG')}`, 105, 60, {
+        align: 'center',
+      });
 
       // Add each chart to a new page
       for (let i = 0; i < elementIds.length; i++) {
@@ -256,9 +232,7 @@ export class ChartExporter {
       canvas.toBlob(async (blob) => {
         if (blob) {
           try {
-            await navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob }),
-            ]);
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
             console.log('Chart copied to clipboard');
           } catch (err) {
             console.error('Failed to copy to clipboard:', err);
@@ -328,16 +302,11 @@ export const exportChartToJPEG = (elementId: string, options?: ExportOptions) =>
 export const exportChartToPDF = (elementId: string, options?: ExportOptions) =>
   chartExporter.exportToPDF(elementId, options);
 
-export const exportMultipleChartsToPDF = (
-  elementIds: string[],
-  options?: ExportOptions
-) => chartExporter.exportMultipleChartsToPDF(elementIds, options);
+export const exportMultipleChartsToPDF = (elementIds: string[], options?: ExportOptions) =>
+  chartExporter.exportMultipleChartsToPDF(elementIds, options);
 
 export const copyChartToClipboard = (elementId: string, scale?: number) =>
   chartExporter.copyToClipboard(elementId, scale);
 
-export const getChartAsBase64 = (
-  elementId: string,
-  format?: 'png' | 'jpeg',
-  scale?: number
-) => chartExporter.getChartAsBase64(elementId, format, scale);
+export const getChartAsBase64 = (elementId: string, format?: 'png' | 'jpeg', scale?: number) =>
+  chartExporter.getChartAsBase64(elementId, format, scale);

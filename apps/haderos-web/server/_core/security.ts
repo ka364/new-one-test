@@ -16,11 +16,11 @@ export const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://api.deepseek.com", "https://api.openai.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      connectSrc: ["'self'", 'https://api.deepseek.com', 'https://api.openai.com'],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
@@ -202,7 +202,7 @@ export function isSQLSafe(input: string): boolean {
     /('|(\\')|(;)|(--)|(\*)|(\bOR\b)|(\bAND\b)|(\bUNION\b)|(\bSELECT\b)|(\bINSERT\b)|(\bUPDATE\b)|(\bDELETE\b)|(\bDROP\b)|(\bCREATE\b))/gi,
   ];
 
-  return !dangerousPatterns.some(pattern => pattern.test(input));
+  return !dangerousPatterns.some((pattern) => pattern.test(input));
 }
 
 // ============================================
@@ -213,15 +213,7 @@ export function isSQLSafe(input: string): boolean {
  * Mask sensitive data in logs
  */
 export function maskSensitiveData(data: any): any {
-  const sensitiveFields = [
-    'password',
-    'token',
-    'secret',
-    'apiKey',
-    'creditCard',
-    'ssn',
-    'pin',
-  ];
+  const sensitiveFields = ['password', 'token', 'secret', 'apiKey', 'creditCard', 'ssn', 'pin'];
 
   if (typeof data !== 'object' || data === null) {
     return data;
@@ -232,7 +224,7 @@ export function maskSensitiveData(data: any): any {
   for (const key in masked) {
     const lowerKey = key.toLowerCase();
 
-    if (sensitiveFields.some(field => lowerKey.includes(field))) {
+    if (sensitiveFields.some((field) => lowerKey.includes(field))) {
       masked[key] = '***REDACTED***';
     } else if (typeof masked[key] === 'object' && masked[key] !== null) {
       masked[key] = maskSensitiveData(masked[key]);

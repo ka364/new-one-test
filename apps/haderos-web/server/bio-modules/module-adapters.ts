@@ -1,12 +1,12 @@
 /**
  * Module Adapters
- * 
+ *
  * Adapters to convert existing module messages to unified BioMessage format
  * This allows existing modules to communicate using the unified messaging system
  */
 
-import { BioModuleName } from "./bio-interaction-matrix";
-import { createBioMessage, BioMessage, BioMessageType } from "./unified-messaging";
+import { BioModuleName } from './bio-interaction-matrix';
+import { createBioMessage, BioMessage, BioMessageType } from './unified-messaging';
 
 /**
  * Generic adapter interface
@@ -21,15 +21,15 @@ export interface ModuleAdapter {
  * Arachnid (Anomaly Detection) Adapter
  */
 export class ArachnidAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "arachnid";
+  moduleName: BioModuleName = 'arachnid';
 
   adaptOutgoing(data: any): BioMessage {
     // Arachnid sends anomaly alerts
-    if (data.type === "anomaly_detected") {
+    if (data.type === 'anomaly_detected') {
       return createBioMessage(
-        "arachnid",
-        ["corvid", "cephalopod"], // Notify learning & decision modules
-        "alert",
+        'arachnid',
+        ['corvid', 'cephalopod'], // Notify learning & decision modules
+        'alert',
         {
           anomalyType: data.anomalyType,
           severity: data.severity,
@@ -37,12 +37,12 @@ export class ArachnidAdapter implements ModuleAdapter {
           metrics: data.metrics,
           recommendedAction: data.recommendedAction,
         },
-        { priority: data.severity === "critical" ? 1 : 2 }
+        { priority: data.severity === 'critical' ? 1 : 2 }
       );
     }
 
     // Default: event
-    return createBioMessage("arachnid", [], "event", data);
+    return createBioMessage('arachnid', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -60,15 +60,15 @@ export class ArachnidAdapter implements ModuleAdapter {
  * Corvid (Meta-Learning) Adapter
  */
 export class CorvidAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "corvid";
+  moduleName: BioModuleName = 'corvid';
 
   adaptOutgoing(data: any): BioMessage {
     // Corvid sends learning insights
-    if (data.type === "pattern_detected") {
+    if (data.type === 'pattern_detected') {
       return createBioMessage(
-        "corvid",
-        ["arachnid", "chameleon", "ant"], // Share patterns with relevant modules
-        "event",
+        'corvid',
+        ['arachnid', 'chameleon', 'ant'], // Share patterns with relevant modules
+        'event',
         {
           patternType: data.patternType,
           confidence: data.confidence,
@@ -78,11 +78,11 @@ export class CorvidAdapter implements ModuleAdapter {
       );
     }
 
-    if (data.type === "prevention_rule") {
+    if (data.type === 'prevention_rule') {
       return createBioMessage(
-        "corvid",
-        ["arachnid"], // Send prevention rules to anomaly detector
-        "command",
+        'corvid',
+        ['arachnid'], // Send prevention rules to anomaly detector
+        'command',
         {
           ruleType: data.ruleType,
           condition: data.condition,
@@ -92,7 +92,7 @@ export class CorvidAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("corvid", [], "event", data);
+    return createBioMessage('corvid', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -109,15 +109,15 @@ export class CorvidAdapter implements ModuleAdapter {
  * Mycelium (Resource Distribution) Adapter
  */
 export class MyceliumAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "mycelium";
+  moduleName: BioModuleName = 'mycelium';
 
   adaptOutgoing(data: any): BioMessage {
     // Mycelium sends resource transfer requests
-    if (data.type === "transfer_request") {
+    if (data.type === 'transfer_request') {
       return createBioMessage(
-        "mycelium",
-        ["cephalopod"], // Request approval from decision module
-        "command",
+        'mycelium',
+        ['cephalopod'], // Request approval from decision module
+        'command',
         {
           fromBranch: data.fromBranch,
           toBranch: data.toBranch,
@@ -125,15 +125,15 @@ export class MyceliumAdapter implements ModuleAdapter {
           quantity: data.quantity,
           urgency: data.urgency,
         },
-        { priority: data.urgency === "critical" ? 1 : 3 }
+        { priority: data.urgency === 'critical' ? 1 : 3 }
       );
     }
 
-    if (data.type === "balance_report") {
+    if (data.type === 'balance_report') {
       return createBioMessage(
-        "mycelium",
-        ["corvid"], // Share balance data for learning
-        "event",
+        'mycelium',
+        ['corvid'], // Share balance data for learning
+        'event',
         {
           networkHealth: data.networkHealth,
           imbalances: data.imbalances,
@@ -142,7 +142,7 @@ export class MyceliumAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("mycelium", [], "event", data);
+    return createBioMessage('mycelium', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -159,15 +159,15 @@ export class MyceliumAdapter implements ModuleAdapter {
  * Ant (Route Optimization) Adapter
  */
 export class AntAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "ant";
+  moduleName: BioModuleName = 'ant';
 
   adaptOutgoing(data: any): BioMessage {
     // Ant sends optimized routes
-    if (data.type === "route_optimized") {
+    if (data.type === 'route_optimized') {
       return createBioMessage(
-        "ant",
-        ["corvid"], // Share routing data for learning
-        "event",
+        'ant',
+        ['corvid'], // Share routing data for learning
+        'event',
         {
           deliveryDate: data.deliveryDate,
           totalOrders: data.totalOrders,
@@ -177,11 +177,11 @@ export class AntAdapter implements ModuleAdapter {
       );
     }
 
-    if (data.type === "route_failure") {
+    if (data.type === 'route_failure') {
       return createBioMessage(
-        "ant",
-        ["corvid", "tardigrade"], // Report failure for learning & resilience
-        "alert",
+        'ant',
+        ['corvid', 'tardigrade'], // Report failure for learning & resilience
+        'alert',
         {
           failedRoute: data.failedRoute,
           reason: data.reason,
@@ -191,7 +191,7 @@ export class AntAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("ant", [], "event", data);
+    return createBioMessage('ant', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -208,15 +208,15 @@ export class AntAdapter implements ModuleAdapter {
  * Tardigrade (Resilience) Adapter
  */
 export class TardigradeAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "tardigrade";
+  moduleName: BioModuleName = 'tardigrade';
 
   adaptOutgoing(data: any): BioMessage {
     // Tardigrade sends health alerts
-    if (data.type === "health_critical") {
+    if (data.type === 'health_critical') {
       return createBioMessage(
-        "tardigrade",
-        ["cephalopod"], // Escalate to decision module
-        "alert",
+        'tardigrade',
+        ['cephalopod'], // Escalate to decision module
+        'alert',
         {
           component: data.component,
           healthScore: data.healthScore,
@@ -227,11 +227,11 @@ export class TardigradeAdapter implements ModuleAdapter {
       );
     }
 
-    if (data.type === "recovery_complete") {
+    if (data.type === 'recovery_complete') {
       return createBioMessage(
-        "tardigrade",
-        ["corvid"], // Share recovery data for learning
-        "event",
+        'tardigrade',
+        ['corvid'], // Share recovery data for learning
+        'event',
         {
           component: data.component,
           recoveryTime: data.recoveryTime,
@@ -240,7 +240,7 @@ export class TardigradeAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("tardigrade", [], "event", data);
+    return createBioMessage('tardigrade', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -257,15 +257,15 @@ export class TardigradeAdapter implements ModuleAdapter {
  * Chameleon (Adaptive Pricing) Adapter
  */
 export class ChameleonAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "chameleon";
+  moduleName: BioModuleName = 'chameleon';
 
   adaptOutgoing(data: any): BioMessage {
     // Chameleon sends pricing changes
-    if (data.type === "price_adjusted") {
+    if (data.type === 'price_adjusted') {
       return createBioMessage(
-        "chameleon",
-        ["arachnid", "cephalopod"], // Notify for anomaly check & approval
-        "command",
+        'chameleon',
+        ['arachnid', 'cephalopod'], // Notify for anomaly check & approval
+        'command',
         {
           productId: data.productId,
           oldPrice: data.oldPrice,
@@ -277,7 +277,7 @@ export class ChameleonAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("chameleon", [], "event", data);
+    return createBioMessage('chameleon', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -294,15 +294,15 @@ export class ChameleonAdapter implements ModuleAdapter {
  * Cephalopod (Distributed Intelligence) Adapter
  */
 export class CephalopodAdapter implements ModuleAdapter {
-  moduleName: BioModuleName = "cephalopod";
+  moduleName: BioModuleName = 'cephalopod';
 
   adaptOutgoing(data: any): BioMessage {
     // Cephalopod sends decisions
-    if (data.type === "decision_made") {
+    if (data.type === 'decision_made') {
       return createBioMessage(
-        "cephalopod",
+        'cephalopod',
         [data.targetModule], // Send decision to requesting module
-        "command",
+        'command',
         {
           decisionId: data.decisionId,
           decision: data.decision,
@@ -313,11 +313,11 @@ export class CephalopodAdapter implements ModuleAdapter {
       );
     }
 
-    if (data.type === "authority_delegated") {
+    if (data.type === 'authority_delegated') {
       return createBioMessage(
-        "cephalopod",
-        ["corvid"], // Log delegation for learning
-        "event",
+        'cephalopod',
+        ['corvid'], // Log delegation for learning
+        'event',
         {
           delegatedTo: data.delegatedTo,
           scope: data.scope,
@@ -326,7 +326,7 @@ export class CephalopodAdapter implements ModuleAdapter {
       );
     }
 
-    return createBioMessage("cephalopod", [], "event", data);
+    return createBioMessage('cephalopod', [], 'event', data);
   }
 
   adaptIncoming(message: BioMessage): any {
@@ -344,13 +344,13 @@ export class CephalopodAdapter implements ModuleAdapter {
  */
 export class ModuleAdapterFactory {
   private static adapters: Map<BioModuleName, ModuleAdapter> = new Map([
-    ["arachnid", new ArachnidAdapter()],
-    ["corvid", new CorvidAdapter()],
-    ["mycelium", new MyceliumAdapter()],
-    ["ant", new AntAdapter()],
-    ["tardigrade", new TardigradeAdapter()],
-    ["chameleon", new ChameleonAdapter()],
-    ["cephalopod", new CephalopodAdapter()],
+    ['arachnid', new ArachnidAdapter()],
+    ['corvid', new CorvidAdapter()],
+    ['mycelium', new MyceliumAdapter()],
+    ['ant', new AntAdapter()],
+    ['tardigrade', new TardigradeAdapter()],
+    ['chameleon', new ChameleonAdapter()],
+    ['cephalopod', new CephalopodAdapter()],
   ]);
 
   /**

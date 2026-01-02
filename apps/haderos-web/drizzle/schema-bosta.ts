@@ -1,8 +1,17 @@
-import { mysqlTable, int, varchar, decimal, boolean, datetime, text, json } from 'drizzle-orm/mysql-core';
+import {
+  mysqlTable,
+  int,
+  varchar,
+  decimal,
+  boolean,
+  datetime,
+  text,
+  json,
+} from 'drizzle-orm/mysql-core';
 
 /**
  * Bosta Integration Schema
- * 
+ *
  * Tables for managing Bosta shipping integration:
  * - bostaConfig: Bosta API configuration
  * - bostaShipments: Shipment tracking and details
@@ -25,56 +34,56 @@ export const bostaConfig = mysqlTable('bosta_config', {
 // Bosta Shipments
 export const bostaShipments = mysqlTable('bosta_shipments', {
   id: int('id').primaryKey().autoincrement(),
-  
+
   // Link to local order (if exists)
   orderId: int('order_id'),
-  
+
   // Bosta API Response Data
   trackingNumber: varchar('tracking_number', { length: 255 }).unique(),
   bostaDeliveryId: varchar('bosta_delivery_id', { length: 255 }),
-  
+
   // Shipment Status
   status: varchar('status', { length: 50 }).notNull(), // pending, picked_up, in_transit, delivered, failed, cancelled
-  
+
   // Package Details
   packageType: varchar('package_type', { length: 50 }), // Parcel, Document, Light Bulky, Heavy Bulky
   size: varchar('size', { length: 50 }), // SMALL, MEDIUM, LARGE
   itemsCount: int('items_count'),
   description: text('description'),
-  
+
   // Customer Details
   customerName: varchar('customer_name', { length: 255 }),
   customerPhone: varchar('customer_phone', { length: 50 }),
   customerEmail: varchar('customer_email', { length: 255 }),
-  
+
   // Shipping Address
   shippingAddress: text('shipping_address'),
   city: varchar('city', { length: 100 }),
   zone: varchar('zone', { length: 100 }),
   district: varchar('district', { length: 100 }),
-  
+
   // COD (Cash on Delivery)
   codAmount: decimal('cod_amount', { precision: 10, scale: 2 }).default('0'),
   codCollected: boolean('cod_collected').default(false),
   codCollectionDate: datetime('cod_collection_date'),
-  
+
   // Tracking Timeline
   pickupDate: datetime('pickup_date'),
   deliveryDate: datetime('delivery_date'),
   estimatedDeliveryDate: datetime('estimated_delivery_date'),
-  
+
   // Failure/Return Info
   failureReason: text('failure_reason'),
   returnToSender: boolean('return_to_sender').default(false),
   returnDate: datetime('return_date'),
-  
+
   // Waybill
   waybillUrl: text('waybill_url'),
-  
+
   // Notes
   notes: text('notes'),
   allowToOpenPackage: boolean('allow_to_open_package').default(false),
-  
+
   // Timestamps
   createdAt: datetime('created_at').notNull(),
   updatedAt: datetime('updated_at').notNull(),

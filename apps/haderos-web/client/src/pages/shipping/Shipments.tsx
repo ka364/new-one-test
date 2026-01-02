@@ -47,7 +47,14 @@ interface Shipment {
   };
   origin: string;
   destination: string;
-  status: 'pending' | 'picked_up' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned';
+  status:
+    | 'pending'
+    | 'picked_up'
+    | 'in_transit'
+    | 'out_for_delivery'
+    | 'delivered'
+    | 'cancelled'
+    | 'returned';
   codAmount: number;
   createdAt: string;
   estimatedDelivery: string;
@@ -177,9 +184,21 @@ export default function ShipmentsPage() {
 
   const stats = [
     { label: 'إجمالي الشحنات', value: shipments.length, color: 'text-blue-600' },
-    { label: 'قيد التوصيل', value: shipments.filter(s => ['in_transit', 'out_for_delivery'].includes(s.status)).length, color: 'text-orange-600' },
-    { label: 'تم التوصيل', value: shipments.filter(s => s.status === 'delivered').length, color: 'text-green-600' },
-    { label: 'قيد الانتظار', value: shipments.filter(s => s.status === 'pending').length, color: 'text-gray-600' },
+    {
+      label: 'قيد التوصيل',
+      value: shipments.filter((s) => ['in_transit', 'out_for_delivery'].includes(s.status)).length,
+      color: 'text-orange-600',
+    },
+    {
+      label: 'تم التوصيل',
+      value: shipments.filter((s) => s.status === 'delivered').length,
+      color: 'text-green-600',
+    },
+    {
+      label: 'قيد الانتظار',
+      value: shipments.filter((s) => s.status === 'pending').length,
+      color: 'text-gray-600',
+    },
   ];
 
   return (
@@ -205,9 +224,7 @@ export default function ShipmentsPage() {
             <Card key={stat.label}>
               <CardContent className="p-6">
                 <div className="text-sm text-gray-600">{stat.label}</div>
-                <div className={`text-3xl font-bold mt-2 ${stat.color}`}>
-                  {stat.value}
-                </div>
+                <div className={`text-3xl font-bold mt-2 ${stat.color}`}>{stat.value}</div>
               </CardContent>
             </Card>
           ))}
@@ -285,9 +302,7 @@ export default function ShipmentsPage() {
 
                     return (
                       <TableRow key={shipment.id}>
-                        <TableCell className="font-medium">
-                          {shipment.trackingNumber}
-                        </TableCell>
+                        <TableCell className="font-medium">{shipment.trackingNumber}</TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{shipment.customer.name}</div>

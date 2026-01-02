@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, Loader2, CheckCircle2, AlertCircle, User, IdCard, FileText } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
-import OTPVerification from "@/components/OTPVerification";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Upload, Loader2, CheckCircle2, AlertCircle, User, IdCard, FileText } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import OTPVerification from '@/components/OTPVerification';
 
 export default function RegisterEmployee() {
-  const [step, setStep] = useState<"upload" | "review" | "otp" | "complete">("upload");
+  const [step, setStep] = useState<'upload' | 'review' | 'otp' | 'complete'>('upload');
   const [extractedData, setExtractedData] = useState<any>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{
@@ -22,24 +22,24 @@ export default function RegisterEmployee() {
   }>({});
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    nationalId: "",
-    dateOfBirth: "",
-    gender: "",
-    religion: "",
-    maritalStatus: "",
-    address: "",
-    governorate: "",
-    phoneNumber: "",
-    email: "",
-    jobTitle: "",
-    department: "",
-    salary: "",
+    fullName: '',
+    nationalId: '',
+    dateOfBirth: '',
+    gender: '',
+    religion: '',
+    maritalStatus: '',
+    address: '',
+    governorate: '',
+    phoneNumber: '',
+    email: '',
+    jobTitle: '',
+    department: '',
+    salary: '',
     hireDate: new Date().toISOString().split('T')[0],
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Get supervisor stats
   const { data: stats } = trpc.hr.stats.useQuery();
@@ -55,21 +55,21 @@ export default function RegisterEmployee() {
       // Auto-fill form with extracted data
       setFormData({
         ...formData,
-        fullName: data.fullName || data.full_name || "",
-        nationalId: data.nationalId || data.national_id || "",
-        dateOfBirth: data.dateOfBirth || data.date_of_birth || "",
-        gender: data.gender || "",
-        religion: data.religion || "",
-        maritalStatus: data.maritalStatus || data.marital_status || "",
-        address: data.address || "",
-        governorate: data.governorate || "",
+        fullName: data.fullName || data.full_name || '',
+        nationalId: data.nationalId || data.national_id || '',
+        dateOfBirth: data.dateOfBirth || data.date_of_birth || '',
+        gender: data.gender || '',
+        religion: data.religion || '',
+        maritalStatus: data.maritalStatus || data.marital_status || '',
+        address: data.address || '',
+        governorate: data.governorate || '',
       });
       setIsExtracting(false);
-      setStep("review");
-      setSuccess("تم استخراج البيانات بنجاح! ✅ يرجى مراجعة البيانات قبل الحفظ");
+      setStep('review');
+      setSuccess('تم استخراج البيانات بنجاح! ✅ يرجى مراجعة البيانات قبل الحفظ');
     },
     onError: (err) => {
-      setError("فشل استخراج البيانات: " + err.message);
+      setError('فشل استخراج البيانات: ' + err.message);
       setIsExtracting(false);
     },
   });
@@ -77,8 +77,8 @@ export default function RegisterEmployee() {
   // Create employee mutation
   const createEmployee = trpc.hr.createEmployee.useMutation({
     onSuccess: () => {
-      setSuccess("تم تسجيل الموظف بنجاح! ✅");
-      setStep("complete");
+      setSuccess('تم تسجيل الموظف بنجاح! ✅');
+      setStep('complete');
     },
     onError: (err) => {
       setError(err.message);
@@ -89,7 +89,10 @@ export default function RegisterEmployee() {
   const sendOTPMutation = trpc.hr.sendOTP.useMutation();
   const verifyOTPMutation = trpc.hr.verifyOTP.useMutation();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof typeof uploadedFiles) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: keyof typeof uploadedFiles
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedFiles({ ...uploadedFiles, [type]: file });
@@ -98,23 +101,23 @@ export default function RegisterEmployee() {
 
   const handleExtractData = async () => {
     if (!uploadedFiles.idFront) {
-      setError("الرجاء رفع صورة البطاقة (الوجه الأمامي)");
+      setError('الرجاء رفع صورة البطاقة (الوجه الأمامي)');
       return;
     }
 
     setIsExtracting(true);
-    setError("");
+    setError('');
 
     try {
       // Convert file to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64 = reader.result as string;
-        
+
         // Upload to S3 first
         const uploadResult = await uploadDocument.mutateAsync({
           employeeId: 0, // Will be set after employee creation
-          documentType: "national_id",
+          documentType: 'national_id',
           documentName: uploadedFiles.idFront!.name,
           fileData: base64,
           mimeType: uploadedFiles.idFront!.type,
@@ -128,28 +131,28 @@ export default function RegisterEmployee() {
       };
       reader.readAsDataURL(uploadedFiles.idFront);
     } catch (err: any) {
-      setError("خطأ في رفع الملف: " + err.message);
+      setError('خطأ في رفع الملف: ' + err.message);
       setIsExtracting(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     // Validation
     if (!formData.fullName || !formData.nationalId || !formData.phoneNumber) {
-      setError("الرجاء ملء جميع الحقول المطلوبة");
+      setError('الرجاء ملء جميع الحقول المطلوبة');
       return;
     }
 
     if (formData.nationalId.length !== 14) {
-      setError("الرقم القومي يجب أن يكون 14 رقم");
+      setError('الرقم القومي يجب أن يكون 14 رقم');
       return;
     }
 
     // Move to OTP step
-    setStep("otp");
+    setStep('otp');
   };
 
   // Handle OTP send
@@ -167,7 +170,7 @@ export default function RegisterEmployee() {
         otpCode: result.otpCode,
       };
     } catch (err: any) {
-      throw new Error(err.message || "فشل إرسال رمز التحقق");
+      throw new Error(err.message || 'فشل إرسال رمز التحقق');
     }
   };
 
@@ -180,7 +183,7 @@ export default function RegisterEmployee() {
       });
       return result;
     } catch (err: any) {
-      throw new Error(err.message || "رمز التحقق غير صحيح");
+      throw new Error(err.message || 'رمز التحقق غير صحيح');
     }
   };
 
@@ -218,9 +221,7 @@ export default function RegisterEmployee() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{employeesCount}/7</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {remainingEmployees} متبقي
-              </p>
+              <p className="text-xs text-gray-600 mt-1">{remainingEmployees} متبقي</p>
             </CardContent>
           </Card>
 
@@ -231,10 +232,10 @@ export default function RegisterEmployee() {
             </CardHeader>
             <CardContent>
               <div className="text-xl font-bold text-purple-600">
-                {step === "upload" && "1. رفع المستندات"}
-                {step === "review" && "2. مراجعة البيانات"}
-                {step === "otp" && "3. التحقق بـ OTP"}
-                {step === "complete" && "4. مكتمل"}
+                {step === 'upload' && '1. رفع المستندات'}
+                {step === 'review' && '2. مراجعة البيانات'}
+                {step === 'otp' && '3. التحقق بـ OTP'}
+                {step === 'complete' && '4. مكتمل'}
               </div>
             </CardContent>
           </Card>
@@ -246,14 +247,14 @@ export default function RegisterEmployee() {
             </CardHeader>
             <CardContent>
               <div className="text-xl font-bold text-green-600">
-                {extractedData ? "✅ تم الاستخراج" : "⏳ في الانتظار"}
+                {extractedData ? '✅ تم الاستخراج' : '⏳ في الانتظار'}
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Step 1: Upload Documents */}
-        {step === "upload" && (
+        {step === 'upload' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -282,17 +283,13 @@ export default function RegisterEmployee() {
                     id="idFront"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileChange(e, "idFront")}
+                    onChange={(e) => handleFileChange(e, 'idFront')}
                     className="flex-1"
                   />
-                  {uploadedFiles.idFront && (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  )}
+                  {uploadedFiles.idFront && <CheckCircle2 className="h-5 w-5 text-green-600" />}
                 </div>
                 {uploadedFiles.idFront && (
-                  <p className="text-sm text-green-600">
-                    ✅ تم رفع: {uploadedFiles.idFront.name}
-                  </p>
+                  <p className="text-sm text-green-600">✅ تم رفع: {uploadedFiles.idFront.name}</p>
                 )}
               </div>
 
@@ -306,12 +303,10 @@ export default function RegisterEmployee() {
                     id="idBack"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileChange(e, "idBack")}
+                    onChange={(e) => handleFileChange(e, 'idBack')}
                     className="flex-1"
                   />
-                  {uploadedFiles.idBack && (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  )}
+                  {uploadedFiles.idBack && <CheckCircle2 className="h-5 w-5 text-green-600" />}
                 </div>
               </div>
 
@@ -325,7 +320,7 @@ export default function RegisterEmployee() {
                     id="militaryCert"
                     type="file"
                     accept="image/*,application/pdf"
-                    onChange={(e) => handleFileChange(e, "militaryCert")}
+                    onChange={(e) => handleFileChange(e, 'militaryCert')}
                     className="flex-1"
                   />
                   {uploadedFiles.militaryCert && (
@@ -344,12 +339,10 @@ export default function RegisterEmployee() {
                     id="photo"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileChange(e, "photo")}
+                    onChange={(e) => handleFileChange(e, 'photo')}
                     className="flex-1"
                   />
-                  {uploadedFiles.photo && (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  )}
+                  {uploadedFiles.photo && <CheckCircle2 className="h-5 w-5 text-green-600" />}
                 </div>
               </div>
 
@@ -375,7 +368,8 @@ export default function RegisterEmployee() {
 
               <Alert>
                 <AlertDescription className="text-sm">
-                  💡 <strong>نصيحة:</strong> تأكد من أن صورة البطاقة واضحة وغير مشوشة للحصول على أفضل نتائج استخراج
+                  💡 <strong>نصيحة:</strong> تأكد من أن صورة البطاقة واضحة وغير مشوشة للحصول على
+                  أفضل نتائج استخراج
                 </AlertDescription>
               </Alert>
             </CardContent>
@@ -383,7 +377,7 @@ export default function RegisterEmployee() {
         )}
 
         {/* Step 2: Review & Edit Data */}
-        {step === "review" && (
+        {step === 'review' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -416,7 +410,7 @@ export default function RegisterEmployee() {
                       id="fullName"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className={extractedData?.fullName ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.fullName ? 'border-green-500 bg-green-50' : ''}
                     />
                     {extractedData?.fullName && (
                       <p className="text-xs text-green-600">✅ مستخرج تلقائياً</p>
@@ -430,7 +424,7 @@ export default function RegisterEmployee() {
                       value={formData.nationalId}
                       onChange={(e) => setFormData({ ...formData, nationalId: e.target.value })}
                       maxLength={14}
-                      className={extractedData?.nationalId ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.nationalId ? 'border-green-500 bg-green-50' : ''}
                     />
                     {extractedData?.nationalId && (
                       <p className="text-xs text-green-600">✅ مستخرج تلقائياً</p>
@@ -444,7 +438,7 @@ export default function RegisterEmployee() {
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                      className={extractedData?.dateOfBirth ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.dateOfBirth ? 'border-green-500 bg-green-50' : ''}
                     />
                   </div>
 
@@ -454,7 +448,7 @@ export default function RegisterEmployee() {
                       id="gender"
                       value={formData.gender}
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      className={extractedData?.gender ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.gender ? 'border-green-500 bg-green-50' : ''}
                     />
                   </div>
 
@@ -464,7 +458,7 @@ export default function RegisterEmployee() {
                       id="address"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className={extractedData?.address ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.address ? 'border-green-500 bg-green-50' : ''}
                     />
                   </div>
 
@@ -474,7 +468,7 @@ export default function RegisterEmployee() {
                       id="governorate"
                       value={formData.governorate}
                       onChange={(e) => setFormData({ ...formData, governorate: e.target.value })}
-                      className={extractedData?.governorate ? "border-green-500 bg-green-50" : ""}
+                      className={extractedData?.governorate ? 'border-green-500 bg-green-50' : ''}
                     />
                   </div>
 
@@ -542,17 +536,13 @@ export default function RegisterEmployee() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setStep("upload")}
+                    onClick={() => setStep('upload')}
                     className="flex-1"
                   >
                     رجوع
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={createEmployee.isPending}
-                    className="flex-1"
-                  >
-                    {createEmployee.isPending ? "جاري التسجيل..." : "تسجيل الموظف"}
+                  <Button type="submit" disabled={createEmployee.isPending} className="flex-1">
+                    {createEmployee.isPending ? 'جاري التسجيل...' : 'تسجيل الموظف'}
                   </Button>
                 </div>
               </form>
@@ -561,19 +551,19 @@ export default function RegisterEmployee() {
         )}
 
         {/* Step 3: OTP Verification */}
-        {step === "otp" && (
+        {step === 'otp' && (
           <OTPVerification
             phoneNumber={formData.phoneNumber}
             email={formData.email}
             onVerified={handleOTPVerified}
-            onBack={() => setStep("review")}
+            onBack={() => setStep('review')}
             sendOTP={handleSendOTP}
             verifyOTP={handleVerifyOTP}
           />
         )}
 
         {/* Step 4: Complete */}
-        {step === "complete" && (
+        {step === 'complete' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-600">
@@ -590,23 +580,23 @@ export default function RegisterEmployee() {
 
               <Button
                 onClick={() => {
-                  setStep("upload");
+                  setStep('upload');
                   setExtractedData(null);
                   setUploadedFiles({});
                   setFormData({
-                    fullName: "",
-                    nationalId: "",
-                    dateOfBirth: "",
-                    gender: "",
-                    religion: "",
-                    maritalStatus: "",
-                    address: "",
-                    governorate: "",
-                    phoneNumber: "",
-                    email: "",
-                    jobTitle: "",
-                    department: "",
-                    salary: "",
+                    fullName: '',
+                    nationalId: '',
+                    dateOfBirth: '',
+                    gender: '',
+                    religion: '',
+                    maritalStatus: '',
+                    address: '',
+                    governorate: '',
+                    phoneNumber: '',
+                    email: '',
+                    jobTitle: '',
+                    department: '',
+                    salary: '',
                     hireDate: new Date().toISOString().split('T')[0],
                   });
                 }}

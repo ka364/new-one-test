@@ -3,16 +3,16 @@
  * خدمة منشئ صفحات الهبوط للمسوقين
  */
 
-import { db } from "../db";
+import { db } from '../db';
 import {
   marketerAccounts,
   marketerLandingPages,
   landingPageTemplates,
   marketerLeads,
   marketerAnalytics,
-  DEFAULT_LANDING_PAGE_TEMPLATES
-} from "../../drizzle/schema-marketer-tools";
-import { eq, and, sql, desc, gte, lte } from "drizzle-orm";
+  DEFAULT_LANDING_PAGE_TEMPLATES,
+} from '../../drizzle/schema-marketer-tools';
+import { eq, and, sql, desc, gte, lte } from 'drizzle-orm';
 
 export interface CreateLandingPageInput {
   marketerId: number;
@@ -46,32 +46,33 @@ export interface UpdateLandingPageInput {
 }
 
 export class MarketerLandingPageService {
-
   /**
    * Check if marketer can create more landing pages
    */
   async canCreateLandingPage(marketerId: number): Promise<{ canCreate: boolean; reason?: string }> {
-    const marketer = await db.select()
+    const marketer = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, marketerId))
       .limit(1);
 
     if (marketer.length === 0) {
-      return { canCreate: false, reason: "Marketer not found" };
+      return { canCreate: false, reason: 'Marketer not found' };
     }
 
     const m = marketer[0];
 
     if (!m.canCreateLandingPages) {
-      return { canCreate: false, reason: "Landing page creation is disabled for your account" };
+      return { canCreate: false, reason: 'Landing page creation is disabled for your account' };
     }
 
-    if (m.status !== "active") {
-      return { canCreate: false, reason: "Your account is not active" };
+    if (m.status !== 'active') {
+      return { canCreate: false, reason: 'Your account is not active' };
     }
 
     // Count existing landing pages
-    const countResult = await db.select({ count: sql<number>`count(*)` })
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
       .from(marketerLandingPages)
       .where(eq(marketerLandingPages.marketerId, marketerId));
 
@@ -81,7 +82,7 @@ export class MarketerLandingPageService {
     if (maxPages !== -1 && currentCount >= maxPages) {
       return {
         canCreate: false,
-        reason: `You've reached your limit of ${maxPages} landing pages. Upgrade your tier to create more.`
+        reason: `You've reached your limit of ${maxPages} landing pages. Upgrade your tier to create more.`,
       };
     }
 
@@ -92,7 +93,8 @@ export class MarketerLandingPageService {
    * Generate unique slug
    */
   async generateUniqueSlug(baseSlug: string): Promise<string> {
-    let slug = baseSlug.toLowerCase()
+    let slug = baseSlug
+      .toLowerCase()
       .replace(/[^a-z0-9-]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -101,7 +103,8 @@ export class MarketerLandingPageService {
     let counter = 1;
 
     while (true) {
-      const existing = await db.select({ id: marketerLandingPages.id })
+      const existing = await db
+        .select({ id: marketerLandingPages.id })
         .from(marketerLandingPages)
         .where(eq(marketerLandingPages.slug, finalSlug))
         .limit(1);
@@ -131,20 +134,21 @@ export class MarketerLandingPageService {
     const slug = await this.generateUniqueSlug(input.slug);
 
     // Get template defaults
-    const template = DEFAULT_LANDING_PAGE_TEMPLATES.find(t => t.id === input.templateId);
+    const template = DEFAULT_LANDING_PAGE_TEMPLATES.find((t) => t.id === input.templateId);
     if (!template) {
-      throw new Error("Template not found");
+      throw new Error('Template not found');
     }
 
     // Check tier requirement
-    const marketer = await db.select()
+    const marketer = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, input.marketerId))
       .limit(1);
 
-    const tierOrder = ["bronze", "silver", "gold", "platinum", "diamond"];
-    const marketerTierIndex = tierOrder.indexOf(marketer[0].tier || "bronze");
-    const templateTierIndex = tierOrder.indexOf(template.tier || "bronze");
+    const tierOrder = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+    const marketerTierIndex = tierOrder.indexOf(marketer[0].tier || 'bronze');
+    const templateTierIndex = tierOrder.indexOf(template.tier || 'bronze');
 
     if (marketerTierIndex < templateTierIndex) {
       throw new Error(`This template requires ${template.tier} tier or higher`);
@@ -155,37 +159,38 @@ export class MarketerLandingPageService {
       hero: {
         headline: input.title,
         headlineAr: input.titleAr || input.title,
-        subheadline: input.description || "",
-        subheadlineAr: input.descriptionAr || input.description || "",
-        ctaText: "Order Now",
-        ctaTextAr: "اطلب الآن",
-        ctaLink: "#order",
-        backgroundImage: "",
-        backgroundVideo: ""
+        subheadline: input.description || '',
+        subheadlineAr: input.descriptionAr || input.description || '',
+        ctaText: 'Order Now',
+        ctaTextAr: 'اطلب الآن',
+        ctaLink: '#order',
+        backgroundImage: '',
+        backgroundVideo: '',
       },
       sections: [] as any[],
       footer: {
-        text: "Powered by Haderos",
-        textAr: "مدعوم من هاديروس",
-        links: []
-      }
+        text: 'Powered by Haderos',
+        textAr: 'مدعوم من هاديروس',
+        links: [],
+      },
     };
 
     // Default design
     const defaultDesign = {
-      primaryColor: "#2563eb",
-      secondaryColor: "#1e40af",
-      accentColor: "#f59e0b",
-      backgroundColor: "#ffffff",
-      textColor: "#1f2937",
-      fontFamily: "Inter, sans-serif",
-      fontFamilyAr: "Cairo, sans-serif",
-      buttonStyle: "rounded" as const,
-      direction: "ltr" as const
+      primaryColor: '#2563eb',
+      secondaryColor: '#1e40af',
+      accentColor: '#f59e0b',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+      fontFamily: 'Inter, sans-serif',
+      fontFamilyAr: 'Cairo, sans-serif',
+      buttonStyle: 'rounded' as const,
+      direction: 'ltr' as const,
     };
 
     // Create landing page
-    const [landingPage] = await db.insert(marketerLandingPages)
+    const [landingPage] = await db
+      .insert(marketerLandingPages)
       .values({
         marketerId: input.marketerId,
         slug,
@@ -196,7 +201,7 @@ export class MarketerLandingPageService {
         templateId: input.templateId,
         content: defaultContent,
         design: defaultDesign,
-        status: "draft"
+        status: 'draft',
       })
       .returning();
 
@@ -209,12 +214,10 @@ export class MarketerLandingPageService {
    */
   async updateLandingPage(id: number, marketerId: number, input: UpdateLandingPageInput) {
     // Verify ownership
-    const existing = await db.select()
+    const existing = await db
+      .select()
       .from(marketerLandingPages)
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .limit(1);
 
     if (existing.length === 0) {
@@ -223,7 +226,7 @@ export class MarketerLandingPageService {
 
     // Build update object
     const updateData: any = {
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     if (input.title !== undefined) updateData.title = input.title;
@@ -240,12 +243,15 @@ export class MarketerLandingPageService {
     if (input.metaKeywords !== undefined) updateData.metaKeywords = input.metaKeywords;
     if (input.ogImage !== undefined) updateData.ogImage = input.ogImage;
     if (input.facebookPixelId !== undefined) updateData.facebookPixelId = input.facebookPixelId;
-    if (input.googleAnalyticsId !== undefined) updateData.googleAnalyticsId = input.googleAnalyticsId;
+    if (input.googleAnalyticsId !== undefined)
+      updateData.googleAnalyticsId = input.googleAnalyticsId;
     if (input.tiktokPixelId !== undefined) updateData.tiktokPixelId = input.tiktokPixelId;
-    if (input.customTrackingCode !== undefined) updateData.customTrackingCode = input.customTrackingCode;
+    if (input.customTrackingCode !== undefined)
+      updateData.customTrackingCode = input.customTrackingCode;
     if (input.customDomain !== undefined) updateData.customDomain = input.customDomain;
 
-    const [updated] = await db.update(marketerLandingPages)
+    const [updated] = await db
+      .update(marketerLandingPages)
       .set(updateData)
       .where(eq(marketerLandingPages.id, id))
       .returning();
@@ -259,12 +265,10 @@ export class MarketerLandingPageService {
    */
   async publishLandingPage(id: number, marketerId: number) {
     // Verify ownership
-    const existing = await db.select()
+    const existing = await db
+      .select()
       .from(marketerLandingPages)
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .limit(1);
 
     if (existing.length === 0) {
@@ -274,14 +278,15 @@ export class MarketerLandingPageService {
     // Validate content before publishing
     const page = existing[0];
     if (!page.content || !page.title) {
-      throw new Error("Landing page must have title and content before publishing");
+      throw new Error('Landing page must have title and content before publishing');
     }
 
-    const [published] = await db.update(marketerLandingPages)
+    const [published] = await db
+      .update(marketerLandingPages)
       .set({
-        status: "published",
+        status: 'published',
         publishedAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(marketerLandingPages.id, id))
       .returning();
@@ -294,15 +299,13 @@ export class MarketerLandingPageService {
    * Unpublish landing page
    */
   async unpublishLandingPage(id: number, marketerId: number) {
-    const [paused] = await db.update(marketerLandingPages)
+    const [paused] = await db
+      .update(marketerLandingPages)
       .set({
-        status: "paused",
-        updatedAt: new Date()
+        status: 'paused',
+        updatedAt: new Date(),
       })
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .returning();
 
     if (!paused) {
@@ -316,15 +319,13 @@ export class MarketerLandingPageService {
    * Delete landing page
    */
   async deleteLandingPage(id: number, marketerId: number) {
-    const [archived] = await db.update(marketerLandingPages)
+    const [archived] = await db
+      .update(marketerLandingPages)
       .set({
-        status: "archived",
-        updatedAt: new Date()
+        status: 'archived',
+        updatedAt: new Date(),
       })
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .returning();
 
     if (!archived) {
@@ -339,12 +340,10 @@ export class MarketerLandingPageService {
    * Get landing page by slug (public)
    */
   async getLandingPageBySlug(slug: string) {
-    const [page] = await db.select()
+    const [page] = await db
+      .select()
       .from(marketerLandingPages)
-      .where(and(
-        eq(marketerLandingPages.slug, slug),
-        eq(marketerLandingPages.status, "published")
-      ))
+      .where(and(eq(marketerLandingPages.slug, slug), eq(marketerLandingPages.status, 'published')))
       .limit(1);
 
     if (!page) {
@@ -352,9 +351,10 @@ export class MarketerLandingPageService {
     }
 
     // Increment view count
-    await db.update(marketerLandingPages)
+    await db
+      .update(marketerLandingPages)
       .set({
-        views: sql`${marketerLandingPages.views} + 1`
+        views: sql`${marketerLandingPages.views} + 1`,
       })
       .where(eq(marketerLandingPages.id, page.id));
 
@@ -364,21 +364,27 @@ export class MarketerLandingPageService {
   /**
    * Get marketer's landing pages
    */
-  async getMarketerLandingPages(marketerId: number, options?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }) {
-    let query = db.select()
+  async getMarketerLandingPages(
+    marketerId: number,
+    options?: {
+      status?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ) {
+    let query = db
+      .select()
       .from(marketerLandingPages)
       .where(eq(marketerLandingPages.marketerId, marketerId))
       .orderBy(desc(marketerLandingPages.createdAt));
 
     if (options?.status) {
-      query = query.where(and(
-        eq(marketerLandingPages.marketerId, marketerId),
-        eq(marketerLandingPages.status, options.status)
-      ));
+      query = query.where(
+        and(
+          eq(marketerLandingPages.marketerId, marketerId),
+          eq(marketerLandingPages.status, options.status)
+        )
+      );
     }
 
     if (options?.limit) {
@@ -396,9 +402,10 @@ export class MarketerLandingPageService {
    * Track click on landing page
    */
   async trackClick(landingPageId: number) {
-    await db.update(marketerLandingPages)
+    await db
+      .update(marketerLandingPages)
       .set({
-        clicks: sql`${marketerLandingPages.clicks} + 1`
+        clicks: sql`${marketerLandingPages.clicks} + 1`,
       })
       .where(eq(marketerLandingPages.id, landingPageId));
   }
@@ -407,10 +414,11 @@ export class MarketerLandingPageService {
    * Track conversion on landing page
    */
   async trackConversion(landingPageId: number, revenue: number) {
-    await db.update(marketerLandingPages)
+    await db
+      .update(marketerLandingPages)
       .set({
         conversions: sql`${marketerLandingPages.conversions} + 1`,
-        revenue: sql`${marketerLandingPages.revenue} + ${revenue}`
+        revenue: sql`${marketerLandingPages.revenue} + ${revenue}`,
       })
       .where(eq(marketerLandingPages.id, landingPageId));
   }
@@ -419,16 +427,14 @@ export class MarketerLandingPageService {
    * Get landing page analytics
    */
   async getLandingPageAnalytics(id: number, marketerId: number) {
-    const [page] = await db.select()
+    const [page] = await db
+      .select()
       .from(marketerLandingPages)
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .limit(1);
 
     if (!page) {
-      throw new Error("Landing page not found");
+      throw new Error('Landing page not found');
     }
 
     const views = page.views || 0;
@@ -441,10 +447,10 @@ export class MarketerLandingPageService {
       clicks,
       conversions,
       revenue,
-      clickRate: views > 0 ? ((clicks / views) * 100).toFixed(2) : "0.00",
-      conversionRate: clicks > 0 ? ((conversions / clicks) * 100).toFixed(2) : "0.00",
-      revenuePerView: views > 0 ? (revenue / views).toFixed(2) : "0.00",
-      revenuePerClick: clicks > 0 ? (revenue / clicks).toFixed(2) : "0.00"
+      clickRate: views > 0 ? ((clicks / views) * 100).toFixed(2) : '0.00',
+      conversionRate: clicks > 0 ? ((conversions / clicks) * 100).toFixed(2) : '0.00',
+      revenuePerView: views > 0 ? (revenue / views).toFixed(2) : '0.00',
+      revenuePerClick: clicks > 0 ? (revenue / clicks).toFixed(2) : '0.00',
     };
   }
 
@@ -458,21 +464,20 @@ export class MarketerLandingPageService {
       throw new Error(canCreate.reason);
     }
 
-    const [original] = await db.select()
+    const [original] = await db
+      .select()
       .from(marketerLandingPages)
-      .where(and(
-        eq(marketerLandingPages.id, id),
-        eq(marketerLandingPages.marketerId, marketerId)
-      ))
+      .where(and(eq(marketerLandingPages.id, id), eq(marketerLandingPages.marketerId, marketerId)))
       .limit(1);
 
     if (!original) {
-      throw new Error("Landing page not found");
+      throw new Error('Landing page not found');
     }
 
     const newSlug = await this.generateUniqueSlug(`${original.slug}-copy`);
 
-    const [duplicate] = await db.insert(marketerLandingPages)
+    const [duplicate] = await db
+      .insert(marketerLandingPages)
       .values({
         marketerId,
         slug: newSlug,
@@ -488,7 +493,7 @@ export class MarketerLandingPageService {
         showInventory: original.showInventory,
         metaTitle: original.metaTitle,
         metaDescription: original.metaDescription,
-        status: "draft"
+        status: 'draft',
       })
       .returning();
 
@@ -500,20 +505,21 @@ export class MarketerLandingPageService {
    * Get available templates for marketer
    */
   async getAvailableTemplates(marketerId: number) {
-    const [marketer] = await db.select()
+    const [marketer] = await db
+      .select()
       .from(marketerAccounts)
       .where(eq(marketerAccounts.id, marketerId))
       .limit(1);
 
     if (!marketer) {
-      throw new Error("Marketer not found");
+      throw new Error('Marketer not found');
     }
 
-    const tierOrder = ["bronze", "silver", "gold", "platinum", "diamond"];
-    const marketerTierIndex = tierOrder.indexOf(marketer.tier || "bronze");
+    const tierOrder = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+    const marketerTierIndex = tierOrder.indexOf(marketer.tier || 'bronze');
 
-    return DEFAULT_LANDING_PAGE_TEMPLATES.filter(template => {
-      const templateTierIndex = tierOrder.indexOf(template.tier || "bronze");
+    return DEFAULT_LANDING_PAGE_TEMPLATES.filter((template) => {
+      const templateTierIndex = tierOrder.indexOf(template.tier || 'bronze');
       return marketerTierIndex >= templateTierIndex;
     });
   }

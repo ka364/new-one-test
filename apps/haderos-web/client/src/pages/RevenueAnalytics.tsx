@@ -1,8 +1,22 @@
-import { TrendingUp, DollarSign, ShoppingCart, Calendar } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
-import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
+import { TrendingUp, DollarSign, ShoppingCart, Calendar } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import { trpc } from '@/lib/trpc';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -14,30 +28,42 @@ export default function RevenueAnalytics() {
       style: 'currency',
       currency: 'EGP',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
-    const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
-                        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const monthNames = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
   const monthlyData = revenueAnalytics.data?.monthlyRevenue || [];
-  
+
   // Calculate totals
   const totalRevenue = monthlyData.reduce((sum, item) => sum + item.revenue, 0);
   const totalOrders = monthlyData.reduce((sum, item) => sum + item.orderCount, 0);
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Prepare chart data
-  const chartData = monthlyData.map(item => ({
+  const chartData = monthlyData.map((item) => ({
     month: formatMonth(item.month),
     revenue: item.revenue,
     orders: item.orderCount,
-    avgValue: item.orderCount > 0 ? item.revenue / item.orderCount : 0
+    avgValue: item.orderCount > 0 ? item.revenue / item.orderCount : 0,
   }));
 
   return (
@@ -100,9 +126,7 @@ export default function RevenueAnalytics() {
         <Card>
           <CardHeader>
             <CardTitle>اتجاه الإيرادات الشهرية</CardTitle>
-            <CardDescription>
-              تطور الإيرادات خلال آخر 6 أشهر
-            </CardDescription>
+            <CardDescription>تطور الإيرادات خلال آخر 6 أشهر</CardDescription>
           </CardHeader>
           <CardContent>
             {revenueAnalytics.isLoading ? (
@@ -113,35 +137,27 @@ export default function RevenueAnalytics() {
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis
                     stroke="#6b7280"
                     tick={{ fontSize: 12 }}
                     tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `الشهر: ${label}`}
                   />
-                  <Legend 
+                  <Legend
                     wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
                     formatter={() => 'الإيرادات'}
                   />
-                  <Bar 
-                    dataKey="revenue" 
-                    fill="#10b981"
-                    radius={[8, 8, 0, 0]}
-                  />
+                  <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -156,9 +172,7 @@ export default function RevenueAnalytics() {
         <Card>
           <CardHeader>
             <CardTitle>عدد الطلبات الشهرية</CardTitle>
-            <CardDescription>
-              تطور عدد الطلبات خلال آخر 6 أشهر
-            </CardDescription>
+            <CardDescription>تطور عدد الطلبات خلال آخر 6 أشهر</CardDescription>
           </CardHeader>
           <CardContent>
             {revenueAnalytics.isLoading ? (
@@ -169,33 +183,26 @@ export default function RevenueAnalytics() {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => value.toLocaleString('ar-EG')}
                     labelFormatter={(label) => `الشهر: ${label}`}
                   />
-                  <Legend 
+                  <Legend
                     wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
                     formatter={() => 'عدد الطلبات'}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="orders" 
-                    stroke="#3b82f6" 
+                  <Line
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#3b82f6"
                     strokeWidth={3}
                     dot={{ fill: '#3b82f6', r: 5 }}
                     activeDot={{ r: 7 }}
@@ -214,9 +221,7 @@ export default function RevenueAnalytics() {
         <Card>
           <CardHeader>
             <CardTitle>متوسط قيمة الطلب</CardTitle>
-            <CardDescription>
-              تطور متوسط قيمة الطلب خلال آخر 6 أشهر
-            </CardDescription>
+            <CardDescription>تطور متوسط قيمة الطلب خلال آخر 6 أشهر</CardDescription>
           </CardHeader>
           <CardContent>
             {revenueAnalytics.isLoading ? (
@@ -227,34 +232,30 @@ export default function RevenueAnalytics() {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#6b7280"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis
                     stroke="#6b7280"
                     tick={{ fontSize: 12 }}
                     tickFormatter={(value) => `${(value / 1000).toFixed(1)}k`}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      direction: 'rtl'
+                      direction: 'rtl',
                     }}
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `الشهر: ${label}`}
                   />
-                  <Legend 
+                  <Legend
                     wrapperStyle={{ direction: 'rtl', paddingTop: '20px' }}
                     formatter={() => 'متوسط قيمة الطلب'}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="avgValue" 
-                    stroke="#8b5cf6" 
+                  <Line
+                    type="monotone"
+                    dataKey="avgValue"
+                    stroke="#8b5cf6"
                     strokeWidth={3}
                     dot={{ fill: '#8b5cf6', r: 5 }}
                     activeDot={{ r: 7 }}
@@ -273,9 +274,7 @@ export default function RevenueAnalytics() {
         <Card>
           <CardHeader>
             <CardTitle>الأداء الشهري التفصيلي</CardTitle>
-            <CardDescription>
-              بيانات مفصلة لكل شهر
-            </CardDescription>
+            <CardDescription>بيانات مفصلة لكل شهر</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

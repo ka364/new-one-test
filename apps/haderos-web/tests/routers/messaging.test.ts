@@ -331,7 +331,7 @@ describe('Messaging Router', () => {
         conversations: 166,
       };
 
-      expect(simulation.totalCost).toBeLessThan(0.50); // Very affordable!
+      expect(simulation.totalCost).toBeLessThan(0.5); // Very affordable!
       expect(simulation.averageCostPerFactory).toBeLessThan(0.03);
 
       // Calculate scalability to 100 factories
@@ -354,8 +354,9 @@ describe('Messaging Router', () => {
         success: true,
       });
 
-      const allSuccess = responses.every(r => r.success);
-      const avgResponseTime = responses.reduce((sum, r) => sum + r.responseTime, 0) / responses.length;
+      const allSuccess = responses.every((r) => r.success);
+      const avgResponseTime =
+        responses.reduce((sum, r) => sum + r.responseTime, 0) / responses.length;
 
       expect(allSuccess).toBe(true);
       expect(avgResponseTime).toBeLessThan(maxResponseTime);

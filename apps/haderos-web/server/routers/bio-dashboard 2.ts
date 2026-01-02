@@ -1,8 +1,12 @@
-import { z } from "zod";
-import { router, publicProcedure } from "../_core/trpc";
-import { getBioDashboard } from "../bio-modules/bio-dashboard.js";
-import { getConflictEngine } from "../bio-modules/conflict-resolution-protocol.js";
-import { getModuleInteractions, getInteractionStats, BIO_INTERACTION_MATRIX } from "../bio-modules/bio-interaction-matrix.js";
+import { z } from 'zod';
+import { router, publicProcedure } from '../_core/trpc';
+import { getBioDashboard } from '../bio-modules/bio-dashboard.js';
+import { getConflictEngine } from '../bio-modules/conflict-resolution-protocol.js';
+import {
+  getModuleInteractions,
+  getInteractionStats,
+  BIO_INTERACTION_MATRIX,
+} from '../bio-modules/bio-interaction-matrix.js';
 
 export const bioDashboardRouter = router({
   // Get full dashboard data
@@ -71,8 +75,8 @@ export const bioDashboardRouter = router({
       const interactions = getModuleInteractions(input.moduleName as any);
       return {
         totalInteractions: interactions.length,
-        outgoing: interactions.filter(i => i.from === input.moduleName).length,
-        incoming: interactions.filter(i => i.to === input.moduleName).length,
+        outgoing: interactions.filter((i) => i.from === input.moduleName).length,
+        incoming: interactions.filter((i) => i.to === input.moduleName).length,
       };
     }),
 
@@ -86,7 +90,7 @@ export const bioDashboardRouter = router({
     )
     .mutation(async ({ input }) => {
       const dashboard = getBioDashboard();
-      
+
       const count = input.count || 1;
       for (let i = 0; i < count; i++) {
         dashboard.trackModuleActivity(input.moduleName as any);
@@ -104,15 +108,13 @@ export const bioDashboardRouter = router({
     .query(async ({ input }) => {
       const dashboard = getBioDashboard();
       const data = dashboard.getDashboardData();
-      
-      const module = data.activeModules.find(
-        (m) => m.name === input.moduleName
-      );
+
+      const module = data.activeModules.find((m) => m.name === input.moduleName);
 
       if (!module) {
         return {
           name: input.moduleName,
-          status: "inactive",
+          status: 'inactive',
           health: 0,
           lastActivity: null,
         };
@@ -145,10 +147,7 @@ export const bioDashboardRouter = router({
     const avgResponseTime = dashboardData.systemHealth.avgProcessingTime;
 
     const totalConflicts = conflictStats.totalResolved + conflictStats.activeConflicts;
-    const conflictRate =
-      totalInteractions > 0
-        ? (totalConflicts / totalInteractions) * 100
-        : 0;
+    const conflictRate = totalInteractions > 0 ? (totalConflicts / totalInteractions) * 100 : 0;
 
     return {
       timestamp: Date.now(),
@@ -156,12 +155,10 @@ export const bioDashboardRouter = router({
       avgResponseTime,
       conflictRate,
       systemHealth: dashboardData.systemHealth.overall,
-      activeModulesCount: dashboardData.activeModules.filter(
-        (m) => m.status === "healthy"
-      ).length,
+      activeModulesCount: dashboardData.activeModules.filter((m) => m.status === 'healthy').length,
       totalConflicts: conflictStats.totalResolved + conflictStats.activeConflicts,
       resolvedConflicts: conflictStats.totalResolved,
-      escalatedConflicts: conflictStats.resolutionTypes["escalate"] || 0,
+      escalatedConflicts: conflictStats.resolutionTypes['escalate'] || 0,
     };
   }),
 
@@ -172,7 +169,7 @@ export const bioDashboardRouter = router({
     // For now, just return success
     return {
       success: true,
-      message: "Dashboard reset (not fully implemented)",
+      message: 'Dashboard reset (not fully implemented)',
     };
   }),
 });

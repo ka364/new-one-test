@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
 import {
   distributeResources,
   checkInventoryAvailability,
@@ -8,8 +8,8 @@ import {
   makeDistributedDecision,
   delegateAuthority,
   getResourceInsights,
-} from "../bio-modules/inventory-bio-integration.js";
-import { logger } from "../_core/logger";
+} from '../bio-modules/inventory-bio-integration.js';
+import { logger } from '../_core/logger';
 
 export const inventoryRouter = router({
   // Distribute resources (Bio-Module: Mycelium)
@@ -17,12 +17,14 @@ export const inventoryRouter = router({
     .input(
       z.object({
         orderId: z.number().positive(),
-        requiredItems: z.array(
-          z.object({
-            productId: z.number().positive(),
-            quantity: z.number().positive(),
-          })
-        ).min(1),
+        requiredItems: z
+          .array(
+            z.object({
+              productId: z.number().positive(),
+              quantity: z.number().positive(),
+            })
+          )
+          .min(1),
         deliveryLocation: z.string().min(1),
       })
     )
@@ -70,7 +72,7 @@ export const inventoryRouter = router({
             error: bioError.message,
             orderId: input.orderId,
           });
-          
+
           // Fallback response
           result = {
             success: false,
@@ -90,7 +92,7 @@ export const inventoryRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Resource distribution failed (TRPCError)', {
             code: error.code,
@@ -118,12 +120,14 @@ export const inventoryRouter = router({
   checkAvailability: publicProcedure
     .input(
       z.object({
-        items: z.array(
-          z.object({
-            productId: z.number().positive(),
-            quantity: z.number().positive(),
-          })
-        ).min(1),
+        items: z
+          .array(
+            z.object({
+              productId: z.number().positive(),
+              quantity: z.number().positive(),
+            })
+          )
+          .min(1),
       })
     )
     .query(async ({ input }) => {
@@ -165,12 +169,12 @@ export const inventoryRouter = router({
           logger.warn('Bio-Module availability check failed, using fallback', {
             error: bioError.message,
           });
-          
+
           // Fallback response
           result = {
             available: false,
             availableItems: [],
-            missingItems: input.items.map(item => ({
+            missingItems: input.items.map((item) => ({
               productId: item.productId,
               requiredQuantity: item.quantity,
               shortfall: item.quantity,
@@ -189,7 +193,7 @@ export const inventoryRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Inventory availability check failed (TRPCError)', {
             code: error.code,
@@ -217,7 +221,7 @@ export const inventoryRouter = router({
       z.object({
         productId: z.number().positive(),
         quantity: z.number().positive(),
-        urgency: z.enum(["low", "medium", "high", "urgent"]),
+        urgency: z.enum(['low', 'medium', 'high', 'urgent']),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -255,17 +259,13 @@ export const inventoryRouter = router({
         // Call Bio-Module (Mycelium) - with error handling
         let result;
         try {
-          result = await requestReplenishment(
-            input.productId,
-            input.quantity,
-            input.urgency
-          );
+          result = await requestReplenishment(input.productId, input.quantity, input.urgency);
         } catch (bioError: any) {
           logger.warn('Bio-Module replenishment request failed', {
             error: bioError.message,
             productId: input.productId,
           });
-          
+
           // Fallback response
           result = {
             success: false,
@@ -285,7 +285,7 @@ export const inventoryRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Replenishment request failed (TRPCError)', {
             code: error.code,
@@ -314,10 +314,10 @@ export const inventoryRouter = router({
     .input(
       z.object({
         decisionType: z.enum([
-          "order_approval",
-          "pricing_override",
-          "inventory_transfer",
-          "supplier_selection",
+          'order_approval',
+          'pricing_override',
+          'inventory_transfer',
+          'supplier_selection',
         ]),
         context: z.record(z.any()),
         requiredApprovers: z.array(z.string()).optional(),
@@ -359,7 +359,7 @@ export const inventoryRouter = router({
             error: bioError.message,
             decisionType: input.decisionType,
           });
-          
+
           // Fallback response
           result = {
             decision: 'pending',
@@ -379,7 +379,7 @@ export const inventoryRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Distributed decision failed (TRPCError)', {
             code: error.code,
@@ -410,10 +410,10 @@ export const inventoryRouter = router({
         fromEntity: z.string().min(1),
         toEntity: z.string().min(1),
         authority: z.enum([
-          "approve_orders",
-          "modify_prices",
-          "manage_inventory",
-          "select_suppliers",
+          'approve_orders',
+          'modify_prices',
+          'manage_inventory',
+          'select_suppliers',
         ]),
         duration: z.number().positive(), // in hours
       })
@@ -471,7 +471,7 @@ export const inventoryRouter = router({
           logger.warn('Bio-Module authority delegation failed', {
             error: bioError.message,
           });
-          
+
           // Fallback response
           result = {
             success: false,
@@ -490,7 +490,7 @@ export const inventoryRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Authority delegation failed (TRPCError)', {
             code: error.code,
@@ -526,7 +526,7 @@ export const inventoryRouter = router({
         logger.warn('Bio-Module insights failed, using fallback', {
           error: bioError.message,
         });
-        
+
         // Fallback response
         insights = {
           overallHealth: 0,
@@ -543,7 +543,7 @@ export const inventoryRouter = router({
       return insights;
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       logger.error('Resource insights fetch failed', error, {
         duration: `${duration}ms`,
       });

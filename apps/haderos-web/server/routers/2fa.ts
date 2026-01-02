@@ -251,9 +251,7 @@ export const twoFactorRouter = router({
         // If not valid as TOTP, check if it's a backup code
         if (!isValid && record.backupCodes) {
           const normalizedToken = input.token.toUpperCase().replace(/\s/g, '');
-          const backupCodeIndex = record.backupCodes.findIndex(
-            (code) => code === normalizedToken
-          );
+          const backupCodeIndex = record.backupCodes.findIndex((code) => code === normalizedToken);
 
           if (backupCodeIndex !== -1) {
             // Valid backup code - remove it

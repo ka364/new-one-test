@@ -1,15 +1,15 @@
 // @ts-nocheck
-import { useState } from "react";
-import { useCart } from "@/contexts/CartContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
-import { Loader2, ShoppingBag, MapPin, User, Phone, Mail } from "lucide-react";
+import { useState } from 'react';
+import { useCart } from '@/contexts/CartContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
+import { Loader2, ShoppingBag, MapPin, User, Phone, Mail } from 'lucide-react';
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
@@ -17,18 +17,18 @@ export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [customerInfo, setCustomerInfo] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    notes: "",
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    notes: '',
   });
 
   const createOrderMutation = trpc.orders.createOrder.useMutation({
     onSuccess: (data: any) => {
-      toast.success("تم إنشاء الطلب بنجاح!");
+      toast.success('تم إنشاء الطلب بنجاح!');
       clearCart();
       setLocation(`/order-confirmation/${data.orderId}`);
     },
@@ -40,15 +40,15 @@ export default function Checkout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (items.length === 0) {
-      toast.error("السلة فارغة!");
+      toast.error('السلة فارغة!');
       return;
     }
 
     // Validation
     if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
 
@@ -60,7 +60,7 @@ export default function Checkout() {
       customerEmail: customerInfo.email || undefined,
       customerPhone: customerInfo.phone,
       shippingAddress: `${customerInfo.address}, ${customerInfo.city}${
-        customerInfo.postalCode ? `, ${customerInfo.postalCode}` : ""
+        customerInfo.postalCode ? `, ${customerInfo.postalCode}` : ''
       }`,
       items: items.map((item) => ({
         productId: item.productId,
@@ -82,12 +82,8 @@ export default function Checkout() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">السلة فارغة</h2>
-            <p className="text-muted-foreground mb-6">
-              أضف منتجات إلى السلة لإتمام الطلب
-            </p>
-            <Button onClick={() => setLocation("/nowshoes")}>
-              تصفح المنتجات
-            </Button>
+            <p className="text-muted-foreground mb-6">أضف منتجات إلى السلة لإتمام الطلب</p>
+            <Button onClick={() => setLocation('/nowshoes')}>تصفح المنتجات</Button>
           </CardContent>
         </Card>
       </div>
@@ -107,9 +103,7 @@ export default function Checkout() {
                 <User className="h-5 w-5" />
                 معلومات العميل
               </CardTitle>
-              <CardDescription>
-                أدخل معلوماتك الشخصية
-              </CardDescription>
+              <CardDescription>أدخل معلوماتك الشخصية</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
@@ -120,9 +114,7 @@ export default function Checkout() {
                   <Input
                     id="name"
                     value={customerInfo.name}
-                    onChange={(e) =>
-                      setCustomerInfo({ ...customerInfo, name: e.target.value })
-                    }
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
                     required
                   />
                 </div>
@@ -134,9 +126,7 @@ export default function Checkout() {
                     id="phone"
                     type="tel"
                     value={customerInfo.phone}
-                    onChange={(e) =>
-                      setCustomerInfo({ ...customerInfo, phone: e.target.value })
-                    }
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
                     required
                   />
                 </div>
@@ -147,9 +137,7 @@ export default function Checkout() {
                   id="email"
                   type="email"
                   value={customerInfo.email}
-                  onChange={(e) =>
-                    setCustomerInfo({ ...customerInfo, email: e.target.value })
-                  }
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
                 />
               </div>
             </CardContent>
@@ -161,9 +149,7 @@ export default function Checkout() {
                 <MapPin className="h-5 w-5" />
                 عنوان الشحن
               </CardTitle>
-              <CardDescription>
-                أدخل عنوان التوصيل
-              </CardDescription>
+              <CardDescription>أدخل عنوان التوصيل</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -173,9 +159,7 @@ export default function Checkout() {
                 <Input
                   id="address"
                   value={customerInfo.address}
-                  onChange={(e) =>
-                    setCustomerInfo({ ...customerInfo, address: e.target.value })
-                  }
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
                   placeholder="الشارع، رقم المبنى، الشقة"
                   required
                 />
@@ -186,9 +170,7 @@ export default function Checkout() {
                   <Input
                     id="city"
                     value={customerInfo.city}
-                    onChange={(e) =>
-                      setCustomerInfo({ ...customerInfo, city: e.target.value })
-                    }
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -210,9 +192,7 @@ export default function Checkout() {
                 <Input
                   id="notes"
                   value={customerInfo.notes}
-                  onChange={(e) =>
-                    setCustomerInfo({ ...customerInfo, notes: e.target.value })
-                  }
+                  onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
                   placeholder="أي ملاحظات خاصة بالتوصيل"
                 />
               </div>
@@ -238,19 +218,13 @@ export default function Checkout() {
                           {item.quantity} × {item.price.toFixed(2)} ج.م
                         </p>
                         {item.size && (
-                          <p className="text-muted-foreground text-xs">
-                            المقاس: {item.size}
-                          </p>
+                          <p className="text-muted-foreground text-xs">المقاس: {item.size}</p>
                         )}
                         {item.color && (
-                          <p className="text-muted-foreground text-xs">
-                            اللون: {item.color}
-                          </p>
+                          <p className="text-muted-foreground text-xs">اللون: {item.color}</p>
                         )}
                       </div>
-                      <p className="font-medium">
-                        {(item.price * item.quantity).toFixed(2)} ج.م
-                      </p>
+                      <p className="font-medium">{(item.price * item.quantity).toFixed(2)} ج.م</p>
                     </div>
                   );
                 })}
@@ -276,25 +250,18 @@ export default function Checkout() {
                 <span>{totalPrice.toFixed(2)} ج.م</span>
               </div>
 
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={handleSubmit}
-                disabled={isProcessing}
-              >
+              <Button className="w-full" size="lg" onClick={handleSubmit} disabled={isProcessing}>
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     جاري المعالجة...
                   </>
                 ) : (
-                  "تأكيد الطلب"
+                  'تأكيد الطلب'
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center">
-                الدفع عند الاستلام متاح
-              </p>
+              <p className="text-xs text-muted-foreground text-center">الدفع عند الاستلام متاح</p>
             </CardContent>
           </Card>
         </div>

@@ -10,11 +10,11 @@
  * - Points expiry management
  */
 
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { eq, and, desc, sql, gte, lte, lt, asc, or } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { getDb } from '../db';
+import { eq, and, desc, sql, gte, lte, lt, asc, or } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
 
 // Import schema
 import {
@@ -25,29 +25,29 @@ import {
   rewardRedemptions,
   pointsRules,
   referralTracking,
-} from "../../drizzle/schema-loyalty";
+} from '../../drizzle/schema-loyalty';
 
 // ============================================
 // TYPES & VALIDATORS
 // ============================================
 
 const transactionTypeEnum = z.enum([
-  "earn",
-  "redeem",
-  "expire",
-  "adjust",
-  "transfer",
-  "bonus",
-  "refund",
+  'earn',
+  'redeem',
+  'expire',
+  'adjust',
+  'transfer',
+  'bonus',
+  'refund',
 ]);
 
 const redemptionStatusEnum = z.enum([
-  "pending",
-  "approved",
-  "processing",
-  "completed",
-  "cancelled",
-  "expired",
+  'pending',
+  'approved',
+  'processing',
+  'completed',
+  'cancelled',
+  'expired',
 ]);
 
 // ============================================
@@ -111,8 +111,8 @@ export const loyaltyRouter = router({
         memberNumber,
         currentPoints: 0,
         tierId: 1,
-        tierName: "Bronze",
-        tierNameAr: "برونزي",
+        tierName: 'Bronze',
+        tierNameAr: 'برونزي',
         nextTierPoints: 1000,
         referralCode: `REF-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
       };
@@ -147,11 +147,8 @@ export const loyaltyRouter = router({
       .where(
         and(
           eq(pointsTransactions.memberId, member[0].id),
-          eq(pointsTransactions.transactionType, "earn"),
-          lt(
-            pointsTransactions.expiresAt,
-            new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-          ),
+          eq(pointsTransactions.transactionType, 'earn'),
+          lt(pointsTransactions.expiresAt, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
           gte(pointsTransactions.expiresAt, new Date())
         )
       );
@@ -165,9 +162,7 @@ export const loyaltyRouter = router({
       totalPointsRedeemed: member[0].totalPointsRedeemed,
       tier: tier[0],
       nextTier: nextTier[0] || null,
-      pointsToNextTier: nextTier[0]
-        ? nextTier[0].minPoints - member[0].currentPoints
-        : 0,
+      pointsToNextTier: nextTier[0] ? nextTier[0].minPoints - member[0].currentPoints : 0,
       expiringPoints: Number(expiringPoints[0]?.total || 0),
       referralCode: member[0].referralCode,
       referralCount: member[0].referralCount,
@@ -201,9 +196,7 @@ export const loyaltyRouter = router({
 
       const conditions = [eq(pointsTransactions.memberId, member[0].id)];
       if (input.transactionType) {
-        conditions.push(
-          eq(pointsTransactions.transactionType, input.transactionType)
-        );
+        conditions.push(eq(pointsTransactions.transactionType, input.transactionType));
       }
 
       const transactions = await db
@@ -245,8 +238,8 @@ export const loyaltyRouter = router({
 
       if (member.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "عضوية الولاء غير موجودة",
+          code: 'NOT_FOUND',
+          message: 'عضوية الولاء غير موجودة',
         });
       }
 
@@ -254,19 +247,14 @@ export const loyaltyRouter = router({
       const rules = await db
         .select()
         .from(pointsRules)
-        .where(
-          and(
-            eq(pointsRules.ruleType, "purchase"),
-            eq(pointsRules.isActive, true)
-          )
-        )
+        .where(and(eq(pointsRules.ruleType, 'purchase'), eq(pointsRules.isActive, true)))
         .limit(1);
 
       const rule = rules[0];
       if (!rule) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "لا توجد قاعدة لاحتساب النقاط",
+          code: 'NOT_FOUND',
+          message: 'لا توجد قاعدة لاحتساب النقاط',
         });
       }
 
@@ -291,10 +279,10 @@ export const loyaltyRouter = router({
       // Create transaction
       await db.insert(pointsTransactions).values({
         memberId: member[0].id,
-        transactionType: "earn",
+        transactionType: 'earn',
         points: finalPoints,
         balanceAfter: member[0].currentPoints + finalPoints,
-        sourceType: "order",
+        sourceType: 'order',
         sourceId: input.orderId.toString(),
         description: `نقاط من طلب #${input.orderNumber}`,
         descriptionAr: `نقاط من طلب #${input.orderNumber}`,
@@ -338,13 +326,7 @@ export const loyaltyRouter = router({
   earnBonus: protectedProcedure
     .input(
       z.object({
-        bonusType: z.enum([
-          "signup",
-          "review",
-          "birthday",
-          "referral",
-          "social_share",
-        ]),
+        bonusType: z.enum(['signup', 'review', 'birthday', 'referral', 'social_share']),
         referenceId: z.string().optional(),
       })
     )
@@ -360,8 +342,8 @@ export const loyaltyRouter = router({
 
       if (member.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "عضوية الولاء غير موجودة",
+          code: 'NOT_FOUND',
+          message: 'عضوية الولاء غير موجودة',
         });
       }
 
@@ -369,18 +351,13 @@ export const loyaltyRouter = router({
       const rule = await db
         .select()
         .from(pointsRules)
-        .where(
-          and(
-            eq(pointsRules.ruleType, input.bonusType),
-            eq(pointsRules.isActive, true)
-          )
-        )
+        .where(and(eq(pointsRules.ruleType, input.bonusType), eq(pointsRules.isActive, true)))
         .limit(1);
 
       if (rule.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "لا توجد قاعدة للمكافأة",
+          code: 'NOT_FOUND',
+          message: 'لا توجد قاعدة للمكافأة',
         });
       }
 
@@ -393,7 +370,7 @@ export const loyaltyRouter = router({
       // Create transaction
       await db.insert(pointsTransactions).values({
         memberId: member[0].id,
-        transactionType: "bonus",
+        transactionType: 'bonus',
         points: bonusPoints,
         balanceAfter: member[0].currentPoints + bonusPoints,
         sourceType: input.bonusType,
@@ -493,8 +470,8 @@ export const loyaltyRouter = router({
 
       if (member.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "عضوية الولاء غير موجودة",
+          code: 'NOT_FOUND',
+          message: 'عضوية الولاء غير موجودة',
         });
       }
 
@@ -507,8 +484,8 @@ export const loyaltyRouter = router({
 
       if (reward.length === 0 || !reward[0].isActive) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "المكافأة غير متاحة",
+          code: 'NOT_FOUND',
+          message: 'المكافأة غير متاحة',
         });
       }
 
@@ -517,7 +494,7 @@ export const loyaltyRouter = router({
       // Check points balance
       if (member[0].currentPoints < totalPointsNeeded) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: 'BAD_REQUEST',
           message: `رصيد النقاط غير كافي. تحتاج ${totalPointsNeeded} نقطة`,
         });
       }
@@ -528,19 +505,16 @@ export const loyaltyRouter = router({
         reward[0].quantityRedeemed + input.quantity > reward[0].quantityLimit
       ) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "الكمية المتاحة غير كافية",
+          code: 'BAD_REQUEST',
+          message: 'الكمية المتاحة غير كافية',
         });
       }
 
       // Check tier requirement
-      if (
-        reward[0].minTierId &&
-        (member[0].currentTierId || 1) < reward[0].minTierId
-      ) {
+      if (reward[0].minTierId && (member[0].currentTierId || 1) < reward[0].minTierId) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "مستوى العضوية غير كافٍ",
+          code: 'FORBIDDEN',
+          message: 'مستوى العضوية غير كافٍ',
         });
       }
 
@@ -548,7 +522,7 @@ export const loyaltyRouter = router({
 
       // Calculate expiry for coupon type rewards
       let expiresAt = null;
-      if (reward[0].rewardType === "coupon") {
+      if (reward[0].rewardType === 'coupon') {
         expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + 3);
       }
@@ -560,7 +534,7 @@ export const loyaltyRouter = router({
         quantity: input.quantity,
         pointsSpent: totalPointsNeeded,
         redemptionCode,
-        status: "pending",
+        status: 'pending',
         deliveryDetails: input.deliveryDetails,
         expiresAt,
       });
@@ -568,10 +542,10 @@ export const loyaltyRouter = router({
       // Deduct points
       await db.insert(pointsTransactions).values({
         memberId: member[0].id,
-        transactionType: "redeem",
+        transactionType: 'redeem',
         points: -totalPointsNeeded,
         balanceAfter: member[0].currentPoints - totalPointsNeeded,
-        sourceType: "reward_redemption",
+        sourceType: 'reward_redemption',
         sourceId: redemptionCode,
         description: `استبدال: ${reward[0].nameAr || reward[0].nameEn}`,
         descriptionAr: `استبدال: ${reward[0].nameAr || reward[0].nameEn}`,
@@ -602,7 +576,7 @@ export const loyaltyRouter = router({
         redemptionCode,
         pointsSpent: totalPointsNeeded,
         newBalance: member[0].currentPoints - totalPointsNeeded,
-        message: "تم استبدال المكافأة بنجاح",
+        message: 'تم استبدال المكافأة بنجاح',
       };
     }),
 
@@ -672,8 +646,8 @@ export const loyaltyRouter = router({
 
       if (referrer.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "كود الإحالة غير صحيح",
+          code: 'NOT_FOUND',
+          message: 'كود الإحالة غير صحيح',
         });
       }
 
@@ -686,8 +660,8 @@ export const loyaltyRouter = router({
 
       if (existingReferral.length > 0) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "لقد تم إحالتك مسبقاً",
+          code: 'BAD_REQUEST',
+          message: 'لقد تم إحالتك مسبقاً',
         });
       }
 
@@ -698,13 +672,12 @@ export const loyaltyRouter = router({
         referrerId: referrer[0].id,
         referredCustomerId: ctx.user.id,
         referralCode,
-        status: "pending",
+        status: 'pending',
       });
 
       return {
         success: true,
-        message:
-          "تم تسجيل الإحالة. ستحصل على مكافأتك بعد إتمام أول عملية شراء",
+        message: 'تم تسجيل الإحالة. ستحصل على مكافأتك بعد إتمام أول عملية شراء',
       };
     }),
 
@@ -735,10 +708,7 @@ export const loyaltyRouter = router({
       .where(eq(referralTracking.referrerId, member[0].id))
       .orderBy(desc(referralTracking.createdAt));
 
-    const totalEarned = referrals.reduce(
-      (sum, ref) => sum + (ref.referrerPointsEarned || 0),
-      0
-    );
+    const totalEarned = referrals.reduce((sum, ref) => sum + (ref.referrerPointsEarned || 0), 0);
 
     return {
       referralCode: member[0].referralCode,
@@ -794,10 +764,7 @@ export const loyaltyRouter = router({
 // HELPER FUNCTIONS
 // ============================================
 
-async function checkAndUpgradeTier(
-  db: Awaited<ReturnType<typeof getDb>>,
-  memberId: number
-) {
+async function checkAndUpgradeTier(db: Awaited<ReturnType<typeof getDb>>, memberId: number) {
   const member = await db
     .select()
     .from(loyaltyMembers)
@@ -810,10 +777,7 @@ async function checkAndUpgradeTier(
     .select()
     .from(loyaltyTiers)
     .where(
-      and(
-        eq(loyaltyTiers.isActive, true),
-        lte(loyaltyTiers.minPoints, member[0].currentPoints)
-      )
+      and(eq(loyaltyTiers.isActive, true), lte(loyaltyTiers.minPoints, member[0].currentPoints))
     )
     .orderBy(desc(loyaltyTiers.minPoints))
     .limit(1);

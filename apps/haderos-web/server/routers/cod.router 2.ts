@@ -3,13 +3,20 @@
  * tRPC procedures for COD order management
  */
 
-import { router, protectedProcedure } from "../_core/trpc";
-import { z } from "zod";
-import { codWorkflowService } from "../services/cod-workflow.service";
-import { shippingAllocatorService } from "../services/shipping-allocator.service";
-import { requireDb } from "../db";
-import { codOrders, shippingPartners, trackingLogs, shippingPerformanceByGovernorate, shippingPerformanceByCenter, shippingPerformanceByPoint } from "../../drizzle/schema";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { router, protectedProcedure } from '../_core/trpc';
+import { z } from 'zod';
+import { codWorkflowService } from '../services/cod-workflow.service';
+import { shippingAllocatorService } from '../services/shipping-allocator.service';
+import { requireDb } from '../db';
+import {
+  codOrders,
+  shippingPartners,
+  trackingLogs,
+  shippingPerformanceByGovernorate,
+  shippingPerformanceByCenter,
+  shippingPerformanceByPoint,
+} from '../../drizzle/schema';
+import { eq, desc, and, gte, lte, sql } from 'drizzle-orm';
 
 // ============================================
 // SCHEMAS
@@ -59,11 +66,9 @@ export const codRouter = router({
   // ============================================
   // CREATE COD ORDER
   // ============================================
-  createOrder: protectedProcedure
-    .input(createCODOrderSchema)
-    .mutation(async ({ input }) => {
-      return await codWorkflowService.createCODOrder(input);
-    }),
+  createOrder: protectedProcedure.input(createCODOrderSchema).mutation(async ({ input }) => {
+    return await codWorkflowService.createCODOrder(input);
+  }),
 
   // ============================================
   // GET ALL COD ORDERS
@@ -108,11 +113,9 @@ export const codRouter = router({
   // ============================================
   // UPDATE STAGE
   // ============================================
-  updateStage: protectedProcedure
-    .input(updateStageSchema)
-    .mutation(async ({ input }) => {
-      return await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
-    }),
+  updateStage: protectedProcedure.input(updateStageSchema).mutation(async ({ input }) => {
+    return await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
+  }),
 
   // ============================================
   // ALLOCATE SHIPPING PARTNER
@@ -125,10 +128,7 @@ export const codRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await shippingAllocatorService.allocatePartner(
-        input.orderId,
-        input.shippingAddress
-      );
+      return await shippingAllocatorService.allocatePartner(input.orderId, input.shippingAddress);
     }),
 
   // ============================================
@@ -191,9 +191,7 @@ export const codRouter = router({
     .mutation(async ({ input }) => {
       const db = await requireDb();
 
-      await db.update(shippingPartners)
-        .set(input.data)
-        .where(eq(shippingPartners.id, input.id));
+      await db.update(shippingPartners).set(input.data).where(eq(shippingPartners.id, input.id));
 
       return { success: true };
     }),
@@ -210,15 +208,14 @@ export const codRouter = router({
     .query(async ({ input }) => {
       const db = await requireDb();
 
-      const [order] = await db.select()
-        .from(codOrders)
-        .where(eq(codOrders.orderId, input.orderId));
+      const [order] = await db.select().from(codOrders).where(eq(codOrders.orderId, input.orderId));
 
       if (!order) {
         throw new Error('الطلب غير موجود');
       }
 
-      const logs = await db.select()
+      const logs = await db
+        .select()
         .from(trackingLogs)
         .where(eq(trackingLogs.codOrderId, order.id))
         .orderBy(desc(trackingLogs.createdAt));
@@ -250,32 +247,36 @@ export const codRouter = router({
     const db = await requireDb();
 
     // Get counts by stage
-    const stageStats = await db.select({
-      stage: codOrders.currentStage,
-      count: sql<number>`count(*)`,
-    })
+    const stageStats = await db
+      .select({
+        stage: codOrders.currentStage,
+        count: sql<number>`count(*)`,
+      })
       .from(codOrders)
       .groupBy(codOrders.currentStage);
 
     // Get counts by status
-    const statusStats = await db.select({
-      status: codOrders.status,
-      count: sql<number>`count(*)`,
-    })
+    const statusStats = await db
+      .select({
+        status: codOrders.status,
+        count: sql<number>`count(*)`,
+      })
       .from(codOrders)
       .groupBy(codOrders.status);
 
     // Get total COD value
-    const [totalCOD] = await db.select({
-      total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
-    })
+    const [totalCOD] = await db
+      .select({
+        total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
+      })
       .from(codOrders);
 
     // Get today's orders
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todayOrders = await db.select()
+    const todayOrders = await db
+      .select()
       .from(codOrders)
       .where(gte(codOrders.createdAt, today.toISOString()));
 
@@ -299,20 +300,24 @@ export const codRouter = router({
   // GET PERFORMANCE BY GOVERNORATE
   // ============================================
   getPerformanceByGovernorate: protectedProcedure
-    .input(z.object({
-      governorateCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        governorateCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await requireDb();
-      
+
       if (input.governorateCode) {
-        return await db.select()
+        return await db
+          .select()
           .from(shippingPerformanceByGovernorate)
           .where(eq(shippingPerformanceByGovernorate.governorateCode, input.governorateCode))
           .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
       }
-      
-      return await db.select()
+
+      return await db
+        .select()
         .from(shippingPerformanceByGovernorate)
         .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
     }),
@@ -321,20 +326,24 @@ export const codRouter = router({
   // GET PERFORMANCE BY CENTER
   // ============================================
   getPerformanceByCenter: protectedProcedure
-    .input(z.object({
-      centerCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        centerCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await requireDb();
-      
+
       if (input.centerCode) {
-        return await db.select()
+        return await db
+          .select()
           .from(shippingPerformanceByCenter)
           .where(eq(shippingPerformanceByCenter.centerCode, input.centerCode))
           .orderBy(desc(shippingPerformanceByCenter.totalShipments));
       }
-      
-      return await db.select()
+
+      return await db
+        .select()
         .from(shippingPerformanceByCenter)
         .orderBy(desc(shippingPerformanceByCenter.totalShipments))
         .limit(50);
@@ -344,20 +353,24 @@ export const codRouter = router({
   // GET PERFORMANCE BY POINT
   // ============================================
   getPerformanceByPoint: protectedProcedure
-    .input(z.object({
-      pointCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        pointCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await requireDb();
-      
+
       if (input.pointCode) {
-        return await db.select()
+        return await db
+          .select()
           .from(shippingPerformanceByPoint)
           .where(eq(shippingPerformanceByPoint.pointCode, input.pointCode))
           .orderBy(desc(shippingPerformanceByPoint.totalShipments));
       }
-      
-      return await db.select()
+
+      return await db
+        .select()
         .from(shippingPerformanceByPoint)
         .orderBy(desc(shippingPerformanceByPoint.totalShipments))
         .limit(50);

@@ -47,8 +47,8 @@ export class DeepSeekProvider {
 
   // Pricing (per 1M tokens)
   private readonly PRICING = {
-    input: 0.14,   // $0.14 per 1M input tokens
-    output: 0.28,  // $0.28 per 1M output tokens
+    input: 0.14, // $0.14 per 1M input tokens
+    output: 0.28, // $0.28 per 1M output tokens
   };
 
   constructor(config: DeepSeekConfig) {
@@ -92,7 +92,9 @@ export class DeepSeekProvider {
       const totalCost = inputCost + outputCost;
 
       console.log(`✅ DeepSeek completed in ${duration}ms`);
-      console.log(`💰 Cost: $${totalCost.toFixed(6)} (Input: $${inputCost.toFixed(6)}, Output: $${outputCost.toFixed(6)})`);
+      console.log(
+        `💰 Cost: $${totalCost.toFixed(6)} (Input: $${inputCost.toFixed(6)}, Output: $${outputCost.toFixed(6)})`
+      );
 
       return {
         text: result.text,
@@ -281,7 +283,10 @@ ${diff}
   /**
    * توليد وثائق
    */
-  async generateDocumentation(code: string, format: 'markdown' | 'jsdoc' = 'markdown'): Promise<DeepSeekResponse> {
+  async generateDocumentation(
+    code: string,
+    format: 'markdown' | 'jsdoc' = 'markdown'
+  ): Promise<DeepSeekResponse> {
     const systemPrompt = `You are a documentation expert. Generate comprehensive ${format} documentation for the provided code.
 Include:
 1. Overview
@@ -302,7 +307,10 @@ ${code}
   /**
    * حساب التكلفة المقدرة
    */
-  estimateCost(inputTokens: number, outputTokens: number): {
+  estimateCost(
+    inputTokens: number,
+    outputTokens: number
+  ): {
     inputCost: number;
     outputCost: number;
     totalCost: number;
@@ -329,8 +337,8 @@ ${code}
   } {
     // Pricing per 1M tokens
     const deepseekCost = (tokens / 1_000_000) * 0.14;
-    const gpt35Cost = (tokens / 1_000_000) * 1.0;     // ~$1/M
-    const gpt4Cost = (tokens / 1_000_000) * 30.0;     // ~$30/M
+    const gpt35Cost = (tokens / 1_000_000) * 1.0; // ~$1/M
+    const gpt4Cost = (tokens / 1_000_000) * 30.0; // ~$30/M
 
     return {
       deepseek: deepseekCost,

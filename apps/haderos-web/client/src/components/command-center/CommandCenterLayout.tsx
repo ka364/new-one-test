@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import {
   LayoutGrid,
   Video,
@@ -13,17 +13,17 @@ import {
   Bell,
   LogOut,
   ChevronDown,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface MenuItem {
   icon: React.ElementType;
@@ -34,14 +34,19 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { icon: LayoutGrid, label: "Command Center", path: "/command-center", badge: 1 },
-  { icon: Video, label: "Live Showroom", sublabel: "System 01", path: "/live-showroom" },
-  { icon: Users, label: "Affiliate Army", sublabel: "System 02", path: "/affiliate-army" },
-  { icon: Factory, label: "Trader/Factory B2B", sublabel: "System 03", path: "/trader-b2b" },
-  { icon: Truck, label: "Smart Shipping", sublabel: "System 04", path: "/smart-shipping" },
-  { icon: Bot, label: "AI Agents", sublabel: "DevLab & Guardian", path: "/ai-agents" },
-  { icon: Calendar, label: "Board Meeting & Strategy", sublabel: "System 12", path: "/board-meeting" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: LayoutGrid, label: 'Command Center', path: '/command-center', badge: 1 },
+  { icon: Video, label: 'Live Showroom', sublabel: 'System 01', path: '/live-showroom' },
+  { icon: Users, label: 'Affiliate Army', sublabel: 'System 02', path: '/affiliate-army' },
+  { icon: Factory, label: 'Trader/Factory B2B', sublabel: 'System 03', path: '/trader-b2b' },
+  { icon: Truck, label: 'Smart Shipping', sublabel: 'System 04', path: '/smart-shipping' },
+  { icon: Bot, label: 'AI Agents', sublabel: 'DevLab & Guardian', path: '/ai-agents' },
+  {
+    icon: Calendar,
+    label: 'Board Meeting & Strategy',
+    sublabel: 'System 12',
+    path: '/board-meeting',
+  },
+  { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
 interface CommandCenterLayoutProps {
@@ -50,7 +55,7 @@ interface CommandCenterLayoutProps {
 
 export default function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const [location, setLocation] = useLocation();
-  const [language, setLanguage] = useState<"AR" | "EN">("EN");
+  const [language, setLanguage] = useState<'AR' | 'EN'>('EN');
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex">
@@ -72,37 +77,40 @@ export default function CommandCenterLayout({ children }: CommandCenterLayoutPro
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
-            const isActive = location === item.path || (item.path === "/command-center" && location === "/");
+            const isActive =
+              location === item.path || (item.path === '/command-center' && location === '/');
             return (
               <button
                 key={item.path}
                 onClick={() => setLocation(item.path)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group",
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group',
                   isActive
-                    ? "bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30"
-                    : "hover:bg-white/5"
+                    ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30'
+                    : 'hover:bg-white/5'
                 )}
               >
-                <item.icon className={cn(
-                  "w-5 h-5 shrink-0",
-                  isActive ? "text-purple-400" : "text-gray-400 group-hover:text-gray-300"
-                )} />
+                <item.icon
+                  className={cn(
+                    'w-5 h-5 shrink-0',
+                    isActive ? 'text-purple-400' : 'text-gray-400 group-hover:text-gray-300'
+                  )}
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "text-sm font-medium truncate",
-                      isActive ? "text-white" : "text-gray-300"
-                    )}>
+                    <span
+                      className={cn(
+                        'text-sm font-medium truncate',
+                        isActive ? 'text-white' : 'text-gray-300'
+                      )}
+                    >
                       {item.label}
                     </span>
                     {item.badge && (
                       <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                     )}
                   </div>
-                  {item.sublabel && (
-                    <span className="text-xs text-gray-500">{item.sublabel}</span>
-                  )}
+                  {item.sublabel && <span className="text-xs text-gray-500">{item.sublabel}</span>}
                 </div>
               </button>
             );
@@ -128,19 +136,19 @@ export default function CommandCenterLayout({ children }: CommandCenterLayoutPro
             {/* Language Toggle */}
             <div className="flex items-center bg-white/5 rounded-lg p-1">
               <button
-                onClick={() => setLanguage("AR")}
+                onClick={() => setLanguage('AR')}
                 className={cn(
-                  "px-3 py-1 text-sm rounded-md transition-all",
-                  language === "AR" ? "bg-white/10 text-white" : "text-gray-400 hover:text-white"
+                  'px-3 py-1 text-sm rounded-md transition-all',
+                  language === 'AR' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'
                 )}
               >
                 AR
               </button>
               <button
-                onClick={() => setLanguage("EN")}
+                onClick={() => setLanguage('EN')}
                 className={cn(
-                  "px-3 py-1 text-sm rounded-md transition-all",
-                  language === "EN" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                  'px-3 py-1 text-sm rounded-md transition-all',
+                  language === 'EN' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                 )}
               >
                 EN
@@ -191,9 +199,7 @@ export default function CommandCenterLayout({ children }: CommandCenterLayoutPro
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );

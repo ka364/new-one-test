@@ -180,9 +180,9 @@ describe('Payment Router - Unit Tests', () => {
     it('should handle payment not found', async () => {
       mockPaymentService.getPaymentStatus.mockResolvedValueOnce(null);
 
-      await expect(
-        caller.payment.getPaymentStatus({ transactionId: 999 })
-      ).rejects.toThrow(TRPCError);
+      await expect(caller.payment.getPaymentStatus({ transactionId: 999 })).rejects.toThrow(
+        TRPCError
+      );
     });
   });
 
@@ -233,4 +233,3 @@ describe('Payment Router - Unit Tests', () => {
     });
   });
 });
-

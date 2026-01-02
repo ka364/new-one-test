@@ -1,13 +1,13 @@
 /**
  * Unified Messaging System for Bio-Modules
- * 
+ *
  * All bio-modules communicate using this standardized message format
  */
 
-import { createHash } from "crypto";
-import { BioModuleName } from "./bio-interaction-matrix";
+import { createHash } from 'crypto';
+import { BioModuleName } from './bio-interaction-matrix';
 
-export type BioMessageType = "command" | "query" | "event" | "alert";
+export type BioMessageType = 'command' | 'query' | 'event' | 'alert';
 
 export type BioMessagePriority = 1 | 2 | 3 | 4 | 5;
 // 1 = Critical/Alert (immediate action required)
@@ -47,8 +47,8 @@ export interface BioMessageResponse {
  * Generate a signature for message authenticity
  */
 function generateSignature(source: BioModuleName, payload: any): string {
-  const data = `${source}:${JSON.stringify(payload)}:${process.env.BIO_SECRET || "haderos-bio-secret"}`;
-  return createHash("sha256").update(data).digest("hex").substring(0, 16);
+  const data = `${source}:${JSON.stringify(payload)}:${process.env.BIO_SECRET || 'haderos-bio-secret'}`;
+  return createHash('sha256').update(data).digest('hex').substring(0, 16);
 }
 
 /**
@@ -75,14 +75,19 @@ export function createBioMessage(
   }
 ): BioMessage {
   const destinations = Array.isArray(destination) ? destination : [destination];
-  
+
   // Auto-assign priority based on type if not specified
-  const priority = options?.priority || (
-    type === "alert" ? 1 :
-    type === "command" ? 2 :
-    type === "event" ? 3 :
-    type === "query" ? 4 : 5
-  );
+  const priority =
+    options?.priority ||
+    (type === 'alert'
+      ? 1
+      : type === 'command'
+        ? 2
+        : type === 'event'
+          ? 3
+          : type === 'query'
+            ? 4
+            : 5);
 
   const message: BioMessage = {
     id: `bio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -92,7 +97,7 @@ export function createBioMessage(
     type,
     priority,
     payload: JSON.parse(JSON.stringify(payload)), // Deep clone to avoid mutations
-    signature: "", // Will be set below
+    signature: '', // Will be set below
     metadata: {
       correlationId: options?.correlationId,
       replyTo: options?.replyTo,
@@ -142,7 +147,8 @@ export function isMessageExpired(message: BioMessage): boolean {
  * Routes messages between bio-modules
  */
 export class BioMessageRouter {
-  private handlers: Map<BioModuleName, (message: BioMessage) => Promise<BioMessageResponse>> = new Map();
+  private handlers: Map<BioModuleName, (message: BioMessage) => Promise<BioMessageResponse>> =
+    new Map();
   private messageHistory: BioMessage[] = [];
   private responseHistory: BioMessageResponse[] = [];
   private readonly MAX_HISTORY = 1000;
@@ -173,7 +179,7 @@ export class BioMessageRouter {
     // Verify signature
     if (!verifySignature(message)) {
       console.error(`[BioMessageRouter] Invalid signature from: ${message.source}`);
-      throw new Error("Invalid message signature");
+      throw new Error('Invalid message signature');
     }
 
     // Check expiration
@@ -189,7 +195,7 @@ export class BioMessageRouter {
     }
 
     console.log(
-      `[BioMessageRouter] Routing ${message.type} from ${message.source} to ${message.destination.join(", ")}`
+      `[BioMessageRouter] Routing ${message.type} from ${message.source} to ${message.destination.join(', ')}`
     );
 
     // Send to all destinations
@@ -197,7 +203,7 @@ export class BioMessageRouter {
 
     for (const dest of message.destination) {
       const handler = this.handlers.get(dest);
-      
+
       if (!handler) {
         console.warn(`[BioMessageRouter] No handler for destination: ${dest}`);
         responses.push({
@@ -215,10 +221,10 @@ export class BioMessageRouter {
         const startTime = Date.now();
         const response = await handler(message);
         response.processingTime = Date.now() - startTime;
-        
+
         responses.push(response);
         this.responseHistory.push(response);
-        
+
         if (this.responseHistory.length > this.MAX_HISTORY) {
           this.responseHistory.shift();
         }
@@ -246,7 +252,7 @@ export class BioMessageRouter {
     type: BioMessageType,
     payload: any
   ): Promise<BioMessageResponse[]> {
-    const allModules = Array.from(this.handlers.keys()).filter(m => m !== source);
+    const allModules = Array.from(this.handlers.keys()).filter((m) => m !== source);
     const message = createBioMessage(source, allModules, type, payload);
     return this.send(message);
   }
@@ -258,15 +264,21 @@ export class BioMessageRouter {
     const recentMessages = this.messageHistory.slice(-100);
     const recentResponses = this.responseHistory.slice(-100);
 
-    const messagesByType = recentMessages.reduce((acc, msg) => {
-      acc[msg.type] = (acc[msg.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const messagesByType = recentMessages.reduce(
+      (acc, msg) => {
+        acc[msg.type] = (acc[msg.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const messagesByPriority = recentMessages.reduce((acc, msg) => {
-      acc[msg.priority] = (acc[msg.priority] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
+    const messagesByPriority = recentMessages.reduce(
+      (acc, msg) => {
+        acc[msg.priority] = (acc[msg.priority] || 0) + 1;
+        return acc;
+      },
+      {} as Record<number, number>
+    );
 
     const avgProcessingTime =
       recentResponses.length > 0
@@ -275,7 +287,7 @@ export class BioMessageRouter {
 
     const successRate =
       recentResponses.length > 0
-        ? recentResponses.filter(r => r.success).length / recentResponses.length
+        ? recentResponses.filter((r) => r.success).length / recentResponses.length
         : 0;
 
     return {
@@ -312,7 +324,7 @@ export class BioMessageRouter {
     limit: number = 50
   ): BioMessage[] {
     return this.messageHistory
-      .filter(msg => msg.source === source && msg.destination.includes(destination))
+      .filter((msg) => msg.source === source && msg.destination.includes(destination))
       .slice(-limit);
   }
 }

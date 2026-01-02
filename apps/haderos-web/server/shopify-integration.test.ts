@@ -29,12 +29,14 @@ vi.mock('./db-shopify', () => ({
     { id: 1, title: 'Product A', shopifyId: '123', inventory: 50 },
     { id: 2, title: 'Product B', shopifyId: '456', inventory: 30 },
   ]),
-  getAllShopifyOrders: vi.fn().mockResolvedValue([
-    { id: 1, orderNumber: '1001', total: 599.99, status: 'fulfilled' },
-  ]),
-  getSyncLogs: vi.fn().mockResolvedValue([
-    { id: 1, action: 'sync_products', status: 'success', createdAt: new Date() },
-  ]),
+  getAllShopifyOrders: vi
+    .fn()
+    .mockResolvedValue([{ id: 1, orderNumber: '1001', total: 599.99, status: 'fulfilled' }]),
+  getSyncLogs: vi
+    .fn()
+    .mockResolvedValue([
+      { id: 1, action: 'sync_products', status: 'success', createdAt: new Date() },
+    ]),
 }));
 
 // Mock services
@@ -222,9 +224,7 @@ describe('Shopify Integration - Unit Tests', () => {
           email: 'ahmed@example.com',
         },
         lineItems: {
-          edges: [
-            { node: { title: 'Product A', quantity: 2, variant: { price: '199.99' } } },
-          ],
+          edges: [{ node: { title: 'Product A', quantity: 2, variant: { price: '199.99' } } }],
         },
       };
 

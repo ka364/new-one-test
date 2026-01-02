@@ -3,15 +3,15 @@
  * Syncs NOW SHOES products to Shopify store
  */
 
-import { shopifyClient } from "../integrations/shopify-client";
+import { shopifyClient } from '../integrations/shopify-client';
 import {
   createShopifyProductMapping,
   getShopifyProductByLocalId,
   updateShopifyProductSync,
   createSyncLog,
-} from "../db-shopify";
-import { requireDb } from "../db";
-import { sql } from "drizzle-orm";
+} from '../db-shopify';
+import { requireDb } from '../db';
+import { sql } from 'drizzle-orm';
 
 export interface ProductSyncResult {
   success: boolean;
@@ -38,7 +38,7 @@ export async function syncAllProductsToShopify(): Promise<ProductSyncResult> {
     // Get all products from local database
     const db = await requireDb();
     if (!db) {
-      throw new Error("Database connection failed");
+      throw new Error('Database connection failed');
     }
 
     // Query products using raw SQL
@@ -47,19 +47,20 @@ export async function syncAllProductsToShopify(): Promise<ProductSyncResult> {
     );
 
     // db.execute returns nested array - first element is the actual data
-    const products = Array.isArray(productsResult) && productsResult.length > 0 && Array.isArray(productsResult[0]) 
-      ? productsResult[0] 
-      : productsResult;
+    const products =
+      Array.isArray(productsResult) && productsResult.length > 0 && Array.isArray(productsResult[0])
+        ? productsResult[0]
+        : productsResult;
     result.totalProducts = products.length;
 
     if (products.length === 0) {
-      console.log("[Shopify Sync] No products to sync");
+      console.log('[Shopify Sync] No products to sync');
       result.success = true;
       return result;
     }
 
     console.log(`[Shopify Sync] Starting sync of ${products.length} products...`);
-    console.log("[DEBUG] First product:", JSON.stringify(products[0]));
+    console.log('[DEBUG] First product:', JSON.stringify(products[0]));
 
     // Sync each product
     for (const product of products) {
@@ -73,7 +74,10 @@ export async function syncAllProductsToShopify(): Promise<ProductSyncResult> {
           productId: product.id || 0,
           error: error.message,
         });
-        console.error(`[Shopify Sync] ✗ Failed to sync product ${product.model_code}:`, error.message);
+        console.error(
+          `[Shopify Sync] ✗ Failed to sync product ${product.model_code}:`,
+          error.message
+        );
       }
     }
 
@@ -82,13 +86,18 @@ export async function syncAllProductsToShopify(): Promise<ProductSyncResult> {
 
     // Log sync operation
     await createSyncLog({
-      syncType: "products",
-      direction: "local_to_shopify",
-      status: result.success ? "success" : result.failed < result.totalProducts ? "partial" : "error",
+      syncType: 'products',
+      direction: 'local_to_shopify',
+      status: result.success
+        ? 'success'
+        : result.failed < result.totalProducts
+          ? 'partial'
+          : 'error',
       itemsProcessed: result.totalProducts,
       itemsSucceeded: result.synced,
       itemsFailed: result.failed,
-      errorMessage: result.errors.length > 0 ? `${result.failed} products failed to sync` : undefined,
+      errorMessage:
+        result.errors.length > 0 ? `${result.failed} products failed to sync` : undefined,
       errorDetails: result.errors.length > 0 ? result.errors : undefined,
       duration,
     });
@@ -99,12 +108,12 @@ export async function syncAllProductsToShopify(): Promise<ProductSyncResult> {
 
     return result;
   } catch (error: any) {
-    console.error("[Shopify Sync] Fatal error:", error);
-    
+    console.error('[Shopify Sync] Fatal error:', error);
+
     await createSyncLog({
-      syncType: "products",
-      direction: "local_to_shopify",
-      status: "error",
+      syncType: 'products',
+      direction: 'local_to_shopify',
+      status: 'error',
       itemsProcessed: 0,
       itemsSucceeded: 0,
       itemsFailed: 0,
@@ -132,17 +141,17 @@ async function syncSingleProduct(product: any): Promise<void> {
   const shopifyProduct = {
     title: `NOW SHOES - ${product.model_code}`,
     descriptionHtml: buildProductDescription(product),
-    vendor: "NOW SHOES",
-    productType: product.category || "Shoes",
+    vendor: 'NOW SHOES',
+    productType: product.category || 'Shoes',
     tags: buildProductTags(product),
     variants: [
       {
-        price: product.selling_price?.toString() || product.supplier_price?.toString() || "0",
+        price: product.selling_price?.toString() || product.supplier_price?.toString() || '0',
         sku: product.model_code,
         barcode: product.model_code,
         inventoryQuantity: 0, // Will be updated from inventory table
         weight: 0.5, // Default weight in kg
-        weightUnit: "KILOGRAMS" as const,
+        weightUnit: 'KILOGRAMS' as const,
       },
     ],
     images: [], // Will be added later from visual search or other sources
@@ -152,7 +161,7 @@ async function syncSingleProduct(product: any): Promise<void> {
   const createdProduct = await shopifyClient.createProduct(shopifyProduct);
 
   if (!createdProduct) {
-    throw new Error("Failed to create product in Shopify");
+    throw new Error('Failed to create product in Shopify');
   }
 
   // Extract Shopify IDs
@@ -172,7 +181,7 @@ async function syncSingleProduct(product: any): Promise<void> {
     barcode: product.model_code,
     price: parseFloat(product.selling_price || product.supplier_price) || 0,
     inventoryQuantity: 0,
-    status: "active",
+    status: 'active',
   });
 
   console.log(`[Shopify Sync] Created product in Shopify: ${shopifyProductId}`);
@@ -200,14 +209,14 @@ function buildProductDescription(product: any): string {
 
   parts.push(`<p>High-quality footwear from NOW SHOES collection.</p>`);
 
-  return parts.join("\n");
+  return parts.join('\n');
 }
 
 /**
  * Build product tags for Shopify
  */
 function buildProductTags(product: any): string[] {
-  const tags: string[] = ["NOW SHOES", "Footwear"];
+  const tags: string[] = ['NOW SHOES', 'Footwear'];
 
   if (product.category) {
     tags.push(product.category);
@@ -253,7 +262,7 @@ export async function updateProductInventory(
   const locationId = locations.data?.locations?.edges?.[0]?.node?.id;
 
   if (!locationId) {
-    throw new Error("No Shopify location found");
+    throw new Error('No Shopify location found');
   }
 
   // Calculate delta
@@ -271,7 +280,7 @@ export async function updateProductInventory(
   // Update local mapping
   await updateShopifyProductSync(mapping.shopify_product_id, {
     inventoryQuantity: newQuantity,
-    syncStatus: "synced",
+    syncStatus: 'synced',
   });
 
   console.log(

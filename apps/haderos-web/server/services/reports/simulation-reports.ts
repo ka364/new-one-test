@@ -207,7 +207,7 @@ export class SimulationReportService {
 
     // توقعات الأشهر القادمة (3، 6، 12 شهر)
     const months = [3, 6, 12];
-    const projections = months.map(month => {
+    const projections = months.map((month) => {
       const userGrowth = Math.pow(1 + growth.userGrowthRate / 100, month);
       const orderGrowth = Math.pow(1 + growth.orderGrowthRate / 100, month);
       const revenueGrowth = Math.pow(1 + growth.revenueGrowthRate / 100, month);
@@ -246,12 +246,12 @@ export class SimulationReportService {
         name: 'محافظ (Conservative)',
         userGrowth: 1.05,
         orderGrowth: 1.08,
-        revenueGrowth: 1.10,
+        revenueGrowth: 1.1,
       },
       {
         name: 'متوقع (Expected)',
         userGrowth: 1.15,
-        orderGrowth: 1.20,
+        orderGrowth: 1.2,
         revenueGrowth: 1.25,
       },
       {
@@ -265,7 +265,7 @@ export class SimulationReportService {
     return {
       period: `${startDate.toLocaleDateString('ar-EG')} - ${endDate.toLocaleDateString('ar-EG')}`,
       baseline,
-      scenarios: scenarios.map(scenario => ({
+      scenarios: scenarios.map((scenario) => ({
         name: scenario.name,
         projectedUsers: Math.floor(baseline.totalUsers * scenario.userGrowth),
         projectedOrders: Math.floor(baseline.totalOrders * scenario.orderGrowth),
@@ -297,7 +297,7 @@ export class SimulationReportService {
     return {
       period: `${startDate.toLocaleDateString('ar-EG')} - ${endDate.toLocaleDateString('ar-EG')}`,
       baselineRevenue: baseline.totalRevenue,
-      sensitivity: variables.map(v => ({
+      sensitivity: variables.map((v) => ({
         variable: v.name,
         changePercent: v.change * 100,
         revenueImpact: v.impact,
@@ -330,7 +330,7 @@ export class SimulationReportService {
     return {
       period: `${startDate.toLocaleDateString('ar-EG')} - ${endDate.toLocaleDateString('ar-EG')}`,
       baselineOrdersPerDay: current.ordersPerDay,
-      stressTests: stressScenarios.map(scenario => ({
+      stressTests: stressScenarios.map((scenario) => ({
         scenario: scenario.name,
         ordersPerDay: current.ordersPerDay * scenario.loadMultiplier,
         expectedPerformance: scenario.expectedPerformance,
@@ -354,16 +354,8 @@ export class SimulationReportService {
     const rows = [
       ['المحاكاة', 'إجمالي المستخدمين', report.simulationMetrics.totalUsers.toString()],
       ['المحاكاة', 'إجمالي الطلبات', report.simulationMetrics.totalOrders.toString()],
-      [
-        'المحاكاة',
-        'إجمالي الإيرادات',
-        report.simulationMetrics.totalRevenue.toFixed(2),
-      ],
-      [
-        'المحاكاة',
-        'متوسط قيمة الطلب',
-        report.simulationMetrics.averageOrderValue.toFixed(2),
-      ],
+      ['المحاكاة', 'إجمالي الإيرادات', report.simulationMetrics.totalRevenue.toFixed(2)],
+      ['المحاكاة', 'متوسط قيمة الطلب', report.simulationMetrics.averageOrderValue.toFixed(2)],
       ['الحالات', 'مكتملة', report.statusDistribution.completed.toString()],
       ['الحالات', 'معلقة', report.statusDistribution.pending.toString()],
       ['الحالات', 'قيد المعالجة', report.statusDistribution.processing.toString()],
@@ -372,6 +364,6 @@ export class SimulationReportService {
       ['الأداء', 'معدل النجاح %', report.performanceMetrics.successRate.toFixed(2)],
     ];
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(',')).join('\n');
   }
 }

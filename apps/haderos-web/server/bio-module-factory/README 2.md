@@ -1,12 +1,16 @@
 # 🏭 BioModuleFactory
 
-**A living system that transforms biological principles into production-ready software modules.**
+**A living system that transforms biological principles into production-ready
+software modules.**
 
 ---
 
 ## 🎯 Overview
 
-BioModuleFactory is not just documentation—it's a **workflow engine** that guides developers through building bio-inspired modules using a standardized 5-step process. Inspired by biological homeostasis, the system maintains quality through automated gates and teaches developers through interactive lessons.
+BioModuleFactory is not just documentation—it's a **workflow engine** that
+guides developers through building bio-inspired modules using a standardized
+5-step process. Inspired by biological homeostasis, the system maintains quality
+through automated gates and teaches developers through interactive lessons.
 
 ### Key Features
 
@@ -14,21 +18,21 @@ BioModuleFactory is not just documentation—it's a **workflow engine** that gui
 ✅ **CLI Commands** - `haderos module init/step/submit/validate`  
 ✅ **Quality Gates** - Automated checks before advancing  
 ✅ **Training Academy** - Interactive lessons on biological principles  
-✅ **7 Bio-Modules** - Pre-defined organisms with business mappings  
+✅ **7 Bio-Modules** - Pre-defined organisms with business mappings
 
 ---
 
 ## 📚 The 7 Bio-Modules
 
-| # | Organism | Business Problem | Solution |
-|---|----------|------------------|----------|
-| 1 | **Mycelium** (Fungus) | Poor resource distribution across branches | Decentralized inventory balancing |
-| 2 | **Corvid** (Crow) | Repeated errors, no learning | Meta-learning error prevention |
-| 3 | **Chameleon** | Static pricing, inflexible UI | Adaptive market response |
-| 4 | **Cephalopod** (Octopus) | Centralized bottlenecks | Distributed decision-making |
-| 5 | **Arachnid** (Spider) | Undetected fraud/errors | Web-based anomaly detection |
-| 6 | **Ant** | Suboptimal delivery routes | Swarm logistics optimization |
-| 7 | **Tardigrade** (Water Bear) | System failures during crises | Extreme resilience & self-healing |
+| #   | Organism                    | Business Problem                           | Solution                          |
+| --- | --------------------------- | ------------------------------------------ | --------------------------------- |
+| 1   | **Mycelium** (Fungus)       | Poor resource distribution across branches | Decentralized inventory balancing |
+| 2   | **Corvid** (Crow)           | Repeated errors, no learning               | Meta-learning error prevention    |
+| 3   | **Chameleon**               | Static pricing, inflexible UI              | Adaptive market response          |
+| 4   | **Cephalopod** (Octopus)    | Centralized bottlenecks                    | Distributed decision-making       |
+| 5   | **Arachnid** (Spider)       | Undetected fraud/errors                    | Web-based anomaly detection       |
+| 6   | **Ant**                     | Suboptimal delivery routes                 | Swarm logistics optimization      |
+| 7   | **Tardigrade** (Water Bear) | System failures during crises              | Extreme resilience & self-healing |
 
 ---
 
@@ -41,6 +45,7 @@ haderos module list
 ```
 
 Output:
+
 ```
 📚 Available Bio-Modules:
 
@@ -63,6 +68,7 @@ haderos module init mycelium
 ```
 
 Creates:
+
 ```
 modules/mycelium/
 ├── docs/
@@ -83,6 +89,7 @@ haderos module step mycelium 1
 ```
 
 Shows:
+
 - Step requirements
 - Deliverables needed
 - Quality gates
@@ -109,12 +116,14 @@ Runs quality gates and advances to next step if passed.
 ### Step 1: Biological Study (1-2 weeks)
 
 **Deliverables:**
+
 - Biological Study Report (2-3 pages)
 - Business Problem Mapping
 - Feasibility Assessment
 - References & Sources
 
 **Quality Gates:**
+
 - Study document exists
 - All required sections present
 - Business mapping is clear
@@ -125,12 +134,14 @@ Runs quality gates and advances to next step if passed.
 ### Step 2: Architecture Design (1 week)
 
 **Deliverables:**
+
 - Architecture Document (5-10 pages)
 - Database Schema (Drizzle ORM)
 - API Specification (tRPC)
 - System Diagrams
 
 **Quality Gates:**
+
 - Schema compiles without errors
 - API types are properly defined
 - Architecture is comprehensive
@@ -140,12 +151,14 @@ Runs quality gates and advances to next step if passed.
 ### Step 3: Development (2-4 weeks)
 
 **Deliverables:**
+
 - Core Algorithm Implementation
 - Database Layer
 - API Router
 - Integration Code
 
 **Quality Gates:**
+
 - Code compiles successfully
 - No console.log statements
 - No hardcoded secrets
@@ -155,12 +168,14 @@ Runs quality gates and advances to next step if passed.
 ### Step 4: Testing (1 week)
 
 **Deliverables:**
+
 - Unit Tests (>80% coverage)
 - Integration Tests
 - Performance Tests
 - Test Report
 
 **Quality Gates:**
+
 - Test coverage >= 80%
 - All tests pass
 - Performance benchmarks met
@@ -170,12 +185,14 @@ Runs quality gates and advances to next step if passed.
 ### Step 5: Documentation (3 days)
 
 **Deliverables:**
+
 - Module README
 - API Reference
 - User Guide
 - FAQ
 
 **Quality Gates:**
+
 - README exists and is complete
 - API has code examples (>=3)
 - User guide covers all features
@@ -206,28 +223,28 @@ Interactive lessons that teach biological principles through code.
 ### Start a Lesson
 
 ```typescript
-import { TrainingAcademy } from "./training-academy";
+import { TrainingAcademy } from './training-academy';
 
 const academy = new TrainingAcademy();
 
 // Start lesson
-await academy.startLesson("user123", "lesson_01");
+await academy.startLesson('user123', 'lesson_01');
 
 // Get lesson content
-const lesson = academy.getLesson("lesson_01");
+const lesson = academy.getLesson('lesson_01');
 
 // Submit exercise
 const result = await academy.submitExercise(
-  "user123",
-  "lesson_01",
-  "ex_01_homeostasis",
+  'user123',
+  'lesson_01',
+  'ex_01_homeostasis',
   myCode
 );
 
 // Submit quiz
 const quizResult = await academy.submitQuiz(
-  "user123",
-  "lesson_01",
+  'user123',
+  'lesson_01',
   [1, 2, 0, 3] // answers
 );
 ```
@@ -254,11 +271,15 @@ bio-module-factory/
 
 ```typescript
 class BioModuleFactory {
-  async initializeModule(definition: BioModule): Promise<void>
-  async advanceStep(moduleName: string): Promise<void>
-  async submitDeliverable(moduleName: string, step: ModuleStep, filePath: string): Promise<void>
-  async validateStep(moduleName: string): Promise<ValidationResult>
-  getModuleState(moduleName: string): Promise<ModuleState | null>
+  async initializeModule(definition: BioModule): Promise<void>;
+  async advanceStep(moduleName: string): Promise<void>;
+  async submitDeliverable(
+    moduleName: string,
+    step: ModuleStep,
+    filePath: string
+  ): Promise<void>;
+  async validateStep(moduleName: string): Promise<ValidationResult>;
+  getModuleState(moduleName: string): Promise<ModuleState | null>;
 }
 ```
 
@@ -266,7 +287,7 @@ class BioModuleFactory {
 
 ```typescript
 class QualityGateSystem {
-  async runAllGates(state: ModuleState): Promise<QualityGateResult>
+  async runAllGates(state: ModuleState): Promise<QualityGateResult>;
 }
 ```
 
@@ -274,10 +295,19 @@ class QualityGateSystem {
 
 ```typescript
 class TrainingAcademy {
-  getLesson(lessonId: string): Lesson | undefined
-  async startLesson(userId: string, lessonId: string): Promise<void>
-  async submitExercise(userId: string, lessonId: string, exerciseId: string, code: string): Promise<ExerciseResult>
-  async submitQuiz(userId: string, lessonId: string, answers: number[]): Promise<QuizResult>
+  getLesson(lessonId: string): Lesson | undefined;
+  async startLesson(userId: string, lessonId: string): Promise<void>;
+  async submitExercise(
+    userId: string,
+    lessonId: string,
+    exerciseId: string,
+    code: string
+  ): Promise<ExerciseResult>;
+  async submitQuiz(
+    userId: string,
+    lessonId: string,
+    answers: number[]
+  ): Promise<QuizResult>;
 }
 ```
 
@@ -334,12 +364,14 @@ Quality gates ensure each step meets minimum standards before advancing.
 ### Examples
 
 **Step 1 Gates:**
+
 - ✅ Biological study document exists
 - ✅ All required sections present
 - ✅ Business mapping is clear
 - 🟡 Scientific references provided (3+ recommended)
 
 **Step 4 Gates:**
+
 - ✅ Test coverage >= 80%
 - ✅ All tests pass
 - 🟡 Performance benchmarks exist
@@ -353,6 +385,7 @@ $ haderos module status mycelium
 ```
 
 Output:
+
 ```
 📊 Module Status: Mycelium Module
 
@@ -379,24 +412,31 @@ Output:
 Each module embodies a biological principle:
 
 ### 1. Mycelium - Decentralized Distribution
+
 > "In nature, resources flow where they're needed without central control."
 
 ### 2. Corvid - Meta-Learning
+
 > "Crows remember mistakes and teach others to avoid them."
 
 ### 3. Chameleon - Adaptive Response
+
 > "Change color instantly to match the environment."
 
 ### 4. Cephalopod - Distributed Intelligence
+
 > "Each arm thinks independently, yet coordinates perfectly."
 
 ### 5. Arachnid - Anomaly Detection
+
 > "Feel the slightest vibration across the entire web."
 
 ### 6. Ant - Swarm Optimization
+
 > "Find the shortest path through collective intelligence."
 
 ### 7. Tardigrade - Extreme Resilience
+
 > "Survive anything by entering suspended animation."
 
 ---
@@ -405,19 +445,20 @@ Each module embodies a biological principle:
 
 BioModuleFactory is designed to integrate with the 5 HADER phases:
 
-| HADER Phase | Bio-Modules |
-|-------------|-------------|
-| 1. Foundation | Corvid (Learning) |
-| 2. KEMET MVP | Cephalopod (Distributed Decisions) |
-| 3. CRM & Agent | Corvid, Arachnid |
-| 4. E-commerce | Mycelium, Chameleon, Ant |
-| 5. Integration & Launch | Tardigrade (Resilience) |
+| HADER Phase             | Bio-Modules                        |
+| ----------------------- | ---------------------------------- |
+| 1. Foundation           | Corvid (Learning)                  |
+| 2. KEMET MVP            | Cephalopod (Distributed Decisions) |
+| 3. CRM & Agent          | Corvid, Arachnid                   |
+| 4. E-commerce           | Mycelium, Chameleon, Ant           |
+| 5. Integration & Launch | Tardigrade (Resilience)            |
 
 ---
 
 ## 📈 Success Metrics
 
 **Per Module:**
+
 - ✅ All 5 steps completed
 - ✅ All quality gates passed
 - ✅ Test coverage >= 80%
@@ -425,6 +466,7 @@ BioModuleFactory is designed to integrate with the 5 HADER phases:
 - ✅ Training lessons finished
 
 **System-Wide:**
+
 - 🎯 7/7 bio-modules implemented
 - 🎯 Zero repeated errors (Corvid working)
 - 🎯 100% uptime (Tardigrade working)
@@ -435,6 +477,7 @@ BioModuleFactory is designed to integrate with the 5 HADER phases:
 ## 🚧 Roadmap
 
 ### Phase 1: haderos-mvp (Current)
+
 - ✅ Core types & interfaces
 - ✅ State machine
 - ✅ CLI commands
@@ -443,12 +486,14 @@ BioModuleFactory is designed to integrate with the 5 HADER phases:
 - ⏳ First module implementation (Mycelium)
 
 ### Phase 2: haderos-platform (Python)
+
 - Port to FastAPI
 - Kafka integration
 - ML/AI stack
 - Production deployment
 
 ### Phase 3: Advanced Features
+
 - Real-time collaboration
 - Visual workflow editor
 - AI-assisted code generation
@@ -459,11 +504,14 @@ BioModuleFactory is designed to integrate with the 5 HADER phases:
 ## 📚 References
 
 ### Scientific Papers
-- Simard, S. W. (1997). Net transfer of carbon between ectomycorrhizal tree species
+
+- Simard, S. W. (1997). Net transfer of carbon between ectomycorrhizal tree
+  species
 - Emery, N. J., & Clayton, N. S. (2004). The mentality of crows
 - Dorigo, M., & Stützle, T. (2004). Ant Colony Optimization
 
 ### Videos
+
 - "How Trees Talk to Each Other" - Suzanne Simard (TED)
 - "The Intelligence of Crows" - PBS
 - "The Wood Wide Web" - BBC
@@ -491,4 +539,4 @@ Part of HaderOS - Organic Operating System for Business
 
 **Built with 🧬 by the HaderOS team**
 
-*"From mechanics to life - building software that breathes."*
+_"From mechanics to life - building software that breathes."_

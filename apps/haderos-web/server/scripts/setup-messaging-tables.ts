@@ -4,14 +4,14 @@
  * Creates all 12 tables for the unified messaging system
  */
 
-import { getDb } from "../db";
-import { sql } from "drizzle-orm";
+import { getDb } from '../db';
+import { sql } from 'drizzle-orm';
 
 async function setupMessagingTables() {
   const db = await getDb();
 
   try {
-    console.log("🔍 Checking messaging tables...\n");
+    console.log('🔍 Checking messaging tables...\n');
 
     // Check if tables exist
     const result = await db.execute(sql`
@@ -37,11 +37,11 @@ async function setupMessagingTables() {
     console.log(`✅ Found ${result.rows.length} existing tables\n`);
 
     if (result.rows.length === 12) {
-      console.log("✅ All messaging tables already exist!");
+      console.log('✅ All messaging tables already exist!');
       return;
     }
 
-    console.log("📝 Creating missing messaging tables...\n");
+    console.log('📝 Creating missing messaging tables...\n');
 
     // 1. conversations
     await db.execute(sql`
@@ -76,7 +76,7 @@ async function setupMessagingTables() {
         closed_at TIMESTAMP
       )
     `);
-    console.log("✅ Created: conversations");
+    console.log('✅ Created: conversations');
 
     // Create indexes for conversations
     await db.execute(sql`
@@ -108,7 +108,7 @@ async function setupMessagingTables() {
         UNIQUE(conversation_id, user_id)
       )
     `);
-    console.log("✅ Created: conversation_participants");
+    console.log('✅ Created: conversation_participants');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS participants_conversation_idx ON conversation_participants(conversation_id);
@@ -143,7 +143,7 @@ async function setupMessagingTables() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: messages");
+    console.log('✅ Created: messages');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS messages_conversation_idx ON messages(conversation_id);
@@ -172,7 +172,7 @@ async function setupMessagingTables() {
         uploaded_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: message_attachments");
+    console.log('✅ Created: message_attachments');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS attachments_message_idx ON message_attachments(message_id);
@@ -190,7 +190,7 @@ async function setupMessagingTables() {
         UNIQUE(message_id, user_id, emoji)
       )
     `);
-    console.log("✅ Created: message_reactions");
+    console.log('✅ Created: message_reactions');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS reactions_message_idx ON message_reactions(message_id);
@@ -208,7 +208,7 @@ async function setupMessagingTables() {
         UNIQUE(message_id, user_id)
       )
     `);
-    console.log("✅ Created: message_read_receipts");
+    console.log('✅ Created: message_read_receipts');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS read_receipts_message_idx ON message_read_receipts(message_id);
@@ -225,7 +225,7 @@ async function setupMessagingTables() {
         expires_at TIMESTAMP NOT NULL
       )
     `);
-    console.log("✅ Created: typing_indicators");
+    console.log('✅ Created: typing_indicators');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS typing_conversation_idx ON typing_indicators(conversation_id);
@@ -246,7 +246,7 @@ async function setupMessagingTables() {
         last_used_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: push_notification_tokens");
+    console.log('✅ Created: push_notification_tokens');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS push_tokens_user_idx ON push_notification_tokens(user_id);
@@ -271,7 +271,7 @@ async function setupMessagingTables() {
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: notification_history");
+    console.log('✅ Created: notification_history');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS notifications_user_idx ON notification_history(user_id);
@@ -299,7 +299,7 @@ async function setupMessagingTables() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: ai_usage_tracking");
+    console.log('✅ Created: ai_usage_tracking');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS ai_usage_user_idx ON ai_usage_tracking(user_id);
@@ -326,7 +326,7 @@ async function setupMessagingTables() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: subscription_plans");
+    console.log('✅ Created: subscription_plans');
 
     // 12. user_subscriptions
     await db.execute(sql`
@@ -351,7 +351,7 @@ async function setupMessagingTables() {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log("✅ Created: user_subscriptions");
+    console.log('✅ Created: user_subscriptions');
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS subscriptions_user_idx ON user_subscriptions(user_id);
@@ -360,7 +360,7 @@ async function setupMessagingTables() {
       CREATE INDEX IF NOT EXISTS subscriptions_end_date_idx ON user_subscriptions(end_date);
     `);
 
-    console.log("\n✅ All messaging tables created successfully!\n");
+    console.log('\n✅ All messaging tables created successfully!\n');
 
     // Verify tables
     const verifyResult = await db.execute(sql`
@@ -389,9 +389,8 @@ async function setupMessagingTables() {
     verifyResult.rows.forEach((row: any) => {
       console.log(`   ✓ ${row.table_name}`);
     });
-
   } catch (error) {
-    console.error("❌ Error setting up messaging tables:", error);
+    console.error('❌ Error setting up messaging tables:', error);
     throw error;
   }
 }
@@ -400,11 +399,11 @@ async function setupMessagingTables() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupMessagingTables()
     .then(() => {
-      console.log("\n✅ Setup complete!");
+      console.log('\n✅ Setup complete!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error("\n❌ Setup failed:", error);
+      console.error('\n❌ Setup failed:', error);
       process.exit(1);
     });
 }

@@ -1,7 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { trpc } from "@/lib/trpc";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { trpc } from '@/lib/trpc';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from 'recharts';
 
 interface VitalSignChartProps {
   signId: string;
@@ -11,10 +21,16 @@ interface VitalSignChartProps {
   days?: number;
 }
 
-export function VitalSignChart({ signId, signName, signNameAr, color, days = 7 }: VitalSignChartProps) {
+export function VitalSignChart({
+  signId,
+  signName,
+  signNameAr,
+  color,
+  days = 7,
+}: VitalSignChartProps) {
   const { data: history, isLoading } = trpc.vitalSigns.getVitalSignsHistory.useQuery({
     signId,
-    days
+    days,
   });
 
   if (isLoading) {
@@ -32,10 +48,15 @@ export function VitalSignChart({ signId, signName, signNameAr, color, days = 7 }
   }
 
   // استخراج اللون الأساسي من gradient
-  const primaryColor = color.includes("blue") ? "#3b82f6" :
-                       color.includes("yellow") || color.includes("orange") ? "#f59e0b" :
-                       color.includes("green") ? "#10b981" :
-                       color.includes("purple") ? "#a855f7" : "#6b7280";
+  const primaryColor = color.includes('blue')
+    ? '#3b82f6'
+    : color.includes('yellow') || color.includes('orange')
+      ? '#f59e0b'
+      : color.includes('green')
+        ? '#10b981'
+        : color.includes('purple')
+          ? '#a855f7'
+          : '#6b7280';
 
   return (
     <Card>
@@ -64,23 +85,20 @@ export function VitalSignChart({ signId, signName, signNameAr, color, days = 7 }
                 return `${date.getDate()}/${date.getMonth() + 1}`;
               }}
             />
-            <YAxis
-              tick={{ fontSize: 11 }}
-              domain={['dataMin - 5', 'dataMax + 5']}
-            />
+            <YAxis tick={{ fontSize: 11 }} domain={['dataMin - 5', 'dataMax + 5']} />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 border: `1px solid ${primaryColor}`,
                 borderRadius: '8px',
-                padding: '8px 12px'
+                padding: '8px 12px',
               }}
               labelFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString('ar-EG', {
                   year: 'numeric',
                   month: 'long',
-                  day: 'numeric'
+                  day: 'numeric',
                 });
               }}
               formatter={(value: any) => [value.toFixed(1), signNameAr]}

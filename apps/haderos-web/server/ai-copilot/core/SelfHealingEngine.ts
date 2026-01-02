@@ -136,10 +136,7 @@ export class SelfHealingEngine {
         const content = await readFile(filePath, 'utf-8');
 
         // Replace console.log with structured logging
-        let newContent = content.replace(
-          /console\.log\(/g,
-          'logger.debug('
-        );
+        let newContent = content.replace(/console\.log\(/g, 'logger.debug(');
 
         if (newContent !== content) {
           // Add logger import if not present
@@ -218,7 +215,6 @@ export class SelfHealingEngine {
         if (content.includes('WHERE') && !content.includes('INDEX')) {
           changes.push(`Consider adding database index in ${file}`);
         }
-
       } catch (error) {
         changes.push(`Failed to analyze ${file}: ${(error as Error).message}`);
       }

@@ -38,31 +38,47 @@ export default function CreateShipmentPage() {
     customerName: '',
     customerPhone: '',
     customerEmail: '',
-    
+
     // Pickup Address
     pickupCity: '',
     pickupDistrict: '',
     pickupAddress: '',
-    
+
     // Delivery Address
     deliveryCity: '',
     deliveryDistrict: '',
     deliveryAddress: '',
-    
+
     // Package Info
     packageType: 'normal',
     packageWeight: '',
     packageDescription: '',
     codAmount: '',
-    
+
     // Additional
     notes: '',
   });
 
   const egyptCities = [
-    'القاهرة', 'الجيزة', 'الإسكندرية', 'المنصورة', 'طنطا', 'الزقازيق',
-    'أسيوط', 'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'بورسعيد', 'السويس',
-    'الإسماعيلية', 'دمياط', 'كفر الشيخ', 'المنيا', 'بني سويف', 'الفيوم',
+    'القاهرة',
+    'الجيزة',
+    'الإسكندرية',
+    'المنصورة',
+    'طنطا',
+    'الزقازيق',
+    'أسيوط',
+    'سوهاج',
+    'قنا',
+    'الأقصر',
+    'أسوان',
+    'بورسعيد',
+    'السويس',
+    'الإسماعيلية',
+    'دمياط',
+    'كفر الشيخ',
+    'المنيا',
+    'بني سويف',
+    'الفيوم',
   ];
 
   const packageTypes = [
@@ -79,8 +95,8 @@ export default function CreateShipmentPage() {
 
     try {
       // TODO: Integrate with Bosta API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Redirect to shipments list
       setLocation('/shipping/shipments');
     } catch (error) {
@@ -361,7 +377,7 @@ export default function CreateShipmentPage() {
             <div className="flex justify-between">
               <span className="text-gray-600">رسوم الشحن</span>
               <span className="font-medium">
-                {packageTypes.find(t => t.value === formData.packageType)?.price || 0} ج.م
+                {packageTypes.find((t) => t.value === formData.packageType)?.price || 0} ج.م
               </span>
             </div>
             <div className="flex justify-between">
@@ -371,7 +387,9 @@ export default function CreateShipmentPage() {
             <div className="border-t pt-3 flex justify-between text-lg font-bold">
               <span>الإجمالي</span>
               <span className="text-green-600">
-                {(Number(formData.codAmount) || 0) + (packageTypes.find(t => t.value === formData.packageType)?.price || 0)} ج.م
+                {(Number(formData.codAmount) || 0) +
+                  (packageTypes.find((t) => t.value === formData.packageType)?.price || 0)}{' '}
+                ج.م
               </span>
             </div>
           </div>
@@ -411,22 +429,19 @@ export default function CreateShipmentPage() {
               <div
                 className={`
                   w-10 h-10 rounded-full flex items-center justify-center font-bold
-                  ${step === stepNum
-                    ? 'bg-[#C62822] text-white'
-                    : step > stepNum
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 text-gray-600'
+                  ${
+                    step === stepNum
+                      ? 'bg-[#C62822] text-white'
+                      : step > stepNum
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
                   }
                 `}
               >
                 {step > stepNum ? <CheckCircle className="h-5 w-5" /> : stepNum}
               </div>
               {stepNum < 3 && (
-                <div
-                  className={`w-20 h-1 ${
-                    step > stepNum ? 'bg-green-500' : 'bg-gray-200'
-                  }`}
-                />
+                <div className={`w-20 h-1 ${step > stepNum ? 'bg-green-500' : 'bg-gray-200'}`} />
               )}
             </div>
           ))}

@@ -117,7 +117,9 @@ export const mockDb = {
 
   // Google Drive Files
   googleDriveFiles: {
-    findMany: vi.fn().mockImplementation(async () => Array.from(mockStorage.googleDriveFiles.values())),
+    findMany: vi
+      .fn()
+      .mockImplementation(async () => Array.from(mockStorage.googleDriveFiles.values())),
     create: vi.fn().mockImplementation(async ({ data }: any) => {
       const id = generateId();
       const file = { id, ...data, createdAt: new Date() };

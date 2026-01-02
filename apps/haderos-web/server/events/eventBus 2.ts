@@ -3,20 +3,20 @@
  * Handles asynchronous event processing and agent coordination
  */
 
-import { createEvent, getPendingEvents, updateEventStatus } from "../db";
-import { Event, InsertEvent } from "../../drizzle/schema";
+import { createEvent, getPendingEvents, updateEventStatus } from '../db';
+import { Event, InsertEvent } from '../../drizzle/schema';
 
-export type EventType = 
-  | "transaction.created"
-  | "transaction.updated"
-  | "order.created"
-  | "order.updated"
-  | "campaign.created"
-  | "campaign.performance_update"
-  | "ethical.violation_detected"
-  | "financial.threshold_exceeded"
-  | "demand.forecast_required"
-  | "system.notification";
+export type EventType =
+  | 'transaction.created'
+  | 'transaction.updated'
+  | 'order.created'
+  | 'order.updated'
+  | 'campaign.created'
+  | 'campaign.performance_update'
+  | 'ethical.violation_detected'
+  | 'financial.threshold_exceeded'
+  | 'demand.forecast_required'
+  | 'system.notification';
 
 export interface EventPayload {
   type: EventType;
@@ -56,7 +56,7 @@ export class EventBus {
         eventName: payload.type,
         eventData: payload.data,
         priority: payload.priority || 100,
-        status: "pending",
+        status: 'pending',
         createdBy: payload.userId,
       };
 
@@ -114,7 +114,7 @@ export class EventBus {
         await this.processEvent(event);
       }
     } catch (error) {
-      console.error("[EventBus] Error processing events:", error);
+      console.error('[EventBus] Error processing events:', error);
     } finally {
       this.isProcessing = false;
     }
@@ -126,34 +126,34 @@ export class EventBus {
   private async processEvent(event: Event): Promise<void> {
     try {
       // Update status to processing
-      await updateEventStatus(event.id, "processing");
+      await updateEventStatus(event.id, 'processing');
 
       // Get handlers for this event type
       const handlers = this.handlers.get(event.eventType as EventType) || [];
 
       if (handlers.length === 0) {
         console.warn(`[EventBus] No handlers for event type: ${event.eventType}`);
-        await updateEventStatus(event.id, "completed");
+        await updateEventStatus(event.id, 'completed');
         return;
       }
 
       // Execute all handlers
-      await Promise.all(handlers.map(handler => handler(event)));
+      await Promise.all(handlers.map((handler) => handler(event)));
 
       // Mark as completed
-      await updateEventStatus(event.id, "completed");
+      await updateEventStatus(event.id, 'completed');
       console.log(`[EventBus] Processed event ${event.id}: ${event.eventType}`);
     } catch (error) {
       console.error(`[EventBus] Error processing event ${event.id}:`, error);
-      
+
       // Update retry count
       const retryCount = (event.retryCount || 0) + 1;
-      
+
       if (retryCount >= event.maxRetries) {
-        await updateEventStatus(event.id, "failed", String(error));
+        await updateEventStatus(event.id, 'failed', String(error));
       } else {
         // Reset to pending for retry
-        await updateEventStatus(event.id, "pending", String(error));
+        await updateEventStatus(event.id, 'pending', String(error));
       }
     }
   }
@@ -180,7 +180,7 @@ export class EventBus {
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
       this.processingInterval = null;
-      console.log("[EventBus] Stopped auto-processing");
+      console.log('[EventBus] Stopped auto-processing');
     }
   }
 
@@ -194,7 +194,7 @@ export class EventBus {
     autoProcessingEnabled: boolean;
   } {
     let totalHandlers = 0;
-    this.handlers.forEach(handlers => {
+    this.handlers.forEach((handlers) => {
       totalHandlers += handlers.length;
     });
 
@@ -202,7 +202,7 @@ export class EventBus {
       subscribedEventTypes: this.handlers.size,
       totalHandlers,
       isProcessing: this.isProcessing,
-      autoProcessingEnabled: this.processingInterval !== null
+      autoProcessingEnabled: this.processingInterval !== null,
     };
   }
 }

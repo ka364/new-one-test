@@ -398,7 +398,11 @@ export class KPIManager {
   /**
    * حساب حالة المؤشر
    */
-  calculateStatus(current: number, target: number, isHigherBetter: boolean = true): 'excellent' | 'good' | 'average' | 'poor' {
+  calculateStatus(
+    current: number,
+    target: number,
+    isHigherBetter: boolean = true
+  ): 'excellent' | 'good' | 'average' | 'poor' {
     const percentage = (current / target) * 100;
 
     if (!isHigherBetter) {
@@ -462,8 +466,8 @@ export class ReviewManager {
       quality: 0.25,
       teamwork: 0.15,
       communication: 0.15,
-      initiative: 0.10,
-      attendance: 0.10,
+      initiative: 0.1,
+      attendance: 0.1,
     };
 
     let score = 0;
@@ -715,7 +719,8 @@ export class DevelopmentManager {
   private suggestCareerPath(currentRole: string): string {
     const careerPaths: Record<string, string> = {
       sales: 'مندوب مبيعات → كبير مندوبي المبيعات → مدير مبيعات → مدير عام المبيعات',
-      customer_service: 'موظف خدمة عملاء → كبير موظفي الخدمة → مشرف خدمة العملاء → مدير خدمة العملاء',
+      customer_service:
+        'موظف خدمة عملاء → كبير موظفي الخدمة → مشرف خدمة العملاء → مدير خدمة العملاء',
       warehouse: 'موظف مخزن → كبير موظفي المخزن → مشرف مخزن → مدير المخازن',
       delivery: 'سائق توصيل → كبير السائقين → مشرف التوصيل → مدير العمليات',
       manager: 'مدير قسم → مدير عام → مدير تنفيذي',
@@ -738,7 +743,10 @@ export class DevelopmentManager {
     );
 
     const expectedProgress = skill.targetLevel - skill.currentLevel;
-    const progress = Math.min(100, ((skill.targetLevel - skill.currentLevel) / expectedProgress) * 100);
+    const progress = Math.min(
+      100,
+      ((skill.targetLevel - skill.currentLevel) / expectedProgress) * 100
+    );
 
     const isOnTrack = daysRemaining > 0 && progress >= 50;
 

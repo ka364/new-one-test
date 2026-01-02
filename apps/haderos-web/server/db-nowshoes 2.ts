@@ -1,5 +1,13 @@
 import { requireDb } from './db.js';
-import { products, productSizeCharts, inventory, orders, orderItems, shipments, returns as returnsTable } from '../drizzle/schema-nowshoes.js';
+import {
+  products,
+  productSizeCharts,
+  inventory,
+  orders,
+  orderItems,
+  shipments,
+  returns as returnsTable,
+} from '../drizzle/schema-nowshoes.js';
 import { eq, and, desc, sql, gte, lte } from 'drizzle-orm';
 
 // Helper to ensure db connection
@@ -36,7 +44,9 @@ export async function getProductByCode(code: string) {
 
 export async function getProductSizeChart(productId: number) {
   const db = await getConnection();
-  return db.select().from(productSizeCharts)
+  return db
+    .select()
+    .from(productSizeCharts)
     .where(eq(productSizeCharts.productId, productId))
     .orderBy(productSizeCharts.size);
 }
@@ -59,13 +69,17 @@ export async function addSizeChartEntry(data: {
   return result;
 }
 
-export async function updateSizeChartEntry(id: number, data: {
-  lengthCm?: number;
-  widthCm?: number;
-  notes?: string;
-}) {
+export async function updateSizeChartEntry(
+  id: number,
+  data: {
+    lengthCm?: number;
+    widthCm?: number;
+    notes?: string;
+  }
+) {
   const db = await getConnection();
-  const result = await db.update(productSizeCharts)
+  const result = await db
+    .update(productSizeCharts)
     .set({
       lengthCm: data.lengthCm?.toString(),
       widthCm: data.widthCm?.toString(),
@@ -87,53 +101,55 @@ export async function deleteSizeChartEntry(id: number) {
 
 export async function getInventory() {
   const db = await getConnection();
-  return db.select({
-    id: inventory.id,
-    productId: inventory.productId,
-    productCode: products.modelCode,
-    size: inventory.size,
-    color: inventory.color,
-    quantity: inventory.quantity,
-    minStockLevel: inventory.minStockLevel,
-    location: inventory.location,
-    lastRestocked: inventory.lastRestocked,
-    supplierPrice: products.supplierPrice,
-    sellingPrice: products.sellingPrice,
-  })
-  .from(inventory)
-  .leftJoin(products, eq(inventory.productId, products.id))
-  .orderBy(desc(inventory.updatedAt));
+  return db
+    .select({
+      id: inventory.id,
+      productId: inventory.productId,
+      productCode: products.modelCode,
+      size: inventory.size,
+      color: inventory.color,
+      quantity: inventory.quantity,
+      minStockLevel: inventory.minStockLevel,
+      location: inventory.location,
+      lastRestocked: inventory.lastRestocked,
+      supplierPrice: products.supplierPrice,
+      sellingPrice: products.sellingPrice,
+    })
+    .from(inventory)
+    .leftJoin(products, eq(inventory.productId, products.id))
+    .orderBy(desc(inventory.updatedAt));
 }
 
 export async function getInventoryByProduct(productId: number) {
   const db = await getConnection();
-  return db.select().from(inventory)
+  return db
+    .select()
+    .from(inventory)
     .where(eq(inventory.productId, productId))
     .orderBy(inventory.size, inventory.color);
 }
 
 export async function getLowStockItems() {
   const db = await getConnection();
-  return db.select({
-    id: inventory.id,
-    productId: inventory.productId,
-    productCode: products.modelCode,
-    size: inventory.size,
-    color: inventory.color,
-    quantity: inventory.quantity,
-    minStockLevel: inventory.minStockLevel,
-  })
-  .from(inventory)
-  .leftJoin(products, eq(inventory.productId, products.id))
-  .where(sql`${inventory.quantity} <= ${inventory.minStockLevel}`)
-  .orderBy(inventory.quantity);
+  return db
+    .select({
+      id: inventory.id,
+      productId: inventory.productId,
+      productCode: products.modelCode,
+      size: inventory.size,
+      color: inventory.color,
+      quantity: inventory.quantity,
+      minStockLevel: inventory.minStockLevel,
+    })
+    .from(inventory)
+    .leftJoin(products, eq(inventory.productId, products.id))
+    .where(sql`${inventory.quantity} <= ${inventory.minStockLevel}`)
+    .orderBy(inventory.quantity);
 }
 
 export async function updateInventoryQuantity(id: number, quantity: number) {
   const db = await getConnection();
-  return db.update(inventory)
-    .set({ quantity, updatedAt: new Date() })
-    .where(eq(inventory.id, id));
+  return db.update(inventory).set({ quantity, updatedAt: new Date() }).where(eq(inventory.id, id));
 }
 
 export async function addInventoryItem(data: {
@@ -179,18 +195,15 @@ export async function getOrderByNumber(orderNumber: string) {
 
 export async function getOrdersByStatus(status: string) {
   const db = await getConnection();
-  return db.select().from(orders)
-    .where(eq(orders.status, status))
-    .orderBy(desc(orders.createdAt));
+  return db.select().from(orders).where(eq(orders.status, status)).orderBy(desc(orders.createdAt));
 }
 
 export async function getOrdersByDateRange(startDate: Date, endDate: Date) {
   const db = await getConnection();
-  return db.select().from(orders)
-    .where(and(
-      gte(orders.createdAt, startDate),
-      lte(orders.createdAt, endDate)
-    ))
+  return db
+    .select()
+    .from(orders)
+    .where(and(gte(orders.createdAt, startDate), lte(orders.createdAt, endDate)))
     .orderBy(desc(orders.createdAt));
 }
 
@@ -226,9 +239,7 @@ export async function createOrder(data: {
 
 export async function updateOrderStatus(id: number, status: string, notes?: string) {
   const db = await getConnection();
-  return db.update(orders)
-    .set({ status, notes, updatedAt: new Date() })
-    .where(eq(orders.id, id));
+  return db.update(orders).set({ status, notes, updatedAt: new Date() }).where(eq(orders.id, id));
 }
 
 // ============================================
@@ -237,20 +248,21 @@ export async function updateOrderStatus(id: number, status: string, notes?: stri
 
 export async function getOrderItems(orderId: number) {
   const db = await getConnection();
-  return db.select({
-    id: orderItems.id,
-    orderId: orderItems.orderId,
-    productId: orderItems.productId,
-    productCode: products.modelCode,
-    size: orderItems.size,
-    color: orderItems.color,
-    quantity: orderItems.quantity,
-    unitPrice: orderItems.unitPrice,
-    subtotal: orderItems.subtotal,
-  })
-  .from(orderItems)
-  .leftJoin(products, eq(orderItems.productId, products.id))
-  .where(eq(orderItems.orderId, orderId));
+  return db
+    .select({
+      id: orderItems.id,
+      orderId: orderItems.orderId,
+      productId: orderItems.productId,
+      productCode: products.modelCode,
+      size: orderItems.size,
+      color: orderItems.color,
+      quantity: orderItems.quantity,
+      unitPrice: orderItems.unitPrice,
+      subtotal: orderItems.subtotal,
+    })
+    .from(orderItems)
+    .leftJoin(products, eq(orderItems.productId, products.id))
+    .where(eq(orderItems.orderId, orderId));
 }
 
 export async function addOrderItem(data: {
@@ -280,25 +292,28 @@ export async function addOrderItem(data: {
 
 export async function getShipmentsByOrder(orderId: number) {
   const db = await getConnection();
-  return db.select().from(shipments)
+  return db
+    .select()
+    .from(shipments)
     .where(eq(shipments.orderId, orderId))
     .orderBy(desc(shipments.createdAt));
 }
 
 export async function getShipmentsByCompany(company: string) {
   const db = await getConnection();
-  return db.select().from(shipments)
+  return db
+    .select()
+    .from(shipments)
     .where(eq(shipments.shippingCompany, company))
     .orderBy(desc(shipments.shippingDate));
 }
 
 export async function getShipmentsByDateRange(startDate: Date, endDate: Date) {
   const db = await getConnection();
-  return db.select().from(shipments)
-    .where(and(
-      gte(shipments.shippingDate, startDate),
-      lte(shipments.shippingDate, endDate)
-    ))
+  return db
+    .select()
+    .from(shipments)
+    .where(and(gte(shipments.shippingDate, startDate), lte(shipments.shippingDate, endDate)))
     .orderBy(desc(shipments.shippingDate));
 }
 
@@ -324,7 +339,8 @@ export async function createShipment(data: {
 
 export async function updateShipmentStatus(id: number, status: string, deliveryDate?: Date) {
   const db = await getConnection();
-  return db.update(shipments)
+  return db
+    .update(shipments)
     .set({ status, deliveryDate, updatedAt: new Date() })
     .where(eq(shipments.id, id));
 }
@@ -335,18 +351,19 @@ export async function updateShipmentStatus(id: number, status: string, deliveryD
 
 export async function getReturnsByShipment(shipmentId: number) {
   const db = await getConnection();
-  return db.select().from(returnsTable)
+  return db
+    .select()
+    .from(returnsTable)
     .where(eq(returnsTable.shipmentId, shipmentId))
     .orderBy(desc(returnsTable.createdAt));
 }
 
 export async function getReturnsByDateRange(startDate: Date, endDate: Date) {
   const db = await getConnection();
-  return db.select().from(returnsTable)
-    .where(and(
-      gte(returnsTable.returnDate, startDate),
-      lte(returnsTable.returnDate, endDate)
-    ))
+  return db
+    .select()
+    .from(returnsTable)
+    .where(and(gte(returnsTable.returnDate, startDate), lte(returnsTable.returnDate, endDate)))
     .orderBy(desc(returnsTable.returnDate));
 }
 
@@ -372,9 +389,7 @@ export async function createReturn(data: {
 
 export async function updateReturnStatus(id: number, status: string) {
   const db = await getConnection();
-  return db.update(returnsTable)
-    .set({ status })
-    .where(eq(returnsTable.id, id));
+  return db.update(returnsTable).set({ status }).where(eq(returnsTable.id, id));
 }
 
 // ============================================
@@ -388,31 +403,30 @@ export async function getDailySalesStats(date: Date) {
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999);
 
-  const result = await db.select({
-    totalOrders: sql<number>`COUNT(*)`,
-    totalRevenue: sql<number>`SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2)))`,
-    avgOrderValue: sql<number>`AVG(CAST(${orders.totalAmount} AS DECIMAL(10,2)))`,
-  })
-  .from(orders)
-  .where(and(
-    gte(orders.createdAt, startOfDay),
-    lte(orders.createdAt, endOfDay)
-  ));
+  const result = await db
+    .select({
+      totalOrders: sql<number>`COUNT(*)`,
+      totalRevenue: sql<number>`SUM(CAST(${orders.totalAmount} AS DECIMAL(10,2)))`,
+      avgOrderValue: sql<number>`AVG(CAST(${orders.totalAmount} AS DECIMAL(10,2)))`,
+    })
+    .from(orders)
+    .where(and(gte(orders.createdAt, startOfDay), lte(orders.createdAt, endOfDay)));
 
   return result[0] || { totalOrders: 0, totalRevenue: 0, avgOrderValue: 0 };
 }
 
 export async function getTopSellingProducts(limit: number = 10) {
   const db = await getConnection();
-  return db.select({
-    productId: orderItems.productId,
-    productCode: products.modelCode,
-    totalQuantity: sql<number>`SUM(${orderItems.quantity})`,
-    totalRevenue: sql<number>`SUM(CAST(${orderItems.subtotal} AS DECIMAL(10,2)))`,
-  })
-  .from(orderItems)
-  .leftJoin(products, eq(orderItems.productId, products.id))
-  .groupBy(orderItems.productId, products.modelCode)
-  .orderBy(desc(sql`SUM(${orderItems.quantity})`))
-  .limit(limit);
+  return db
+    .select({
+      productId: orderItems.productId,
+      productCode: products.modelCode,
+      totalQuantity: sql<number>`SUM(${orderItems.quantity})`,
+      totalRevenue: sql<number>`SUM(CAST(${orderItems.subtotal} AS DECIMAL(10,2)))`,
+    })
+    .from(orderItems)
+    .leftJoin(products, eq(orderItems.productId, products.id))
+    .groupBy(orderItems.productId, products.modelCode)
+    .orderBy(desc(sql`SUM(${orderItems.quantity})`))
+    .limit(limit);
 }

@@ -1,13 +1,13 @@
 /**
  * Cephalopod Module - Octopus Distributed Intelligence
- * 
+ *
  * Inspired by: Octopus's decentralized nervous system (neurons in each arm)
  * Problem: Centralized decision-making bottlenecks
  * Solution: Delegated authority with intelligent autonomy
  */
 
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface AuthorityLevel {
   level: number; // 1-7
@@ -50,7 +50,7 @@ export interface DelegationRule {
 
 /**
  * Cephalopod Distributed Intelligence Engine
- * 
+ *
  * Capabilities:
  * 1. Hierarchical authority levels
  * 2. Context-aware decision delegation
@@ -75,88 +75,88 @@ export class CephalopodDistributedEngine {
     const levels: AuthorityLevel[] = [
       {
         level: 1,
-        name: "Branch Staff",
+        name: 'Branch Staff',
         maxTransactionValue: 500,
         maxInventoryTransfer: 10,
         maxDiscount: 5,
         canApproveReturns: false,
         canModifyPrices: false,
         canCreateOrders: true,
-        requiresApproval: true
+        requiresApproval: true,
       },
       {
         level: 2,
-        name: "Senior Staff",
+        name: 'Senior Staff',
         maxTransactionValue: 2000,
         maxInventoryTransfer: 50,
         maxDiscount: 10,
         canApproveReturns: true,
         canModifyPrices: false,
         canCreateOrders: true,
-        requiresApproval: true
+        requiresApproval: true,
       },
       {
         level: 3,
-        name: "Branch Supervisor",
+        name: 'Branch Supervisor',
         maxTransactionValue: 5000,
         maxInventoryTransfer: 100,
         maxDiscount: 15,
         canApproveReturns: true,
         canModifyPrices: true,
         canCreateOrders: true,
-        requiresApproval: true
+        requiresApproval: true,
       },
       {
         level: 4,
-        name: "Branch Manager",
+        name: 'Branch Manager',
         maxTransactionValue: 20000,
         maxInventoryTransfer: 500,
         maxDiscount: 25,
         canApproveReturns: true,
         canModifyPrices: true,
         canCreateOrders: true,
-        requiresApproval: false
+        requiresApproval: false,
       },
       {
         level: 5,
-        name: "Regional Manager",
+        name: 'Regional Manager',
         maxTransactionValue: 100000,
         maxInventoryTransfer: 2000,
         maxDiscount: 40,
         canApproveReturns: true,
         canModifyPrices: true,
         canCreateOrders: true,
-        requiresApproval: false
+        requiresApproval: false,
       },
       {
         level: 6,
-        name: "Operations Director",
+        name: 'Operations Director',
         maxTransactionValue: 500000,
         maxInventoryTransfer: 10000,
         maxDiscount: 60,
         canApproveReturns: true,
         canModifyPrices: true,
         canCreateOrders: true,
-        requiresApproval: false
+        requiresApproval: false,
       },
       {
         level: 7,
-        name: "CEO / Founder",
+        name: 'CEO / Founder',
         maxTransactionValue: Infinity,
         maxInventoryTransfer: Infinity,
         maxDiscount: 100,
         canApproveReturns: true,
         canModifyPrices: true,
         canCreateOrders: true,
-        requiresApproval: false
-      }
+        requiresApproval: false,
+      },
     ];
 
-    levels.forEach(level => {
+    levels.forEach((level) => {
       this.authorityLevels.set(level.level, level);
     });
 
-    console.log("[Cephalopod] Authority levels initialized (7 levels)");
+    console.log('[Cephalopod] Authority levels initialized (7 levels)');
   }
 
   /**
@@ -166,11 +166,11 @@ export class CephalopodDistributedEngine {
     const eventBus = getEventBus();
 
     // Listen for decision requests
-    eventBus.on("decision.requested", async (event) => {
+    eventBus.on('decision.requested', async (event) => {
       await this.handleDecisionRequest(event);
     });
 
-    console.log("[Cephalopod] Event handlers registered");
+    console.log('[Cephalopod] Event handlers registered');
   }
 
   /**
@@ -187,7 +187,7 @@ export class CephalopodDistributedEngine {
     const requiresApproval = !allowed && authorityLevel.requiresApproval;
 
     // Generate approval chain if needed
-    const approvalChain = requiresApproval 
+    const approvalChain = requiresApproval
       ? await this.generateApprovalChain(context, authorityLevel)
       : undefined;
 
@@ -200,21 +200,23 @@ export class CephalopodDistributedEngine {
       reason: this.generateDecisionReason(context, authorityLevel, allowed),
       requiresApproval,
       approvalChain,
-      confidence
+      confidence,
     };
 
     // Log decision
-    console.log(`[Cephalopod] Decision: ${context.action} by ${context.userRole} - ${allowed ? "ALLOWED" : "DENIED"}`);
+    console.log(
+      `[Cephalopod] Decision: ${context.action} by ${context.userRole} - ${allowed ? 'ALLOWED' : 'DENIED'}`
+    );
 
     // Create insight if decision is significant
-    if (!allowed || context.value && context.value > authorityLevel.maxTransactionValue * 0.8) {
+    if (!allowed || (context.value && context.value > authorityLevel.maxTransactionValue * 0.8)) {
       await createAgentInsight({
-        agentType: "cephalopod",
-        insightType: "authority_decision",
+        agentType: 'cephalopod',
+        insightType: 'authority_decision',
         title: `🐙 Authority Decision: ${context.action}`,
         titleAr: `🐙 قرار السلطة: ${context.action}`,
-        description: `${context.userRole} attempted ${context.action}. Result: ${allowed ? "Allowed" : "Requires approval"}`,
-        descriptionAr: `${context.userRole} حاول ${context.action}. النتيجة: ${allowed ? "مسموح" : "يتطلب موافقة"}`,
+        description: `${context.userRole} attempted ${context.action}. Result: ${allowed ? 'Allowed' : 'Requires approval'}`,
+        descriptionAr: `${context.userRole} حاول ${context.action}. النتيجة: ${allowed ? 'مسموح' : 'يتطلب موافقة'}`,
         // severity: allowed ? "low" : "medium",
         actionable: requiresApproval,
         metadata: {
@@ -223,21 +225,21 @@ export class CephalopodDistributedEngine {
           value: context.value,
           allowed,
           requiresApproval,
-          authorityLevel: authorityLevel.level
-        }
+          authorityLevel: authorityLevel.level,
+        },
       });
     }
 
     // Emit event
     const eventBus = getEventBus();
     await eventBus.emit({
-      type: "decision.evaluated",
+      type: 'decision.evaluated',
       entityId: context.userId,
-      entityType: "user",
+      entityType: 'user',
       payload: {
         context,
-        result
-      }
+        result,
+      },
     });
 
     return result;
@@ -256,26 +258,29 @@ export class CephalopodDistributedEngine {
   /**
    * Check if action is allowed
    */
-  private async checkActionAllowed(context: DecisionContext, authority: AuthorityLevel): Promise<boolean> {
+  private async checkActionAllowed(
+    context: DecisionContext,
+    authority: AuthorityLevel
+  ): Promise<boolean> {
     switch (context.action) {
-      case "create_order":
+      case 'create_order':
         return authority.canCreateOrders;
 
-      case "approve_return":
+      case 'approve_return':
         return authority.canApproveReturns;
 
-      case "modify_price":
+      case 'modify_price':
         return authority.canModifyPrices;
 
-      case "apply_discount":
+      case 'apply_discount':
         if (!context.value) return false;
         return context.value <= authority.maxDiscount;
 
-      case "transfer_inventory":
+      case 'transfer_inventory':
         if (!context.value) return false;
         return context.value <= authority.maxInventoryTransfer;
 
-      case "process_transaction":
+      case 'process_transaction':
         if (!context.value) return false;
         return context.value <= authority.maxTransactionValue;
 
@@ -287,7 +292,10 @@ export class CephalopodDistributedEngine {
   /**
    * Generate approval chain
    */
-  private async generateApprovalChain(context: DecisionContext, currentAuthority: AuthorityLevel): Promise<number[]> {
+  private async generateApprovalChain(
+    context: DecisionContext,
+    currentAuthority: AuthorityLevel
+  ): Promise<number[]> {
     const chain: number[] = [];
 
     // Find next authority level that can approve
@@ -309,22 +317,26 @@ export class CephalopodDistributedEngine {
   /**
    * Calculate decision confidence
    */
-  private calculateDecisionConfidence(context: DecisionContext, authority: AuthorityLevel, allowed: boolean): number {
+  private calculateDecisionConfidence(
+    context: DecisionContext,
+    authority: AuthorityLevel,
+    allowed: boolean
+  ): number {
     let confidence = 100;
 
     if (!allowed) {
       confidence = 50;
     } else if (context.value) {
       // Reduce confidence as we approach authority limits
-      if (context.action === "process_transaction") {
+      if (context.action === 'process_transaction') {
         const ratio = context.value / authority.maxTransactionValue;
-        confidence = Math.max(50, 100 - (ratio * 50));
-      } else if (context.action === "transfer_inventory") {
+        confidence = Math.max(50, 100 - ratio * 50);
+      } else if (context.action === 'transfer_inventory') {
         const ratio = context.value / authority.maxInventoryTransfer;
-        confidence = Math.max(50, 100 - (ratio * 50));
-      } else if (context.action === "apply_discount") {
+        confidence = Math.max(50, 100 - ratio * 50);
+      } else if (context.action === 'apply_discount') {
         const ratio = context.value / authority.maxDiscount;
-        confidence = Math.max(50, 100 - (ratio * 50));
+        confidence = Math.max(50, 100 - ratio * 50);
       }
     }
 
@@ -334,17 +346,21 @@ export class CephalopodDistributedEngine {
   /**
    * Generate decision reason
    */
-  private generateDecisionReason(context: DecisionContext, authority: AuthorityLevel, allowed: boolean): string {
+  private generateDecisionReason(
+    context: DecisionContext,
+    authority: AuthorityLevel,
+    allowed: boolean
+  ): string {
     if (allowed) {
       return `${authority.name} has authority to ${context.action}`;
     }
 
     if (context.value) {
-      if (context.action === "process_transaction") {
+      if (context.action === 'process_transaction') {
         return `Transaction value (${context.value} EGP) exceeds ${authority.name} limit (${authority.maxTransactionValue} EGP)`;
-      } else if (context.action === "transfer_inventory") {
+      } else if (context.action === 'transfer_inventory') {
         return `Transfer quantity (${context.value}) exceeds ${authority.name} limit (${authority.maxInventoryTransfer})`;
-      } else if (context.action === "apply_discount") {
+      } else if (context.action === 'apply_discount') {
         return `Discount (${context.value}%) exceeds ${authority.name} limit (${authority.maxDiscount}%)`;
       }
     }
@@ -367,7 +383,7 @@ export class CephalopodDistributedEngine {
       toRole,
       condition,
       temporaryUntil,
-      active: true
+      active: true,
     };
 
     this.delegationRules.set(rule.id, rule);
@@ -376,20 +392,20 @@ export class CephalopodDistributedEngine {
 
     // Create insight
     await createAgentInsight({
-      agentType: "cephalopod",
-      insightType: "delegation_created",
+      agentType: 'cephalopod',
+      insightType: 'delegation_created',
       title: `🐙 Authority Delegated: ${fromRole} → ${toRole}`,
       titleAr: `🐙 تم تفويض السلطة: ${fromRole} ← ${toRole}`,
-      description: `Authority delegated from ${fromRole} to ${toRole}${temporaryUntil ? ` until ${temporaryUntil.toISOString()}` : ""}`,
-      descriptionAr: `تم تفويض السلطة من ${fromRole} إلى ${toRole}${temporaryUntil ? ` حتى ${temporaryUntil.toISOString()}` : ""}`,
+      description: `Authority delegated from ${fromRole} to ${toRole}${temporaryUntil ? ` until ${temporaryUntil.toISOString()}` : ''}`,
+      descriptionAr: `تم تفويض السلطة من ${fromRole} إلى ${toRole}${temporaryUntil ? ` حتى ${temporaryUntil.toISOString()}` : ''}`,
       // severity: "low",
       actionable: false,
       metadata: {
         fromRole,
         toRole,
         condition,
-        temporaryUntil
-      }
+        temporaryUntil,
+      },
     });
 
     return rule;
@@ -405,10 +421,10 @@ export class CephalopodDistributedEngine {
     // Emit result
     const eventBus = getEventBus();
     await eventBus.emit({
-      type: "decision.result",
+      type: 'decision.result',
       entityId: context.userId,
-      entityType: "user",
-      payload: result
+      entityType: 'user',
+      payload: result,
     });
   }
 
@@ -424,30 +440,34 @@ export class CephalopodDistributedEngine {
     // TODO: Implement actual statistics from database
     return {
       totalLevels: this.authorityLevels.size,
-      activeDelegations: Array.from(this.delegationRules.values()).filter(r => r.active).length,
+      activeDelegations: Array.from(this.delegationRules.values()).filter((r) => r.active).length,
       decisionsToday: 0,
-      approvalRate: 0
+      approvalRate: 0,
     };
   }
 
   /**
    * Emergency override (CEO/Founder only)
    */
-  async emergencyOverride(userId: number, context: DecisionContext, reason: string): Promise<DecisionResult> {
+  async emergencyOverride(
+    userId: number,
+    context: DecisionContext,
+    reason: string
+  ): Promise<DecisionResult> {
     const authority = await this.getUserAuthorityLevel(userId);
 
     if (authority.level !== 7) {
-      throw new Error("Emergency override requires CEO/Founder authority");
+      throw new Error('Emergency override requires CEO/Founder authority');
     }
 
     console.log(`[Cephalopod] 🚨 EMERGENCY OVERRIDE by user ${userId}: ${context.action}`);
 
     // Create critical insight
     await createAgentInsight({
-      agentType: "cephalopod",
-      insightType: "emergency_override",
-      title: "🚨 EMERGENCY OVERRIDE ACTIVATED",
-      titleAr: "🚨 تم تفعيل التجاوز الطارئ",
+      agentType: 'cephalopod',
+      insightType: 'emergency_override',
+      title: '🚨 EMERGENCY OVERRIDE ACTIVATED',
+      titleAr: '🚨 تم تفعيل التجاوز الطارئ',
       description: `CEO/Founder activated emergency override for: ${context.action}. Reason: ${reason}`,
       descriptionAr: `قام المؤسس بتفعيل التجاوز الطارئ لـ: ${context.action}. السبب: ${reason}`,
       // severity: "critical",
@@ -456,8 +476,8 @@ export class CephalopodDistributedEngine {
         userId,
         context,
         reason,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     return {
@@ -465,7 +485,7 @@ export class CephalopodDistributedEngine {
       authorityLevel: authority,
       reason: `Emergency override by CEO/Founder: ${reason}`,
       requiresApproval: false,
-      confidence: 100
+      confidence: 100,
     };
   }
 }

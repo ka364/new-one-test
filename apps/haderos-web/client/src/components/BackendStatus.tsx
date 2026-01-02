@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
-import { checkBackendConnection, getBackendUrl } from "@/lib/backend-api";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Loader2, Server } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { checkBackendConnection, getBackendUrl } from '@/lib/backend-api';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, XCircle, Loader2, Server } from 'lucide-react';
 
 export function BackendStatus() {
-  const [status, setStatus] = useState<"checking" | "connected" | "disconnected">("checking");
+  const [status, setStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
   const checkStatus = async () => {
-    setStatus("checking");
+    setStatus('checking');
     const isConnected = await checkBackendConnection();
-    setStatus(isConnected ? "connected" : "disconnected");
+    setStatus(isConnected ? 'connected' : 'disconnected');
     setLastCheck(new Date());
   };
 
@@ -28,24 +28,24 @@ export function BackendStatus() {
   const statusConfig = {
     checking: {
       icon: Loader2,
-      iconClass: "animate-spin text-blue-500",
-      badge: "جاري الفحص...",
-      badgeVariant: "secondary" as const,
-      message: "Checking backend connection...",
+      iconClass: 'animate-spin text-blue-500',
+      badge: 'جاري الفحص...',
+      badgeVariant: 'secondary' as const,
+      message: 'Checking backend connection...',
     },
     connected: {
       icon: CheckCircle2,
-      iconClass: "text-green-500",
-      badge: "متصل",
-      badgeVariant: "default" as const,
-      message: "Backend connected",
+      iconClass: 'text-green-500',
+      badge: 'متصل',
+      badgeVariant: 'default' as const,
+      message: 'Backend connected',
     },
     disconnected: {
       icon: XCircle,
-      iconClass: "text-red-500",
-      badge: "غير متصل",
-      badgeVariant: "destructive" as const,
-      message: "Backend not reachable",
+      iconClass: 'text-red-500',
+      badge: 'غير متصل',
+      badgeVariant: 'destructive' as const,
+      message: 'Backend not reachable',
     },
   };
 
@@ -67,9 +67,7 @@ export function BackendStatus() {
                   {config.badge}
                 </Badge>
               </div>
-              <div className="text-xs text-muted-foreground">
-                {getBackendUrl()}
-              </div>
+              <div className="text-xs text-muted-foreground">{getBackendUrl()}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -81,9 +79,10 @@ export function BackendStatus() {
             )}
           </div>
         </div>
-        {status === "disconnected" && (
+        {status === 'disconnected' && (
           <div className="mt-3 p-2 bg-red-50 dark:bg-red-950/20 rounded text-xs text-red-700 dark:text-red-400">
-            ⚠️ Cannot connect to haderos-platform backend. Make sure it's running at {getBackendUrl()}
+            ⚠️ Cannot connect to haderos-platform backend. Make sure it's running at{' '}
+            {getBackendUrl()}
           </div>
         )}
       </CardContent>

@@ -1,6 +1,6 @@
 /**
  * Shopify Admin API Client
- * 
+ *
  * Complete integration with Shopify REST Admin API for:
  * - Products management
  * - Inventory sync
@@ -141,7 +141,9 @@ class ShopifyAPI {
 
   constructor() {
     if (!SHOPIFY_STORE_NAME || !SHOPIFY_ACCESS_TOKEN) {
-      throw new Error('Shopify credentials not configured. Set SHOPIFY_STORE_NAME and SHOPIFY_ACCESS_TOKEN.');
+      throw new Error(
+        'Shopify credentials not configured. Set SHOPIFY_STORE_NAME and SHOPIFY_ACCESS_TOKEN.'
+      );
     }
 
     this.client = axios.create({
@@ -163,13 +165,16 @@ class ShopifyAPI {
    * @param limit Max 250 per page
    * @param pageInfo Pagination cursor from previous response
    */
-  async getProducts(limit = 250, pageInfo?: string): Promise<{ products: ShopifyProduct[]; pageInfo?: string }> {
+  async getProducts(
+    limit = 250,
+    pageInfo?: string
+  ): Promise<{ products: ShopifyProduct[]; pageInfo?: string }> {
     try {
       const params: any = { limit };
       if (pageInfo) params.page_info = pageInfo;
 
       const response = await this.client.get('/products.json', { params });
-      
+
       // Extract pagination info from Link header
       const linkHeader = response.headers['link'];
       const nextPageInfo = this.extractPageInfo(linkHeader, 'next');
@@ -210,7 +215,10 @@ class ShopifyAPI {
   /**
    * Update existing product
    */
-  async updateProduct(productId: number, product: Partial<ShopifyProduct>): Promise<ShopifyProduct> {
+  async updateProduct(
+    productId: number,
+    product: Partial<ShopifyProduct>
+  ): Promise<ShopifyProduct> {
     try {
       const response = await this.client.put(`/products/${productId}.json`, { product });
       return response.data.product;
@@ -253,7 +261,11 @@ class ShopifyAPI {
   /**
    * Update inventory level
    */
-  async updateInventoryLevel(locationId: number, inventoryItemId: number, available: number): Promise<ShopifyInventoryLevel> {
+  async updateInventoryLevel(
+    locationId: number,
+    inventoryItemId: number,
+    available: number
+  ): Promise<ShopifyInventoryLevel> {
     try {
       const response = await this.client.post('/inventory_levels/set.json', {
         location_id: locationId,
@@ -273,7 +285,7 @@ class ShopifyAPI {
     try {
       const response = await this.client.get('/locations.json');
       const locations = response.data.locations;
-      
+
       if (locations.length === 0) {
         throw new Error('No locations found in Shopify store');
       }
@@ -296,13 +308,17 @@ class ShopifyAPI {
    * @param limit Max 250 per page
    * @param pageInfo Pagination cursor
    */
-  async getOrders(status: 'any' | 'open' | 'closed' | 'cancelled' = 'any', limit = 250, pageInfo?: string): Promise<{ orders: ShopifyOrder[]; pageInfo?: string }> {
+  async getOrders(
+    status: 'any' | 'open' | 'closed' | 'cancelled' = 'any',
+    limit = 250,
+    pageInfo?: string
+  ): Promise<{ orders: ShopifyOrder[]; pageInfo?: string }> {
     try {
       const params: any = { status, limit };
       if (pageInfo) params.page_info = pageInfo;
 
       const response = await this.client.get('/orders.json', { params });
-      
+
       const linkHeader = response.headers['link'];
       const nextPageInfo = this.extractPageInfo(linkHeader, 'next');
 
@@ -346,7 +362,7 @@ class ShopifyAPI {
         });
 
         allOrders.push(...response.data.orders);
-        
+
         const linkHeader = response.headers['link'];
         pageInfo = this.extractPageInfo(linkHeader, 'next');
       } while (pageInfo);
@@ -381,7 +397,7 @@ class ShopifyAPI {
           tracking_company: trackingCompany,
           tracking_url: trackingUrl,
           notify_customer: true,
-          line_items: lineItemIds.map(id => ({ id })),
+          line_items: lineItemIds.map((id) => ({ id })),
         },
       });
 
@@ -402,14 +418,17 @@ class ShopifyAPI {
     trackingUrl: string
   ): Promise<ShopifyFulfillment> {
     try {
-      const response = await this.client.put(`/orders/${orderId}/fulfillments/${fulfillmentId}.json`, {
-        fulfillment: {
-          tracking_number: trackingNumber,
-          tracking_company: trackingCompany,
-          tracking_url: trackingUrl,
-          notify_customer: true,
-        },
-      });
+      const response = await this.client.put(
+        `/orders/${orderId}/fulfillments/${fulfillmentId}.json`,
+        {
+          fulfillment: {
+            tracking_number: trackingNumber,
+            tracking_company: trackingCompany,
+            tracking_url: trackingUrl,
+            notify_customer: true,
+          },
+        }
+      );
 
       return response.data.fulfillment;
     } catch (error: any) {
@@ -481,11 +500,9 @@ class ShopifyAPI {
 
     for (const topic of topics) {
       const webhookUrl = `${baseUrl}/api/webhooks/shopify`;
-      
+
       // Check if webhook already exists
-      const exists = existingWebhooks.some(
-        wh => wh.topic === topic && wh.address === webhookUrl
-      );
+      const exists = existingWebhooks.some((wh) => wh.topic === topic && wh.address === webhookUrl);
 
       if (!exists) {
         await this.createWebhook(topic, webhookUrl);
@@ -501,7 +518,10 @@ class ShopifyAPI {
   /**
    * Extract page_info from Link header
    */
-  private extractPageInfo(linkHeader: string | undefined, rel: 'next' | 'previous'): string | undefined {
+  private extractPageInfo(
+    linkHeader: string | undefined,
+    rel: 'next' | 'previous'
+  ): string | undefined {
     if (!linkHeader) return undefined;
 
     const links = linkHeader.split(',');
@@ -522,7 +542,7 @@ class ShopifyAPI {
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
-      
+
       console.error(`[Shopify API Error] ${method}:`, {
         status,
         data,

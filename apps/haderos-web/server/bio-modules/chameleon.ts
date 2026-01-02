@@ -1,20 +1,20 @@
 /**
  * Chameleon Module - Adaptive Response & Dynamic Pricing
- * 
+ *
  * Inspired by: Chameleon's ability to change color based on environment
  * Problem: Fixed pricing in dynamic markets
  * Solution: Real-time adaptive pricing and strategy
  */
 
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface MarketConditions {
   demand: number; // 0-100
   competition: number; // 0-100
   seasonality: number; // 0-100
   inventory: number; // 0-100
-  trend: "rising" | "stable" | "falling";
+  trend: 'rising' | 'stable' | 'falling';
 }
 
 export interface PricingStrategy {
@@ -34,7 +34,7 @@ export interface PricingStrategy {
 }
 
 export interface AdaptiveDecision {
-  action: "increase_price" | "decrease_price" | "maintain_price" | "promote" | "discount";
+  action: 'increase_price' | 'decrease_price' | 'maintain_price' | 'promote' | 'discount';
   magnitude: number; // Percentage or amount
   reason: string;
   confidence: number;
@@ -44,7 +44,7 @@ export interface AdaptiveDecision {
 
 /**
  * Chameleon Adaptive Engine
- * 
+ *
  * Capabilities:
  * 1. Monitor market conditions
  * 2. Analyze competitor pricing
@@ -72,7 +72,7 @@ export class ChameleonAdaptiveEngine {
       await this.analyzeAndAdapt();
     }, this.MONITORING_INTERVAL);
 
-    console.log("[Chameleon] Market monitoring started");
+    console.log('[Chameleon] Market monitoring started');
   }
 
   /**
@@ -82,15 +82,15 @@ export class ChameleonAdaptiveEngine {
     const eventBus = getEventBus();
 
     // Listen for market signals
-    eventBus.on("order.created", async (event) => {
+    eventBus.on('order.created', async (event) => {
       await this.recordDemandSignal(event);
     });
 
-    eventBus.on("product.viewed", async (event) => {
+    eventBus.on('product.viewed', async (event) => {
       await this.recordInterestSignal(event);
     });
 
-    console.log("[Chameleon] Event handlers registered");
+    console.log('[Chameleon] Event handlers registered');
   }
 
   /**
@@ -98,8 +98,8 @@ export class ChameleonAdaptiveEngine {
    */
   async analyzeAndAdapt(): Promise<void> {
     try {
-      const { db } = await import("../db");
-      const { products } = await import("../../drizzle/schema");
+      const { db } = await import('../db');
+      const { products } = await import('../../drizzle/schema');
 
       // Get all active products
       const allProducts = await db.select().from(products);
@@ -117,7 +117,7 @@ export class ChameleonAdaptiveEngine {
         }
       }
     } catch (error) {
-      console.error("[Chameleon] Error in analyzeAndAdapt:", error);
+      console.error('[Chameleon] Error in analyzeAndAdapt:', error);
     }
   }
 
@@ -145,7 +145,7 @@ export class ChameleonAdaptiveEngine {
       competition,
       seasonality,
       inventory,
-      trend
+      trend,
     };
   }
 
@@ -154,9 +154,9 @@ export class ChameleonAdaptiveEngine {
    */
   private async analyzeDemand(productId: number): Promise<number> {
     try {
-      const { db } = await import("../db");
-      const { events } = await import("../../drizzle/schema");
-      const { eq, and, gte } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { events } = await import('../../drizzle/schema');
+      const { eq, and, gte } = await import('drizzle-orm');
 
       // Count orders in last 7 days
       const sevenDaysAgo = new Date();
@@ -165,15 +165,10 @@ export class ChameleonAdaptiveEngine {
       const orderEvents = await db
         .select()
         .from(events)
-        .where(
-          and(
-            eq(events.type, "order.created"),
-            gte(events.createdAt, sevenDaysAgo)
-          )
-        );
+        .where(and(eq(events.type, 'order.created'), gte(events.createdAt, sevenDaysAgo)));
 
       // Filter by product
-      const productOrders = orderEvents.filter(e => {
+      const productOrders = orderEvents.filter((e) => {
         const payload = e.payload as any;
         return payload.items?.some((item: any) => item.productId === productId);
       });
@@ -183,7 +178,7 @@ export class ChameleonAdaptiveEngine {
 
       return demand;
     } catch (error) {
-      console.error("[Chameleon] Error analyzing demand:", error);
+      console.error('[Chameleon] Error analyzing demand:', error);
       return 50; // Default medium demand
     }
   }
@@ -193,26 +188,24 @@ export class ChameleonAdaptiveEngine {
    */
   private async analyzeCompetition(productId: number): Promise<number> {
     try {
-      const { db } = await import("../db");
-      const { products } = await import("../../drizzle/schema");
-      const { eq } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { products } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
 
       // Get the product
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, productId));
+      const [product] = await db.select().from(products).where(eq(products.id, productId));
 
       if (!product) return 50;
 
       // Check if we have competitor price data in product metadata
       const metadata = product.metadata as any;
       if (metadata?.competitorPrices && Array.isArray(metadata.competitorPrices)) {
-        const ourPrice = parseFloat(product.sellingPrice?.toString() || "0");
+        const ourPrice = parseFloat(product.sellingPrice?.toString() || '0');
         const competitorPrices = metadata.competitorPrices.map((c: any) => parseFloat(c.price));
 
         if (competitorPrices.length > 0) {
-          const avgCompetitorPrice = competitorPrices.reduce((a: number, b: number) => a + b, 0) / competitorPrices.length;
+          const avgCompetitorPrice =
+            competitorPrices.reduce((a: number, b: number) => a + b, 0) / competitorPrices.length;
           const priceRatio = ourPrice / avgCompetitorPrice;
 
           // Convert to competition score (0-100)
@@ -226,19 +219,19 @@ export class ChameleonAdaptiveEngine {
       }
 
       // Default: Use category-based estimation
-      const category = product.category || "general";
+      const category = product.category || 'general';
       const categoryCompetition: Record<string, number> = {
-        "electronics": 85,
-        "clothing": 70,
-        "shoes": 75,
-        "accessories": 60,
-        "bags": 65,
-        "general": 50
+        electronics: 85,
+        clothing: 70,
+        shoes: 75,
+        accessories: 60,
+        bags: 65,
+        general: 50,
       };
 
       return categoryCompetition[category.toLowerCase()] || 50;
     } catch (error) {
-      console.error("[Chameleon] Error analyzing competition:", error);
+      console.error('[Chameleon] Error analyzing competition:', error);
       return 50;
     }
   }
@@ -248,20 +241,17 @@ export class ChameleonAdaptiveEngine {
    */
   private async analyzeSeasonality(productId: number): Promise<number> {
     try {
-      const { db } = await import("../db");
-      const { products, orders } = await import("../../drizzle/schema");
-      const { eq, and, gte, sql } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { products, orders } = await import('../../drizzle/schema');
+      const { eq, and, gte, sql } = await import('drizzle-orm');
 
       const month = new Date().getMonth();
       const currentYear = new Date().getFullYear();
 
       // Get product category for category-specific seasonality
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.id, productId));
+      const [product] = await db.select().from(products).where(eq(products.id, productId));
 
-      const category = product?.category || "general";
+      const category = product?.category || 'general';
 
       // Base seasonality by month (Egyptian market patterns)
       const baseSeasonality: Record<number, number> = {
@@ -281,26 +271,26 @@ export class ChameleonAdaptiveEngine {
 
       // Category-specific adjustments
       const categoryModifiers: Record<string, Record<number, number>> = {
-        "shoes": {
+        shoes: {
           8: 15, // Back to school boost
           9: 10,
           3: 10, // Eid boost
           4: 15,
         },
-        "clothing": {
+        clothing: {
           3: 15, // Eid boost
           4: 20,
           8: 10, // Back to school
           11: 10, // Winter clothing
         },
-        "bags": {
+        bags: {
           8: 10, // Back to school
           3: 15, // Eid
         },
-        "electronics": {
+        electronics: {
           11: 15, // Black Friday
           0: -10, // Post-holiday drop
-        }
+        },
       };
 
       let seasonality = baseSeasonality[month] || 50;
@@ -320,12 +310,7 @@ export class ChameleonAdaptiveEngine {
         const historicalOrders = await db
           .select({ count: sql<number>`count(*)` })
           .from(orders)
-          .where(
-            and(
-              gte(orders.createdAt, lastYearStart),
-              gte(lastYearEnd, orders.createdAt)
-            )
-          );
+          .where(and(gte(orders.createdAt, lastYearStart), gte(lastYearEnd, orders.createdAt)));
 
         // If we have historical data, weight it into the prediction
         if (historicalOrders[0]?.count > 10) {
@@ -335,7 +320,7 @@ export class ChameleonAdaptiveEngine {
           const histRatio = histCount / avgMonthlyOrders;
 
           // Blend historical with base prediction (40% historical, 60% base)
-          seasonality = Math.round(seasonality * 0.6 + (histRatio * 100) * 0.4);
+          seasonality = Math.round(seasonality * 0.6 + histRatio * 100 * 0.4);
         }
       } catch {
         // Historical data not available, use base prediction
@@ -344,12 +329,22 @@ export class ChameleonAdaptiveEngine {
       // Cap between 0-100
       return Math.max(0, Math.min(100, seasonality));
     } catch (error) {
-      console.error("[Chameleon] Error analyzing seasonality:", error);
+      console.error('[Chameleon] Error analyzing seasonality:', error);
       // Fallback to simple month-based
       const month = new Date().getMonth();
       const fallback: Record<number, number> = {
-        0: 60, 1: 50, 2: 55, 3: 60, 4: 65, 5: 70,
-        6: 75, 7: 70, 8: 65, 9: 60, 10: 70, 11: 85
+        0: 60,
+        1: 50,
+        2: 55,
+        3: 60,
+        4: 65,
+        5: 70,
+        6: 75,
+        7: 70,
+        8: 65,
+        9: 60,
+        10: 70,
+        11: 85,
       };
       return fallback[month] || 50;
     }
@@ -360,9 +355,9 @@ export class ChameleonAdaptiveEngine {
    */
   private async analyzeInventory(productId: number): Promise<number> {
     try {
-      const { db } = await import("../db");
-      const { branchInventory } = await import("../../drizzle/schema-branches");
-      const { eq, sum } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { branchInventory } = await import('../../drizzle/schema-branches');
+      const { eq, sum } = await import('drizzle-orm');
 
       // Get total inventory across all branches
       const inventory = await db
@@ -370,12 +365,12 @@ export class ChameleonAdaptiveEngine {
         .from(branchInventory)
         .where(eq(branchInventory.productId, productId));
 
-      const total = parseInt(inventory[0]?.total?.toString() || "0");
+      const total = parseInt(inventory[0]?.total?.toString() || '0');
 
       // Normalize to 0-100 (assume 1000 items is high stock)
       return Math.min(100, (total / 1000) * 100);
     } catch (error) {
-      console.error("[Chameleon] Error analyzing inventory:", error);
+      console.error('[Chameleon] Error analyzing inventory:', error);
       return 50;
     }
   }
@@ -383,11 +378,11 @@ export class ChameleonAdaptiveEngine {
   /**
    * Determine trend
    */
-  private async determineTrend(productId: number): Promise<MarketConditions["trend"]> {
+  private async determineTrend(productId: number): Promise<MarketConditions['trend']> {
     try {
-      const { db } = await import("../db");
-      const { events } = await import("../../drizzle/schema");
-      const { eq, and, gte } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { events } = await import('../../drizzle/schema');
+      const { eq, and, gte } = await import('drizzle-orm');
 
       // Compare last 7 days vs previous 7 days
       const now = new Date();
@@ -397,85 +392,84 @@ export class ChameleonAdaptiveEngine {
       const recentOrders = await db
         .select()
         .from(events)
-        .where(
-          and(
-            eq(events.type, "order.created"),
-            gte(events.createdAt, sevenDaysAgo)
-          )
-        );
+        .where(and(eq(events.type, 'order.created'), gte(events.createdAt, sevenDaysAgo)));
 
       const previousOrders = await db
         .select()
         .from(events)
-        .where(
-          and(
-            eq(events.type, "order.created"),
-            gte(events.createdAt, fourteenDaysAgo)
-          )
-        );
+        .where(and(eq(events.type, 'order.created'), gte(events.createdAt, fourteenDaysAgo)));
 
-      const recentCount = recentOrders.filter(e => {
+      const recentCount = recentOrders.filter((e) => {
         const payload = e.payload as any;
         return payload.items?.some((item: any) => item.productId === productId);
       }).length;
 
-      const previousCount = previousOrders.filter(e => {
+      const previousCount = previousOrders.filter((e) => {
         const payload = e.payload as any;
         return payload.items?.some((item: any) => item.productId === productId);
       }).length;
 
       const change = ((recentCount - previousCount) / (previousCount || 1)) * 100;
 
-      if (change > 10) return "rising";
-      if (change < -10) return "falling";
-      return "stable";
+      if (change > 10) return 'rising';
+      if (change < -10) return 'falling';
+      return 'stable';
     } catch (error) {
-      console.error("[Chameleon] Error determining trend:", error);
-      return "stable";
+      console.error('[Chameleon] Error determining trend:', error);
+      return 'stable';
     }
   }
 
   /**
    * Generate adaptive decision
    */
-  async generateAdaptiveDecision(product: any, conditions: MarketConditions): Promise<AdaptiveDecision | null> {
+  async generateAdaptiveDecision(
+    product: any,
+    conditions: MarketConditions
+  ): Promise<AdaptiveDecision | null> {
     // Decision matrix based on market conditions
-    let action: AdaptiveDecision["action"] = "maintain_price";
+    let action: AdaptiveDecision['action'] = 'maintain_price';
     let magnitude = 0;
-    let reason = "";
+    let reason = '';
     let confidence = 0;
 
     // High demand + Low inventory = Increase price
     if (conditions.demand > 70 && conditions.inventory < 30) {
-      action = "increase_price";
-      magnitude = Math.min(this.MAX_PRICE_INCREASE, 10 + (conditions.demand - conditions.inventory) / 5);
-      reason = "High demand with low inventory";
+      action = 'increase_price';
+      magnitude = Math.min(
+        this.MAX_PRICE_INCREASE,
+        10 + (conditions.demand - conditions.inventory) / 5
+      );
+      reason = 'High demand with low inventory';
       confidence = 85;
     }
     // Low demand + High inventory = Decrease price or promote
     else if (conditions.demand < 30 && conditions.inventory > 70) {
-      action = "decrease_price";
-      magnitude = Math.min(this.MAX_PRICE_DECREASE, 15 + (conditions.inventory - conditions.demand) / 5);
-      reason = "Low demand with excess inventory";
+      action = 'decrease_price';
+      magnitude = Math.min(
+        this.MAX_PRICE_DECREASE,
+        15 + (conditions.inventory - conditions.demand) / 5
+      );
+      reason = 'Low demand with excess inventory';
       confidence = 80;
     }
     // Rising trend + Good seasonality = Moderate increase
-    else if (conditions.trend === "rising" && conditions.seasonality > 70) {
-      action = "increase_price";
+    else if (conditions.trend === 'rising' && conditions.seasonality > 70) {
+      action = 'increase_price';
       magnitude = 5;
-      reason = "Rising trend in peak season";
+      reason = 'Rising trend in peak season';
       confidence = 70;
     }
     // Falling trend = Promotional strategy
-    else if (conditions.trend === "falling") {
-      action = "promote";
+    else if (conditions.trend === 'falling') {
+      action = 'promote';
       magnitude = 10;
-      reason = "Falling demand trend";
+      reason = 'Falling demand trend';
       confidence = 75;
     }
 
     // Only return decision if magnitude exceeds threshold
-    if (magnitude < this.PRICE_CHANGE_THRESHOLD && action !== "promote") {
+    if (magnitude < this.PRICE_CHANGE_THRESHOLD && action !== 'promote') {
       return null;
     }
 
@@ -485,7 +479,7 @@ export class ChameleonAdaptiveEngine {
       reason,
       confidence,
       marketConditions: conditions,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -494,25 +488,25 @@ export class ChameleonAdaptiveEngine {
    */
   async applyAdaptiveDecision(product: any, decision: AdaptiveDecision): Promise<void> {
     try {
-      const { db } = await import("../db");
-      const { products } = await import("../../drizzle/schema");
-      const { eq } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { products } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
 
       const currentPrice = parseFloat(product.price.toString());
       let newPrice = currentPrice;
 
       switch (decision.action) {
-        case "increase_price":
+        case 'increase_price':
           newPrice = currentPrice * (1 + decision.magnitude / 100);
           break;
-        case "decrease_price":
+        case 'decrease_price':
           newPrice = currentPrice * (1 - decision.magnitude / 100);
           break;
-        case "promote":
+        case 'promote':
           // Create promotional discount
           await this.createPromotion(product, decision.magnitude, decision.reason);
           return;
-        case "maintain_price":
+        case 'maintain_price':
           return;
       }
 
@@ -522,17 +516,19 @@ export class ChameleonAdaptiveEngine {
         .set({ price: newPrice.toString() })
         .where(eq(products.id, product.id));
 
-      console.log(`[Chameleon] ${decision.action}: ${product.name} ${currentPrice} → ${newPrice.toFixed(2)} EGP (${decision.magnitude.toFixed(1)}%)`);
+      console.log(
+        `[Chameleon] ${decision.action}: ${product.name} ${currentPrice} → ${newPrice.toFixed(2)} EGP (${decision.magnitude.toFixed(1)}%)`
+      );
 
       // Create insight
       await createAgentInsight({
-        agentType: "chameleon",
-        insightType: "price_adjusted",
+        agentType: 'chameleon',
+        insightType: 'price_adjusted',
         title: `🦎 Price Adjusted: ${product.name}`,
         titleAr: `🦎 تم تعديل السعر: ${product.name}`,
-        description: `${decision.action.replace("_", " ")}: ${currentPrice} → ${newPrice.toFixed(2)} EGP (${decision.magnitude.toFixed(1)}%). Reason: ${decision.reason}`,
+        description: `${decision.action.replace('_', ' ')}: ${currentPrice} → ${newPrice.toFixed(2)} EGP (${decision.magnitude.toFixed(1)}%). Reason: ${decision.reason}`,
         descriptionAr: `${decision.action}: ${currentPrice} ← ${newPrice.toFixed(2)} جنيه (${decision.magnitude.toFixed(1)}٪). السبب: ${decision.reason}`,
-        severity: "low",
+        severity: 'low',
         actionable: false,
         metadata: {
           productId: product.id,
@@ -541,37 +537,41 @@ export class ChameleonAdaptiveEngine {
           change: decision.magnitude,
           reason: decision.reason,
           confidence: decision.confidence,
-          conditions: decision.marketConditions
-        }
+          conditions: decision.marketConditions,
+        },
       });
 
       // Emit event
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "product.price.changed",
+        type: 'product.price.changed',
         entityId: product.id,
-        entityType: "product",
+        entityType: 'product',
         payload: {
           productId: product.id,
           oldPrice: currentPrice,
           newPrice,
           change: decision.magnitude,
           reason: decision.reason,
-          triggeredBy: "chameleon_auto"
-        }
+          triggeredBy: 'chameleon_auto',
+        },
       });
     } catch (error) {
-      console.error("[Chameleon] Error applying adaptive decision:", error);
+      console.error('[Chameleon] Error applying adaptive decision:', error);
     }
   }
 
   /**
    * Create promotional discount for a product
    */
-  private async createPromotion(product: any, discountPercentage: number, reason: string): Promise<void> {
+  private async createPromotion(
+    product: any,
+    discountPercentage: number,
+    reason: string
+  ): Promise<void> {
     try {
-      const { db } = await import("../db");
-      const { coupons } = await import("../../drizzle/schema-coupons");
+      const { db } = await import('../db');
+      const { coupons } = await import('../../drizzle/schema-coupons');
 
       // Generate unique promo code
       const promoCode = `AUTO_${product.modelCode || product.id}_${Date.now().toString(36).toUpperCase()}`;
@@ -583,10 +583,13 @@ export class ChameleonAdaptiveEngine {
       // Create coupon
       await db.insert(coupons).values({
         code: promoCode,
-        discountType: "percentage",
+        discountType: 'percentage',
         discountValue: discountPercentage.toString(),
-        minimumPurchase: "0",
-        maximumDiscount: (parseFloat(product.price?.toString() || "0") * discountPercentage / 100).toString(),
+        minimumPurchase: '0',
+        maximumDiscount: (
+          (parseFloat(product.price?.toString() || '0') * discountPercentage) /
+          100
+        ).toString(),
         usageLimit: 100,
         usageCount: 0,
         validFrom: new Date(),
@@ -595,48 +598,50 @@ export class ChameleonAdaptiveEngine {
         description: `Auto-generated promotion: ${reason}`,
         metadata: {
           productId: product.id,
-          generatedBy: "chameleon",
-          reason
-        }
+          generatedBy: 'chameleon',
+          reason,
+        },
       });
 
-      console.log(`[Chameleon] Created promotion ${promoCode}: ${discountPercentage}% off for ${product.name || product.modelCode}`);
+      console.log(
+        `[Chameleon] Created promotion ${promoCode}: ${discountPercentage}% off for ${product.name || product.modelCode}`
+      );
 
       // Create insight
       await createAgentInsight({
-        agentType: "chameleon",
-        insightType: "promotion_created",
+        agentType: 'chameleon',
+        insightType: 'promotion_created',
         title: `🎉 Promotion Created: ${product.name || product.modelCode}`,
         titleAr: `🎉 تم إنشاء عرض: ${product.name || product.modelCode}`,
         description: `Created ${discountPercentage}% discount (code: ${promoCode}). Reason: ${reason}. Valid for 7 days.`,
         descriptionAr: `تم إنشاء خصم ${discountPercentage}٪ (كود: ${promoCode}). السبب: ${reason}. صالح لمدة 7 أيام.`,
-        severity: "low",
+        severity: 'low',
         actionable: false,
         metadata: {
           productId: product.id,
           promoCode,
           discountPercentage,
           reason,
-          expiresAt
-        }
+          expiresAt,
+        },
       });
 
       // Emit event
       const eventBus = getEventBus();
       await eventBus.emit({
-        type: "promotion.created",
+        type: 'promotion.created',
         entityId: product.id,
-        entityType: "product",
+        entityType: 'product',
         payload: {
           productId: product.id,
           promoCode,
           discountPercentage,
           reason,
-          triggeredBy: "chameleon_auto"
-        }
+          triggeredBy: 'chameleon_auto',
+        },
       });
     } catch (error) {
-      console.error("[Chameleon] Error creating promotion:", error);
+      console.error('[Chameleon] Error creating promotion:', error);
     }
   }
 
@@ -646,8 +651,8 @@ export class ChameleonAdaptiveEngine {
   private async recordDemandSignal(event: any): Promise<void> {
     try {
       // Store demand signal for ML training
-      const { db } = await import("../db");
-      const { sql } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
 
       const orderData = event.data || event.payload;
       if (!orderData) return;
@@ -660,7 +665,9 @@ export class ChameleonAdaptiveEngine {
         if (!productId) continue;
 
         // Store demand signal (upsert to demand_signals table if exists, otherwise use events)
-        await db.execute(sql`
+        await db
+          .execute(
+            sql`
           INSERT INTO events (type, entity_id, entity_type, payload, created_at)
           VALUES (
             'chameleon.demand_signal',
@@ -671,17 +678,19 @@ export class ChameleonAdaptiveEngine {
               quantity: item.quantity || 1,
               price: item.price,
               timestamp: new Date().toISOString(),
-              source: "order"
+              source: 'order',
             })}::jsonb,
             NOW()
           )
-        `).catch(() => {
-          // If events table doesn't exist, just log
-          console.log(`[Chameleon] Demand signal recorded for product ${productId}`);
-        });
+        `
+          )
+          .catch(() => {
+            // If events table doesn't exist, just log
+            console.log(`[Chameleon] Demand signal recorded for product ${productId}`);
+          });
       }
     } catch (error) {
-      console.error("[Chameleon] Error recording demand signal:", error);
+      console.error('[Chameleon] Error recording demand signal:', error);
     }
   }
 
@@ -691,8 +700,8 @@ export class ChameleonAdaptiveEngine {
   private async recordInterestSignal(event: any): Promise<void> {
     try {
       // Store interest signal for ML training
-      const { db } = await import("../db");
-      const { sql } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
 
       const viewData = event.data || event.payload;
       if (!viewData) return;
@@ -701,7 +710,9 @@ export class ChameleonAdaptiveEngine {
       if (!productId) return;
 
       // Store interest signal
-      await db.execute(sql`
+      await db
+        .execute(
+          sql`
         INSERT INTO events (type, entity_id, entity_type, payload, created_at)
         VALUES (
           'chameleon.interest_signal',
@@ -713,16 +724,18 @@ export class ChameleonAdaptiveEngine {
             sessionId: viewData.sessionId,
             duration: viewData.duration,
             timestamp: new Date().toISOString(),
-            source: "product_view"
+            source: 'product_view',
           })}::jsonb,
           NOW()
         )
-      `).catch(() => {
-        // If events table doesn't exist, just log
-        console.log(`[Chameleon] Interest signal recorded for product ${productId}`);
-      });
+      `
+        )
+        .catch(() => {
+          // If events table doesn't exist, just log
+          console.log(`[Chameleon] Interest signal recorded for product ${productId}`);
+        });
     } catch (error) {
-      console.error("[Chameleon] Error recording interest signal:", error);
+      console.error('[Chameleon] Error recording interest signal:', error);
     }
   }
 
@@ -730,17 +743,14 @@ export class ChameleonAdaptiveEngine {
    * Generate pricing strategy for product
    */
   async generatePricingStrategy(productId: number): Promise<PricingStrategy> {
-    const { db } = await import("../db");
-    const { products } = await import("../../drizzle/schema");
-    const { eq } = await import("drizzle-orm");
+    const { db } = await import('../db');
+    const { products } = await import('../../drizzle/schema');
+    const { eq } = await import('drizzle-orm');
 
-    const [product] = await db
-      .select()
-      .from(products)
-      .where(eq(products.id, productId));
+    const [product] = await db.select().from(products).where(eq(products.id, productId));
 
     if (!product) {
-      throw new Error("Product not found");
+      throw new Error('Product not found');
     }
 
     const conditions = await this.analyzeMarketConditions(productId);
@@ -748,11 +758,12 @@ export class ChameleonAdaptiveEngine {
 
     const basePrice = parseFloat(product.price.toString());
     const adjustment = decision?.magnitude || 0;
-    const currentPrice = decision?.action === "increase_price"
-      ? basePrice * (1 + adjustment / 100)
-      : decision?.action === "decrease_price"
-      ? basePrice * (1 - adjustment / 100)
-      : basePrice;
+    const currentPrice =
+      decision?.action === 'increase_price'
+        ? basePrice * (1 + adjustment / 100)
+        : decision?.action === 'decrease_price'
+          ? basePrice * (1 - adjustment / 100)
+          : basePrice;
 
     return {
       id: `strategy_${productId}_${Date.now()}`,
@@ -760,14 +771,29 @@ export class ChameleonAdaptiveEngine {
       basePrice,
       currentPrice,
       adjustment,
-      reason: decision?.reason || "No adjustment needed",
+      reason: decision?.reason || 'No adjustment needed',
       confidence: decision?.confidence || 100,
       expectedImpact: {
-        sales: decision?.action === "decrease_price" ? 15 : decision?.action === "increase_price" ? -10 : 0,
-        revenue: decision?.action === "increase_price" ? 5 : decision?.action === "decrease_price" ? -5 : 0,
-        profit: decision?.action === "increase_price" ? 10 : decision?.action === "decrease_price" ? -10 : 0
+        sales:
+          decision?.action === 'decrease_price'
+            ? 15
+            : decision?.action === 'increase_price'
+              ? -10
+              : 0,
+        revenue:
+          decision?.action === 'increase_price'
+            ? 5
+            : decision?.action === 'decrease_price'
+              ? -5
+              : 0,
+        profit:
+          decision?.action === 'increase_price'
+            ? 10
+            : decision?.action === 'decrease_price'
+              ? -10
+              : 0,
       },
-      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     };
   }
 }

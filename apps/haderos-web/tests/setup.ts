@@ -91,12 +91,14 @@ vi.mock('@sendgrid/mail', () => ({
 
 // Mock glob for SystemAnalyzer
 vi.mock('glob', () => {
-  const mockGlob = vi.fn().mockResolvedValue([
-    'server/index.ts',
-    'server/db.ts',
-    'client/App.tsx',
-    'tests/example.test.ts',
-  ]);
+  const mockGlob = vi
+    .fn()
+    .mockResolvedValue([
+      'server/index.ts',
+      'server/db.ts',
+      'client/App.tsx',
+      'tests/example.test.ts',
+    ]);
   return {
     glob: mockGlob,
     globSync: vi.fn().mockReturnValue(['server/index.ts', 'client/App.tsx']),
@@ -132,7 +134,7 @@ interface MockContext {
 // ==================== Test Utilities ====================
 export const testUtils = {
   generateTestId: () => 'test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-  wait: (ms: number) => new Promise(resolve => setTimeout(resolve, ms)),
+  wait: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 
   // Mock context for tRPC procedures
   createMockContext: (overrides: Partial<MockContext> = {}): MockContext => ({
@@ -183,7 +185,7 @@ export const testUtils = {
     customerName: 'Test Customer',
     customerPhone: '01012345678',
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockPayment: (overrides = {}) => ({
@@ -193,7 +195,7 @@ export const testUtils = {
     provider: 'instapay',
     status: 'pending',
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockUser: (overrides = {}) => ({
@@ -202,7 +204,7 @@ export const testUtils = {
     name: 'Test User',
     role: 'admin',
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockProduct: (overrides = {}) => ({
@@ -213,7 +215,7 @@ export const testUtils = {
     stock: 100,
     category: 'test',
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockConversation: (overrides = {}) => ({
@@ -222,7 +224,7 @@ export const testUtils = {
     title: 'Test Conversation',
     organizationId: 1,
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockEthicalRule: (overrides = {}) => ({
@@ -241,7 +243,7 @@ export const testUtils = {
     priority: 5,
     createdBy: 1,
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   createMockChatMessage: (overrides = {}) => ({
@@ -253,7 +255,7 @@ export const testUtils = {
     parentMessageId: null,
     metadata: {},
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
 
   // Mock AI response
@@ -263,7 +265,7 @@ export const testUtils = {
     tokensUsed: 30,
     cost: 0,
     cached: false,
-    ...overrides
+    ...overrides,
   }),
 
   // Mock bio-module response
@@ -279,7 +281,7 @@ export const testUtils = {
       chameleon: { active: true, health: 90 },
       cephalopod: { active: true, health: 95 },
     },
-    ...overrides
+    ...overrides,
   }),
 };
 

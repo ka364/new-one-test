@@ -1,6 +1,6 @@
-import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
-import { Button } from "@/components/ui/button";
+import { ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -8,8 +8,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Link } from "wouter";
+} from '@/components/ui/sheet';
+import { Link } from 'wouter';
 
 export function Cart() {
   const { items, itemCount, totalPrice, updateQuantity, removeItem } = useCart();
@@ -30,9 +30,7 @@ export function Cart() {
         <SheetHeader>
           <SheetTitle>سلة التسوق</SheetTitle>
           <SheetDescription>
-            {itemCount === 0
-              ? "السلة فارغة"
-              : `${itemCount} منتج في السلة`}
+            {itemCount === 0 ? 'السلة فارغة' : `${itemCount} منتج في السلة`}
           </SheetDescription>
         </SheetHeader>
 
@@ -49,10 +47,7 @@ export function Cart() {
                 {items.map((item) => {
                   const itemKey = `${item.productId}-${item.size}-${item.color}`;
                   return (
-                    <div
-                      key={itemKey}
-                      className="flex gap-4 p-4 border rounded-lg"
-                    >
+                    <div key={itemKey} className="flex gap-4 p-4 border rounded-lg">
                       {item.image && (
                         <img
                           src={item.image}
@@ -62,22 +57,14 @@ export function Cart() {
                       )}
                       <div className="flex-1">
                         <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {item.modelCode}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{item.modelCode}</p>
                         {item.size && (
-                          <p className="text-sm text-muted-foreground">
-                            المقاس: {item.size}
-                          </p>
+                          <p className="text-sm text-muted-foreground">المقاس: {item.size}</p>
                         )}
                         {item.color && (
-                          <p className="text-sm text-muted-foreground">
-                            اللون: {item.color}
-                          </p>
+                          <p className="text-sm text-muted-foreground">اللون: {item.color}</p>
                         )}
-                        <p className="text-sm font-bold mt-1">
-                          {item.price.toFixed(2)} ج.م
-                        </p>
+                        <p className="text-sm font-bold mt-1">{item.price.toFixed(2)} ج.م</p>
 
                         <div className="flex items-center gap-2 mt-2">
                           <Button
@@ -95,9 +82,7 @@ export function Cart() {
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
-                          <span className="w-8 text-center font-medium">
-                            {item.quantity}
-                          </span>
+                          <span className="w-8 text-center font-medium">{item.quantity}</span>
                           <Button
                             variant="outline"
                             size="icon"
@@ -117,9 +102,7 @@ export function Cart() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 mr-auto text-destructive"
-                            onClick={() =>
-                              removeItem(item.productId, item.size, item.color)
-                            }
+                            onClick={() => removeItem(item.productId, item.size, item.color)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

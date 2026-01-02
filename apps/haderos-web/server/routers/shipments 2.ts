@@ -1,21 +1,21 @@
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import * as XLSX from "xlsx";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import * as XLSX from 'xlsx';
 import {
   getShipments,
   getShipmentStats,
   bulkInsertShipments,
   getShipmentCount,
   type ShipmentFilters,
-} from "../db-shipments";
+} from '../db-shipments';
 import {
   optimizeDeliveryRoute,
   batchOptimizeShipments,
   trackDeliveryWithTardigrade,
   getDeliveryInsights,
   type ShipmentData,
-} from "../bio-modules/shipping-bio-integration.js";
+} from '../bio-modules/shipping-bio-integration.js';
 
 export const shipmentsRouter = router({
   // Get shipments list with filters
@@ -34,11 +34,13 @@ export const shipmentsRouter = router({
     .query(async ({ input }) => {
       const shipments = await getShipments(input);
       const total = await getShipmentCount(input);
-      
+
       return {
         shipments,
         total,
-        hasMore: input.offset ? (input.offset + (input.limit || 50)) < total : total > (input.limit || 50),
+        hasMore: input.offset
+          ? input.offset + (input.limit || 50) < total
+          : total > (input.limit || 50),
       };
     }),
 
@@ -68,8 +70,8 @@ export const shipmentsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN' });
       }
 
       const inserted = await bulkInsertShipments(input.shipments);
@@ -92,41 +94,41 @@ export const shipmentsRouter = router({
 
       // Create Excel workbook
       const workbook = XLSX.utils.book_new();
-      
+
       const worksheetData = [
         [
-          "الرقم",
-          "الشركة",
-          "رقم التتبع",
-          "رقم الطلب",
-          "اسم العميل",
-          "رقم الهاتف",
-          "الكمية",
-          "المبلغ",
-          "تاريخ الشحن",
-          "الحالة",
-          "المصدر",
+          'الرقم',
+          'الشركة',
+          'رقم التتبع',
+          'رقم الطلب',
+          'اسم العميل',
+          'رقم الهاتف',
+          'الكمية',
+          'المبلغ',
+          'تاريخ الشحن',
+          'الحالة',
+          'المصدر',
         ],
         ...shipments.map((s: any, i: number) => [
           i + 1,
           s.company,
-          s.tracking_number || "",
-          s.order_number || "",
-          s.customer_name || "",
-          s.customer_phone || "",
+          s.tracking_number || '',
+          s.order_number || '',
+          s.customer_name || '',
+          s.customer_phone || '',
           s.quantity || 0,
           s.amount || 0,
-          s.shipment_date || "",
-          s.status || "",
-          s.file_source || "",
+          s.shipment_date || '',
+          s.status || '',
+          s.file_source || '',
         ]),
       ];
 
       const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      
+
       // Set column widths
       worksheet['!cols'] = [
-        { wch: 8 },  // ID
+        { wch: 8 }, // ID
         { wch: 15 }, // Company
         { wch: 20 }, // Tracking
         { wch: 20 }, // Order
@@ -139,16 +141,16 @@ export const shipmentsRouter = router({
         { wch: 30 }, // Source
       ];
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, "الشحنات");
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'الشحنات');
 
       // Convert to buffer
       const excelBuffer = XLSX.write(workbook, {
-        type: "buffer",
-        bookType: "xlsx",
+        type: 'buffer',
+        bookType: 'xlsx',
       });
 
       // Convert buffer to base64
-      const excelBase64 = excelBuffer.toString("base64");
+      const excelBase64 = excelBuffer.toString('base64');
 
       const filename = `shipments_${input.company || 'all'}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
@@ -182,7 +184,7 @@ export const shipmentsRouter = router({
               city: z.string().optional(),
               district: z.string().optional(),
             }),
-            priority: z.enum(["low", "medium", "high", "urgent"]),
+            priority: z.enum(['low', 'medium', 'high', 'urgent']),
             estimatedWeight: z.number().optional(),
             fragile: z.boolean().optional(),
           })
@@ -199,14 +201,23 @@ export const shipmentsRouter = router({
     .input(
       z.object({
         shipmentId: z.number(),
-        status: z.enum(["picked_up", "in_transit", "out_for_delivery", "delivered", "failed", "returned"]),
-        location: z.object({
-          address: z.string(),
-          latitude: z.number().optional(),
-          longitude: z.number().optional(),
-          city: z.string().optional(),
-          district: z.string().optional(),
-        }).optional(),
+        status: z.enum([
+          'picked_up',
+          'in_transit',
+          'out_for_delivery',
+          'delivered',
+          'failed',
+          'returned',
+        ]),
+        location: z
+          .object({
+            address: z.string(),
+            latitude: z.number().optional(),
+            longitude: z.number().optional(),
+            city: z.string().optional(),
+            district: z.string().optional(),
+          })
+          .optional(),
         notes: z.string().optional(),
       })
     )

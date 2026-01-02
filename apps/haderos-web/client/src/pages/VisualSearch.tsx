@@ -27,7 +27,7 @@ export default function VisualSearch() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,14 +37,14 @@ export default function VisualSearch() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Use back camera on mobile
+        video: { facingMode: 'environment' }, // Use back camera on mobile
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
       }
-      
+
       setSearchMode('camera');
       setError(null);
     } catch (err) {
@@ -56,7 +56,7 @@ export default function VisualSearch() {
   // Stop camera
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setSearchMode(null);
@@ -68,10 +68,10 @@ export default function VisualSearch() {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
+
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0);
@@ -97,13 +97,13 @@ export default function VisualSearch() {
 
   // Perform visual search
   const searchMutation = trpc.visualSearch.searchByImage.useMutation();
-  
+
   const performSearch = async () => {
     if (!capturedImage) return;
-    
+
     setIsSearching(true);
     setError(null);
-    
+
     try {
       // Call visual search API
       const result = await searchMutation.mutateAsync({
@@ -112,7 +112,7 @@ export default function VisualSearch() {
         minSimilarity: 0.5,
         includeFeatures: true,
       });
-      
+
       // Transform backend results to UI format
       const transformedResults: SearchResult[] = result.results.map((item: any) => ({
         productId: item.productId,
@@ -123,7 +123,7 @@ export default function VisualSearch() {
         price: item.product?.price,
         inStock: item.product?.stock > 0,
       }));
-      
+
       setSearchResults(transformedResults);
     } catch (err) {
       setError('حدث خطأ أثناء البحث. حاول مرة أخرى.');
@@ -146,19 +146,18 @@ export default function VisualSearch() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            البحث بالصورة
-          </h1>
-          <p className="text-gray-600">
-            صور أي حذاء للحصول على معلوماته فوراً
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">البحث بالصورة</h1>
+          <p className="text-gray-600">صور أي حذاء للحصول على معلوماته فوراً</p>
         </div>
 
         {/* Main Content */}
         {!searchMode && !capturedImage && (
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             {/* Camera Button */}
-            <Card className="p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={startCamera}>
+            <Card
+              className="p-8 hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={startCamera}
+            >
               <div className="text-center">
                 <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Camera className="w-10 h-10 text-blue-600" />
@@ -169,7 +168,7 @@ export default function VisualSearch() {
             </Card>
 
             {/* Upload Button */}
-            <Card 
+            <Card
               className="p-8 hover:shadow-lg transition-shadow cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
@@ -190,7 +189,7 @@ export default function VisualSearch() {
             </Card>
 
             {/* Barcode Scanner Button */}
-            <Card 
+            <Card
               className="p-8 hover:shadow-lg transition-shadow cursor-pointer"
               onClick={() => setSearchMode('barcode')}
             >
@@ -221,14 +220,9 @@ export default function VisualSearch() {
         {searchMode === 'camera' && !capturedImage && (
           <Card className="p-4 mb-4">
             <div className="relative">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="w-full rounded-lg"
-              />
+              <video ref={videoRef} autoPlay playsInline className="w-full rounded-lg" />
               <canvas ref={canvasRef} className="hidden" />
-              
+
               <div className="flex justify-center gap-4 mt-4">
                 <Button onClick={capturePhoto} size="lg">
                   <Camera className="ml-2" />
@@ -252,13 +246,9 @@ export default function VisualSearch() {
                 alt="Captured"
                 className="w-full rounded-lg max-h-96 object-contain"
               />
-              
+
               <div className="flex justify-center gap-4 mt-4">
-                <Button 
-                  onClick={performSearch} 
-                  size="lg"
-                  disabled={isSearching}
-                >
+                <Button onClick={performSearch} size="lg" disabled={isSearching}>
                   {isSearching ? (
                     <>
                       <Loader2 className="ml-2 animate-spin" />
@@ -318,14 +308,12 @@ export default function VisualSearch() {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="text-xl font-bold">{result.modelCode}</h3>
-                          {result.category && (
-                            <p className="text-gray-600">{result.category}</p>
-                          )}
+                          {result.category && <p className="text-gray-600">{result.category}</p>}
                         </div>
-                        
+
                         {/* Similarity Score */}
-                        <Badge 
-                          variant={result.similarity >= 0.9 ? "default" : "secondary"}
+                        <Badge
+                          variant={result.similarity >= 0.9 ? 'default' : 'secondary'}
                           className="text-lg px-3 py-1"
                         >
                           {Math.round(result.similarity * 100)}% تطابق
@@ -338,9 +326,9 @@ export default function VisualSearch() {
                             {result.price} جنيه
                           </div>
                         )}
-                        
+
                         {result.inStock !== undefined && (
-                          <Badge variant={result.inStock ? "default" : "destructive"}>
+                          <Badge variant={result.inStock ? 'default' : 'destructive'}>
                             {result.inStock ? (
                               <>
                                 <CheckCircle2 className="ml-1 w-4 h-4" />
@@ -358,7 +346,9 @@ export default function VisualSearch() {
 
                       <div className="flex gap-2 mt-4">
                         <Button size="sm">عرض التفاصيل</Button>
-                        <Button size="sm" variant="outline">إضافة لطلب</Button>
+                        <Button size="sm" variant="outline">
+                          إضافة لطلب
+                        </Button>
                       </div>
                     </div>
                   </div>

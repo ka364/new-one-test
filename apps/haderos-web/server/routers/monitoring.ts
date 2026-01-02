@@ -72,7 +72,9 @@ export const monitoringRouter = router({
         .optional()
     )
     .query(async ({ input }) => {
-      const since = input?.since ? new Date(input.since) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const since = input?.since
+        ? new Date(input.since)
+        : new Date(Date.now() - 24 * 60 * 60 * 1000);
       const metrics = monitoring.getMetrics({ since });
 
       const byName = new Map<string, number[]>();
@@ -96,4 +98,3 @@ export const monitoringRouter = router({
       return summary;
     }),
 });
-

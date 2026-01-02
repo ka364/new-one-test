@@ -1,63 +1,65 @@
-import { useState } from "react";
-import { Users, Plus, Eye, Activity } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from 'react';
+import { Users, Plus, Eye, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { trpc } from '@/lib/trpc';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function InvestorManagement() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    phone: "",
-    password: "",
-    investmentInterest: "",
-    notes: ""
+    name: '',
+    email: '',
+    company: '',
+    phone: '',
+    password: '',
+    investmentInterest: '',
+    notes: '',
   });
 
   const investorsQuery = trpc.investors.getAllInvestors.useQuery();
-  
+
   const createMutation = trpc.investors.createInvestor.useMutation({
     onSuccess: (data) => {
-      toast.success("تم إنشاء حساب المستثمر بنجاح", {
-        description: `البريد: ${data.email}\nكلمة المرور: ${data.password}`
+      toast.success('تم إنشاء حساب المستثمر بنجاح', {
+        description: `البريد: ${data.email}\nكلمة المرور: ${data.password}`,
       });
       setShowForm(false);
       setFormData({
-        name: "",
-        email: "",
-        company: "",
-        phone: "",
-        password: "",
-        investmentInterest: "",
-        notes: ""
+        name: '',
+        email: '',
+        company: '',
+        phone: '',
+        password: '',
+        investmentInterest: '',
+        notes: '',
       });
       investorsQuery.refetch();
     },
     onError: (error) => {
-      toast.error("خطأ في إنشاء الحساب", {
-        description: error.message
+      toast.error('خطأ في إنشاء الحساب', {
+        description: error.message,
       });
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
 
     createMutation.mutate({
       ...formData,
-      investmentInterest: formData.investmentInterest ? parseFloat(formData.investmentInterest) : undefined,
+      investmentInterest: formData.investmentInterest
+        ? parseFloat(formData.investmentInterest)
+        : undefined,
       createdBy: 1, // TODO: Get from auth context
     });
   };
@@ -95,7 +97,7 @@ export default function InvestorManagement() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                     />
                   </div>
@@ -106,7 +108,7 @@ export default function InvestorManagement() {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                     />
                   </div>
@@ -116,7 +118,7 @@ export default function InvestorManagement() {
                     <Input
                       id="company"
                       value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
 
@@ -125,7 +127,7 @@ export default function InvestorManagement() {
                     <Input
                       id="phone"
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
                   </div>
 
@@ -135,7 +137,7 @@ export default function InvestorManagement() {
                       id="password"
                       type="text"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="8 أحرف على الأقل"
                       required
                     />
@@ -147,7 +149,9 @@ export default function InvestorManagement() {
                       id="investment"
                       type="number"
                       value={formData.investmentInterest}
-                      onChange={(e) => setFormData({...formData, investmentInterest: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, investmentInterest: e.target.value })
+                      }
                       placeholder="2000000"
                     />
                   </div>
@@ -158,7 +162,7 @@ export default function InvestorManagement() {
                   <Textarea
                     id="notes"
                     value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
                     placeholder="أي ملاحظات إضافية عن المستثمر..."
                   />
@@ -166,7 +170,7 @@ export default function InvestorManagement() {
 
                 <div className="flex gap-3">
                   <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? "جاري الإنشاء..." : "إنشاء الحساب"}
+                    {createMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء الحساب'}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                     إلغاء
@@ -184,9 +188,7 @@ export default function InvestorManagement() {
               <Users className="w-5 h-5" />
               المستثمرون
             </CardTitle>
-            <CardDescription>
-              {investorsQuery.data?.length || 0} مستثمر مسجل
-            </CardDescription>
+            <CardDescription>{investorsQuery.data?.length || 0} مستثمر مسجل</CardDescription>
           </CardHeader>
           <CardContent>
             {investorsQuery.isLoading ? (
@@ -194,15 +196,13 @@ export default function InvestorManagement() {
             ) : investorsQuery.data && investorsQuery.data.length > 0 ? (
               <div className="space-y-3">
                 {investorsQuery.data.map((investor) => (
-                  <div 
+                  <div
                     key={investor.id}
                     className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
                   >
                     <div className="flex-1">
                       <h3 className="font-semibold">{investor.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {investor.email}
-                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{investor.email}</p>
                       {investor.company && (
                         <p className="text-sm text-gray-500">{investor.company}</p>
                       )}
@@ -210,9 +210,11 @@ export default function InvestorManagement() {
                     <div className="flex items-center gap-2">
                       <div className="text-left mr-4">
                         <p className="text-xs text-gray-500">الحالة</p>
-                        <span className={`text-sm font-medium ${
-                          investor.status === 'active' ? 'text-green-600' : 'text-gray-500'
-                        }`}>
+                        <span
+                          className={`text-sm font-medium ${
+                            investor.status === 'active' ? 'text-green-600' : 'text-gray-500'
+                          }`}
+                        >
                           {investor.status === 'active' ? 'نشط' : 'غير نشط'}
                         </span>
                       </div>

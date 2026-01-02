@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Users,
+  TrendingUp,
+  Clock,
+  CheckCircle,
   XCircle,
   Lightbulb,
   Activity,
   BarChart3,
-  AlertCircle
-} from "lucide-react";
+  AlertCircle,
+} from 'lucide-react';
 
 export default function ManagerDashboard() {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
@@ -22,7 +22,7 @@ export default function ManagerDashboard() {
   // Fetch all users (we'll use a mock for now since we don't have this endpoint yet)
   // TODO: Add users router with getAll endpoint
   const users: any[] = []; // const { data: users = [] } = trpc.users.getAll.useQuery();
-  
+
   // Fetch adaptive system stats
   const { data: allPatterns = [] } = trpc.adaptive.getAllPatterns.useQuery({ limit: 100 });
   const { data: allSuggestions = [] } = trpc.adaptive.getAllSuggestions.useQuery({ limit: 100 });
@@ -32,15 +32,16 @@ export default function ManagerDashboard() {
   const totalUsers = users.length;
   const activeUsers = users.filter((u: any) => u.isActive).length;
   const totalPatterns = allPatterns.length;
-  const pendingSuggestions = allSuggestions.filter((s: any) => s.status === "pending").length;
-  const acceptedSuggestions = allSuggestions.filter((s: any) => s.status === "accepted").length;
-  const acceptanceRate = allSuggestions.length > 0 
-    ? ((acceptedSuggestions / allSuggestions.length) * 100).toFixed(1) 
-    : "0";
+  const pendingSuggestions = allSuggestions.filter((s: any) => s.status === 'pending').length;
+  const acceptedSuggestions = allSuggestions.filter((s: any) => s.status === 'accepted').length;
+  const acceptanceRate =
+    allSuggestions.length > 0
+      ? ((acceptedSuggestions / allSuggestions.length) * 100).toFixed(1)
+      : '0';
 
   // Group patterns by task type
   const patternsByType = allPatterns.reduce((acc: any, pattern: any) => {
-    const type = pattern.taskType || "other";
+    const type = pattern.taskType || 'other';
     if (!acc[type]) {
       acc[type] = { count: 0, totalFrequency: 0 };
     }
@@ -91,9 +92,7 @@ export default function ManagerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {activeUsers} نشط
-            </p>
+            <p className="text-xs text-muted-foreground">{activeUsers} نشط</p>
           </CardContent>
         </Card>
 
@@ -104,9 +103,7 @@ export default function ManagerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalPatterns}</div>
-            <p className="text-xs text-muted-foreground">
-              من جميع الموظفين
-            </p>
+            <p className="text-xs text-muted-foreground">من جميع الموظفين</p>
           </CardContent>
         </Card>
 
@@ -117,9 +114,7 @@ export default function ManagerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingSuggestions}</div>
-            <p className="text-xs text-muted-foreground">
-              تحتاج مراجعة
-            </p>
+            <p className="text-xs text-muted-foreground">تحتاج مراجعة</p>
           </CardContent>
         </Card>
 
@@ -159,7 +154,10 @@ export default function ManagerDashboard() {
                   const userPatterns = allPatterns.filter((p: any) => p.userId === user.id);
                   const userSuggestions = allSuggestions.filter((s: any) => s.userId === user.id);
                   const userIcons = iconsByUser[user.id] || [];
-                  const totalUsage = userIcons.reduce((sum: number, icon: any) => sum + (icon.usageCount || 0), 0);
+                  const totalUsage = userIcons.reduce(
+                    (sum: number, icon: any) => sum + (icon.usageCount || 0),
+                    0
+                  );
 
                   return (
                     <div
@@ -170,12 +168,12 @@ export default function ManagerDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{user.name}</h3>
-                          <Badge variant={user.isActive ? "default" : "secondary"}>
-                            {user.isActive ? "نشط" : "غير نشط"}
+                          <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                            {user.isActive ? 'نشط' : 'غير نشط'}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
-                        
+
                         {selectedUser === user.id && (
                           <div className="mt-4 grid grid-cols-3 gap-4">
                             <div className="space-y-1">
@@ -197,7 +195,7 @@ export default function ManagerDashboard() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{userPatterns.length} نمط</Badge>
                         <Badge variant="outline">{userIcons.length} أيقونة</Badge>
@@ -220,7 +218,10 @@ export default function ManagerDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {topPatterns.map((pattern, index) => (
-                  <div key={pattern.type} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={pattern.type}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold">
                         {index + 1}
@@ -253,37 +254,37 @@ export default function ManagerDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {allSuggestions
-                  .filter((s: any) => s.status === "pending")
+                  .filter((s: any) => s.status === 'pending')
                   .slice(0, 10)
                   .map((suggestion: any) => {
                     const user = users.find((u: any) => u.id === suggestion.userId);
-                    const data = typeof suggestion.suggestionData === 'string' 
-                      ? JSON.parse(suggestion.suggestionData) 
-                      : suggestion.suggestionData;
+                    const data =
+                      typeof suggestion.suggestionData === 'string'
+                        ? JSON.parse(suggestion.suggestionData)
+                        : suggestion.suggestionData;
 
                     return (
-                      <div key={suggestion.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div
+                        key={suggestion.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{user?.name || "Unknown"}</h3>
-                            <Badge>{data?.taskType || "Unknown"}</Badge>
+                            <h3 className="font-semibold">{user?.name || 'Unknown'}</h3>
+                            <Badge>{data?.taskType || 'Unknown'}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {suggestion.reason}
-                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">{suggestion.reason}</p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(suggestion.createdAt).toLocaleDateString("ar-EG")}
+                            {new Date(suggestion.createdAt).toLocaleDateString('ar-EG')}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline">
-                            {data?.confidence || 0}% ثقة
-                          </Badge>
+                          <Badge variant="outline">{data?.confidence || 0}% ثقة</Badge>
                         </div>
                       </div>
                     );
                   })}
-                
+
                 {pendingSuggestions === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -306,9 +307,12 @@ export default function ManagerDashboard() {
               <div className="space-y-4">
                 {mostUsedIcons.map((icon: any, index) => {
                   const user = users.find((u: any) => u.id === icon.userId);
-                  
+
                   return (
-                    <div key={icon.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={icon.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold">
                           {index + 1}
@@ -340,7 +344,7 @@ export default function ManagerDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {acceptanceRate < "50" && (
+            {acceptanceRate < '50' && (
               <div className="flex items-start gap-3 p-4 border border-yellow-500/50 rounded-lg bg-yellow-500/10">
                 <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
                 <div>

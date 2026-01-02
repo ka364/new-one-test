@@ -63,13 +63,13 @@ export class FinancialReportService {
       roi,
       revenueBySource: {
         'مبيعات مباشرة': totalRevenue * 0.7,
-        'شراكات': totalRevenue * 0.2,
-        'أخرى': totalRevenue * 0.1,
+        شراكات: totalRevenue * 0.2,
+        أخرى: totalRevenue * 0.1,
       },
       expensesByCategory: {
-        'رواتب': totalExpenses * 0.5,
-        'تشغيل': totalExpenses * 0.3,
-        'تسويق': totalExpenses * 0.2,
+        رواتب: totalExpenses * 0.5,
+        تشغيل: totalExpenses * 0.3,
+        تسويق: totalExpenses * 0.2,
       },
     };
   }
@@ -122,8 +122,10 @@ export class FinancialReportService {
       cashFlow,
       kpis: {
         averageOrderValue: profitLoss.totalRevenue / (await this.getOrderCount(options)),
-        customerAcquisitionCost: profitLoss.expensesByCategory['تسويق'] / (await this.getNewCustomersCount(options)),
-        customerLifetimeValue: profitLoss.totalRevenue / (await this.getActiveCustomersCount(options)),
+        customerAcquisitionCost:
+          profitLoss.expensesByCategory['تسويق'] / (await this.getNewCustomersCount(options)),
+        customerLifetimeValue:
+          profitLoss.totalRevenue / (await this.getActiveCustomersCount(options)),
       },
     };
   }
@@ -184,6 +186,6 @@ export class FinancialReportService {
       ['العائد على الاستثمار %', report.roi.toFixed(2)],
     ];
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(',')).join('\n');
   }
 }

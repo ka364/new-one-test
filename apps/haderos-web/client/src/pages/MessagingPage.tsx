@@ -8,7 +8,7 @@
  * - AI Assistant
  */
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   MessageSquare,
   Users,
@@ -29,84 +29,84 @@ import {
   Filter,
   Check,
   CheckCheck,
-  Circle
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+  Circle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 // Mock conversations data
 const MOCK_CONVERSATIONS = {
   team: [
     {
-      id: "1",
-      title: "فريق المبيعات",
-      type: "team" as const,
-      lastMessage: "تم تحقيق الهدف الشهري!",
-      lastMessageTime: "منذ 5 دقائق",
+      id: '1',
+      title: 'فريق المبيعات',
+      type: 'team' as const,
+      lastMessage: 'تم تحقيق الهدف الشهري!',
+      lastMessageTime: 'منذ 5 دقائق',
       unreadCount: 3,
       participants: [
-        { id: 1, name: "أحمد محمد", avatar: null },
-        { id: 2, name: "سارة خالد", avatar: null },
-        { id: 3, name: "محمود علي", avatar: null },
+        { id: 1, name: 'أحمد محمد', avatar: null },
+        { id: 2, name: 'سارة خالد', avatar: null },
+        { id: 3, name: 'محمود علي', avatar: null },
       ],
       isOnline: true,
     },
     {
-      id: "2",
-      title: "فريق التطوير",
-      type: "team" as const,
-      lastMessage: "تم إصلاح المشكلة في الإنتاج",
-      lastMessageTime: "منذ ساعة",
+      id: '2',
+      title: 'فريق التطوير',
+      type: 'team' as const,
+      lastMessage: 'تم إصلاح المشكلة في الإنتاج',
+      lastMessageTime: 'منذ ساعة',
       unreadCount: 0,
       participants: [
-        { id: 4, name: "علي حسن", avatar: null },
-        { id: 5, name: "نورا أحمد", avatar: null },
+        { id: 4, name: 'علي حسن', avatar: null },
+        { id: 5, name: 'نورا أحمد', avatar: null },
       ],
       isOnline: true,
     },
   ],
   support: [
     {
-      id: "3",
-      title: "استفسار عن طلب #12345",
-      type: "support" as const,
-      ticketNumber: "TICKET-12345",
-      status: "open" as const,
-      priority: "high" as const,
-      lastMessage: "متى سيصل الطلب؟",
-      lastMessageTime: "منذ 10 دقائق",
+      id: '3',
+      title: 'استفسار عن طلب #12345',
+      type: 'support' as const,
+      ticketNumber: 'TICKET-12345',
+      status: 'open' as const,
+      priority: 'high' as const,
+      lastMessage: 'متى سيصل الطلب؟',
+      lastMessageTime: 'منذ 10 دقائق',
       unreadCount: 1,
-      customer: { name: "عميل جديد", email: "customer@example.com" },
+      customer: { name: 'عميل جديد', email: 'customer@example.com' },
     },
     {
-      id: "4",
-      title: "مشكلة في الدفع",
-      type: "support" as const,
-      ticketNumber: "TICKET-12346",
-      status: "in_progress" as const,
-      priority: "medium" as const,
-      lastMessage: "تم حل المشكلة",
-      lastMessageTime: "منذ ساعتين",
+      id: '4',
+      title: 'مشكلة في الدفع',
+      type: 'support' as const,
+      ticketNumber: 'TICKET-12346',
+      status: 'in_progress' as const,
+      priority: 'medium' as const,
+      lastMessage: 'تم حل المشكلة',
+      lastMessageTime: 'منذ ساعتين',
       unreadCount: 0,
-      customer: { name: "محمد علي", email: "ali@example.com" },
+      customer: { name: 'محمد علي', email: 'ali@example.com' },
     },
   ],
   ai: [
     {
-      id: "5",
-      title: "مساعد HADEROS",
-      type: "ai" as const,
-      lastMessage: "كيف يمكنني مساعدتك اليوم؟",
-      lastMessageTime: "الآن",
+      id: '5',
+      title: 'مساعد HADEROS',
+      type: 'ai' as const,
+      lastMessage: 'كيف يمكنني مساعدتك اليوم؟',
+      lastMessageTime: 'الآن',
       unreadCount: 0,
-      aiModel: "GPT-4",
+      aiModel: 'GPT-4',
     },
   ],
 };
@@ -114,87 +114,98 @@ const MOCK_CONVERSATIONS = {
 // Mock messages
 const MOCK_MESSAGES = [
   {
-    id: "m1",
+    id: 'm1',
     senderId: 1,
-    senderName: "أحمد محمد",
-    content: "السلام عليكم جميعاً!",
-    timestamp: "10:00",
+    senderName: 'أحمد محمد',
+    content: 'السلام عليكم جميعاً!',
+    timestamp: '10:00',
     isRead: true,
   },
   {
-    id: "m2",
+    id: 'm2',
     senderId: 2,
-    senderName: "سارة خالد",
-    content: "وعليكم السلام، صباح الخير",
-    timestamp: "10:01",
+    senderName: 'سارة خالد',
+    content: 'وعليكم السلام، صباح الخير',
+    timestamp: '10:01',
     isRead: true,
   },
   {
-    id: "m3",
+    id: 'm3',
     senderId: 1,
-    senderName: "أحمد محمد",
-    content: "أريد إبلاغكم أننا حققنا الهدف الشهري! 🎉",
-    timestamp: "10:05",
+    senderName: 'أحمد محمد',
+    content: 'أريد إبلاغكم أننا حققنا الهدف الشهري! 🎉',
+    timestamp: '10:05',
     isRead: true,
   },
   {
-    id: "m4",
+    id: 'm4',
     senderId: 3,
-    senderName: "محمود علي",
-    content: "ممتاز! عمل رائع من الجميع",
-    timestamp: "10:06",
+    senderName: 'محمود علي',
+    content: 'ممتاز! عمل رائع من الجميع',
+    timestamp: '10:06',
     isRead: true,
   },
   {
-    id: "m5",
+    id: 'm5',
     senderId: 2,
-    senderName: "سارة خالد",
-    content: "مبروك لنا جميعاً! 💪",
-    timestamp: "10:07",
+    senderName: 'سارة خالد',
+    content: 'مبروك لنا جميعاً! 💪',
+    timestamp: '10:07',
     isRead: false,
   },
 ];
 
 export default function MessagingPage() {
-  const [activeTab, setActiveTab] = useState("team");
-  const [selectedConversation, setSelectedConversation] = useState<string | null>("1");
-  const [messageInput, setMessageInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState('team');
+  const [selectedConversation, setSelectedConversation] = useState<string | null>('1');
+  const [messageInput, setMessageInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const currentUserId = 1; // Mock current user
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
     // In production, use tRPC to send message
-    console.log("Sending:", messageInput);
-    setMessageInput("");
+    console.log('Sending:', messageInput);
+    setMessageInput('');
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open": return "bg-yellow-500";
-      case "in_progress": return "bg-blue-500";
-      case "resolved": return "bg-green-500";
-      case "closed": return "bg-gray-500";
-      default: return "bg-gray-500";
+      case 'open':
+        return 'bg-yellow-500';
+      case 'in_progress':
+        return 'bg-blue-500';
+      case 'resolved':
+        return 'bg-green-500';
+      case 'closed':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent": return "text-red-600 bg-red-100";
-      case "high": return "text-orange-600 bg-orange-100";
-      case "medium": return "text-yellow-600 bg-yellow-100";
-      case "low": return "text-green-600 bg-green-100";
-      default: return "text-gray-600 bg-gray-100";
+      case 'urgent':
+        return 'text-red-600 bg-red-100';
+      case 'high':
+        return 'text-orange-600 bg-orange-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'low':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
-  const conversations = activeTab === "team"
-    ? MOCK_CONVERSATIONS.team
-    : activeTab === "support"
-    ? MOCK_CONVERSATIONS.support
-    : MOCK_CONVERSATIONS.ai;
+  const conversations =
+    activeTab === 'team'
+      ? MOCK_CONVERSATIONS.team
+      : activeTab === 'support'
+        ? MOCK_CONVERSATIONS.support
+        : MOCK_CONVERSATIONS.ai;
 
   return (
     <div className="h-[calc(100vh-80px)] flex" dir="rtl">
@@ -244,10 +255,10 @@ export default function MessagingPage() {
                 key={conv.id}
                 onClick={() => setSelectedConversation(conv.id)}
                 className={cn(
-                  "p-3 rounded-lg cursor-pointer transition-colors",
+                  'p-3 rounded-lg cursor-pointer transition-colors',
                   selectedConversation === conv.id
-                    ? "bg-blue-50 dark:bg-blue-900/30"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? 'bg-blue-50 dark:bg-blue-900/30'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -255,10 +266,10 @@ export default function MessagingPage() {
                   <div className="relative">
                     <Avatar className="w-10 h-10">
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                        {conv.type === "ai" ? "🤖" : conv.title[0]}
+                        {conv.type === 'ai' ? '🤖' : conv.title[0]}
                       </AvatarFallback>
                     </Avatar>
-                    {conv.type === "team" && (conv as any).isOnline && (
+                    {conv.type === 'team' && (conv as any).isOnline && (
                       <Circle className="absolute bottom-0 left-0 w-3 h-3 fill-green-500 text-green-500" />
                     )}
                   </div>
@@ -270,12 +281,20 @@ export default function MessagingPage() {
                       <span className="text-xs text-gray-500">{conv.lastMessageTime}</span>
                     </div>
 
-                    {conv.type === "support" && (
+                    {conv.type === 'support' && (
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className={getPriorityColor((conv as any).priority)}>
-                          {(conv as any).priority === "high" ? "عاجل" : "متوسط"}
+                        <Badge
+                          variant="outline"
+                          className={getPriorityColor((conv as any).priority)}
+                        >
+                          {(conv as any).priority === 'high' ? 'عاجل' : 'متوسط'}
                         </Badge>
-                        <span className={cn("w-2 h-2 rounded-full", getStatusColor((conv as any).status))} />
+                        <span
+                          className={cn(
+                            'w-2 h-2 rounded-full',
+                            getStatusColor((conv as any).status)
+                          )}
+                        />
                       </div>
                     )}
 
@@ -346,17 +365,14 @@ export default function MessagingPage() {
                   return (
                     <div
                       key={message.id}
-                      className={cn(
-                        "flex",
-                        isOwn ? "justify-start" : "justify-end"
-                      )}
+                      className={cn('flex', isOwn ? 'justify-start' : 'justify-end')}
                     >
                       <div
                         className={cn(
-                          "max-w-[70%] rounded-2xl px-4 py-2",
+                          'max-w-[70%] rounded-2xl px-4 py-2',
                           isOwn
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-white dark:bg-gray-800 rounded-bl-none shadow-sm"
+                            ? 'bg-blue-600 text-white rounded-br-none'
+                            : 'bg-white dark:bg-gray-800 rounded-bl-none shadow-sm'
                         )}
                       >
                         {!isOwn && (
@@ -365,21 +381,23 @@ export default function MessagingPage() {
                           </p>
                         )}
                         <p className="text-sm">{message.content}</p>
-                        <div className={cn(
-                          "flex items-center gap-1 mt-1",
-                          isOwn ? "justify-start" : "justify-end"
-                        )}>
-                          <span className={cn(
-                            "text-xs",
-                            isOwn ? "text-blue-200" : "text-gray-500"
-                          )}>
+                        <div
+                          className={cn(
+                            'flex items-center gap-1 mt-1',
+                            isOwn ? 'justify-start' : 'justify-end'
+                          )}
+                        >
+                          <span
+                            className={cn('text-xs', isOwn ? 'text-blue-200' : 'text-gray-500')}
+                          >
                             {message.timestamp}
                           </span>
-                          {isOwn && (
-                            message.isRead
-                              ? <CheckCheck className="w-3 h-3 text-blue-200" />
-                              : <Check className="w-3 h-3 text-blue-200" />
-                          )}
+                          {isOwn &&
+                            (message.isRead ? (
+                              <CheckCheck className="w-3 h-3 text-blue-200" />
+                            ) : (
+                              <Check className="w-3 h-3 text-blue-200" />
+                            ))}
                         </div>
                       </div>
                     </div>
@@ -398,7 +416,7 @@ export default function MessagingPage() {
                   placeholder="اكتب رسالتك..."
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   className="flex-1"
                 />
                 <Button variant="ghost" size="icon">

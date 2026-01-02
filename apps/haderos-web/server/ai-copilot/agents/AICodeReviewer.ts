@@ -84,7 +84,7 @@ export class AICodeReviewer {
 
     // Auto-fix fixable issues
     let modifiedContent = content;
-    const autoFixableIssues = issues.filter(i => i.autoFixable && i.fix);
+    const autoFixableIssues = issues.filter((i) => i.autoFixable && i.fix);
 
     for (const issue of autoFixableIssues) {
       if (issue.fix) {
@@ -141,9 +141,7 @@ export class AICodeReviewer {
     const batchSize = 20;
     for (let i = 0; i < Math.min(files.length, 100); i += batchSize) {
       const batch = files.slice(i, i + batchSize);
-      const batchReviews = await Promise.all(
-        batch.map(file => this.reviewFile(file))
-      );
+      const batchReviews = await Promise.all(batch.map((file) => this.reviewFile(file)));
       reviews.push(...batchReviews);
     }
 
@@ -318,8 +316,8 @@ export class AICodeReviewer {
             if (importMatch) {
               const imported = importMatch[1] || importMatch[2];
               if (imported) {
-                const items = imported.split(',').map(i => i.trim());
-                items.forEach(item => {
+                const items = imported.split(',').map((i) => i.trim());
+                items.forEach((item) => {
                   const name = item.split(' as ')[0].trim();
                   if (!content.slice(line.length).includes(name)) {
                     issues.push({
@@ -371,14 +369,11 @@ export class AICodeReviewer {
    * حساب مقاييس الكود
    */
   private calculateMetrics(content: string, lines: string[]): CodeMetrics {
-    const codeLines = lines.filter(l => l.trim() && !l.trim().startsWith('//')).length;
+    const codeLines = lines.filter((l) => l.trim() && !l.trim().startsWith('//')).length;
     const complexity = this.calculateComplexity(content);
     const duplications = this.findDuplications(lines);
 
-    const maintainability = Math.max(
-      0,
-      100 - complexity - duplications * 5
-    );
+    const maintainability = Math.max(0, 100 - complexity - duplications * 5);
 
     return {
       lines: codeLines,
@@ -408,7 +403,7 @@ export class AICodeReviewer {
       /\b\|\|\b/g,
     ];
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       const matches = content.match(pattern);
       complexity += matches ? matches.length : 0;
     });
@@ -424,13 +419,16 @@ export class AICodeReviewer {
 
     // Check for duplicate blocks of 5+ lines
     for (let i = 0; i < lines.length - 5; i++) {
-      const block = lines.slice(i, i + 5).join('\n').trim();
+      const block = lines
+        .slice(i, i + 5)
+        .join('\n')
+        .trim();
       if (block.length > 50) {
         blocks.set(block, (blocks.get(block) || 0) + 1);
       }
     }
 
-    return Array.from(blocks.values()).filter(count => count > 1).length;
+    return Array.from(blocks.values()).filter((count) => count > 1).length;
   }
 
   /**
@@ -440,8 +438,8 @@ export class AICodeReviewer {
     let score = metrics.maintainability;
 
     // Deduct for issues
-    const errors = issues.filter(i => i.severity === 'error').length;
-    const warnings = issues.filter(i => i.severity === 'warning').length;
+    const errors = issues.filter((i) => i.severity === 'error').length;
+    const warnings = issues.filter((i) => i.severity === 'warning').length;
 
     score -= errors * 10;
     score -= warnings * 5;
@@ -458,8 +456,8 @@ export class AICodeReviewer {
     const averageScore = reviews.reduce((sum, r) => sum + r.score, 0) / reviews.length;
 
     const issuesByRule = new Map<string, number>();
-    reviews.forEach(r => {
-      r.issues.forEach(issue => {
+    reviews.forEach((r) => {
+      r.issues.forEach((issue) => {
         issuesByRule.set(issue.rule, (issuesByRule.get(issue.rule) || 0) + 1);
       });
     });
@@ -475,9 +473,18 @@ export class AICodeReviewer {
       totalAutoFixes,
       averageScore: Math.round(averageScore),
       issuesBySeverity: {
-        error: reviews.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'error').length, 0),
-        warning: reviews.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'warning').length, 0),
-        info: reviews.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'info').length, 0),
+        error: reviews.reduce(
+          (sum, r) => sum + r.issues.filter((i) => i.severity === 'error').length,
+          0
+        ),
+        warning: reviews.reduce(
+          (sum, r) => sum + r.issues.filter((i) => i.severity === 'warning').length,
+          0
+        ),
+        info: reviews.reduce(
+          (sum, r) => sum + r.issues.filter((i) => i.severity === 'info').length,
+          0
+        ),
       },
       topIssues,
     };
@@ -486,7 +493,11 @@ export class AICodeReviewer {
   /**
    * توليد تقرير المراجعة
    */
-  generateReport(result: { totalFiles: number; reviews: CodeReview[]; summary: ReviewSummary }): string {
+  generateReport(result: {
+    totalFiles: number;
+    reviews: CodeReview[];
+    summary: ReviewSummary;
+  }): string {
     return `
 # 👨‍💻 AI Code Review Report
 
@@ -512,9 +523,10 @@ ${result.summary.topIssues.map((issue, i) => `${i + 1}. **${issue.rule}**: ${iss
 ## 📁 Files with Issues
 
 ${result.reviews
-  .filter(r => r.issues.length > 0)
+  .filter((r) => r.issues.length > 0)
   .slice(0, 20)
-  .map(review => `
+  .map(
+    (review) => `
 ### ${review.file} (Score: ${review.score}/100)
 
 - **Issues:** ${review.issues.length}
@@ -522,23 +534,33 @@ ${result.reviews
 - **Complexity:** ${review.metrics.complexity}
 - **Maintainability:** ${review.metrics.maintainability}/100
 
-${review.issues.slice(0, 5).map(issue => `
+${review.issues
+  .slice(0, 5)
+  .map(
+    (issue) => `
 - Line ${issue.line}: [${issue.severity}] ${issue.message}
   ${issue.fix ? `  ✅ Auto-fixed: \`${issue.fix}\`` : ''}
-`).join('\n')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
+`
+  )
+  .join('\n')}
 
 ## 💡 Recommendations
 
 ${result.reviews
-  .flatMap(r => r.suggestions)
+  .flatMap((r) => r.suggestions)
   .sort((a, b) => b.priority - a.priority)
   .slice(0, 10)
-  .map((sug, i) => `
+  .map(
+    (sug, i) => `
 ${i + 1}. **${sug.type}** (Priority: ${sug.priority})
    - ${sug.description}
    - Impact: ${sug.impact}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ---
 *Report generated by HADEROS AI Code Reviewer*

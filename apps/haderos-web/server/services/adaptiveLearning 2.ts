@@ -1,12 +1,12 @@
-import { requireDb } from "../db";
+import { requireDb } from '../db';
 import {
   userBehavior,
   taskPatterns,
   userPreferences,
   dynamicIcons,
   aiSuggestions,
-} from "../../drizzle/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+} from '../../drizzle/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
 
 /**
  * Adaptive Learning Service
@@ -141,10 +141,7 @@ async function suggestNewIcons(userId: number): Promise<void> {
     );
 
   // التحقق من الأيقونات الموجودة
-  const existingIcons = await db
-    .select()
-    .from(dynamicIcons)
-    .where(eq(dynamicIcons.userId, userId));
+  const existingIcons = await db.select().from(dynamicIcons).where(eq(dynamicIcons.userId, userId));
 
   const existingTaskTypes = new Set(existingIcons.map((icon) => icon.taskType));
 
@@ -168,7 +165,7 @@ async function createAISuggestion(
 
   const suggestion: typeof aiSuggestions.$inferInsert = {
     userId,
-    suggestionType: "new_icon",
+    suggestionType: 'new_icon',
     title: `Add quick action for ${pattern.taskName}`,
     titleAr: `إضافة إجراء سريع لـ ${pattern.taskNameAr}`,
     description: `We noticed you frequently ${pattern.taskName}. Would you like a quick action icon?`,
@@ -178,7 +175,7 @@ async function createAISuggestion(
       frequency: pattern.frequency,
       suggestedIcon: pattern.suggestedIcon,
     }),
-    confidence: pattern.confidence || "0",
+    confidence: pattern.confidence || '0',
   };
 
   await db.insert(aiSuggestions).values(suggestion);
@@ -187,10 +184,7 @@ async function createAISuggestion(
 /**
  * قبول اقتراح وإنشاء أيقونة ديناميكية
  */
-export async function acceptSuggestion(
-  suggestionId: number,
-  userId: number
-): Promise<void> {
+export async function acceptSuggestion(suggestionId: number, userId: number): Promise<void> {
   const db = await requireDb();
   if (!db) return;
 
@@ -202,20 +196,21 @@ export async function acceptSuggestion(
     .limit(1);
 
   if (suggestion.length === 0 || suggestion[0].userId !== userId) {
-    throw new Error("Suggestion not found or unauthorized");
+    throw new Error('Suggestion not found or unauthorized');
   }
 
   // Parse suggestion data - handle both string and object
-  const suggestionData = typeof suggestion[0].suggestionData === 'string' 
-    ? JSON.parse(suggestion[0].suggestionData)
-    : suggestion[0].suggestionData;
+  const suggestionData =
+    typeof suggestion[0].suggestionData === 'string'
+      ? JSON.parse(suggestion[0].suggestionData)
+      : suggestion[0].suggestionData;
 
   // إنشاء الأيقونة الديناميكية
   const icon: typeof dynamicIcons.$inferInsert = {
     userId,
     iconName: formatTaskName(suggestionData.taskType),
     iconNameAr: formatTaskNameAr(suggestionData.taskType),
-    iconEmoji: suggestionData.suggestedIcon || "📋",
+    iconEmoji: suggestionData.suggestedIcon || '📋',
     taskType: suggestionData.taskType,
     description: `Quick action for ${formatTaskName(suggestionData.taskType)}`,
     descriptionAr: `إجراء سريع لـ ${formatTaskNameAr(suggestionData.taskType)}`,
@@ -228,7 +223,7 @@ export async function acceptSuggestion(
   // تحديث حالة الاقتراح
   await db
     .update(aiSuggestions)
-    .set({ status: "accepted", respondedAt: sql`NOW()` })
+    .set({ status: 'accepted', respondedAt: sql`NOW()` })
     .where(eq(aiSuggestions.id, suggestionId));
 }
 
@@ -246,7 +241,7 @@ export async function rejectSuggestion(
   await db
     .update(aiSuggestions)
     .set({
-      status: "rejected",
+      status: 'rejected',
       respondedAt: sql`NOW()`,
       userFeedback: feedback || null,
     })
@@ -277,7 +272,7 @@ export async function getPendingSuggestions(userId: number) {
   return await db
     .select()
     .from(aiSuggestions)
-    .where(and(eq(aiSuggestions.userId, userId), eq(aiSuggestions.status, "pending")))
+    .where(and(eq(aiSuggestions.userId, userId), eq(aiSuggestions.status, 'pending')))
     .orderBy(desc(aiSuggestions.confidence));
 }
 
@@ -301,20 +296,20 @@ export async function incrementIconUsage(iconId: number, userId: number): Promis
 
 function formatTaskName(taskType: string): string {
   return taskType
-    .split("_")
+    .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .join(' ');
 }
 
 function formatTaskNameAr(taskType: string): string {
   const translations: Record<string, string> = {
-    create_invoice: "إنشاء فاتورة",
-    request_images: "طلب صور",
-    daily_report: "تقرير يومي",
-    create_content: "إنشاء محتوى",
-    track_order: "تتبع طلب",
-    financial_transaction: "معاملة مالية",
-    performance_analysis: "تحليل أداء",
+    create_invoice: 'إنشاء فاتورة',
+    request_images: 'طلب صور',
+    daily_report: 'تقرير يومي',
+    create_content: 'إنشاء محتوى',
+    track_order: 'تتبع طلب',
+    financial_transaction: 'معاملة مالية',
+    performance_analysis: 'تحليل أداء',
   };
 
   return translations[taskType] || formatTaskName(taskType);
@@ -322,16 +317,16 @@ function formatTaskNameAr(taskType: string): string {
 
 function suggestIconForTask(taskType: string): string {
   const iconMap: Record<string, string> = {
-    create_invoice: "📋",
-    request_images: "📸",
-    daily_report: "📊",
-    create_content: "📢",
-    track_order: "📦",
-    financial_transaction: "💰",
-    performance_analysis: "📈",
+    create_invoice: '📋',
+    request_images: '📸',
+    daily_report: '📊',
+    create_content: '📢',
+    track_order: '📦',
+    financial_transaction: '💰',
+    performance_analysis: '📈',
   };
 
-  return iconMap[taskType] || "⚡";
+  return iconMap[taskType] || '⚡';
 }
 
 async function getNextDisplayOrder(userId: number): Promise<number> {
@@ -346,36 +341,23 @@ async function getNextDisplayOrder(userId: number): Promise<number> {
   return (result[0]?.maxOrder || 0) + 1;
 }
 
-
 /**
  * Admin functions for manager dashboard
  */
 export async function getAllTaskPatterns(limit = 100) {
   const db = await requireDb();
   if (!db) return [];
-  return await db
-    .select()
-    .from(taskPatterns)
-    .orderBy(desc(taskPatterns.frequency))
-    .limit(limit);
+  return await db.select().from(taskPatterns).orderBy(desc(taskPatterns.frequency)).limit(limit);
 }
 
 export async function getAllAiSuggestions(limit = 100) {
   const db = await requireDb();
   if (!db) return [];
-  return await db
-    .select()
-    .from(aiSuggestions)
-    .orderBy(desc(aiSuggestions.createdAt))
-    .limit(limit);
+  return await db.select().from(aiSuggestions).orderBy(desc(aiSuggestions.createdAt)).limit(limit);
 }
 
 export async function getAllDynamicIcons(limit = 100) {
   const db = await requireDb();
   if (!db) return [];
-  return await db
-    .select()
-    .from(dynamicIcons)
-    .orderBy(desc(dynamicIcons.usageCount))
-    .limit(limit);
+  return await db.select().from(dynamicIcons).orderBy(desc(dynamicIcons.usageCount)).limit(limit);
 }

@@ -3,10 +3,10 @@
  * Bidirectional inventory synchronization between local DB and Shopify
  */
 
-import { requireDb } from "../db";
-import { sql } from "drizzle-orm";
-import { shopifyClient } from "../integrations/shopify-client";
-import { getShopifyProductByLocalId, updateShopifyProductSync } from "../db-shopify";
+import { requireDb } from '../db';
+import { sql } from 'drizzle-orm';
+import { shopifyClient } from '../integrations/shopify-client';
+import { getShopifyProductByLocalId, updateShopifyProductSync } from '../db-shopify';
 
 /**
  * Sync local inventory to Shopify
@@ -17,30 +17,32 @@ export async function syncInventoryToShopify(
   newQuantity: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`[Inventory Sync] Syncing product ${localProductId} to Shopify: ${newQuantity} units`);
+    console.log(
+      `[Inventory Sync] Syncing product ${localProductId} to Shopify: ${newQuantity} units`
+    );
 
     // Get Shopify mapping
     const shopifyProduct = await getShopifyProductByLocalId(localProductId);
-    
+
     if (!shopifyProduct) {
       console.log(`[Inventory Sync] Product ${localProductId} not synced to Shopify yet`);
-      return { success: false, error: "Product not synced to Shopify" };
+      return { success: false, error: 'Product not synced to Shopify' };
     }
 
     const inventoryItemId = shopifyProduct.shopify_inventory_item_id;
     if (!inventoryItemId) {
-      return { success: false, error: "No inventory item ID found" };
+      return { success: false, error: 'No inventory item ID found' };
     }
 
     // Update inventory in Shopify
     // Note: locationId is required - using default location
-    const locationId = "gid://shopify/Location/96698753342"; // Default location
+    const locationId = 'gid://shopify/Location/96698753342'; // Default location
     await shopifyClient.updateInventory(inventoryItemId, newQuantity, locationId);
 
     // Update local sync record
     await updateShopifyProductSync(localProductId.toString(), {
       inventoryQuantity: newQuantity,
-      syncStatus: "synced",
+      syncStatus: 'synced',
     });
 
     console.log(`[Inventory Sync] ✓ Synced to Shopify: ${newQuantity} units`);
@@ -64,7 +66,7 @@ export async function syncInventoryFromShopify(
     console.log(`[Inventory Sync] Syncing from Shopify: ${inventoryItemId} = ${newQuantity} units`);
 
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     // Find product by inventory item ID
     const result: any = await db.execute(
@@ -72,13 +74,12 @@ export async function syncInventoryFromShopify(
           WHERE shopify_inventory_item_id = ${inventoryItemId}`
     );
 
-    const products = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) 
-      ? result[0] 
-      : result;
+    const products =
+      Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : result;
 
     if (!products || products.length === 0) {
       console.log(`[Inventory Sync] No local product found for inventory item ${inventoryItemId}`);
-      return { success: false, error: "Product not found" };
+      return { success: false, error: 'Product not found' };
     }
 
     const localProductId = products[0].local_product_id;
@@ -100,7 +101,9 @@ export async function syncInventoryFromShopify(
           WHERE shopify_inventory_item_id = ${inventoryItemId}`
     );
 
-    console.log(`[Inventory Sync] ✓ Updated local inventory for product ${localProductId}: ${newQuantity} units`);
+    console.log(
+      `[Inventory Sync] ✓ Updated local inventory for product ${localProductId}: ${newQuantity} units`
+    );
 
     return { success: true };
   } catch (error: any) {
@@ -127,10 +130,10 @@ export async function bulkSyncInventoryFromShopify(): Promise<{
   };
 
   try {
-    console.log("[Inventory Sync] Starting bulk inventory sync from Shopify...");
+    console.log('[Inventory Sync] Starting bulk inventory sync from Shopify...');
 
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     // Get all synced products
     const productsResult: any = await db.execute(
@@ -139,9 +142,10 @@ export async function bulkSyncInventoryFromShopify(): Promise<{
           WHERE shopify_inventory_item_id IS NOT NULL`
     );
 
-    const products = Array.isArray(productsResult) && productsResult.length > 0 && Array.isArray(productsResult[0]) 
-      ? productsResult[0] 
-      : productsResult;
+    const products =
+      Array.isArray(productsResult) && productsResult.length > 0 && Array.isArray(productsResult[0])
+        ? productsResult[0]
+        : productsResult;
 
     console.log(`[Inventory Sync] Found ${products.length} products to sync`);
 
@@ -150,7 +154,9 @@ export async function bulkSyncInventoryFromShopify(): Promise<{
         // For now, skip bulk sync from Shopify
         // This would require fetching each product individually which is expensive
         // Instead, rely on webhooks for real-time sync
-        console.log(`[Inventory Sync] Skipping ${product.shopify_inventory_item_id} - use webhooks for sync`);
+        console.log(
+          `[Inventory Sync] Skipping ${product.shopify_inventory_item_id} - use webhooks for sync`
+        );
         result.synced++;
       } catch (error: any) {
         result.failed++;
@@ -162,11 +168,13 @@ export async function bulkSyncInventoryFromShopify(): Promise<{
     }
 
     result.success = result.failed === 0;
-    console.log(`[Inventory Sync] Bulk sync completed: ${result.synced} synced, ${result.failed} failed`);
+    console.log(
+      `[Inventory Sync] Bulk sync completed: ${result.synced} synced, ${result.failed} failed`
+    );
 
     return result;
   } catch (error: any) {
-    console.error("[Inventory Sync] Bulk sync failed:", error.message);
+    console.error('[Inventory Sync] Bulk sync failed:', error.message);
     return result;
   }
 }
@@ -182,7 +190,7 @@ export async function getInventorySyncStatus(): Promise<{
 }> {
   try {
     const db = await requireDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
     const stats: any = await db.execute(
       sql`SELECT 
@@ -194,18 +202,17 @@ export async function getInventorySyncStatus(): Promise<{
           WHERE shopify_inventory_item_id IS NOT NULL`
     );
 
-    const data = Array.isArray(stats) && stats.length > 0 && Array.isArray(stats[0]) 
-      ? stats[0][0] 
-      : stats[0];
+    const data =
+      Array.isArray(stats) && stats.length > 0 && Array.isArray(stats[0]) ? stats[0][0] : stats[0];
 
     return {
-      totalProducts: parseInt(data?.total || "0"),
-      syncedProducts: parseInt(data?.synced || "0"),
-      outOfSync: parseInt(data?.out_of_sync || "0"),
+      totalProducts: parseInt(data?.total || '0'),
+      syncedProducts: parseInt(data?.synced || '0'),
+      outOfSync: parseInt(data?.out_of_sync || '0'),
       lastSync: data?.last_sync || null,
     };
   } catch (error: any) {
-    console.error("[Inventory Sync] Error getting status:", error.message);
+    console.error('[Inventory Sync] Error getting status:', error.message);
     return {
       totalProducts: 0,
       syncedProducts: 0,
@@ -223,7 +230,7 @@ export async function autoSyncInventory(productId: number, newQuantity: number) 
   try {
     // Check if product is synced to Shopify
     const shopifyProduct = await getShopifyProductByLocalId(productId);
-    
+
     if (shopifyProduct && shopifyProduct.shopify_inventory_item_id) {
       // Sync to Shopify in background
       syncInventoryToShopify(productId, newQuantity).catch((error) => {
@@ -231,6 +238,6 @@ export async function autoSyncInventory(productId: number, newQuantity: number) 
       });
     }
   } catch (error) {
-    console.error("[Auto Sync] Error:", error);
+    console.error('[Auto Sync] Error:', error);
   }
 }

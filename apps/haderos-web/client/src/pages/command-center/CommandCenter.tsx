@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import CommandCenterLayout from "@/components/command-center/CommandCenterLayout";
-import { HRSystemCard } from "@/components/command-center/cards/HRSystemCard";
-import { SmartShippingCard } from "@/components/command-center/cards/SmartShippingCard";
-import { LiveShowroomCard } from "@/components/command-center/cards/LiveShowroomCard";
-import { BoardDecisionsCard } from "@/components/command-center/cards/BoardDecisionsCard";
-import { AIInsightsCard } from "@/components/command-center/cards/AIInsightsCard";
-import { SystemStatusCard } from "@/components/command-center/cards/SystemStatusCard";
+import { useState, useEffect } from 'react';
+import CommandCenterLayout from '@/components/command-center/CommandCenterLayout';
+import { HRSystemCard } from '@/components/command-center/cards/HRSystemCard';
+import { SmartShippingCard } from '@/components/command-center/cards/SmartShippingCard';
+import { LiveShowroomCard } from '@/components/command-center/cards/LiveShowroomCard';
+import { BoardDecisionsCard } from '@/components/command-center/cards/BoardDecisionsCard';
+import { AIInsightsCard } from '@/components/command-center/cards/AIInsightsCard';
+import { SystemStatusCard } from '@/components/command-center/cards/SystemStatusCard';
 
 export default function CommandCenter() {
-  console.log("🚀 CommandCenter component loaded!");
+  console.log('🚀 CommandCenter component loaded!');
   return (
     <CommandCenterLayout>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

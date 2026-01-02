@@ -2,31 +2,31 @@
  * Create 12 employee accounts with passwords
  */
 
-import { getDb } from "../db";
-import { sql } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+import { getDb } from '../db';
+import { sql } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 const employees = [
-  { username: "ahmed.hassan", name: "Ahmed Hassan", password: "Ahmed@2025" },
-  { username: "fatima.ali", name: "Fatima Ali", password: "Fatima@2025" },
-  { username: "mohamed.ibrahim", name: "Mohamed Ibrahim", password: "Mohamed@2025" },
-  { username: "layla.mahmoud", name: "Layla Mahmoud", password: "Layla@2025" },
-  { username: "omar.khalil", name: "Omar Khalil", password: "Omar@2025" },
-  { username: "nour.said", name: "Nour Said", password: "Nour@2025" },
-  { username: "youssef.adel", name: "Youssef Adel", password: "Youssef@2025" },
-  { username: "mona.farid", name: "Mona Farid", password: "Mona@2025" },
-  { username: "khaled.mostafa", name: "Khaled Mostafa", password: "Khaled@2025" },
-  { username: "heba.nabil", name: "Heba Nabil", password: "Heba@2025" },
-  { username: "tarek.samy", name: "Tarek Samy", password: "Tarek@2025" },
-  { username: "dina.kamal", name: "Dina Kamal", password: "Dina@2025" },
+  { username: 'ahmed.hassan', name: 'Ahmed Hassan', password: 'Ahmed@2025' },
+  { username: 'fatima.ali', name: 'Fatima Ali', password: 'Fatima@2025' },
+  { username: 'mohamed.ibrahim', name: 'Mohamed Ibrahim', password: 'Mohamed@2025' },
+  { username: 'layla.mahmoud', name: 'Layla Mahmoud', password: 'Layla@2025' },
+  { username: 'omar.khalil', name: 'Omar Khalil', password: 'Omar@2025' },
+  { username: 'nour.said', name: 'Nour Said', password: 'Nour@2025' },
+  { username: 'youssef.adel', name: 'Youssef Adel', password: 'Youssef@2025' },
+  { username: 'mona.farid', name: 'Mona Farid', password: 'Mona@2025' },
+  { username: 'khaled.mostafa', name: 'Khaled Mostafa', password: 'Khaled@2025' },
+  { username: 'heba.nabil', name: 'Heba Nabil', password: 'Heba@2025' },
+  { username: 'tarek.samy', name: 'Tarek Samy', password: 'Tarek@2025' },
+  { username: 'dina.kamal', name: 'Dina Kamal', password: 'Dina@2025' },
 ];
 
 async function createEmployees() {
   try {
     const db = await getDb();
-    if (!db) throw new Error("Database connection failed");
+    if (!db) throw new Error('Database connection failed');
 
-    console.log("🚀 Creating 12 employee accounts...\n");
+    console.log('🚀 Creating 12 employee accounts...\n');
 
     for (const emp of employees) {
       try {
@@ -42,7 +42,7 @@ async function createEmployees() {
 
         console.log(`✅ ${emp.name} (${emp.username})`);
       } catch (error: any) {
-        if (error.message.includes("Duplicate entry")) {
+        if (error.message.includes('Duplicate entry')) {
           console.log(`⚠️  ${emp.name} (${emp.username}) - Already exists`);
         } else {
           console.log(`❌ ${emp.name} (${emp.username}) - Error: ${error.message}`);
@@ -50,17 +50,17 @@ async function createEmployees() {
       }
     }
 
-    console.log("\n📋 **Employee Credentials:**\n");
-    console.log("| Username | Password | Name |");
-    console.log("|----------|----------|------|");
+    console.log('\n📋 **Employee Credentials:**\n');
+    console.log('| Username | Password | Name |');
+    console.log('|----------|----------|------|');
     for (const emp of employees) {
       console.log(`| ${emp.username} | ${emp.password} | ${emp.name} |`);
     }
 
-    console.log("\n✅ All done!");
+    console.log('\n✅ All done!');
     process.exit(0);
   } catch (error: any) {
-    console.error("❌ Fatal error:", error.message);
+    console.error('❌ Fatal error:', error.message);
     process.exit(1);
   }
 }

@@ -58,21 +58,19 @@ export default function CallCenterPage() {
                     <User className="h-5 w-5" />
                     معلومات العميل
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="customerName">اسم العميل *</Label>
                       <Input
                         id="customerName"
                         value={formData.customerName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, customerName: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                         placeholder="أحمد محمد"
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="customerPhone">رقم الهاتف *</Label>
                       <Input
@@ -94,15 +92,13 @@ export default function CallCenterPage() {
                     <MapPin className="h-5 w-5" />
                     عنوان التوصيل
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="customerCity">المدينة *</Label>
                       <Select
                         value={formData.customerCity}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, customerCity: value })
-                        }
+                        onValueChange={(value) => setFormData({ ...formData, customerCity: value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر المدينة" />
@@ -117,7 +113,7 @@ export default function CallCenterPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="customerAddress">العنوان التفصيلي *</Label>
                       <Input
@@ -139,21 +135,19 @@ export default function CallCenterPage() {
                     <Package className="h-5 w-5" />
                     معلومات المنتج
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
                       <Label htmlFor="productName">اسم المنتج *</Label>
                       <Input
                         id="productName"
                         value={formData.productName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, productName: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
                         placeholder="حذاء رياضي - مقاس 42"
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="quantity">الكمية *</Label>
                       <Input
@@ -168,7 +162,7 @@ export default function CallCenterPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="codAmount">المبلغ المطلوب (COD) *</Label>
                     <div className="relative">
@@ -195,9 +189,7 @@ export default function CallCenterPage() {
                   <Textarea
                     id="notes"
                     value={formData.notes}
-                    onChange={(e) =>
-                      setFormData({ ...formData, notes: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="أي ملاحظات خاصة بالطلب..."
                     rows={3}
                   />

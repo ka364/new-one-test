@@ -1,13 +1,17 @@
 /**
  * Bio-Integration Dashboard
- * 
+ *
  * Real-time monitoring of bio-module interactions
  * This is the "nervous system monitor" of HaderOS
  */
 
-import { BioModuleName, getModuleInteractions, getInteractionStats } from "./bio-interaction-matrix";
-import { getBioMessageRouter } from "./unified-messaging";
-import { getConflictEngine } from "./conflict-resolution-protocol";
+import {
+  BioModuleName,
+  getModuleInteractions,
+  getInteractionStats,
+} from './bio-interaction-matrix';
+import { getBioMessageRouter } from './unified-messaging';
+import { getConflictEngine } from './conflict-resolution-protocol';
 
 export interface InteractionMetrics {
   path: string; // "arachnid→corvid"
@@ -21,7 +25,7 @@ export interface InteractionMetrics {
 
 export interface ModuleHealthStatus {
   name: BioModuleName;
-  status: "healthy" | "degraded" | "critical" | "offline";
+  status: 'healthy' | 'degraded' | 'critical' | 'offline';
   lastActive: number; // timestamp
   messageQueueSize: number;
   avgResponseTime: number;
@@ -88,12 +92,12 @@ export class BioIntegrationDashboard {
 
     const existing = this.interactions.get(key) || [];
     existing.push(interaction);
-    
+
     // Keep only last 1000 interactions per path
     if (existing.length > 1000) {
       existing.shift();
     }
-    
+
     this.interactions.set(key, existing);
 
     // Track module activity
@@ -107,12 +111,12 @@ export class BioIntegrationDashboard {
   static trackModuleActivity(module: BioModuleName): void {
     const timestamps = this.moduleActivity.get(module) || [];
     timestamps.push(Date.now());
-    
+
     // Keep only last 1000 timestamps
     if (timestamps.length > 1000) {
       timestamps.shift();
     }
-    
+
     this.moduleActivity.set(module, timestamps);
   }
 
@@ -120,9 +124,9 @@ export class BioIntegrationDashboard {
    * Calculate average processing time for interactions
    */
   private static calculateAverageTime(interactions: any[]): number {
-    const withTime = interactions.filter(i => i.processingTime !== null);
+    const withTime = interactions.filter((i) => i.processingTime !== null);
     if (withTime.length === 0) return 0;
-    
+
     const sum = withTime.reduce((acc, i) => acc + i.processingTime, 0);
     return Math.round(sum / withTime.length);
   }
@@ -134,12 +138,12 @@ export class BioIntegrationDashboard {
     const interactions = this.interactions.get(path) || [];
     const now = Date.now();
 
-    const lastMinute = interactions.filter(i => now - i.timestamp < 60000).length;
-    const lastHour = interactions.filter(i => now - i.timestamp < 3600000).length;
-    const lastDay = interactions.filter(i => now - i.timestamp < 86400000).length;
+    const lastMinute = interactions.filter((i) => now - i.timestamp < 60000).length;
+    const lastHour = interactions.filter((i) => now - i.timestamp < 3600000).length;
+    const lastDay = interactions.filter((i) => now - i.timestamp < 86400000).length;
 
-    const withTime = interactions.filter(i => i.processingTime !== null);
-    const successfulInteractions = withTime.filter(i => i.processingTime < 5000); // < 5s = success
+    const withTime = interactions.filter((i) => i.processingTime !== null);
+    const successfulInteractions = withTime.filter((i) => i.processingTime < 5000); // < 5s = success
 
     return {
       path,
@@ -147,7 +151,8 @@ export class BioIntegrationDashboard {
       lastHour,
       lastDay,
       averageProcessingTime: this.calculateAverageTime(interactions),
-      successRate: withTime.length > 0 ? (successfulInteractions.length / withTime.length) * 100 : 100,
+      successRate:
+        withTime.length > 0 ? (successfulInteractions.length / withTime.length) * 100 : 100,
       totalMessages: interactions.length,
     };
   }
@@ -162,7 +167,7 @@ export class BioIntegrationDashboard {
     if (timestamps.length === 0) {
       return {
         name: module,
-        status: "offline",
+        status: 'offline',
         lastActive: 0,
         messageQueueSize: 0,
         avgResponseTime: 0,
@@ -179,26 +184,33 @@ export class BioIntegrationDashboard {
       .filter(([path]) => path.startsWith(module) || path.endsWith(module))
       .flatMap(([_, interactions]) => interactions);
 
-    const recentInteractions = moduleInteractions.filter(i => now - i.timestamp < 3600000);
+    const recentInteractions = moduleInteractions.filter((i) => now - i.timestamp < 3600000);
     const avgResponseTime = this.calculateAverageTime(recentInteractions);
-    const failedInteractions = recentInteractions.filter(i => i.processingTime === null || i.processingTime > 5000);
-    const errorRate = recentInteractions.length > 0 ? (failedInteractions.length / recentInteractions.length) * 100 : 0;
+    const failedInteractions = recentInteractions.filter(
+      (i) => i.processingTime === null || i.processingTime > 5000
+    );
+    const errorRate =
+      recentInteractions.length > 0
+        ? (failedInteractions.length / recentInteractions.length) * 100
+        : 0;
 
     // Calculate uptime
     const totalTime = now - this.startTime;
-    const activeTime = timestamps.length > 1 ? timestamps[timestamps.length - 1] - timestamps[0] : totalTime;
+    const activeTime =
+      timestamps.length > 1 ? timestamps[timestamps.length - 1] - timestamps[0] : totalTime;
     const uptime = (activeTime / totalTime) * 100;
 
     // Determine status
-    let status: ModuleHealthStatus["status"];
-    if (timeSinceActive > 300000) { // 5 minutes
-      status = "offline";
+    let status: ModuleHealthStatus['status'];
+    if (timeSinceActive > 300000) {
+      // 5 minutes
+      status = 'offline';
     } else if (errorRate > 50 || avgResponseTime > 5000) {
-      status = "critical";
+      status = 'critical';
     } else if (errorRate > 20 || avgResponseTime > 2000) {
-      status = "degraded";
+      status = 'degraded';
     } else {
-      status = "healthy";
+      status = 'healthy';
     }
 
     return {
@@ -222,12 +234,14 @@ export class BioIntegrationDashboard {
     // Group conflicts by module pair
     const conflictPairs = new Map<string, any[]>();
 
-    history.forEach(resolution => {
+    history.forEach((resolution) => {
       // Extract modules from conflict (assuming they're in metadata)
-      const conflict = conflictEngine.getActiveConflicts().find(c => c.id === resolution.conflictId);
+      const conflict = conflictEngine
+        .getActiveConflicts()
+        .find((c) => c.id === resolution.conflictId);
       if (!conflict) return;
 
-      const key = [conflict.moduleA, conflict.moduleB].sort().join("↔");
+      const key = [conflict.moduleA, conflict.moduleB].sort().join('↔');
       const existing = conflictPairs.get(key) || [];
       existing.push(resolution);
       conflictPairs.set(key, existing);
@@ -238,11 +252,12 @@ export class BioIntegrationDashboard {
 
     conflictPairs.forEach((resolutions, key) => {
       if (!resolutions || resolutions.length === 0) return;
-      
-      const [moduleA, moduleB] = key.split("↔") as [BioModuleName, BioModuleName];
-      const lastConflict = Math.max(...resolutions.map(r => r.timestamp.getTime()));
-      const successfulResolutions = resolutions.filter(r => r.winner !== "escalate");
-      const avgResolutionTime = resolutions.reduce((sum, r) => sum + r.resolutionTime, 0) / resolutions.length;
+
+      const [moduleA, moduleB] = key.split('↔') as [BioModuleName, BioModuleName];
+      const lastConflict = Math.max(...resolutions.map((r) => r.timestamp.getTime()));
+      const successfulResolutions = resolutions.filter((r) => r.winner !== 'escalate');
+      const avgResolutionTime =
+        resolutions.reduce((sum, r) => sum + r.resolutionTime, 0) / resolutions.length;
 
       hotspots.push({
         moduleA,
@@ -268,22 +283,22 @@ export class BioIntegrationDashboard {
     const conflictStats = conflictEngine.getStats();
 
     // Get all interaction paths
-    const liveInteractions = Array.from(this.interactions.keys()).map(path =>
+    const liveInteractions = Array.from(this.interactions.keys()).map((path) =>
       this.getInteractionMetrics(path)
     );
 
     // Get module health for all 7 modules
     const modules: BioModuleName[] = [
-      "arachnid",
-      "corvid",
-      "mycelium",
-      "ant",
-      "tardigrade",
-      "chameleon",
-      "cephalopod",
+      'arachnid',
+      'corvid',
+      'mycelium',
+      'ant',
+      'tardigrade',
+      'chameleon',
+      'cephalopod',
     ];
 
-    const moduleHealth = modules.map(module => this.checkModuleHealth(module));
+    const moduleHealth = modules.map((module) => this.checkModuleHealth(module));
 
     // Get recent conflicts
     const recentConflicts = conflictEngine.getResolutionHistory(10);
@@ -292,44 +307,44 @@ export class BioIntegrationDashboard {
     const conflictHotspots = this.identifyConflictHotspots();
 
     // Calculate system health (weighted average)
-    const healthyModules = moduleHealth.filter(m => m.status === "healthy").length;
-    const degradedModules = moduleHealth.filter(m => m.status === "degraded").length;
-    const criticalModules = moduleHealth.filter(m => m.status === "critical").length;
-    const activeModules = modules.filter(m => this.moduleActivity.has(m)).length;
-    
+    const healthyModules = moduleHealth.filter((m) => m.status === 'healthy').length;
+    const degradedModules = moduleHealth.filter((m) => m.status === 'degraded').length;
+    const criticalModules = moduleHealth.filter((m) => m.status === 'critical').length;
+    const activeModules = modules.filter((m) => this.moduleActivity.has(m)).length;
+
     // Weighted health calculation
-    const moduleHealthScore = (
-      (healthyModules * 100) +
-      (degradedModules * 60) +
-      (criticalModules * 20)
-    ) / modules.length;
-    
+    const moduleHealthScore =
+      (healthyModules * 100 + degradedModules * 60 + criticalModules * 20) / modules.length;
+
     const activityScore = (activeModules / modules.length) * 100;
-    
+
     // Average success rate across all modules
-    const avgSuccessRate = moduleHealth.reduce((sum, m) => {
-      const successRate = 100 - m.errorRate;
-      return sum + successRate;
-    }, 0) / modules.length;
-    
+    const avgSuccessRate =
+      moduleHealth.reduce((sum, m) => {
+        const successRate = 100 - m.errorRate;
+        return sum + successRate;
+      }, 0) / modules.length;
+
     // Average response time score (lower is better, max 5000ms)
-    const avgResponseTime = moduleHealth.reduce((sum, m) => sum + m.avgResponseTime, 0) / modules.length;
-    const responseTimeScore = Math.max(0, 100 - (avgResponseTime / 50)); // 5000ms = 0%, 0ms = 100%
-    
+    const avgResponseTime =
+      moduleHealth.reduce((sum, m) => sum + m.avgResponseTime, 0) / modules.length;
+    const responseTimeScore = Math.max(0, 100 - avgResponseTime / 50); // 5000ms = 0%, 0ms = 100%
+
     // Weighted overall health
     const overall = Math.round(
-      (moduleHealthScore * 0.35) +  // 35% weight on module health
-      (activityScore * 0.25) +       // 25% weight on activity
-      (avgSuccessRate * 0.25) +      // 25% weight on success rate
-      (responseTimeScore * 0.15)     // 15% weight on response time
+      moduleHealthScore * 0.35 + // 35% weight on module health
+        activityScore * 0.25 + // 25% weight on activity
+        avgSuccessRate * 0.25 + // 25% weight on success rate
+        responseTimeScore * 0.15 // 15% weight on response time
     );
 
     const totalInteractions = liveInteractions.reduce((sum, i) => sum + i.totalMessages, 0);
-    const conflictRate = totalInteractions > 0 ? (conflictStats.totalResolved / totalInteractions) * 100 : 0;
+    const conflictRate =
+      totalInteractions > 0 ? (conflictStats.totalResolved / totalInteractions) * 100 : 0;
 
     // Interaction matrix coverage
     const matrixStats = getInteractionStats();
-    const activeToday = liveInteractions.filter(i => i.lastDay > 0).length;
+    const activeToday = liveInteractions.filter((i) => i.lastDay > 0).length;
     const coverage = (activeToday / matrixStats.totalInteractions) * 100;
 
     return {
@@ -342,7 +357,7 @@ export class BioIntegrationDashboard {
       conflictHotspots,
       systemHealth: {
         overall,
-        activeModules: modules.filter(m => this.moduleActivity.has(m)).length,
+        activeModules: modules.filter((m) => this.moduleActivity.has(m)).length,
         totalInteractions,
         conflictRate: Math.round(conflictRate * 100) / 100,
         avgProcessingTime: routerStats.avgProcessingTime,
@@ -362,7 +377,7 @@ export class BioIntegrationDashboard {
     const allInteractions: any[] = [];
 
     this.interactions.forEach((interactions, path) => {
-      interactions.forEach(interaction => {
+      interactions.forEach((interaction) => {
         allInteractions.push({
           ...interaction,
           path,

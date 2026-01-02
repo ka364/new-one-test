@@ -1,11 +1,11 @@
-import { getDb } from "../db";
-import { sql } from "drizzle-orm";
+import { getDb } from '../db';
+import { sql } from 'drizzle-orm';
 
 async function setupSpreadsheetTables() {
   const db = await getDb();
 
   try {
-    console.log("🔍 Checking spreadsheet tables...");
+    console.log('🔍 Checking spreadsheet tables...');
 
     // Check if tables exist
     const result = await db.execute(sql`
@@ -26,11 +26,11 @@ async function setupSpreadsheetTables() {
     console.log(`✅ Found ${result.rows.length} existing tables`);
 
     if (result.rows.length === 7) {
-      console.log("✅ All spreadsheet tables already exist!");
+      console.log('✅ All spreadsheet tables already exist!');
       return;
     }
 
-    console.log("📝 Creating missing spreadsheet tables...");
+    console.log('📝 Creating missing spreadsheet tables...');
 
     // Create spreadsheet_sessions table
     await db.execute(sql`
@@ -132,7 +132,7 @@ async function setupSpreadsheetTables() {
       )
     `);
 
-    console.log("✅ All spreadsheet tables created successfully!");
+    console.log('✅ All spreadsheet tables created successfully!');
 
     // Verify tables
     const verifyResult = await db.execute(sql`
@@ -151,9 +151,8 @@ async function setupSpreadsheetTables() {
     `);
 
     console.log(`✅ Verification: ${verifyResult.rows.length}/7 tables exist`);
-
   } catch (error) {
-    console.error("❌ Error setting up spreadsheet tables:", error);
+    console.error('❌ Error setting up spreadsheet tables:', error);
     throw error;
   }
 }
@@ -162,11 +161,11 @@ async function setupSpreadsheetTables() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupSpreadsheetTables()
     .then(() => {
-      console.log("✅ Setup complete!");
+      console.log('✅ Setup complete!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error("❌ Setup failed:", error);
+      console.error('❌ Setup failed:', error);
       process.exit(1);
     });
 }

@@ -3,13 +3,13 @@
  * Username/Password + Gmail OTP authentication for monthly employee accounts
  */
 
-import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
-import { requireDb } from "../db";
-import { sql } from "drizzle-orm";
-import { sendOTPEmail } from "../_core/email";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
+import { z } from 'zod';
+import { publicProcedure, router } from '../_core/trpc';
+import { requireDb } from '../db';
+import { sql } from 'drizzle-orm';
+import { sendOTPEmail } from '../_core/email';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /**
  * Generate 6-digit OTP
@@ -22,7 +22,7 @@ function generateOTP(): string {
  * Generate session token
  */
 function generateSessionToken(): string {
-  return crypto.randomBytes(32).toString("hex");
+  return crypto.randomBytes(32).toString('hex');
 }
 
 export const employeeAuthRouter = router({
@@ -41,7 +41,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Get employee account
         const employeeResult: any = await db.execute(
@@ -51,14 +51,17 @@ export const employeeAuthRouter = router({
               LIMIT 1`
         );
 
-        const employees = Array.isArray(employeeResult) && employeeResult.length > 0 && Array.isArray(employeeResult[0])
-          ? employeeResult[0]
-          : employeeResult;
+        const employees =
+          Array.isArray(employeeResult) &&
+          employeeResult.length > 0 &&
+          Array.isArray(employeeResult[0])
+            ? employeeResult[0]
+            : employeeResult;
 
         if (!employees || employees.length === 0) {
           return {
             success: false,
-            error: "اسم المستخدم أو كلمة المرور غير صحيحة",
+            error: 'اسم المستخدم أو كلمة المرور غير صحيحة',
           };
         }
 
@@ -68,7 +71,7 @@ export const employeeAuthRouter = router({
         if (!employee.is_active) {
           return {
             success: false,
-            error: "الحساب غير نشط",
+            error: 'الحساب غير نشط',
           };
         }
 
@@ -77,7 +80,7 @@ export const employeeAuthRouter = router({
         if (!passwordValid) {
           return {
             success: false,
-            error: "اسم المستخدم أو كلمة المرور غير صحيحة",
+            error: 'اسم المستخدم أو كلمة المرور غير صحيحة',
           };
         }
 
@@ -92,7 +95,7 @@ export const employeeAuthRouter = router({
         if (!employee.email || !employee.email_verified) {
           // Need to register email
           const sessionToken = generateSessionToken();
-          
+
           return {
             success: true,
             needsEmailRegistration: true,
@@ -124,7 +127,7 @@ export const employeeAuthRouter = router({
           success: true,
           needsEmailRegistration: false,
           needsOTP: true,
-          message: "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+          message: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
           employee: {
             id: employee.id,
             username: employee.username,
@@ -133,10 +136,10 @@ export const employeeAuthRouter = router({
           },
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Login error:", error.message);
+        console.error('[Employee Auth] Login error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في تسجيل الدخول",
+          error: 'حدث خطأ في تسجيل الدخول',
         };
       }
     }),
@@ -154,7 +157,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Generate OTP
         const otp = generateOTP();
@@ -176,24 +179,28 @@ export const employeeAuthRouter = router({
           sql`SELECT employee_name FROM monthly_employee_accounts WHERE id = ${input.employeeId}`
         );
 
-        const employees = Array.isArray(employeeResult) && employeeResult.length > 0 && Array.isArray(employeeResult[0])
-          ? employeeResult[0]
-          : employeeResult;
+        const employees =
+          Array.isArray(employeeResult) &&
+          employeeResult.length > 0 &&
+          Array.isArray(employeeResult[0])
+            ? employeeResult[0]
+            : employeeResult;
 
-        const employeeName = employees && employees.length > 0 ? employees[0].employee_name : "موظف";
+        const employeeName =
+          employees && employees.length > 0 ? employees[0].employee_name : 'موظف';
 
         // Send OTP
         await sendOTPEmail(input.email, employeeName, otp);
 
         return {
           success: true,
-          message: "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+          message: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Register email error:", error.message);
+        console.error('[Employee Auth] Register email error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في تسجيل البريد الإلكتروني",
+          error: 'حدث خطأ في تسجيل البريد الإلكتروني',
         };
       }
     }),
@@ -211,7 +218,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Get employee with OTP
         const employeeResult: any = await db.execute(
@@ -221,14 +228,17 @@ export const employeeAuthRouter = router({
               LIMIT 1`
         );
 
-        const employees = Array.isArray(employeeResult) && employeeResult.length > 0 && Array.isArray(employeeResult[0])
-          ? employeeResult[0]
-          : employeeResult;
+        const employees =
+          Array.isArray(employeeResult) &&
+          employeeResult.length > 0 &&
+          Array.isArray(employeeResult[0])
+            ? employeeResult[0]
+            : employeeResult;
 
         if (!employees || employees.length === 0) {
           return {
             success: false,
-            error: "الحساب غير موجود",
+            error: 'الحساب غير موجود',
           };
         }
 
@@ -238,7 +248,7 @@ export const employeeAuthRouter = router({
         if (employee.otp_attempts >= 5) {
           return {
             success: false,
-            error: "تم تجاوز عدد المحاولات المسموحة",
+            error: 'تم تجاوز عدد المحاولات المسموحة',
           };
         }
 
@@ -246,7 +256,7 @@ export const employeeAuthRouter = router({
         if (new Date() > new Date(employee.otp_expires_at)) {
           return {
             success: false,
-            error: "انتهت صلاحية رمز التحقق",
+            error: 'انتهت صلاحية رمز التحقق',
           };
         }
 
@@ -261,7 +271,7 @@ export const employeeAuthRouter = router({
 
           return {
             success: false,
-            error: "رمز التحقق غير صحيح",
+            error: 'رمز التحقق غير صحيح',
           };
         }
 
@@ -289,10 +299,10 @@ export const employeeAuthRouter = router({
           },
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Verify OTP error:", error.message);
+        console.error('[Employee Auth] Verify OTP error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في التحقق من الرمز",
+          error: 'حدث خطأ في التحقق من الرمز',
         };
       }
     }),
@@ -309,7 +319,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Get employee account
         const employeeResult: any = await db.execute(
@@ -319,14 +329,17 @@ export const employeeAuthRouter = router({
               LIMIT 1`
         );
 
-        const employees = Array.isArray(employeeResult) && employeeResult.length > 0 && Array.isArray(employeeResult[0])
-          ? employeeResult[0]
-          : employeeResult;
+        const employees =
+          Array.isArray(employeeResult) &&
+          employeeResult.length > 0 &&
+          Array.isArray(employeeResult[0])
+            ? employeeResult[0]
+            : employeeResult;
 
         if (!employees || employees.length === 0) {
           return {
             success: false,
-            error: "اسم المستخدم غير موجود",
+            error: 'اسم المستخدم غير موجود',
           };
         }
 
@@ -336,7 +349,7 @@ export const employeeAuthRouter = router({
         if (!employee.email || !employee.email_verified) {
           return {
             success: false,
-            error: "لم يتم تسجيل بريد إلكتروني لهذا الحساب",
+            error: 'لم يتم تسجيل بريد إلكتروني لهذا الحساب',
           };
         }
 
@@ -359,13 +372,13 @@ export const employeeAuthRouter = router({
         return {
           success: true,
           employeeId: employee.id,
-          message: "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+          message: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Request password reset error:", error.message);
+        console.error('[Employee Auth] Request password reset error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في إرسال رمز التحقق",
+          error: 'حدث خطأ في إرسال رمز التحقق',
         };
       }
     }),
@@ -383,7 +396,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Get employee with OTP
         const employeeResult: any = await db.execute(
@@ -393,14 +406,17 @@ export const employeeAuthRouter = router({
               LIMIT 1`
         );
 
-        const employees = Array.isArray(employeeResult) && employeeResult.length > 0 && Array.isArray(employeeResult[0])
-          ? employeeResult[0]
-          : employeeResult;
+        const employees =
+          Array.isArray(employeeResult) &&
+          employeeResult.length > 0 &&
+          Array.isArray(employeeResult[0])
+            ? employeeResult[0]
+            : employeeResult;
 
         if (!employees || employees.length === 0) {
           return {
             success: false,
-            error: "الحساب غير موجود",
+            error: 'الحساب غير موجود',
           };
         }
 
@@ -410,7 +426,7 @@ export const employeeAuthRouter = router({
         if (employee.otp_attempts >= 5) {
           return {
             success: false,
-            error: "تم تجاوز عدد المحاولات المسموحة",
+            error: 'تم تجاوز عدد المحاولات المسموحة',
           };
         }
 
@@ -418,7 +434,7 @@ export const employeeAuthRouter = router({
         if (new Date() > new Date(employee.otp_expires_at)) {
           return {
             success: false,
-            error: "انتهت صلاحية رمز التحقق",
+            error: 'انتهت صلاحية رمز التحقق',
           };
         }
 
@@ -433,7 +449,7 @@ export const employeeAuthRouter = router({
 
           return {
             success: false,
-            error: "رمز التحقق غير صحيح",
+            error: 'رمز التحقق غير صحيح',
           };
         }
 
@@ -448,13 +464,13 @@ export const employeeAuthRouter = router({
 
         return {
           success: true,
-          message: "تم التحقق بنجاح",
+          message: 'تم التحقق بنجاح',
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Verify reset OTP error:", error.message);
+        console.error('[Employee Auth] Verify reset OTP error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في التحقق",
+          error: 'حدث خطأ في التحقق',
         };
       }
     }),
@@ -472,7 +488,7 @@ export const employeeAuthRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await requireDb();
-        if (!db) throw new Error("Database connection failed");
+        if (!db) throw new Error('Database connection failed');
 
         // Hash new password
         const passwordHash = await bcrypt.hash(input.newPassword, 10);
@@ -486,13 +502,13 @@ export const employeeAuthRouter = router({
 
         return {
           success: true,
-          message: "تم تغيير كلمة المرور بنجاح",
+          message: 'تم تغيير كلمة المرور بنجاح',
         };
       } catch (error: any) {
-        console.error("[Employee Auth] Reset password error:", error.message);
+        console.error('[Employee Auth] Reset password error:', error.message);
         return {
           success: false,
-          error: "حدث خطأ في تغيير كلمة المرور",
+          error: 'حدث خطأ في تغيير كلمة المرور',
         };
       }
     }),

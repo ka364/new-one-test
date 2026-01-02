@@ -32,13 +32,13 @@ export class ChartInsightsAI {
     }
 
     // 1. Revenue Trend Analysis
-    const revenueTrend = this.analyzeTrend(data.map(d => d.revenue || 0));
+    const revenueTrend = this.analyzeTrend(data.map((d) => d.revenue || 0));
     if (revenueTrend.insight) {
       insights.push(revenueTrend.insight);
     }
 
     // 2. Order Volume Analysis
-    const orderTrend = this.analyzeTrend(data.map(d => d.orders || 0));
+    const orderTrend = this.analyzeTrend(data.map((d) => d.orders || 0));
     if (orderTrend.insight) {
       insights.push({
         ...orderTrend.insight,
@@ -47,7 +47,7 @@ export class ChartInsightsAI {
     }
 
     // 3. Average Order Value Analysis
-    const avgValues = data.map(d => d.avgValue || 0);
+    const avgValues = data.map((d) => d.avgValue || 0);
     const avgTrend = this.analyzeTrend(avgValues);
     if (avgTrend.insight) {
       insights.push({
@@ -57,7 +57,7 @@ export class ChartInsightsAI {
     }
 
     // 4. Volatility Analysis
-    const volatility = this.analyzeVolatility(data.map(d => d.revenue || 0));
+    const volatility = this.analyzeVolatility(data.map((d) => d.revenue || 0));
     if (volatility) {
       insights.push(volatility);
     }
@@ -69,7 +69,7 @@ export class ChartInsightsAI {
     }
 
     // 6. Growth Rate Analysis
-    const growth = this.analyzeGrowthRate(data.map(d => d.revenue || 0));
+    const growth = this.analyzeGrowthRate(data.map((d) => d.revenue || 0));
     if (growth) {
       insights.push(growth);
     }
@@ -200,7 +200,7 @@ export class ChartInsightsAI {
   private detectSeasonalPattern(data: ChartDataPoint[]): ChartInsight | null {
     if (data.length < 6) return null;
 
-    const revenues = data.map(d => d.revenue || 0);
+    const revenues = data.map((d) => d.revenue || 0);
     const maxRevenue = Math.max(...revenues);
     const maxIndex = revenues.indexOf(maxRevenue);
     const minRevenue = Math.min(...revenues);
@@ -284,7 +284,7 @@ export class ChartInsightsAI {
     const avgOrderValue = totalRevenue / totalOrders;
 
     // Rule-based recommendations
-    insights.forEach(insight => {
+    insights.forEach((insight) => {
       if (insight.recommendation) {
         recommendations.push(insight.recommendation);
       }
@@ -292,7 +292,9 @@ export class ChartInsightsAI {
 
     // Additional smart recommendations
     if (avgOrderValue < 500) {
-      recommendations.push('💡 متوسط قيمة الطلب منخفض - جرب استراتيجيات البيع المتبادل (Cross-selling)');
+      recommendations.push(
+        '💡 متوسط قيمة الطلب منخفض - جرب استراتيجيات البيع المتبادل (Cross-selling)'
+      );
     }
 
     if (totalOrders < 100) {

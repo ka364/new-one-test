@@ -1,21 +1,21 @@
-import "dotenv/config";
-import express from "express";
-import { createServer } from "http";
-import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
-import { initializeDatabase } from "./init-db";
+import 'dotenv/config';
+import express from 'express';
+import { createServer } from 'http';
+import net from 'net';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { registerOAuthRoutes } from './oauth';
+import { appRouter } from '../routers';
+import { createContext } from './context';
+import { serveStatic, setupVite } from './vite';
+import { initializeDatabase } from './init-db';
 
 function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const server = net.createServer();
     server.listen(port, () => {
       server.close(() => resolve(true));
     });
-    server.on("error", () => resolve(false));
+    server.on('error', () => resolve(false));
   });
 }
 
@@ -41,32 +41,32 @@ async function startServer() {
   const server = createServer(app);
 
   // Raw body middleware for Shopify webhook signature verification
-  app.use("/api/webhooks/shopify", express.raw({ type: "application/json" }), (req, res, next) => {
+  app.use('/api/webhooks/shopify', express.raw({ type: 'application/json' }), (req, res, next) => {
     if (Buffer.isBuffer(req.body)) {
-      (req as any).rawBody = req.body.toString("utf8");
+      (req as any).rawBody = req.body.toString('utf8');
       req.body = JSON.parse((req as any).rawBody);
     }
     next();
   });
 
   // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
   // Health check endpoint
-  app.get("/health", async (req, res) => {
+  app.get('/health', async (req, res) => {
     try {
       // Basic health check
       res.json({
-        status: "healthy",
+        status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV || "development",
-        version: "1.0.0",
+        environment: process.env.NODE_ENV || 'development',
+        version: '1.0.0',
       });
     } catch (error) {
       res.status(503).json({
-        status: "unhealthy",
-        error: error instanceof Error ? error.message : "Unknown error",
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
@@ -75,24 +75,24 @@ async function startServer() {
   registerOAuthRoutes(app);
 
   // Shopify webhooks endpoint
-  const shopifyWebhookRouter = (await import("./shopify-webhook-endpoint")).default;
-  app.use("/api", shopifyWebhookRouter);
+  const shopifyWebhookRouter = (await import('./shopify-webhook-endpoint')).default;
+  app.use('/api', shopifyWebhookRouter);
   // tRPC API
   app.use(
-    "/api/trpc",
+    '/api/trpc',
     createExpressMiddleware({
       router: appRouter,
       createContext,
     })
   );
   // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
+  const preferredPort = parseInt(process.env.PORT || '3000');
   const port = await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {

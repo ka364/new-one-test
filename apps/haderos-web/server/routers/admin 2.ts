@@ -1,16 +1,16 @@
-import { router, protectedProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { requireDb } from "../db";
-import { users } from "../../drizzle/schema";
-import { eq, like, or, and, sql, desc } from "drizzle-orm";
+import { router, protectedProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { requireDb } from '../db';
+import { users } from '../../drizzle/schema';
+import { eq, like, or, and, sql, desc } from 'drizzle-orm';
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin") {
+  if (ctx.user.role !== 'admin') {
     throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only admins can access this resource",
+      code: 'FORBIDDEN',
+      message: 'Only admins can access this resource',
     });
   }
   return next({ ctx });
@@ -24,7 +24,7 @@ export const adminRouter = router({
         page: z.number().min(1).default(1),
         pageSize: z.number().min(1).max(100).default(20),
         search: z.string().optional(),
-        role: z.enum(["user", "admin"]).optional(),
+        role: z.enum(['user', 'admin']).optional(),
         isActive: z.boolean().optional(),
       })
     )
@@ -34,7 +34,7 @@ export const adminRouter = router({
 
       // Build where conditions
       const conditions = [];
-      
+
       if (search) {
         conditions.push(
           or(
@@ -44,11 +44,11 @@ export const adminRouter = router({
           )
         );
       }
-      
+
       if (role) {
         conditions.push(eq(users.role, role));
       }
-      
+
       if (isActive !== undefined) {
         conditions.push(eq(users.isActive, isActive ? 1 : 0));
       }
@@ -57,7 +57,11 @@ export const adminRouter = router({
 
       // Get users
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       const usersList = await db
         .select()
         .from(users)
@@ -82,52 +86,51 @@ export const adminRouter = router({
     }),
 
   // Get user by ID
-  getUserById: adminProcedure
-    .input(z.object({ userId: z.number() }))
-    .query(async ({ input }) => {
-      const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, input.userId))
-        .limit(1);
+  getUserById: adminProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => {
+    const db = await requireDb();
+    if (!db)
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database connection failed' });
+    const [user] = await db.select().from(users).where(eq(users.id, input.userId)).limit(1);
 
-      if (!user) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
+    if (!user) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'User not found',
+      });
+    }
 
-      return user;
-    }),
+    return user;
+  }),
 
   // Update user role
   updateUserRole: adminProcedure
     .input(
       z.object({
         userId: z.number(),
-        role: z.enum(["user", "admin"]),
+        role: z.enum(['user', 'admin']),
       })
     )
     .mutation(async ({ input, ctx }) => {
       // Prevent self-demotion
-      if (input.userId === ctx.user.id && input.role === "user") {
+      if (input.userId === ctx.user.id && input.role === 'user') {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot demote yourself from admin",
+          code: 'BAD_REQUEST',
+          message: 'Cannot demote yourself from admin',
         });
       }
 
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       await db
         .update(users)
         .set({ role: input.role, updatedAt: new Date().toISOString() })
         .where(eq(users.id, input.userId));
 
-      return { success: true, message: "User role updated successfully" };
+      return { success: true, message: 'User role updated successfully' };
     }),
 
   // Update user permissions
@@ -140,13 +143,17 @@ export const adminRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       await db
         .update(users)
         .set({ permissions: input.permissions, updatedAt: new Date().toISOString() })
         .where(eq(users.id, input.userId));
 
-      return { success: true, message: "User permissions updated successfully" };
+      return { success: true, message: 'User permissions updated successfully' };
     }),
 
   // Toggle user active status
@@ -161,13 +168,17 @@ export const adminRouter = router({
       // Prevent self-deactivation
       if (input.userId === ctx.user.id && !input.isActive) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot deactivate your own account",
+          code: 'BAD_REQUEST',
+          message: 'Cannot deactivate your own account',
         });
       }
 
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       await db
         .update(users)
         .set({ isActive: input.isActive ? 1 : 0, updatedAt: new Date().toISOString() })
@@ -175,7 +186,7 @@ export const adminRouter = router({
 
       return {
         success: true,
-        message: input.isActive ? "User activated successfully" : "User deactivated successfully",
+        message: input.isActive ? 'User activated successfully' : 'User deactivated successfully',
       };
     }),
 
@@ -186,29 +197,32 @@ export const adminRouter = router({
       // Prevent self-deletion
       if (input.userId === ctx.user.id) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot delete your own account",
+          code: 'BAD_REQUEST',
+          message: 'Cannot delete your own account',
         });
       }
 
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       await db
         .update(users)
         .set({ isActive: 0, updatedAt: new Date().toISOString() })
         .where(eq(users.id, input.userId));
 
-      return { success: true, message: "User deleted successfully" };
+      return { success: true, message: 'User deleted successfully' };
     }),
 
   // Get system statistics
   getSystemStats: adminProcedure.query(async () => {
     const db = await requireDb();
-    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
-    
-    const [totalUsers] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(users);
+    if (!db)
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database connection failed' });
+
+    const [totalUsers] = await db.select({ count: sql<number>`count(*)` }).from(users);
 
     const [activeUsers] = await db
       .select({ count: sql<number>`count(*)` })
@@ -218,7 +232,7 @@ export const adminRouter = router({
     const [adminUsers] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(eq(users.role, "admin"));
+      .where(eq(users.role, 'admin'));
 
     const [recentUsers] = await db
       .select({ count: sql<number>`count(*)` })
@@ -246,21 +260,30 @@ export const adminRouter = router({
       // Prevent self-deactivation
       if (input.userIds.includes(ctx.user.id) && !input.isActive) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot deactivate your own account",
+          code: 'BAD_REQUEST',
+          message: 'Cannot deactivate your own account',
         });
       }
 
       const db = await requireDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection failed" });
+      if (!db)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
       await db
         .update(users)
         .set({ isActive: input.isActive ? 1 : 0, updatedAt: new Date().toISOString() })
-        .where(sql`${users.id} IN (${sql.join(input.userIds.map(id => sql`${id}`), sql`, `)})`);
+        .where(
+          sql`${users.id} IN (${sql.join(
+            input.userIds.map((id) => sql`${id}`),
+            sql`, `
+          )})`
+        );
 
       return {
         success: true,
-        message: `${input.userIds.length} users ${input.isActive ? "activated" : "deactivated"} successfully`,
+        message: `${input.userIds.length} users ${input.isActive ? 'activated' : 'deactivated'} successfully`,
       };
     }),
 });

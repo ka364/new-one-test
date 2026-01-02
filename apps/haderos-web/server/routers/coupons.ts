@@ -11,11 +11,11 @@
  * - Analytics & reporting
  */
 
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { eq, and, desc, sql, gte, lte, lt, or, ne, inArray } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { getDb } from '../db';
+import { eq, and, desc, sql, gte, lte, lt, or, ne, inArray } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
 
 // Import schema
 import {
@@ -27,28 +27,21 @@ import {
   generatedCoupons,
   couponAnalytics,
   bundleOffers,
-} from "../../drizzle/schema-coupons";
+} from '../../drizzle/schema-coupons';
 
 // ============================================
 // TYPES & VALIDATORS
 // ============================================
 
 const discountTypeEnum = z.enum([
-  "percentage",
-  "fixed_amount",
-  "free_shipping",
-  "buy_x_get_y",
-  "fixed_price",
+  'percentage',
+  'fixed_amount',
+  'free_shipping',
+  'buy_x_get_y',
+  'fixed_price',
 ]);
 
-const couponStatusEnum = z.enum([
-  "draft",
-  "scheduled",
-  "active",
-  "paused",
-  "expired",
-  "depleted",
-]);
+const couponStatusEnum = z.enum(['draft', 'scheduled', 'active', 'paused', 'expired', 'depleted']);
 
 // ============================================
 // ROUTER
@@ -119,7 +112,7 @@ export const couponsRouter = router({
         termsAndConditions: z.string().optional(),
         termsAndConditionsAr: z.string().optional(),
 
-        status: couponStatusEnum.default("draft"),
+        status: couponStatusEnum.default('draft'),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -134,8 +127,8 @@ export const couponsRouter = router({
 
       if (existing.length > 0) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "كود الكوبون موجود مسبقاً",
+          code: 'BAD_REQUEST',
+          message: 'كود الكوبون موجود مسبقاً',
         });
       }
 
@@ -181,7 +174,7 @@ export const couponsRouter = router({
 
       return {
         success: true,
-        message: "تم إنشاء الكوبون بنجاح",
+        message: 'تم إنشاء الكوبون بنجاح',
       };
     }),
 
@@ -235,8 +228,8 @@ export const couponsRouter = router({
 
       if (coupon.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "الكوبون غير موجود",
+          code: 'NOT_FOUND',
+          message: 'الكوبون غير موجود',
         });
       }
 
@@ -276,12 +269,9 @@ export const couponsRouter = router({
         updateData.maxDiscountAmount = updateData.maxDiscountAmount.toString();
       }
 
-      await db
-        .update(coupons)
-        .set(updateData)
-        .where(eq(coupons.id, input.couponId));
+      await db.update(coupons).set(updateData).where(eq(coupons.id, input.couponId));
 
-      return { success: true, message: "تم تحديث الكوبون" };
+      return { success: true, message: 'تم تحديث الكوبون' };
     }),
 
   /**
@@ -301,14 +291,14 @@ export const couponsRouter = router({
 
       if (usage.length > 0) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "لا يمكن حذف كوبون تم استخدامه. يمكنك إيقافه بدلاً من ذلك",
+          code: 'BAD_REQUEST',
+          message: 'لا يمكن حذف كوبون تم استخدامه. يمكنك إيقافه بدلاً من ذلك',
         });
       }
 
       await db.delete(coupons).where(eq(coupons.id, input.couponId));
 
-      return { success: true, message: "تم حذف الكوبون" };
+      return { success: true, message: 'تم حذف الكوبون' };
     }),
 
   // ==========================================
@@ -343,17 +333,17 @@ export const couponsRouter = router({
       if (coupon.length === 0) {
         return {
           valid: false,
-          message: "كود الكوبون غير صحيح",
+          message: 'كود الكوبون غير صحيح',
         };
       }
 
       const c = coupon[0];
 
       // Check status
-      if (c.status !== "active") {
+      if (c.status !== 'active') {
         return {
           valid: false,
-          message: "الكوبون غير نشط",
+          message: 'الكوبون غير نشط',
         };
       }
 
@@ -362,13 +352,13 @@ export const couponsRouter = router({
       if (c.validFrom && now < c.validFrom) {
         return {
           valid: false,
-          message: "الكوبون لم يبدأ بعد",
+          message: 'الكوبون لم يبدأ بعد',
         };
       }
       if (c.validUntil && now > c.validUntil) {
         return {
           valid: false,
-          message: "انتهت صلاحية الكوبون",
+          message: 'انتهت صلاحية الكوبون',
         };
       }
 
@@ -376,7 +366,7 @@ export const couponsRouter = router({
       if (c.totalUsageLimit && c.usageCount >= c.totalUsageLimit) {
         return {
           valid: false,
-          message: "تم استنفاد الكوبون",
+          message: 'تم استنفاد الكوبون',
         };
       }
 
@@ -385,17 +375,12 @@ export const couponsRouter = router({
         const customerUsage = await db
           .select({ count: sql<number>`count(*)` })
           .from(couponUsage)
-          .where(
-            and(
-              eq(couponUsage.couponId, c.id),
-              eq(couponUsage.customerId, input.customerId)
-            )
-          );
+          .where(and(eq(couponUsage.couponId, c.id), eq(couponUsage.customerId, input.customerId)));
 
         if (Number(customerUsage[0]?.count) >= c.perCustomerLimit) {
           return {
             valid: false,
-            message: "لقد استخدمت هذا الكوبون بالفعل",
+            message: 'لقد استخدمت هذا الكوبون بالفعل',
           };
         }
       }
@@ -420,7 +405,7 @@ export const couponsRouter = router({
       if (c.firstOrderOnly && !input.isFirstOrder) {
         return {
           valid: false,
-          message: "هذا الكوبون للطلب الأول فقط",
+          message: 'هذا الكوبون للطلب الأول فقط',
         };
       }
 
@@ -428,7 +413,7 @@ export const couponsRouter = router({
       if (c.newCustomersOnly && !input.isNewCustomer) {
         return {
           valid: false,
-          message: "هذا الكوبون للعملاء الجدد فقط",
+          message: 'هذا الكوبون للعملاء الجدد فقط',
         };
       }
 
@@ -437,25 +422,21 @@ export const couponsRouter = router({
       const excludedProducts = (c.excludedProducts as number[]) || [];
 
       if (applicableProducts.length > 0 && input.productIds) {
-        const hasApplicable = input.productIds.some((id) =>
-          applicableProducts.includes(id)
-        );
+        const hasApplicable = input.productIds.some((id) => applicableProducts.includes(id));
         if (!hasApplicable) {
           return {
             valid: false,
-            message: "الكوبون لا ينطبق على هذه المنتجات",
+            message: 'الكوبون لا ينطبق على هذه المنتجات',
           };
         }
       }
 
       if (excludedProducts.length > 0 && input.productIds) {
-        const hasExcluded = input.productIds.some((id) =>
-          excludedProducts.includes(id)
-        );
+        const hasExcluded = input.productIds.some((id) => excludedProducts.includes(id));
         if (hasExcluded) {
           return {
             valid: false,
-            message: "الكوبون لا ينطبق على بعض المنتجات في سلتك",
+            message: 'الكوبون لا ينطبق على بعض المنتجات في سلتك',
           };
         }
       }
@@ -464,25 +445,25 @@ export const couponsRouter = router({
       const activeDays = (c.activeDays as string[]) || [];
       if (activeDays.length > 0) {
         const today = [
-          "sunday",
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
+          'sunday',
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
         ][now.getDay()];
         if (!activeDays.includes(today)) {
           return {
             valid: false,
-            message: "الكوبون غير متاح اليوم",
+            message: 'الكوبون غير متاح اليوم',
           };
         }
       }
 
       // Check active hours
       if (c.activeHoursStart && c.activeHoursEnd) {
-        const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         if (currentTime < c.activeHoursStart || currentTime > c.activeHoursEnd) {
           return {
             valid: false,
@@ -493,14 +474,14 @@ export const couponsRouter = router({
 
       // Calculate discount
       let discountAmount = 0;
-      if (c.discountType === "percentage") {
+      if (c.discountType === 'percentage') {
         discountAmount = (input.orderAmount * Number(c.discountValue)) / 100;
         if (c.maxDiscountAmount && discountAmount > Number(c.maxDiscountAmount)) {
           discountAmount = Number(c.maxDiscountAmount);
         }
-      } else if (c.discountType === "fixed_amount") {
+      } else if (c.discountType === 'fixed_amount') {
         discountAmount = Number(c.discountValue);
-      } else if (c.discountType === "free_shipping") {
+      } else if (c.discountType === 'free_shipping') {
         discountAmount = 0; // Handle in shipping calculation
       }
 
@@ -509,7 +490,7 @@ export const couponsRouter = router({
         coupon: c,
         discountAmount,
         discountType: c.discountType,
-        message: "الكوبون صالح",
+        message: 'الكوبون صالح',
       };
     }),
 
@@ -537,8 +518,8 @@ export const couponsRouter = router({
 
       if (coupon.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "الكوبون غير موجود",
+          code: 'NOT_FOUND',
+          message: 'الكوبون غير موجود',
         });
       }
 
@@ -552,7 +533,7 @@ export const couponsRouter = router({
         customerId: ctx.user.id,
         discountAmount: input.discountAmount.toString(),
         discountType: coupon[0].discountType,
-        status: "applied",
+        status: 'applied',
       });
 
       // Update usage count
@@ -569,16 +550,13 @@ export const couponsRouter = router({
         coupon[0].totalUsageLimit &&
         (coupon[0].usageCount || 0) + 1 >= coupon[0].totalUsageLimit
       ) {
-        await db
-          .update(coupons)
-          .set({ status: "depleted" })
-          .where(eq(coupons.id, coupon[0].id));
+        await db.update(coupons).set({ status: 'depleted' }).where(eq(coupons.id, coupon[0].id));
       }
 
       return {
         success: true,
         discountAmount: input.discountAmount,
-        message: "تم تطبيق الكوبون",
+        message: 'تم تطبيق الكوبون',
       };
     }),
 
@@ -599,16 +577,10 @@ export const couponsRouter = router({
       .from(coupons)
       .where(
         and(
-          eq(coupons.status, "active"),
+          eq(coupons.status, 'active'),
           eq(coupons.showInStorefront, true),
-          or(
-            sql`${coupons.validFrom} IS NULL`,
-            lte(coupons.validFrom, now)
-          ),
-          or(
-            sql`${coupons.validUntil} IS NULL`,
-            gte(coupons.validUntil, now)
-          )
+          or(sql`${coupons.validFrom} IS NULL`, lte(coupons.validFrom, now)),
+          or(sql`${coupons.validUntil} IS NULL`, gte(coupons.validUntil, now))
         )
       )
       .orderBy(desc(coupons.priority));
@@ -644,13 +616,13 @@ export const couponsRouter = router({
         nameAr: z.string(),
         description: z.string().optional(),
         type: z.enum([
-          "sale",
-          "flash_sale",
-          "seasonal",
-          "holiday",
-          "clearance",
-          "bundle",
-          "loyalty",
+          'sale',
+          'flash_sale',
+          'seasonal',
+          'holiday',
+          'clearance',
+          'bundle',
+          'loyalty',
         ]),
         discountType: discountTypeEnum.optional(),
         discountValue: z.number().optional(),
@@ -685,11 +657,11 @@ export const couponsRouter = router({
         flashSaleDurationMinutes: input.flashSaleDurationMinutes,
         bannerImageUrl: input.bannerImageUrl,
         showOnHomepage: input.showOnHomepage,
-        status: "scheduled",
+        status: 'scheduled',
         createdBy: ctx.user.id,
       });
 
-      return { success: true, message: "تم إنشاء الحملة" };
+      return { success: true, message: 'تم إنشاء الحملة' };
     }),
 
   /**
@@ -705,7 +677,7 @@ export const couponsRouter = router({
       .from(promotionalCampaigns)
       .where(
         and(
-          eq(promotionalCampaigns.status, "active"),
+          eq(promotionalCampaigns.status, 'active'),
           lte(promotionalCampaigns.startDate, now),
           gte(promotionalCampaigns.endDate, now)
         )
@@ -767,11 +739,11 @@ export const couponsRouter = router({
         validFrom: input.validFrom,
         validUntil: input.validUntil,
         showOnHomepage: input.showOnHomepage,
-        status: "active",
+        status: 'active',
         createdBy: ctx.user.id,
       });
 
-      return { success: true, message: "تم إنشاء عرض الباقة" };
+      return { success: true, message: 'تم إنشاء عرض الباقة' };
     }),
 
   /**
@@ -787,15 +759,9 @@ export const couponsRouter = router({
       .from(bundleOffers)
       .where(
         and(
-          eq(bundleOffers.status, "active"),
-          or(
-            sql`${bundleOffers.validFrom} IS NULL`,
-            lte(bundleOffers.validFrom, now)
-          ),
-          or(
-            sql`${bundleOffers.validUntil} IS NULL`,
-            gte(bundleOffers.validUntil, now)
-          ),
+          eq(bundleOffers.status, 'active'),
+          or(sql`${bundleOffers.validFrom} IS NULL`, lte(bundleOffers.validFrom, now)),
+          or(sql`${bundleOffers.validUntil} IS NULL`, gte(bundleOffers.validUntil, now)),
           or(
             sql`${bundleOffers.quantityLimit} IS NULL`,
             sql`${bundleOffers.soldQuantity} < ${bundleOffers.quantityLimit}`

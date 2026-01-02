@@ -15,12 +15,12 @@
  * - AI usage tracking
  */
 
-import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { and, eq, desc, sql, gte, lte, inArray, or, isNull } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { v4 as uuidv4 } from "uuid";
+import { z } from 'zod';
+import { router, protectedProcedure } from '../_core/trpc';
+import { getDb } from '../db';
+import { and, eq, desc, sql, gte, lte, inArray, or, isNull } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { v4 as uuidv4 } from 'uuid';
 
 // Import schema
 import {
@@ -36,19 +36,19 @@ import {
   aiUsageTracking,
   subscriptionPlans,
   userSubscriptions,
-} from "../../drizzle/schema-messaging";
+} from '../../drizzle/schema-messaging';
 
 // ============================================
 // TYPES & VALIDATORS
 // ============================================
 
-const conversationTypeEnum = z.enum(["team", "support", "ai", "direct"]);
-const ticketStatusEnum = z.enum(["open", "in_progress", "resolved", "closed"]);
-const ticketPriorityEnum = z.enum(["low", "medium", "high", "urgent"]);
-const contentTypeEnum = z.enum(["text", "html", "markdown"]);
-const platformEnum = z.enum(["web", "ios", "android"]);
-const subscriptionStatusEnum = z.enum(["active", "cancelled", "expired", "suspended"]);
-const billingCycleEnum = z.enum(["monthly", "yearly"]);
+const conversationTypeEnum = z.enum(['team', 'support', 'ai', 'direct']);
+const ticketStatusEnum = z.enum(['open', 'in_progress', 'resolved', 'closed']);
+const ticketPriorityEnum = z.enum(['low', 'medium', 'high', 'urgent']);
+const contentTypeEnum = z.enum(['text', 'html', 'markdown']);
+const platformEnum = z.enum(['web', 'ios', 'android']);
+const subscriptionStatusEnum = z.enum(['active', 'cancelled', 'expired', 'suspended']);
+const billingCycleEnum = z.enum(['monthly', 'yearly']);
 
 // ============================================
 // HELPER FUNCTIONS
@@ -87,16 +87,11 @@ async function checkAILimits(
   const usage = await db
     .select()
     .from(aiUsageTracking)
-    .where(
-      and(
-        eq(aiUsageTracking.userId, userId),
-        gte(aiUsageTracking.periodEndDate, new Date())
-      )
-    )
+    .where(and(eq(aiUsageTracking.userId, userId), gte(aiUsageTracking.periodEndDate, new Date())))
     .limit(1);
 
   if (usage.length === 0) {
-    return { allowed: false, reason: "No active AI subscription" };
+    return { allowed: false, reason: 'No active AI subscription' };
   }
 
   const userUsage = usage[0];
@@ -104,7 +99,7 @@ async function checkAILimits(
   if (userUsage.messagesThisMonth >= userUsage.monthlyMessageLimit) {
     return {
       allowed: false,
-      reason: "Monthly message limit reached",
+      reason: 'Monthly message limit reached',
       usage: userUsage,
     };
   }
@@ -112,7 +107,7 @@ async function checkAILimits(
   if (userUsage.tokensThisMonth >= userUsage.monthlyTokenLimit) {
     return {
       allowed: false,
-      reason: "Monthly token limit reached",
+      reason: 'Monthly token limit reached',
       usage: userUsage,
     };
   }
@@ -120,7 +115,7 @@ async function checkAILimits(
   if (userUsage.costThisMonth >= userUsage.monthlyBudget) {
     return {
       allowed: false,
-      reason: "Monthly budget limit reached",
+      reason: 'Monthly budget limit reached',
       usage: userUsage,
     };
   }
@@ -212,9 +207,7 @@ export const messagingRouter = router({
             eq(conversationParticipants.userId, ctx.user.id),
             isNull(conversationParticipants.leftAt),
             input.type ? eq(conversations.type, input.type) : undefined,
-            input.includeArchived
-              ? undefined
-              : eq(conversations.isArchived, false)
+            input.includeArchived ? undefined : eq(conversations.isArchived, false)
           )
         )
         .groupBy(conversations.id, conversationParticipants.id)
@@ -238,15 +231,11 @@ export const messagingRouter = router({
       const db = await getDb();
 
       // Check access
-      const hasAccess = await checkConversationAccess(
-        db,
-        input.conversationId,
-        ctx.user.id
-      );
+      const hasAccess = await checkConversationAccess(db, input.conversationId, ctx.user.id);
 
       if (!hasAccess) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: "You don't have access to this conversation",
         });
       }
@@ -281,8 +270,8 @@ export const messagingRouter = router({
 
       if (conversation.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Conversation not found",
+          code: 'NOT_FOUND',
+          message: 'Conversation not found',
         });
       }
 
@@ -328,8 +317,8 @@ export const messagingRouter = router({
         departmentId: input.departmentId,
         ticketCategory: input.ticketCategory,
         ticketPriority: input.ticketPriority,
-        ticketStatus: input.type === "support" ? "open" : undefined,
-        ticketNumber: input.type === "support" ? `TICKET-${Date.now()}` : undefined,
+        ticketStatus: input.type === 'support' ? 'open' : undefined,
+        ticketNumber: input.type === 'support' ? `TICKET-${Date.now()}` : undefined,
         aiModel: input.aiModel,
         aiPersona: input.aiPersona,
         createdById: ctx.user.id,
@@ -339,7 +328,7 @@ export const messagingRouter = router({
       await db.insert(conversationParticipants).values({
         conversationId,
         userId: ctx.user.id,
-        role: "admin",
+        role: 'admin',
       });
 
       // Add other participants
@@ -348,7 +337,7 @@ export const messagingRouter = router({
           input.participantIds.map((userId) => ({
             conversationId,
             userId,
-            role: "member" as const,
+            role: 'member' as const,
           }))
         );
       }
@@ -383,14 +372,14 @@ export const messagingRouter = router({
           and(
             eq(conversationParticipants.conversationId, input.conversationId),
             eq(conversationParticipants.userId, ctx.user.id),
-            eq(conversationParticipants.role, "admin")
+            eq(conversationParticipants.role, 'admin')
           )
         )
         .limit(1);
 
       if (participant.length === 0) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: "You don't have permission to update this conversation",
         });
       }
@@ -402,8 +391,7 @@ export const messagingRouter = router({
         .set({
           ...updateData,
           updatedAt: new Date(),
-          closedAt:
-            input.ticketStatus === "closed" ? new Date() : undefined,
+          closedAt: input.ticketStatus === 'closed' ? new Date() : undefined,
         })
         .where(eq(conversations.id, conversationId));
 
@@ -430,15 +418,11 @@ export const messagingRouter = router({
       const db = await getDb();
 
       // Check access
-      const hasAccess = await checkConversationAccess(
-        db,
-        input.conversationId,
-        ctx.user.id
-      );
+      const hasAccess = await checkConversationAccess(db, input.conversationId, ctx.user.id);
 
       if (!hasAccess) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: "You don't have access to this conversation",
         });
       }
@@ -476,10 +460,7 @@ export const messagingRouter = router({
           `,
         })
         .from(messages)
-        .leftJoin(
-          messageAttachments,
-          eq(messageAttachments.messageId, messages.id)
-        )
+        .leftJoin(messageAttachments, eq(messageAttachments.messageId, messages.id))
         .leftJoin(messageReactions, eq(messageReactions.messageId, messages.id))
         .where(
           and(
@@ -506,7 +487,7 @@ export const messagingRouter = router({
       z.object({
         conversationId: z.string(),
         content: z.string().min(1),
-        contentType: contentTypeEnum.default("text"),
+        contentType: contentTypeEnum.default('text'),
         parentMessageId: z.string().optional(), // For threaded replies
         attachments: z
           .array(
@@ -527,15 +508,11 @@ export const messagingRouter = router({
       const db = await getDb();
 
       // Check access
-      const hasAccess = await checkConversationAccess(
-        db,
-        input.conversationId,
-        ctx.user.id
-      );
+      const hasAccess = await checkConversationAccess(db, input.conversationId, ctx.user.id);
 
       if (!hasAccess) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: "You don't have access to this conversation",
         });
       }
@@ -549,8 +526,8 @@ export const messagingRouter = router({
 
       if (conversation[0]?.isLocked) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This conversation is locked",
+          code: 'FORBIDDEN',
+          message: 'This conversation is locked',
         });
       }
 
@@ -612,7 +589,7 @@ export const messagingRouter = router({
       z.object({
         conversationId: z.string(),
         prompt: z.string().min(1),
-        model: z.string().default("gpt-3.5-turbo"),
+        model: z.string().default('gpt-3.5-turbo'),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -623,28 +600,24 @@ export const messagingRouter = router({
 
       if (!limitsCheck.allowed) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: limitsCheck.reason || "AI access denied",
+          code: 'FORBIDDEN',
+          message: limitsCheck.reason || 'AI access denied',
         });
       }
 
       // Check conversation access
-      const hasAccess = await checkConversationAccess(
-        db,
-        input.conversationId,
-        ctx.user.id
-      );
+      const hasAccess = await checkConversationAccess(db, input.conversationId, ctx.user.id);
 
       if (!hasAccess) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: 'FORBIDDEN',
           message: "You don't have access to this conversation",
         });
       }
 
       // TODO: Call OpenAI API
       // For now, simulate response
-      const aiResponse = "AI response simulation";
+      const aiResponse = 'AI response simulation';
       const tokensUsed = 100;
       const costInCents = 1;
 
@@ -656,7 +629,7 @@ export const messagingRouter = router({
         conversationId: input.conversationId,
         senderId: ctx.user.id, // Could be a special AI user
         content: aiResponse,
-        contentType: "text",
+        contentType: 'text',
         isAiGenerated: true,
         aiModel: input.model,
         aiTokens: tokensUsed,
@@ -697,15 +670,15 @@ export const messagingRouter = router({
 
       if (message.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Message not found",
+          code: 'NOT_FOUND',
+          message: 'Message not found',
         });
       }
 
       if (message[0].senderId !== ctx.user.id) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can only edit your own messages",
+          code: 'FORBIDDEN',
+          message: 'You can only edit your own messages',
         });
       }
 
@@ -742,15 +715,15 @@ export const messagingRouter = router({
 
       if (message.length === 0) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Message not found",
+          code: 'NOT_FOUND',
+          message: 'Message not found',
         });
       }
 
       if (message[0].senderId !== ctx.user.id) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can only delete your own messages",
+          code: 'FORBIDDEN',
+          message: 'You can only delete your own messages',
         });
       }
 
@@ -916,9 +889,7 @@ export const messagingRouter = router({
       const db = await getDb();
 
       // Clean up expired indicators first
-      await db
-        .delete(typingIndicators)
-        .where(lte(typingIndicators.expiresAt, new Date()));
+      await db.delete(typingIndicators).where(lte(typingIndicators.expiresAt, new Date()));
 
       // Get active typing users
       const typingUsers = await db
@@ -1009,9 +980,7 @@ export const messagingRouter = router({
         .where(
           and(
             eq(notificationHistory.userId, ctx.user.id),
-            input.unreadOnly
-              ? eq(notificationHistory.isRead, false)
-              : undefined
+            input.unreadOnly ? eq(notificationHistory.isRead, false) : undefined
           )
         )
         .orderBy(desc(notificationHistory.createdAt))
@@ -1081,10 +1050,7 @@ export const messagingRouter = router({
         usage: aiUsageTracking,
       })
       .from(userSubscriptions)
-      .innerJoin(
-        subscriptionPlans,
-        eq(subscriptionPlans.id, userSubscriptions.planId)
-      )
+      .innerJoin(subscriptionPlans, eq(subscriptionPlans.id, userSubscriptions.planId))
       .leftJoin(
         aiUsageTracking,
         and(
@@ -1092,12 +1058,7 @@ export const messagingRouter = router({
           gte(aiUsageTracking.periodEndDate, new Date())
         )
       )
-      .where(
-        and(
-          eq(userSubscriptions.userId, ctx.user.id),
-          eq(userSubscriptions.status, "active")
-        )
-      )
+      .where(and(eq(userSubscriptions.userId, ctx.user.id), eq(userSubscriptions.status, 'active')))
       .limit(1);
 
     return subscription[0] || null;
@@ -1113,10 +1074,7 @@ export const messagingRouter = router({
       .select()
       .from(aiUsageTracking)
       .where(
-        and(
-          eq(aiUsageTracking.userId, ctx.user.id),
-          gte(aiUsageTracking.periodEndDate, new Date())
-        )
+        and(eq(aiUsageTracking.userId, ctx.user.id), gte(aiUsageTracking.periodEndDate, new Date()))
       )
       .limit(1);
 
@@ -1148,7 +1106,7 @@ export const messagingRouter = router({
         .from(conversations)
         .where(
           and(
-            eq(conversations.type, "support"),
+            eq(conversations.type, 'support'),
             input.status ? eq(conversations.ticketStatus, input.status) : undefined,
             input.priority ? eq(conversations.ticketPriority, input.priority) : undefined,
             input.assignedToMe ? eq(conversations.assignedToId, ctx.user.id) : undefined
@@ -1180,15 +1138,10 @@ export const messagingRouter = router({
         .update(conversations)
         .set({
           assignedToId: input.assignToId,
-          ticketStatus: "in_progress",
+          ticketStatus: 'in_progress',
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(conversations.id, input.ticketId),
-            eq(conversations.type, "support")
-          )
-        );
+        .where(and(eq(conversations.id, input.ticketId), eq(conversations.type, 'support')));
 
       return { success: true };
     }),

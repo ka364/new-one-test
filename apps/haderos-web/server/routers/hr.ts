@@ -1,42 +1,44 @@
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import * as hrDb from "../db-hr";
-import { otpDb } from "../db-otp";
-import { storagePut } from "../storage";
-import { invokeLLM } from "../_core/llm";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import * as hrDb from '../db-hr';
+import { otpDb } from '../db-otp';
+import { storagePut } from '../storage';
+import { invokeLLM } from '../_core/llm';
 
 export const hrRouter = router({
   // Send OTP for employee verification
   sendOTP: publicProcedure
-    .input(z.object({
-      phoneNumber: z.string(),
-      email: z.string().email().optional(),
-      latitude: z.number().optional(),
-      longitude: z.number().optional(),
-    }))
+    .input(
+      z.object({
+        phoneNumber: z.string(),
+        email: z.string().email().optional(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       // Rate limiting check
       const canRequest = await otpDb.canRequestOTP(input.phoneNumber);
       if (!canRequest) {
         throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: "تم تجاوز الحد الأقصى لطلبات OTP. يرجى المحاولة بعد ساعة",
+          code: 'TOO_MANY_REQUESTS',
+          message: 'تم تجاوز الحد الأقصى لطلبات OTP. يرجى المحاولة بعد ساعة',
         });
       }
 
       // Generate OTP
       const otpCode = otpDb.generateOTP();
-      
+
       // Determine method (email for <25, SMS for >=25)
       const method = await otpDb.getOTPMethod();
-      
+
       // Set expiration (5 minutes)
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-      
+
       // Get IP address from request
       const ipAddress = (ctx as any).req?.ip || (ctx as any).req?.socket?.remoteAddress;
-      
+
       // Save OTP to database
       await otpDb.createOTP({
         phoneNumber: input.phoneNumber,
@@ -50,11 +52,11 @@ export const hrRouter = router({
       });
 
       // Send OTP (email or SMS)
-      if (method === "email" && input.email) {
+      if (method === 'email' && input.email) {
         // TODO: Send email with OTP
         // For now, log OTP (DEVELOPMENT ONLY)
         console.log(`[OTP] Email to ${input.email}: ${otpCode}`);
-      } else if (method === "sms") {
+      } else if (method === 'sms') {
         // TODO: Send SMS with OTP via Twilio
         console.log(`[OTP] SMS to ${input.phoneNumber}: ${otpCode}`);
       }
@@ -64,21 +66,23 @@ export const hrRouter = router({
         method,
         expiresAt,
         // DEVELOPMENT ONLY - Remove in production
-        otpCode: process.env.NODE_ENV === "development" ? otpCode : undefined,
+        otpCode: process.env.NODE_ENV === 'development' ? otpCode : undefined,
       };
     }),
 
   // Verify OTP
   verifyOTP: publicProcedure
-    .input(z.object({
-      phoneNumber: z.string(),
-      otpCode: z.string().length(6),
-    }))
+    .input(
+      z.object({
+        phoneNumber: z.string(),
+        otpCode: z.string().length(6),
+      })
+    )
     .mutation(async ({ input }) => {
       const result = await otpDb.verifyOTP(input.phoneNumber, input.otpCode);
       if (!result.success) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: 'BAD_REQUEST',
           message: result.message,
         });
       }
@@ -92,10 +96,12 @@ export const hrRouter = router({
 
   // Check if user can create more children
   canCreateChild: protectedProcedure
-    .input(z.object({
-      parentId: z.number(),
-      parentRole: z.enum(['base_account', 'supervisor']),
-    }))
+    .input(
+      z.object({
+        parentId: z.number(),
+        parentRole: z.enum(['base_account', 'supervisor']),
+      })
+    )
     .query(async ({ input }: { input: any }) => {
       return await hrDb.canCreateChild(input.parentId, input.parentRole);
     }),
@@ -128,22 +134,24 @@ export const hrRouter = router({
 
   // Create supervisor
   createSupervisor: protectedProcedure
-    .input(z.object({
-      fullName: z.string(),
-      nationalId: z.string().length(14),
-      phoneNumber: z.string(),
-      email: z.string().email().optional(),
-      jobTitle: z.string(),
-      department: z.string(),
-      salary: z.number().optional(),
-      hireDate: z.string(),
-      contractType: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        fullName: z.string(),
+        nationalId: z.string().length(14),
+        phoneNumber: z.string(),
+        email: z.string().email().optional(),
+        jobTitle: z.string(),
+        department: z.string(),
+        salary: z.number().optional(),
+        hireDate: z.string(),
+        contractType: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       // Check if user can create more supervisors
       const canCreate = await hrDb.canCreateChild(ctx.user.id, 'base_account');
       if (!canCreate) {
-        throw new Error("لقد وصلت للحد الأقصى من المشرفين (7 مشرفين)");
+        throw new Error('لقد وصلت للحد الأقصى من المشرفين (7 مشرفين)');
       }
 
       const employeeId = await hrDb.createEmployee({
@@ -159,35 +167,37 @@ export const hrRouter = router({
 
   // Create employee
   createEmployee: protectedProcedure
-    .input(z.object({
-      fullName: z.string(),
-      nationalId: z.string().length(14),
-      dateOfBirth: z.string().optional(),
-      gender: z.string().optional(),
-      religion: z.string().optional(),
-      maritalStatus: z.string().optional(),
-      address: z.string().optional(),
-      governorate: z.string().optional(),
-      phoneNumber: z.string(),
-      email: z.string().email().optional(),
-      jobTitle: z.string(),
-      department: z.string(),
-      salary: z.number().optional(),
-      hireDate: z.string(),
-      contractType: z.string().optional(),
-      supervisorId: z.number(),
-    }))
+    .input(
+      z.object({
+        fullName: z.string(),
+        nationalId: z.string().length(14),
+        dateOfBirth: z.string().optional(),
+        gender: z.string().optional(),
+        religion: z.string().optional(),
+        maritalStatus: z.string().optional(),
+        address: z.string().optional(),
+        governorate: z.string().optional(),
+        phoneNumber: z.string(),
+        email: z.string().email().optional(),
+        jobTitle: z.string(),
+        department: z.string(),
+        salary: z.number().optional(),
+        hireDate: z.string(),
+        contractType: z.string().optional(),
+        supervisorId: z.number(),
+      })
+    )
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       // Get supervisor info
       const supervisor = await hrDb.getEmployeeById(input.supervisorId);
       if (!supervisor || supervisor.role !== 'supervisor') {
-        throw new Error("المشرف غير موجود");
+        throw new Error('المشرف غير موجود');
       }
 
       // Check if supervisor can create more employees
       const canCreate = await hrDb.canCreateChild(input.supervisorId, 'supervisor');
       if (!canCreate) {
-        throw new Error("المشرف وصل للحد الأقصى من الموظفين (7 موظفين)");
+        throw new Error('المشرف وصل للحد الأقصى من الموظفين (7 موظفين)');
       }
 
       const employeeId = await hrDb.createEmployee({
@@ -203,17 +213,19 @@ export const hrRouter = router({
 
   // Upload document
   uploadDocument: protectedProcedure
-    .input(z.object({
-      employeeId: z.number(),
-      documentType: z.string(),
-      documentName: z.string(),
-      fileData: z.string(), // base64
-      mimeType: z.string(),
-    }))
+    .input(
+      z.object({
+        employeeId: z.number(),
+        documentType: z.string(),
+        documentName: z.string(),
+        fileData: z.string(), // base64
+        mimeType: z.string(),
+      })
+    )
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       // Decode base64
       const buffer = Buffer.from(input.fileData, 'base64');
-      
+
       // Upload to S3
       const fileKey = `hr/employees/${input.employeeId}/${input.documentType}-${Date.now()}.${input.mimeType.split('/')[1]}`;
       const { url } = await storagePut(fileKey, buffer, input.mimeType);
@@ -236,52 +248,56 @@ export const hrRouter = router({
 
   // Extract data from Egyptian ID card using AI
   extractIdData: protectedProcedure
-    .input(z.object({
-      documentId: z.number(),
-      imageUrl: z.string(),
-    }))
+    .input(
+      z.object({
+        documentId: z.number(),
+        imageUrl: z.string(),
+      })
+    )
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       try {
         // Use LLM with vision to extract data from ID card
         const response = await invokeLLM({
           messages: [
             {
-              role: "system",
-              content: "أنت خبير في استخراج البيانات من البطاقات الشخصية المصرية. استخرج جميع البيانات بدقة وأرجعها بصيغة JSON."
+              role: 'system',
+              content:
+                'أنت خبير في استخراج البيانات من البطاقات الشخصية المصرية. استخرج جميع البيانات بدقة وأرجعها بصيغة JSON.',
             },
             {
-              role: "user",
-              content: `استخرج البيانات من البطاقة: ${input.imageUrl}`
-            }
+              role: 'user',
+              content: `استخرج البيانات من البطاقة: ${input.imageUrl}`,
+            },
           ],
           response_format: {
-            type: "json_schema",
+            type: 'json_schema',
             json_schema: {
-              name: "egyptian_id_data",
+              name: 'egyptian_id_data',
               strict: true,
               schema: {
-                type: "object",
+                type: 'object',
                 properties: {
-                  full_name: { type: "string" },
-                  national_id: { type: "string" },
-                  date_of_birth: { type: "string" },
-                  gender: { type: "string" },
-                  religion: { type: "string" },
-                  marital_status: { type: "string" },
-                  address: { type: "string" },
-                  governorate: { type: "string" },
+                  full_name: { type: 'string' },
+                  national_id: { type: 'string' },
+                  date_of_birth: { type: 'string' },
+                  gender: { type: 'string' },
+                  religion: { type: 'string' },
+                  marital_status: { type: 'string' },
+                  address: { type: 'string' },
+                  governorate: { type: 'string' },
                 },
-                required: ["full_name", "national_id"],
-                additionalProperties: false
-              }
-            }
-          }
+                required: ['full_name', 'national_id'],
+                additionalProperties: false,
+              },
+            },
+          },
         });
 
-        const content = typeof response.choices[0].message.content === 'string' 
-          ? response.choices[0].message.content 
-          : JSON.stringify(response.choices[0].message.content);
-        const extractedData = JSON.parse(content || "{}");
+        const content =
+          typeof response.choices[0].message.content === 'string'
+            ? response.choices[0].message.content
+            : JSON.stringify(response.choices[0].message.content);
+        const extractedData = JSON.parse(content || '{}');
 
         // Save extracted data
         await hrDb.updateDocumentExtractedData(input.documentId, extractedData);
@@ -310,7 +326,7 @@ export const hrRouter = router({
           ctx.user.id
         );
 
-        throw new Error("فشل استخراج البيانات من البطاقة");
+        throw new Error('فشل استخراج البيانات من البطاقة');
       }
     }),
 

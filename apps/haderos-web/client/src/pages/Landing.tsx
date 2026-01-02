@@ -48,7 +48,9 @@ export default function Landing() {
 
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
               منصة متكاملة لإدارة المبيعات، المخزون، المشاريع والمصروفات
-              <strong className="block mt-2 text-indigo-600">بتكلفة $290/سنوياً بدلاً من $12,000+</strong>
+              <strong className="block mt-2 text-indigo-600">
+                بتكلفة $290/سنوياً بدلاً من $12,000+
+              </strong>
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -169,7 +171,9 @@ export default function Landing() {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-2">
-                      <Check className={`h-5 w-5 mt-0.5 ${plan.highlighted ? 'text-indigo-600' : 'text-green-600'}`} />
+                      <Check
+                        className={`h-5 w-5 mt-0.5 ${plan.highlighted ? 'text-indigo-600' : 'text-green-600'}`}
+                      />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
@@ -215,11 +219,12 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section id="cta-section" className="py-24 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+      <section
+        id="cta-section"
+        className="py-24 bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
+      >
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            ابدأ رحلتك مع HADEROS اليوم
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">ابدأ رحلتك مع HADEROS اليوم</h2>
           <p className="text-xl mb-10 text-indigo-100 max-w-2xl mx-auto">
             انضم إلى آلاف الشركات التي تستخدم HADEROS لإدارة أعمالها بكفاءة أعلى وتكلفة أقل
           </p>
@@ -229,7 +234,11 @@ export default function Landing() {
               ابدأ التجربة المجانية
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6 bg-transparent text-white border-white hover:bg-white/10">
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 py-6 bg-transparent text-white border-white hover:bg-white/10"
+            >
               تحدث مع فريق المبيعات
             </Button>
           </div>
@@ -246,32 +255,66 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="font-bold text-white mb-4">HADEROS AI CLOUD</h3>
-              <p className="text-sm">
-                نظام التشغيل للأعمال في الأسواق الناشئة
-              </p>
+              <p className="text-sm">نظام التشغيل للأعمال في الأسواق الناشئة</p>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">المنتج</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">الميزات</a></li>
-                <li><a href="#" className="hover:text-white">التسعير</a></li>
-                <li><a href="#" className="hover:text-white">الأمان</a></li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    الميزات
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    التسعير
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    الأمان
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">الشركة</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">عن HADEROS</a></li>
-                <li><a href="#" className="hover:text-white">المدونة</a></li>
-                <li><a href="#" className="hover:text-white">الوظائف</a></li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    عن HADEROS
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    المدونة
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    الوظائف
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">الدعم</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">مركز المساعدة</a></li>
-                <li><a href="#" className="hover:text-white">اتصل بنا</a></li>
-                <li><a href="#" className="hover:text-white">الحالة</a></li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    مركز المساعدة
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    اتصل بنا
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white">
+                    الحالة
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -322,12 +365,7 @@ const pricingPlans = [
     name: 'Odoo',
     price: '$1,200',
     perUser: 'لـ 10 مستخدمين',
-    features: [
-      'ميزات محدودة',
-      'دعم بطيء',
-      'تخصيص معقد',
-      'تكاليف إضافية للموديولات',
-    ],
+    features: ['ميزات محدودة', 'دعم بطيء', 'تخصيص معقد', 'تكاليف إضافية للموديولات'],
     cta: 'مقارنة',
     highlighted: false,
   },
@@ -353,12 +391,7 @@ const pricingPlans = [
     name: 'SAP / Oracle',
     price: '$12,000+',
     perUser: 'لـ 10 مستخدمين',
-    features: [
-      'تكلفة عالية جداً',
-      'إعداد معقد ومكلف',
-      'عقود طويلة الأمد',
-      'تحديثات مدفوعة',
-    ],
+    features: ['تكلفة عالية جداً', 'إعداد معقد ومكلف', 'عقود طويلة الأمد', 'تحديثات مدفوعة'],
     cta: 'مقارنة',
     highlighted: false,
   },

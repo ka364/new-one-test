@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { trpc } from "@/lib/trpc";
-import { VitalSignChart } from "@/components/VitalSignChart";
-import { SimulationPanel } from "@/components/SimulationPanel";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { trpc } from '@/lib/trpc';
+import { VitalSignChart } from '@/components/VitalSignChart';
+import { SimulationPanel } from '@/components/SimulationPanel';
 import {
   Activity,
   Zap,
@@ -21,8 +21,8 @@ import {
   TrendingUp,
   TrendingDown,
   AlertTriangle,
-  CheckCircle2
-} from "lucide-react";
+  CheckCircle2,
+} from 'lucide-react';
 
 // المؤشرات الحيوية الأربعة
 interface VitalSign {
@@ -58,8 +58,16 @@ export default function VitalSignsInfographic() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // جلب البيانات من API
-  const { data: vitalSignsData, isLoading: signsLoading, refetch: refetchSigns } = trpc.vitalSigns.getCurrentVitalSigns.useQuery();
-  const { data: protocolsData, isLoading: protocolsLoading, refetch: refetchProtocols } = trpc.vitalSigns.getBioProtocols.useQuery();
+  const {
+    data: vitalSignsData,
+    isLoading: signsLoading,
+    refetch: refetchSigns,
+  } = trpc.vitalSigns.getCurrentVitalSigns.useQuery();
+  const {
+    data: protocolsData,
+    isLoading: protocolsLoading,
+    refetch: refetchProtocols,
+  } = trpc.vitalSigns.getBioProtocols.useQuery();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -76,21 +84,21 @@ export default function VitalSignsInfographic() {
     decision_consistency: Brain,
     response_time: Zap,
     learning_rate: TrendingUp,
-    detection_accuracy: Eye
+    detection_accuracy: Eye,
   };
 
   const colorMap: Record<string, string> = {
-    decision_consistency: "from-blue-500 to-cyan-500",
-    response_time: "from-yellow-500 to-orange-500",
-    learning_rate: "from-green-500 to-emerald-500",
-    detection_accuracy: "from-purple-500 to-pink-500"
+    decision_consistency: 'from-blue-500 to-cyan-500',
+    response_time: 'from-yellow-500 to-orange-500',
+    learning_rate: 'from-green-500 to-emerald-500',
+    detection_accuracy: 'from-purple-500 to-pink-500',
   };
 
   // المؤشرات الحيوية من API مع إضافة الأيقونات
   const vitalSigns: VitalSign[] = (vitalSignsData || []).map((sign: any) => ({
     ...sign,
     icon: iconMap[sign.id] || Activity,
-    color: colorMap[sign.id] || "from-gray-500 to-gray-600"
+    color: colorMap[sign.id] || 'from-gray-500 to-gray-600',
   }));
 
   // ربط الأيقونات بالبروتوكولات
@@ -101,49 +109,49 @@ export default function VitalSignsInfographic() {
     chameleon: Waves,
     cephalopod: Target,
     arachnid: Activity,
-    tardigrade: Shield
+    tardigrade: Shield,
   };
 
   const protocolColorMap: Record<string, string> = {
-    mycelium: "from-green-600 to-lime-500",
-    ant_colony: "from-amber-600 to-yellow-500",
-    corvid: "from-indigo-600 to-blue-500",
-    chameleon: "from-teal-600 to-cyan-500",
-    cephalopod: "from-violet-600 to-purple-500",
-    arachnid: "from-rose-600 to-pink-500",
-    tardigrade: "from-slate-600 to-gray-500"
+    mycelium: 'from-green-600 to-lime-500',
+    ant_colony: 'from-amber-600 to-yellow-500',
+    corvid: 'from-indigo-600 to-blue-500',
+    chameleon: 'from-teal-600 to-cyan-500',
+    cephalopod: 'from-violet-600 to-purple-500',
+    arachnid: 'from-rose-600 to-pink-500',
+    tardigrade: 'from-slate-600 to-gray-500',
   };
 
   // البروتوكولات الحيوية من API مع إضافة الأيقونات
   const bioProtocols: BioProtocol[] = (protocolsData || []).map((protocol: any) => ({
     ...protocol,
     icon: protocolIconMap[protocol.id] || Network,
-    color: protocolColorMap[protocol.id] || "from-gray-600 to-gray-500"
+    color: protocolColorMap[protocol.id] || 'from-gray-600 to-gray-500',
   }));
 
   const getStatusColor = (current: number, target: number, threshold: number, unit: string) => {
-    if (unit === "ms") {
+    if (unit === 'ms') {
       // For response time, lower is better
-      if (current <= target) return "text-green-600";
-      if (current <= threshold) return "text-yellow-600";
-      return "text-red-600";
+      if (current <= target) return 'text-green-600';
+      if (current <= threshold) return 'text-yellow-600';
+      return 'text-red-600';
     } else {
       // For percentages, higher is better (except if threshold is 0)
-      if (current >= target) return "text-green-600";
-      if (current >= threshold) return "text-yellow-600";
-      return "text-red-600";
+      if (current >= target) return 'text-green-600';
+      if (current >= threshold) return 'text-yellow-600';
+      return 'text-red-600';
     }
   };
 
   const getStatusIcon = (current: number, target: number, threshold: number, unit: string) => {
     const color = getStatusColor(current, target, threshold, unit);
-    if (color === "text-green-600") return <CheckCircle2 className="h-5 w-5 text-green-600" />;
-    if (color === "text-yellow-600") return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+    if (color === 'text-green-600') return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+    if (color === 'text-yellow-600') return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
     return <AlertTriangle className="h-5 w-5 text-red-600" />;
   };
 
   const getProgressValue = (current: number, target: number, unit: string) => {
-    if (unit === "ms") {
+    if (unit === 'ms') {
       // For response time, inverse the progress (lower is better)
       return Math.min(100, (target / current) * 100);
     } else {
@@ -154,7 +162,10 @@ export default function VitalSignsInfographic() {
   // Loading State
   if (signsLoading || protocolsLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-8 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen" dir="rtl">
+      <div
+        className="container mx-auto p-6 space-y-8 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen"
+        dir="rtl"
+      >
         <div className="text-center space-y-4 py-8">
           <Skeleton className="h-12 w-96 mx-auto" />
           <Skeleton className="h-6 w-64 mx-auto" />
@@ -169,7 +180,10 @@ export default function VitalSignsInfographic() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen" dir="rtl">
+    <div
+      className="container mx-auto p-6 space-y-8 bg-gradient-to-br from-slate-50 to-gray-100 min-h-screen"
+      dir="rtl"
+    >
       {/* Header */}
       <div className="text-center space-y-4 py-8">
         <div className="flex items-center justify-center gap-3">
@@ -201,7 +215,10 @@ export default function VitalSignsInfographic() {
             {vitalSigns.map((vital) => {
               const Icon = vital.icon;
               return (
-                <Card key={vital.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 border-2">
+                <Card
+                  key={vital.id}
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 border-2"
+                >
                   <div className={`h-2 bg-gradient-to-r ${vital.color}`} />
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -220,21 +237,32 @@ export default function VitalSignsInfographic() {
                   <CardContent className="space-y-4">
                     <div className="flex items-end justify-between">
                       <div>
-                        <div className={`text-4xl font-bold ${getStatusColor(vital.current, vital.target, vital.threshold, vital.unit)}`}>
+                        <div
+                          className={`text-4xl font-bold ${getStatusColor(vital.current, vital.target, vital.threshold, vital.unit)}`}
+                        >
                           {vital.current}
                         </div>
                         <div className="text-sm text-muted-foreground">{vital.unit}</div>
                       </div>
                       <div className="text-left space-y-1">
                         <div className="text-xs text-muted-foreground">المستهدف</div>
-                        <div className="text-lg font-semibold">{vital.unit === "ms" ? `<${vital.target}` : `>${vital.target}`}{vital.unit}</div>
-                        <div className="text-xs text-red-600">إنذار: {vital.unit === "ms" ? `>${vital.threshold}` : `<${vital.threshold}`}{vital.unit}</div>
+                        <div className="text-lg font-semibold">
+                          {vital.unit === 'ms' ? `<${vital.target}` : `>${vital.target}`}
+                          {vital.unit}
+                        </div>
+                        <div className="text-xs text-red-600">
+                          إنذار:{' '}
+                          {vital.unit === 'ms' ? `>${vital.threshold}` : `<${vital.threshold}`}
+                          {vital.unit}
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span>الأداء</span>
-                        <span className="font-semibold">{getProgressValue(vital.current, vital.target, vital.unit).toFixed(0)}%</span>
+                        <span className="font-semibold">
+                          {getProgressValue(vital.current, vital.target, vital.unit).toFixed(0)}%
+                        </span>
                       </div>
                       <Progress
                         value={getProgressValue(vital.current, vital.target, vital.unit)}
@@ -243,7 +271,7 @@ export default function VitalSignsInfographic() {
                     </div>
                     {vital.protocol && (
                       <Badge variant="outline" className="text-xs">
-                        البروتوكول: {bioProtocols.find(p => p.id === vital.protocol)?.nameAr}
+                        البروتوكول: {bioProtocols.find((p) => p.id === vital.protocol)?.nameAr}
                       </Badge>
                     )}
                   </CardContent>
@@ -267,9 +295,16 @@ export default function VitalSignsInfographic() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {bioProtocols.map((protocol) => {
               const Icon = protocol.icon;
-              const avgPerformance = (protocol.metrics.efficiency + protocol.metrics.reliability + protocol.metrics.adaptability) / 3;
+              const avgPerformance =
+                (protocol.metrics.efficiency +
+                  protocol.metrics.reliability +
+                  protocol.metrics.adaptability) /
+                3;
               return (
-                <Card key={protocol.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Card
+                  key={protocol.id}
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
                   <div className={`h-2 bg-gradient-to-r ${protocol.color}`} />
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
@@ -287,7 +322,9 @@ export default function VitalSignsInfographic() {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold">الأداء الكلي</span>
-                        <span className="font-bold text-green-600">{avgPerformance.toFixed(0)}%</span>
+                        <span className="font-bold text-green-600">
+                          {avgPerformance.toFixed(0)}%
+                        </span>
                       </div>
                       <Progress value={avgPerformance} className="h-1.5" />
                     </div>
@@ -308,7 +345,9 @@ export default function VitalSignsInfographic() {
                       </div>
                     </div>
 
-                    <div className={`mt-2 p-2 rounded-lg bg-gradient-to-r ${protocol.color} bg-opacity-10`}>
+                    <div
+                      className={`mt-2 p-2 rounded-lg bg-gradient-to-r ${protocol.color} bg-opacity-10`}
+                    >
                       <div className="flex items-center justify-center gap-1">
                         <Icon className="h-4 w-4" />
                         <span className="text-xs font-semibold">نشط</span>
@@ -337,10 +376,13 @@ export default function VitalSignsInfographic() {
                 <div className="text-center space-y-2">
                   <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
                   <div className="text-3xl font-bold text-green-600">
-                    {vitalSigns.filter(v => {
-                      const status = getStatusColor(v.current, v.target, v.threshold, v.unit);
-                      return status === "text-green-600";
-                    }).length}/{vitalSigns.length}
+                    {
+                      vitalSigns.filter((v) => {
+                        const status = getStatusColor(v.current, v.target, v.threshold, v.unit);
+                        return status === 'text-green-600';
+                      }).length
+                    }
+                    /{vitalSigns.length}
                   </div>
                   <div className="text-sm text-muted-foreground">مؤشرات سليمة</div>
                 </div>
@@ -351,9 +393,7 @@ export default function VitalSignsInfographic() {
               <CardContent className="pt-6">
                 <div className="text-center space-y-2">
                   <Network className="h-12 w-12 text-purple-600 mx-auto" />
-                  <div className="text-3xl font-bold text-purple-600">
-                    {bioProtocols.length}
-                  </div>
+                  <div className="text-3xl font-bold text-purple-600">{bioProtocols.length}</div>
                   <div className="text-sm text-muted-foreground">بروتوكولات نشطة</div>
                 </div>
               </CardContent>
@@ -364,7 +404,16 @@ export default function VitalSignsInfographic() {
                 <div className="text-center space-y-2">
                   <Activity className="h-12 w-12 text-blue-600 mx-auto animate-pulse" />
                   <div className="text-3xl font-bold text-blue-600">
-                    {(bioProtocols.reduce((sum, p) => sum + (p.metrics.efficiency + p.metrics.reliability + p.metrics.adaptability) / 3, 0) / bioProtocols.length).toFixed(1)}%
+                    {(
+                      bioProtocols.reduce(
+                        (sum, p) =>
+                          sum +
+                          (p.metrics.efficiency + p.metrics.reliability + p.metrics.adaptability) /
+                            3,
+                        0
+                      ) / bioProtocols.length
+                    ).toFixed(1)}
+                    %
                   </div>
                   <div className="text-sm text-muted-foreground">متوسط الأداء</div>
                 </div>

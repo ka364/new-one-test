@@ -1,7 +1,7 @@
 /**
  * Orders Performance Benchmarks
  * Apple-Level Performance Testing
- * 
+ *
  * Establishes performance baselines for order operations
  */
 
@@ -83,11 +83,13 @@ describe('Orders Performance Benchmarks', () => {
       await caller.orders.createOrder({
         customerName: 'أحمد محمد',
         customerPhone: '01012345678',
-        items: Array(10).fill(null).map((_, i) => ({
-          productName: `منتج ${i + 1}`,
-          quantity: 1,
-          price: 100,
-        })),
+        items: Array(10)
+          .fill(null)
+          .map((_, i) => ({
+            productName: `منتج ${i + 1}`,
+            quantity: 1,
+            price: 100,
+          })),
         totalAmount: 1000,
         shippingAddress: 'القاهرة',
       });
@@ -116,4 +118,3 @@ describe('Orders Performance Benchmarks', () => {
     expect(duration).toBeLessThan(50); // Allow margin for test
   });
 });
-

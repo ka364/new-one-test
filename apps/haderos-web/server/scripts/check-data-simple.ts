@@ -18,7 +18,7 @@ async function checkData() {
   }
 
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
   });
 
   try {
@@ -92,7 +92,6 @@ async function checkData() {
 
     await pool.end();
     process.exit(0);
-
   } catch (error) {
     console.error('❌ خطأ:', error);
     await pool.end();

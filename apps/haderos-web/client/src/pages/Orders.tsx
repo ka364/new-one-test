@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -16,28 +16,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Search, Download, Eye, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Search, Download, Eye, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Orders() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -48,53 +42,53 @@ export default function Orders() {
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch =
       order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          String(order.id).includes(searchQuery);
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+      String(order.id).includes(searchQuery);
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "outline",
-      processing: "secondary",
-      completed: "default",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'outline',
+      processing: 'secondary',
+      completed: 'default',
+      cancelled: 'destructive',
     };
     return (
-      <Badge variant={variants[status] || "default"}>
-        {status === "pending" && "قيد الانتظار"}
-        {status === "processing" && "قيد المعالجة"}
-        {status === "completed" && "مكتمل"}
-        {status === "cancelled" && "ملغي"}
+      <Badge variant={variants[status] || 'default'}>
+        {status === 'pending' && 'قيد الانتظار'}
+        {status === 'processing' && 'قيد المعالجة'}
+        {status === 'completed' && 'مكتمل'}
+        {status === 'cancelled' && 'ملغي'}
       </Badge>
     );
   };
 
   const handleExport = () => {
     if (!filteredOrders || filteredOrders.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
+      toast.error('لا توجد بيانات للتصدير');
       return;
     }
 
     const csv = [
-      ["رقم الطلب", "العميل", "المبلغ", "الحالة", "التاريخ"].join(","),
+      ['رقم الطلب', 'العميل', 'المبلغ', 'الحالة', 'التاريخ'].join(','),
       ...filteredOrders.map((order) =>
         [
           order.id,
-          order.customerName || "غير محدد",
+          order.customerName || 'غير محدد',
           order.totalAmount,
           order.status,
-          new Date(order.createdAt).toLocaleDateString("ar-EG"),
-        ].join(",")
+          new Date(order.createdAt).toLocaleDateString('ar-EG'),
+        ].join(',')
       ),
-    ].join("\n");
+    ].join('\n');
 
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `orders_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    toast.success("تم تصدير البيانات بنجاح");
+    toast.success('تم تصدير البيانات بنجاح');
   };
 
   const handleViewDetails = (order: any) => {
@@ -117,9 +111,7 @@ export default function Orders() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">إدارة الطلبات</h1>
-          <p className="text-muted-foreground">
-            عرض وإدارة جميع الطلبات في النظام
-          </p>
+          <p className="text-muted-foreground">عرض وإدارة جميع الطلبات في النظام</p>
         </div>
         <Button onClick={() => refetch()} variant="outline" size="icon">
           <RefreshCw className="w-4 h-4" />
@@ -129,9 +121,7 @@ export default function Orders() {
       <Card>
         <CardHeader>
           <CardTitle>البحث والفلترة</CardTitle>
-          <CardDescription>
-            ابحث عن الطلبات باستخدام الاسم أو رقم الطلب
-          </CardDescription>
+          <CardDescription>ابحث عن الطلبات باستخدام الاسم أو رقم الطلب</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -166,9 +156,7 @@ export default function Orders() {
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            الطلبات ({filteredOrders?.length || 0})
-          </CardTitle>
+          <CardTitle>الطلبات ({filteredOrders?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -188,16 +176,14 @@ export default function Orders() {
                   filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">#{order.id}</TableCell>
-                      <TableCell>{order.customerName || "غير محدد"}</TableCell>
-                      <TableCell>
-                        {Number(order.totalAmount).toFixed(2)} ج.م
-                      </TableCell>
+                      <TableCell>{order.customerName || 'غير محدد'}</TableCell>
+                      <TableCell>{Number(order.totalAmount).toFixed(2)} ج.م</TableCell>
                       <TableCell>{getStatusBadge(order.status)}</TableCell>
                       <TableCell>
                         {new Date(order.createdAt).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         })}
                       </TableCell>
                       <TableCell>
@@ -231,16 +217,14 @@ export default function Orders() {
         <DialogContent className="max-w-2xl" dir="rtl">
           <DialogHeader>
             <DialogTitle>تفاصيل الطلب #{selectedOrder?.id}</DialogTitle>
-            <DialogDescription>
-              معلومات كاملة عن الطلب
-            </DialogDescription>
+            <DialogDescription>معلومات كاملة عن الطلب</DialogDescription>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">العميل</p>
-                  <p className="text-lg">{selectedOrder.customerName || "غير محدد"}</p>
+                  <p className="text-lg">{selectedOrder.customerName || 'غير محدد'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">الحالة</p>
@@ -256,20 +240,18 @@ export default function Orders() {
                   <p className="text-sm font-medium text-muted-foreground">تاريخ الإنشاء</p>
                   <p className="text-lg">
                     {new Date(selectedOrder.createdAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </p>
                 </div>
               </div>
               {selectedOrder.metadata && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    معلومات إضافية
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">معلومات إضافية</p>
                   <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto">
                     {JSON.stringify(selectedOrder.metadata, null, 2)}
                   </pre>

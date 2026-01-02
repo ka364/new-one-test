@@ -219,7 +219,12 @@ class LaunchManager {
         dependencies: ['pre-1'],
         checklist: [
           { id: 'c1', title: 'Server setup', titleAr: 'إعداد الخادم', completed: true },
-          { id: 'c2', title: 'Database migration', titleAr: 'ترحيل قاعدة البيانات', completed: false },
+          {
+            id: 'c2',
+            title: 'Database migration',
+            titleAr: 'ترحيل قاعدة البيانات',
+            completed: false,
+          },
           { id: 'c3', title: 'SSL certificate', titleAr: 'شهادة SSL', completed: false },
         ],
         progress: 33,
@@ -277,7 +282,12 @@ class LaunchManager {
         priority: 'critical',
         dependencies: [],
         checklist: [
-          { id: 'c1', title: 'Select beta users', titleAr: 'اختيار المستخدمين التجريبيين', completed: false },
+          {
+            id: 'c1',
+            title: 'Select beta users',
+            titleAr: 'اختيار المستخدمين التجريبيين',
+            completed: false,
+          },
           { id: 'c2', title: 'Send invitations', titleAr: 'إرسال الدعوات', completed: false },
           { id: 'c3', title: 'Monitor feedback', titleAr: 'مراقبة الملاحظات', completed: false },
         ],
@@ -294,7 +304,12 @@ class LaunchManager {
         priority: 'high',
         dependencies: ['soft-1'],
         checklist: [
-          { id: 'c1', title: 'Setup feedback channels', titleAr: 'إعداد قنوات الملاحظات', completed: false },
+          {
+            id: 'c1',
+            title: 'Setup feedback channels',
+            titleAr: 'إعداد قنوات الملاحظات',
+            completed: false,
+          },
           { id: 'c2', title: 'Conduct surveys', titleAr: 'إجراء استطلاعات', completed: false },
           { id: 'c3', title: 'Analyze results', titleAr: 'تحليل النتائج', completed: false },
         ],
@@ -311,7 +326,12 @@ class LaunchManager {
         priority: 'critical',
         dependencies: ['soft-2'],
         checklist: [
-          { id: 'c1', title: 'Prioritize issues', titleAr: 'ترتيب المشاكل حسب الأولوية', completed: false },
+          {
+            id: 'c1',
+            title: 'Prioritize issues',
+            titleAr: 'ترتيب المشاكل حسب الأولوية',
+            completed: false,
+          },
           { id: 'c2', title: 'Fix bugs', titleAr: 'إصلاح الأخطاء', completed: false },
           { id: 'c3', title: 'Verify fixes', titleAr: 'التحقق من الإصلاحات', completed: false },
         ],
@@ -336,7 +356,12 @@ class LaunchManager {
         priority: 'critical',
         dependencies: [],
         checklist: [
-          { id: 'c1', title: 'Social media ads', titleAr: 'إعلانات وسائل التواصل', completed: false },
+          {
+            id: 'c1',
+            title: 'Social media ads',
+            titleAr: 'إعلانات وسائل التواصل',
+            completed: false,
+          },
           { id: 'c2', title: 'Email campaign', titleAr: 'حملة البريد', completed: false },
           { id: 'c3', title: 'Press release', titleAr: 'بيان صحفي', completed: false },
         ],
@@ -372,7 +397,12 @@ class LaunchManager {
         checklist: [
           { id: 'c1', title: 'Setup monitoring', titleAr: 'إعداد المراقبة', completed: false },
           { id: 'c2', title: 'Daily reports', titleAr: 'تقارير يومية', completed: false },
-          { id: 'c3', title: 'Response team ready', titleAr: 'فريق الاستجابة جاهز', completed: false },
+          {
+            id: 'c3',
+            title: 'Response team ready',
+            titleAr: 'فريق الاستجابة جاهز',
+            completed: false,
+          },
         ],
         progress: 0,
       },
@@ -396,7 +426,12 @@ class LaunchManager {
         dependencies: [],
         checklist: [
           { id: 'c1', title: 'A/B testing', titleAr: 'اختبار A/B', completed: false },
-          { id: 'c2', title: 'UX improvements', titleAr: 'تحسينات تجربة المستخدم', completed: false },
+          {
+            id: 'c2',
+            title: 'UX improvements',
+            titleAr: 'تحسينات تجربة المستخدم',
+            completed: false,
+          },
           { id: 'c3', title: 'Checkout optimization', titleAr: 'تحسين الدفع', completed: false },
         ],
         progress: 0,
@@ -412,9 +447,19 @@ class LaunchManager {
         priority: 'high',
         dependencies: [],
         checklist: [
-          { id: 'c1', title: 'Increase ad spend', titleAr: 'زيادة الإنفاق الإعلاني', completed: false },
+          {
+            id: 'c1',
+            title: 'Increase ad spend',
+            titleAr: 'زيادة الإنفاق الإعلاني',
+            completed: false,
+          },
           { id: 'c2', title: 'New channels', titleAr: 'قنوات جديدة', completed: false },
-          { id: 'c3', title: 'Influencer partnerships', titleAr: 'شراكات المؤثرين', completed: false },
+          {
+            id: 'c3',
+            title: 'Influencer partnerships',
+            titleAr: 'شراكات المؤثرين',
+            completed: false,
+          },
         ],
         progress: 0,
       },
@@ -455,7 +500,12 @@ class LaunchManager {
         dependencies: [],
         checklist: [
           { id: 'c1', title: 'Server capacity', titleAr: 'سعة الخوادم', completed: false },
-          { id: 'c2', title: 'Database optimization', titleAr: 'تحسين قاعدة البيانات', completed: false },
+          {
+            id: 'c2',
+            title: 'Database optimization',
+            titleAr: 'تحسين قاعدة البيانات',
+            completed: false,
+          },
           { id: 'c3', title: 'CDN setup', titleAr: 'إعداد CDN', completed: false },
         ],
         progress: 0,
@@ -561,7 +611,13 @@ class LaunchManager {
         progress: 71.7,
         milestones: [
           { id: 'm1', title: '2M EGP', titleAr: '2 مليون ج.م', target: 2000000, achieved: false },
-          { id: 'm2', title: '2.5M EGP', titleAr: '2.5 مليون ج.م', target: 2500000, achieved: false },
+          {
+            id: 'm2',
+            title: '2.5M EGP',
+            titleAr: '2.5 مليون ج.م',
+            target: 2500000,
+            achieved: false,
+          },
         ],
       },
       {
@@ -681,9 +737,7 @@ class LaunchManager {
     // محاكاة بيانات
     const goal = this.getGoalsForPhase(LaunchPhase.GROWTH)[0];
 
-    const daysRemaining = Math.ceil(
-      (goal.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
+    const daysRemaining = Math.ceil((goal.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
     const requiredDailyProgress = (goal.target - goal.current) / daysRemaining;
     const actualDailyProgress = 15000; // افتراضي

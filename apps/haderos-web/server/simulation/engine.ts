@@ -233,11 +233,11 @@ export class SimulationEngine {
       nextQuarter: {
         revenue: stats.revenue.quarter,
         orders: stats.orders.quarter,
-        growth: { min: 0.10, avg: 0.20, max: 0.35 },
+        growth: { min: 0.1, avg: 0.2, max: 0.35 },
       },
       nextYear: {
         revenue: stats.revenue.year,
-        marketShare: { min: 0.05, avg: 0.10, max: 0.15 },
+        marketShare: { min: 0.05, avg: 0.1, max: 0.15 },
         expansion: ['القاهرة الكبرى', 'الإسكندرية', 'دلتا النيل'],
       },
     };
@@ -246,10 +246,7 @@ export class SimulationEngine {
   /**
    * تطبيق تباين عشوائي
    */
-  private applyRandomVariation(
-    current: SimulationMetrics,
-    scenario: string
-  ): SimulationMetrics {
+  private applyRandomVariation(current: SimulationMetrics, scenario: string): SimulationMetrics {
     const growthFactor = this.getScenarioGrowthFactor(scenario);
     const randomVariation = 0.9 + Math.random() * 0.2; // 90%-110%
 
@@ -277,12 +274,12 @@ export class SimulationEngine {
     const factors: Record<string, number> = {
       conservative: 1.05, // نمو محافظ 5%
       moderate: 1.15, // نمو معتدل 15%
-      aggressive: 1.30, // نمو قوي 30%
-      exponential: 1.50, // نمو أسي 50%
+      aggressive: 1.3, // نمو قوي 30%
+      exponential: 1.5, // نمو أسي 50%
       best_case: 1.75, // أفضل حالة 75%
       worst_case: 0.85, // أسوأ حالة -15%
-      baseline: 1.00, // الخط الأساسي
-      seasonal_high: 1.40, // موسم مرتفع 40%
+      baseline: 1.0, // الخط الأساسي
+      seasonal_high: 1.4, // موسم مرتفع 40%
     };
 
     return factors[scenario] || 1.15;
@@ -292,9 +289,9 @@ export class SimulationEngine {
    * حساب الإحصائيات
    */
   private calculateStatistics(results: number[][]): any {
-    const sortedRevenue = results.map(r => r[0]).sort((a, b) => a - b);
-    const sortedOrders = results.map(r => r[1]).sort((a, b) => a - b);
-    const sortedCustomers = results.map(r => r[2]).sort((a, b) => a - b);
+    const sortedRevenue = results.map((r) => r[0]).sort((a, b) => a - b);
+    const sortedOrders = results.map((r) => r[1]).sort((a, b) => a - b);
+    const sortedCustomers = results.map((r) => r[2]).sort((a, b) => a - b);
 
     const percentile = (arr: number[], p: number) => {
       const index = Math.floor(arr.length * p);
@@ -395,7 +392,7 @@ export class SimulationEngine {
           avg: monthlyRevenue * 12,
           max: monthlyRevenue * 12 * 1.15,
         },
-        marketShare: { min: 0.05, avg: 0.10, max: 0.15 },
+        marketShare: { min: 0.05, avg: 0.1, max: 0.15 },
         expansion: this.getExpansionPlan(scenario),
       },
     };
@@ -409,20 +406,8 @@ export class SimulationEngine {
       conservative: ['القاهرة الكبرى'],
       moderate: ['القاهرة الكبرى', 'الإسكندرية'],
       aggressive: ['القاهرة الكبرى', 'الإسكندرية', 'دلتا النيل', 'الصعيد'],
-      exponential: [
-        'القاهرة الكبرى',
-        'الإسكندرية',
-        'دلتا النيل',
-        'الصعيد',
-        'قناة السويس',
-        'سيناء',
-      ],
-      best_case: [
-        'جميع محافظات مصر',
-        'السعودية',
-        'الإمارات',
-        'الكويت',
-      ],
+      exponential: ['القاهرة الكبرى', 'الإسكندرية', 'دلتا النيل', 'الصعيد', 'قناة السويس', 'سيناء'],
+      best_case: ['جميع محافظات مصر', 'السعودية', 'الإمارات', 'الكويت'],
     };
 
     return plans[scenario] || ['القاهرة الكبرى', 'الإسكندرية'];
@@ -464,9 +449,9 @@ export class SimulationEngine {
     // تقدير بسيط للتأثير
     const impactFactors: Record<string, number> = {
       'متوسط قيمة الطلب': change / 100,
-      'معدل التحويل': change / 100 * 1.5,
-      'معدل الاحتفاظ': change / 100 * 1.2,
-      'تكلفة اكتساب العميل': -change / 100 * 0.8,
+      'معدل التحويل': (change / 100) * 1.5,
+      'معدل الاحتفاظ': (change / 100) * 1.2,
+      'تكلفة اكتساب العميل': (-change / 100) * 0.8,
     };
 
     const factor = impactFactors[variable] || 0;
@@ -506,7 +491,9 @@ export class SimulationEngine {
 
     // حساب النتائج
     const newRevenue =
-      modified.orders.total * modified.orders.averageValue * (modified.orders.completed / modified.orders.total);
+      modified.orders.total *
+      modified.orders.averageValue *
+      (modified.orders.completed / modified.orders.total);
 
     return {
       scenario: scenario.name,

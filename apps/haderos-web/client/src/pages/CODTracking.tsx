@@ -154,7 +154,9 @@ export default function CODTracking() {
                 selectedStage === stageStat.stage ? 'ring-2 ring-primary' : ''
               }`}
               onClick={() =>
-                setSelectedStage(selectedStage === stageStat.stage ? undefined : stageStat.stage || undefined)
+                setSelectedStage(
+                  selectedStage === stageStat.stage ? undefined : stageStat.stage || undefined
+                )
               }
             >
               <CardHeader className="pb-3">
@@ -178,9 +180,7 @@ export default function CODTracking() {
         <CardHeader>
           <CardTitle>الطلبات</CardTitle>
           <CardDescription>
-            {selectedStage
-              ? `عرض طلبات مرحلة: ${stageLabels[selectedStage]}`
-              : 'عرض جميع الطلبات'}
+            {selectedStage ? `عرض طلبات مرحلة: ${stageLabels[selectedStage]}` : 'عرض جميع الطلبات'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -220,17 +220,17 @@ export default function CODTracking() {
                           order.status === 'completed'
                             ? 'default'
                             : order.status === 'cancelled'
-                            ? 'destructive'
-                            : 'secondary'
+                              ? 'destructive'
+                              : 'secondary'
                         }
                       >
                         {order.status === 'completed'
                           ? 'مكتمل'
                           : order.status === 'cancelled'
-                          ? 'ملغي'
-                          : order.status === 'in_progress'
-                          ? 'قيد التنفيذ'
-                          : 'قيد الانتظار'}
+                            ? 'ملغي'
+                            : order.status === 'in_progress'
+                              ? 'قيد التنفيذ'
+                              : 'قيد الانتظار'}
                       </Badge>
                     </TableCell>
                     <TableCell>

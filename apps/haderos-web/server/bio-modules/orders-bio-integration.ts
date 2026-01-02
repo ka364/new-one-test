@@ -1,6 +1,6 @@
 /**
  * Orders Bio-Integration Module
- * 
+ *
  * Integrates order processing with Bio-Modules for:
  * - Anomaly detection (Arachnid)
  * - Dynamic pricing (Chameleon)
@@ -8,9 +8,9 @@
  * - Resource distribution (Mycelium)
  */
 
-import { sendBioMessage } from "./unified-messaging.js";
-import { getBioDashboard } from "./bio-dashboard.js";
-import { getConflictEngine } from "./conflict-resolution-protocol.js";
+import { sendBioMessage } from './unified-messaging.js';
+import { getBioDashboard } from './bio-dashboard.js';
+import { getConflictEngine } from './conflict-resolution-protocol.js';
 
 export interface OrderData {
   orderId: number;
@@ -46,14 +46,14 @@ export async function validateOrderWithArachnid(
 
   // Check 1: Unusually large order amount
   if (orderData.totalAmount > 10000) {
-    anomalies.push("Large order amount detected");
+    anomalies.push('Large order amount detected');
     warnings.push(`Order amount ${orderData.totalAmount} EGP exceeds normal threshold`);
   }
 
   // Check 2: Suspicious quantity
   const totalQuantity = orderData.items.reduce((sum, item) => sum + item.quantity, 0);
   if (totalQuantity > 50) {
-    anomalies.push("Unusually high quantity");
+    anomalies.push('Unusually high quantity');
     warnings.push(`Total quantity ${totalQuantity} exceeds normal threshold`);
   }
 
@@ -70,11 +70,11 @@ export async function validateOrderWithArachnid(
   // Send to Arachnid for analysis
   try {
     await sendBioMessage(
-      "arachnid",
-      ["corvid"], // Inform Corvid for learning
-      "event",
+      'arachnid',
+      ['corvid'], // Inform Corvid for learning
+      'event',
       {
-        eventType: "order.validation",
+        eventType: 'order.validation',
         orderId: orderData.orderId,
         orderNumber: orderData.orderNumber,
         totalAmount: orderData.totalAmount,
@@ -83,13 +83,13 @@ export async function validateOrderWithArachnid(
       }
     );
   } catch (error) {
-    console.error("[OrdersBioIntegration] Error sending to Arachnid:", error);
+    console.error('[OrdersBioIntegration] Error sending to Arachnid:', error);
   }
 
   // Generate recommendations
   if (anomalies.length > 0) {
-    recommendations.push("Manual review recommended");
-    recommendations.push("Contact customer for verification");
+    recommendations.push('Manual review recommended');
+    recommendations.push('Contact customer for verification');
   }
 
   const isValid = anomalies.length === 0;
@@ -114,7 +114,7 @@ export async function applyDynamicPricing(
     customerHistory?: number; // Number of previous orders
     timeOfDay?: number; // Hour of day (0-23)
     dayOfWeek?: number; // Day of week (0-6)
-    currentDemand?: "low" | "medium" | "high";
+    currentDemand?: 'low' | 'medium' | 'high';
   }
 ): Promise<{
   adjustedPrice: number;
@@ -123,13 +123,13 @@ export async function applyDynamicPricing(
 }> {
   let adjustedPrice = basePrice;
   let discount = 0;
-  let reason = "Standard pricing";
+  let reason = 'Standard pricing';
 
   // Loyal customer discount
   if (context.customerHistory && context.customerHistory >= 5) {
     discount = 0.1; // 10% discount
     adjustedPrice = basePrice * (1 - discount);
-    reason = "Loyal customer discount (10%)";
+    reason = 'Loyal customer discount (10%)';
   }
 
   // Time-based pricing
@@ -138,31 +138,31 @@ export async function applyDynamicPricing(
     if (context.timeOfDay >= 2 && context.timeOfDay < 6) {
       discount = Math.max(discount, 0.05); // 5% discount
       adjustedPrice = basePrice * (1 - discount);
-      reason = "Off-peak hours discount (5%)";
+      reason = 'Off-peak hours discount (5%)';
     }
   }
 
   // Demand-based pricing
-  if (context.currentDemand === "high") {
+  if (context.currentDemand === 'high') {
     // No discount during high demand
     discount = 0;
     adjustedPrice = basePrice;
-    reason = "High demand - standard pricing";
-  } else if (context.currentDemand === "low") {
+    reason = 'High demand - standard pricing';
+  } else if (context.currentDemand === 'low') {
     // Encourage purchases during low demand
     discount = Math.max(discount, 0.15); // 15% discount
     adjustedPrice = basePrice * (1 - discount);
-    reason = "Low demand promotion (15%)";
+    reason = 'Low demand promotion (15%)';
   }
 
   // Send to Chameleon for tracking
   try {
     await sendBioMessage(
-      "chameleon",
-      ["corvid"], // Inform Corvid for learning
-      "event",
+      'chameleon',
+      ['corvid'], // Inform Corvid for learning
+      'event',
       {
-        eventType: "pricing.adjustment",
+        eventType: 'pricing.adjustment',
         productName,
         basePrice,
         adjustedPrice,
@@ -172,7 +172,7 @@ export async function applyDynamicPricing(
       }
     );
   } catch (error) {
-    console.error("[OrdersBioIntegration] Error sending to Chameleon:", error);
+    console.error('[OrdersBioIntegration] Error sending to Chameleon:', error);
   }
 
   return {
@@ -187,62 +187,52 @@ export async function applyDynamicPricing(
  */
 export async function processCODPayment(
   orderData: OrderData,
-  deliveryStatus: "delivered" | "failed" | "returned"
+  deliveryStatus: 'delivered' | 'failed' | 'returned'
 ): Promise<{
   success: boolean;
-  paymentStatus: "paid" | "failed" | "pending";
+  paymentStatus: 'paid' | 'failed' | 'pending';
   message: string;
 }> {
   const dashboard = getBioDashboard();
 
   // Track activity
-  dashboard.trackModuleActivity("mycelium"); // Resource distribution
+  dashboard.trackModuleActivity('mycelium'); // Resource distribution
 
-  if (deliveryStatus === "delivered") {
+  if (deliveryStatus === 'delivered') {
     // Payment successful
-    await sendBioMessage(
-      "mycelium",
-      ["corvid"],
-      "event",
-      {
-        eventType: "payment.cod_success",
-        orderId: orderData.orderId,
-        amount: orderData.totalAmount,
-        deliveryStatus,
-      }
-    );
+    await sendBioMessage('mycelium', ['corvid'], 'event', {
+      eventType: 'payment.cod_success',
+      orderId: orderData.orderId,
+      amount: orderData.totalAmount,
+      deliveryStatus,
+    });
 
     return {
       success: true,
-      paymentStatus: "paid",
-      message: "COD payment received successfully",
+      paymentStatus: 'paid',
+      message: 'COD payment received successfully',
     };
-  } else if (deliveryStatus === "failed" || deliveryStatus === "returned") {
+  } else if (deliveryStatus === 'failed' || deliveryStatus === 'returned') {
     // Payment failed - learn from it
-    await sendBioMessage(
-      "corvid",
-      ["arachnid", "mycelium"],
-      "alert",
-      {
-        eventType: "payment.cod_failed",
-        orderId: orderData.orderId,
-        amount: orderData.totalAmount,
-        deliveryStatus,
-        customerPhone: orderData.customerPhone,
-      }
-    );
+    await sendBioMessage('corvid', ['arachnid', 'mycelium'], 'alert', {
+      eventType: 'payment.cod_failed',
+      orderId: orderData.orderId,
+      amount: orderData.totalAmount,
+      deliveryStatus,
+      customerPhone: orderData.customerPhone,
+    });
 
     return {
       success: false,
-      paymentStatus: "failed",
-      message: "COD payment failed - delivery not completed",
+      paymentStatus: 'failed',
+      message: 'COD payment failed - delivery not completed',
     };
   }
 
   return {
     success: false,
-    paymentStatus: "pending",
-    message: "Payment status pending",
+    paymentStatus: 'pending',
+    message: 'Payment status pending',
   };
 }
 
@@ -252,46 +242,41 @@ export async function processCODPayment(
 export async function trackOrderLifecycle(
   orderId: number,
   orderNumber: string,
-  status: "created" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"
+  status: 'created' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
 ): Promise<void> {
   const dashboard = getBioDashboard();
 
   // Track activity based on status
   switch (status) {
-    case "created":
-      dashboard.trackModuleActivity("arachnid"); // Anomaly detection
-      dashboard.trackModuleActivity("chameleon"); // Pricing
+    case 'created':
+      dashboard.trackModuleActivity('arachnid'); // Anomaly detection
+      dashboard.trackModuleActivity('chameleon'); // Pricing
       break;
-    case "confirmed":
-      dashboard.trackModuleActivity("mycelium"); // Resource allocation
+    case 'confirmed':
+      dashboard.trackModuleActivity('mycelium'); // Resource allocation
       break;
-    case "processing":
-      dashboard.trackModuleActivity("ant"); // Route optimization
+    case 'processing':
+      dashboard.trackModuleActivity('ant'); // Route optimization
       break;
-    case "shipped":
-      dashboard.trackModuleActivity("tardigrade"); // Resilience
+    case 'shipped':
+      dashboard.trackModuleActivity('tardigrade'); // Resilience
       break;
-    case "delivered":
-      dashboard.trackModuleActivity("corvid"); // Learning
+    case 'delivered':
+      dashboard.trackModuleActivity('corvid'); // Learning
       break;
-    case "cancelled":
-      dashboard.trackModuleActivity("corvid"); // Learn from cancellation
+    case 'cancelled':
+      dashboard.trackModuleActivity('corvid'); // Learn from cancellation
       break;
   }
 
   // Send lifecycle event
-  await sendBioMessage(
-    "corvid",
-    ["arachnid", "mycelium"],
-    "event",
-    {
-      eventType: "order.lifecycle",
-      orderId,
-      orderNumber,
-      status,
-      timestamp: Date.now(),
-    }
-  );
+  await sendBioMessage('corvid', ['arachnid', 'mycelium'], 'event', {
+    eventType: 'order.lifecycle',
+    orderId,
+    orderNumber,
+    status,
+    timestamp: Date.now(),
+  });
 }
 
 /**
@@ -314,11 +299,11 @@ export async function getOrderInsights(orderId: number): Promise<{
 
   // Generate recommendations based on system state
   if (systemHealth < 70) {
-    recommendations.push("System health below optimal - consider delaying shipment");
+    recommendations.push('System health below optimal - consider delaying shipment');
   }
 
   if (dashboardData.systemHealth.conflictRate > 5) {
-    recommendations.push("High conflict rate detected - manual review recommended");
+    recommendations.push('High conflict rate detected - manual review recommended');
   }
 
   // Estimate delivery time based on system performance

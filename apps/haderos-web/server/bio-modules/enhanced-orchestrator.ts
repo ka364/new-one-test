@@ -1,6 +1,6 @@
 /**
  * Enhanced Bio-Protocol Orchestrator
- * 
+ *
  * Integrates all bio-modules with:
  * - Unified messaging
  * - Conflict resolution
@@ -8,17 +8,22 @@
  * - Module adapters
  */
 
-import { BioModuleName, getModuleInteractions } from "./bio-interaction-matrix";
-import { getBioMessageRouter, BioMessage, BioMessageResponse, sendBioMessage } from "./unified-messaging";
-import { getConflictEngine, ConflictType } from "./conflict-resolution-protocol";
-import { getBioDashboard } from "./bio-dashboard";
-import { ModuleAdapterFactory } from "./module-adapters";
+import { BioModuleName, getModuleInteractions } from './bio-interaction-matrix';
+import {
+  getBioMessageRouter,
+  BioMessage,
+  BioMessageResponse,
+  sendBioMessage,
+} from './unified-messaging';
+import { getConflictEngine, ConflictType } from './conflict-resolution-protocol';
+import { getBioDashboard } from './bio-dashboard';
+import { ModuleAdapterFactory } from './module-adapters';
 
 export interface OrchestrationConfig {
   enableConflictResolution: boolean;
   enableDashboard: boolean;
   enableAdapters: boolean;
-  logLevel: "debug" | "info" | "warn" | "error";
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
 }
 
 /**
@@ -36,7 +41,7 @@ export class EnhancedBioOrchestrator {
       enableConflictResolution: true,
       enableDashboard: true,
       enableAdapters: true,
-      logLevel: "info",
+      logLevel: 'info',
       ...config,
     };
 
@@ -47,26 +52,26 @@ export class EnhancedBioOrchestrator {
    * Initialize the orchestrator
    */
   private initialize(): void {
-    this.log("info", "Initializing Enhanced Bio-Protocol Orchestrator...");
+    this.log('info', 'Initializing Enhanced Bio-Protocol Orchestrator...');
 
     // Register message handlers for all modules
     const modules: BioModuleName[] = [
-      "arachnid",
-      "corvid",
-      "mycelium",
-      "ant",
-      "tardigrade",
-      "chameleon",
-      "cephalopod",
+      'arachnid',
+      'corvid',
+      'mycelium',
+      'ant',
+      'tardigrade',
+      'chameleon',
+      'cephalopod',
     ];
 
-    modules.forEach(module => {
+    modules.forEach((module) => {
       this.router.registerHandler(module, async (message: BioMessage) => {
         return this.handleModuleMessage(module, message);
       });
     });
 
-    this.log("info", "Enhanced Bio-Protocol Orchestrator initialized successfully");
+    this.log('info', 'Enhanced Bio-Protocol Orchestrator initialized successfully');
   }
 
   /**
@@ -79,7 +84,7 @@ export class EnhancedBioOrchestrator {
     const startTime = Date.now();
 
     try {
-      this.log("debug", `Handling message for ${module} from ${message.source}`);
+      this.log('debug', `Handling message for ${module} from ${message.source}`);
 
       // 1. Track interaction in dashboard
       if (this.config.enableDashboard) {
@@ -106,11 +111,11 @@ export class EnhancedBioOrchestrator {
       // 4. Call module handler
       const handler = this.moduleHandlers.get(module);
       let result = null;
-      
+
       if (handler) {
         result = await handler(moduleData);
       } else {
-        this.log("warn", `No handler registered for module: ${module}`);
+        this.log('warn', `No handler registered for module: ${module}`);
       }
 
       // 5. Update dashboard with processing time
@@ -134,8 +139,8 @@ export class EnhancedBioOrchestrator {
         timestamp: Date.now(),
       };
     } catch (error) {
-      this.log("error", `Error handling message for ${module}: ${error}`);
-      
+      this.log('error', `Error handling message for ${module}: ${error}`);
+
       return {
         messageId: message.id,
         success: false,
@@ -153,16 +158,16 @@ export class EnhancedBioOrchestrator {
   private async checkForConflicts(message: BioMessage): Promise<void> {
     // Check if this message might conflict with recent messages
     const recentMessages = this.router.getRecentMessages(10);
-    
+
     for (const recentMsg of recentMessages) {
       if (recentMsg.id === message.id) continue;
-      
+
       // Check if messages target the same resource
       const conflictType = this.detectConflictType(message, recentMsg);
-      
+
       if (conflictType) {
-        this.log("warn", `Conflict detected: ${message.source} vs ${recentMsg.source}`);
-        
+        this.log('warn', `Conflict detected: ${message.source} vs ${recentMsg.source}`);
+
         // Register conflict
         const conflictId = await this.conflictEngine.registerConflict(
           message.source,
@@ -176,8 +181,8 @@ export class EnhancedBioOrchestrator {
 
         // Resolve conflict
         const resolution = await this.conflictEngine.resolveConflict(conflictId);
-        
-        this.log("info", `Conflict resolved: ${resolution.winner} won`);
+
+        this.log('info', `Conflict resolved: ${resolution.winner} won`);
       }
     }
   }
@@ -192,21 +197,21 @@ export class EnhancedBioOrchestrator {
       msg2.payload.productId &&
       msg1.payload.productId === msg2.payload.productId
     ) {
-      return "resource";
+      return 'resource';
     }
 
     // Priority conflict: both messages have high priority
     if (msg1.priority <= 2 && msg2.priority <= 2) {
-      return "priority";
+      return 'priority';
     }
 
     // Authority conflict: both messages are commands to the same destination
     if (
-      msg1.type === "command" &&
-      msg2.type === "command" &&
-      msg1.destination.some(d => msg2.destination.includes(d))
+      msg1.type === 'command' &&
+      msg2.type === 'command' &&
+      msg1.destination.some((d) => msg2.destination.includes(d))
     ) {
-      return "authority";
+      return 'authority';
     }
 
     return null;
@@ -215,12 +220,9 @@ export class EnhancedBioOrchestrator {
   /**
    * Register a module handler
    */
-  registerModuleHandler(
-    module: BioModuleName,
-    handler: (data: any) => Promise<any>
-  ): void {
+  registerModuleHandler(module: BioModuleName, handler: (data: any) => Promise<any>): void {
     this.moduleHandlers.set(module, handler);
-    this.log("info", `Registered handler for module: ${module}`);
+    this.log('info', `Registered handler for module: ${module}`);
   }
 
   /**
@@ -233,12 +235,12 @@ export class EnhancedBioOrchestrator {
   ): Promise<BioMessageResponse[]> {
     // Convert module data to unified message using adapter
     let message: BioMessage;
-    
+
     if (this.config.enableAdapters) {
       message = ModuleAdapterFactory.convertToUnifiedFormat(source, data);
     } else {
       // Fallback: create simple message
-      message = await sendBioMessage(source, destination, "event", data);
+      message = await sendBioMessage(source, destination, 'event', data);
       return [];
     }
 
@@ -262,7 +264,7 @@ export class EnhancedBioOrchestrator {
    */
   getSystemHealth() {
     if (!this.config.enableDashboard) {
-      return { overall: 100, message: "Dashboard disabled" };
+      return { overall: 100, message: 'Dashboard disabled' };
     }
 
     const dashboardData = this.dashboard.getDashboardData();
@@ -272,8 +274,8 @@ export class EnhancedBioOrchestrator {
   /**
    * Log message
    */
-  private log(level: OrchestrationConfig["logLevel"], message: string): void {
-    const levels = ["debug", "info", "warn", "error"];
+  private log(level: OrchestrationConfig['logLevel'], message: string): void {
+    const levels = ['debug', 'info', 'warn', 'error'];
     const currentLevelIndex = levels.indexOf(this.config.logLevel);
     const messageLevelIndex = levels.indexOf(level);
 
@@ -290,7 +292,9 @@ let orchestratorInstance: EnhancedBioOrchestrator | null = null;
 /**
  * Get the singleton Enhanced Bio-Protocol Orchestrator
  */
-export function getEnhancedOrchestrator(config?: Partial<OrchestrationConfig>): EnhancedBioOrchestrator {
+export function getEnhancedOrchestrator(
+  config?: Partial<OrchestrationConfig>
+): EnhancedBioOrchestrator {
   if (!orchestratorInstance) {
     orchestratorInstance = new EnhancedBioOrchestrator(config);
   }
@@ -300,7 +304,9 @@ export function getEnhancedOrchestrator(config?: Partial<OrchestrationConfig>): 
 /**
  * Initialize the orchestrator with default config
  */
-export function initializeBioOrchestrator(config?: Partial<OrchestrationConfig>): EnhancedBioOrchestrator {
+export function initializeBioOrchestrator(
+  config?: Partial<OrchestrationConfig>
+): EnhancedBioOrchestrator {
   orchestratorInstance = new EnhancedBioOrchestrator(config);
   return orchestratorInstance;
 }

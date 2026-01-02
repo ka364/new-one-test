@@ -3,19 +3,19 @@
  * APIs for Shopify integration
  */
 
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { shopifyClient } from "../integrations/shopify-client";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { shopifyClient } from '../integrations/shopify-client';
 import {
   syncAllProductsToShopify,
   updateProductInventory,
-} from "../services/shopify-product-sync.service";
+} from '../services/shopify-product-sync.service';
 import {
   syncInventoryToShopify,
   syncInventoryFromShopify,
   bulkSyncInventoryFromShopify,
   getInventorySyncStatus,
-} from "../services/shopify-inventory-sync.service";
+} from '../services/shopify-inventory-sync.service';
 import {
   getAllShopifyProducts,
   getAllShopifyOrders,
@@ -23,7 +23,7 @@ import {
   getSyncLogs,
   getShopifyProductByLocalId,
   updateShopifyOrder,
-} from "../db-shopify";
+} from '../db-shopify';
 
 export const shopifyRouter = router({
   /**
@@ -244,21 +244,21 @@ export const shopifyRouter = router({
   fetchOrders: protectedProcedure.mutation(async () => {
     try {
       const ordersData = await shopifyClient.getOrders(50);
-      
+
       if (!ordersData?.edges) {
         return {
           success: false,
-          error: "No orders data received from Shopify",
+          error: 'No orders data received from Shopify',
           imported: 0,
         };
       }
 
       let imported = 0;
-      const { createShopifyOrder, getShopifyOrderByShopifyId } = await import("../db-shopify");
+      const { createShopifyOrder, getShopifyOrderByShopifyId } = await import('../db-shopify');
 
       for (const edge of ordersData.edges) {
         const order = edge.node;
-        
+
         // Check if order already exists
         const existing = await getShopifyOrderByShopifyId(order.id);
         if (existing) {
@@ -268,17 +268,17 @@ export const shopifyRouter = router({
         // Import order
         await createShopifyOrder({
           shopifyOrderId: order.id,
-          orderNumber: order.name.replace("#", ""),
+          orderNumber: order.name.replace('#', ''),
           orderName: order.name,
           customerEmail: order.email,
           customerPhone: order.phone,
           customerFirstName: order.customer?.firstName,
           customerLastName: order.customer?.lastName,
           shippingAddress: order.shippingAddress,
-          totalPrice: parseFloat(order.totalPriceSet?.shopMoney?.amount || "0"),
-          subtotalPrice: parseFloat(order.subtotalPriceSet?.shopMoney?.amount || "0"),
-          totalShipping: parseFloat(order.totalShippingPriceSet?.shopMoney?.amount || "0"),
-          currencyCode: order.totalPriceSet?.shopMoney?.currencyCode || "EGP",
+          totalPrice: parseFloat(order.totalPriceSet?.shopMoney?.amount || '0'),
+          subtotalPrice: parseFloat(order.subtotalPriceSet?.shopMoney?.amount || '0'),
+          totalShipping: parseFloat(order.totalShippingPriceSet?.shopMoney?.amount || '0'),
+          currencyCode: order.totalPriceSet?.shopMoney?.currencyCode || 'EGP',
           lineItems: order.lineItems?.edges?.map((item: any) => ({
             id: item.node.id,
             title: item.node.title,

@@ -94,7 +94,8 @@ export class IntelligentTestGenerator {
 
     const results: TestGenerationResult[] = [];
 
-    for (const file of files.slice(0, 10)) { // Limit to 10 files for demo
+    for (const file of files.slice(0, 10)) {
+      // Limit to 10 files for demo
       try {
         const result = await this.generateTestsForFile(file);
         results.push(result);
@@ -154,7 +155,7 @@ export class IntelligentTestGenerator {
       if (line.startsWith('import')) {
         const importMatch = line.match(/import\s+(?:{([^}]+)}|(\w+))/);
         if (importMatch) {
-          const imported = (importMatch[1] || importMatch[2]).split(',').map(i => i.trim());
+          const imported = (importMatch[1] || importMatch[2]).split(',').map((i) => i.trim());
           imports.push(...imported);
         }
       }
@@ -167,8 +168,10 @@ export class IntelligentTestGenerator {
     });
 
     // Detect if it's a tRPC router
-    const isTRPCRouter = content.includes('publicProcedure') || content.includes('protectedProcedure');
-    const isReactComponent = content.includes('return (') && (filePath.endsWith('.tsx') || filePath.endsWith('.jsx'));
+    const isTRPCRouter =
+      content.includes('publicProcedure') || content.includes('protectedProcedure');
+    const isReactComponent =
+      content.includes('return (') && (filePath.endsWith('.tsx') || filePath.endsWith('.jsx'));
 
     return {
       functions,
@@ -211,7 +214,7 @@ export class IntelligentTestGenerator {
   private generateTRPCTests(analysis: SourceAnalysis): GeneratedTest[] {
     const tests: GeneratedTest[] = [];
 
-    analysis.functions.forEach(func => {
+    analysis.functions.forEach((func) => {
       if (func.isExported) {
         // Basic success test
         tests.push({
@@ -322,7 +325,7 @@ export class IntelligentTestGenerator {
   private generateUnitTests(analysis: SourceAnalysis): GeneratedTest[] {
     const tests: GeneratedTest[] = [];
 
-    analysis.functions.forEach(func => {
+    analysis.functions.forEach((func) => {
       if (func.isExported) {
         tests.push({
           name: `should call ${func.name} correctly`,
@@ -348,7 +351,7 @@ export class IntelligentTestGenerator {
   private generateErrorTests(analysis: SourceAnalysis): GeneratedTest[] {
     const tests: GeneratedTest[] = [];
 
-    analysis.functions.forEach(func => {
+    analysis.functions.forEach((func) => {
       if (func.isExported) {
         tests.push({
           name: `should handle errors in ${func.name}`,
@@ -410,10 +413,15 @@ export class IntelligentTestGenerator {
   /**
    * بناء ملف الاختبار
    */
-  private buildTestFile(sourceFile: string, tests: GeneratedTest[], analysis: SourceAnalysis): string {
-    const imports = analysis.exports.length > 0
-      ? `import { ${analysis.exports.join(', ')} } from '../${sourceFile.replace(/\.ts$/, '')}';`
-      : '';
+  private buildTestFile(
+    sourceFile: string,
+    tests: GeneratedTest[],
+    analysis: SourceAnalysis
+  ): string {
+    const imports =
+      analysis.exports.length > 0
+        ? `import { ${analysis.exports.join(', ')} } from '../${sourceFile.replace(/\.ts$/, '')}';`
+        : '';
 
     return `
 /**
@@ -433,7 +441,7 @@ describe('${sourceFile}', () => {
     vi.clearAllMocks();
   });
 
-${tests.map(test => `  ${test.code}`).join('\n\n')}
+${tests.map((test) => `  ${test.code}`).join('\n\n')}
 });
     `.trim();
   }
@@ -451,7 +459,7 @@ ${tests.map(test => `  ${test.code}`).join('\n\n')}
    * تقدير التغطية
    */
   private estimateCoverage(tests: GeneratedTest[], analysis: SourceAnalysis): TestCoverage {
-    const functionsCount = analysis.functions.filter(f => f.isExported).length;
+    const functionsCount = analysis.functions.filter((f) => f.isExported).length;
     const testsCount = tests.length;
 
     // Simple estimation

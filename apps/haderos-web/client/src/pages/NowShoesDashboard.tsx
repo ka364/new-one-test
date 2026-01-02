@@ -1,16 +1,9 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  Package, 
-  AlertTriangle, 
-  ShoppingCart, 
-  TrendingUp,
-  Box,
-  DollarSign
-} from "lucide-react";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Package, AlertTriangle, ShoppingCart, TrendingUp, Box, DollarSign } from 'lucide-react';
 // import { useToast } from "@/hooks/use-toast";
 
 export default function NowShoesDashboard() {
@@ -18,18 +11,29 @@ export default function NowShoesDashboard() {
   const [selectedDate] = useState<Date>(new Date());
 
   // Fetch data
-  const { data: products = [], isLoading: loadingProducts } = trpc.nowshoes.getAllProducts.useQuery();
-  const { data: inventory = [], isLoading: loadingInventory } = trpc.nowshoes.getInventory.useQuery();
-  const { data: lowStock = [], isLoading: loadingLowStock } = trpc.nowshoes.getLowStockItems.useQuery();
+  const { data: products = [], isLoading: loadingProducts } =
+    trpc.nowshoes.getAllProducts.useQuery();
+  const { data: inventory = [], isLoading: loadingInventory } =
+    trpc.nowshoes.getInventory.useQuery();
+  const { data: lowStock = [], isLoading: loadingLowStock } =
+    trpc.nowshoes.getLowStockItems.useQuery();
   const { data: orders = [], isLoading: loadingOrders } = trpc.nowshoes.getAllOrders.useQuery();
-  const { data: topProducts = [], isLoading: loadingTop } = trpc.nowshoes.getTopSellingProducts.useQuery({ limit: 5 });
-  const { data: dailyStats } = trpc.nowshoes.getDailySalesStats.useQuery({ date: selectedDate }, { enabled: !!selectedDate });
+  const { data: topProducts = [], isLoading: loadingTop } =
+    trpc.nowshoes.getTopSellingProducts.useQuery({ limit: 5 });
+  const { data: dailyStats } = trpc.nowshoes.getDailySalesStats.useQuery(
+    { date: selectedDate },
+    { enabled: !!selectedDate }
+  );
 
-  const isLoading = loadingProducts || loadingInventory || loadingLowStock || loadingOrders || loadingTop;
+  const isLoading =
+    loadingProducts || loadingInventory || loadingLowStock || loadingOrders || loadingTop;
 
   // Calculate stats
   const totalProducts = products.length;
-  const totalInventory = (inventory as any[]).reduce((sum, item: any) => sum + (item.quantity || 0), 0);
+  const totalInventory = (inventory as any[]).reduce(
+    (sum, item: any) => sum + (item.quantity || 0),
+    0
+  );
   const lowStockCount = lowStock.length;
   const todayOrders = (orders as any[]).filter((order: any) => {
     if (!order.createdAt) return false;
@@ -38,7 +42,10 @@ export default function NowShoesDashboard() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
+      dir="rtl"
+    >
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -51,7 +58,12 @@ export default function NowShoesDashboard() {
             </p>
           </div>
           <Badge variant="outline" className="text-lg px-4 py-2">
-            {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString('ar-EG', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </Badge>
         </div>
 
@@ -64,9 +76,7 @@ export default function NowShoesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{totalProducts}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                موديل مختلف
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">موديل مختلف</p>
             </CardContent>
           </Card>
 
@@ -77,9 +87,7 @@ export default function NowShoesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{totalInventory}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                قطعة متاحة
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">قطعة متاحة</p>
             </CardContent>
           </Card>
 
@@ -90,9 +98,7 @@ export default function NowShoesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-red-600">{lowStockCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                منتج يحتاج إعادة توريد
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">منتج يحتاج إعادة توريد</p>
             </CardContent>
           </Card>
 
@@ -104,7 +110,9 @@ export default function NowShoesDashboard() {
             <CardContent>
               <div className="text-3xl font-bold">{todayOrders}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {dailyStats?.totalRevenue ? `${Number(dailyStats.totalRevenue).toFixed(0)} جنيه` : 'لا توجد مبيعات'}
+                {dailyStats?.totalRevenue
+                  ? `${Number(dailyStats.totalRevenue).toFixed(0)} جنيه`
+                  : 'لا توجد مبيعات'}
               </p>
             </CardContent>
           </Card>
@@ -125,7 +133,10 @@ export default function NowShoesDashboard() {
             <CardContent>
               <div className="space-y-2">
                 {(lowStock as any[]).slice(0, 5).map((item: any) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg">
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{item.productCode}</p>
                       <p className="text-sm text-muted-foreground">
@@ -133,9 +144,7 @@ export default function NowShoesDashboard() {
                       </p>
                     </div>
                     <div className="text-left">
-                      <Badge variant="destructive">
-                        {item.quantity} قطعة
-                      </Badge>
+                      <Badge variant="destructive">{item.quantity} قطعة</Badge>
                       <p className="text-xs text-muted-foreground mt-1">
                         الحد الأدنى: {item.minStockLevel}
                       </p>
@@ -159,9 +168,7 @@ export default function NowShoesDashboard() {
               <TrendingUp className="h-5 w-5 text-green-500" />
               أكثر المنتجات مبيعاً
             </CardTitle>
-            <CardDescription>
-              أفضل 5 منتجات من حيث المبيعات
-            </CardDescription>
+            <CardDescription>أفضل 5 منتجات من حيث المبيعات</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingTop ? (
@@ -171,7 +178,10 @@ export default function NowShoesDashboard() {
             ) : (
               <div className="space-y-4">
                 {topProducts.map((product, index) => (
-                  <div key={product.productId} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                  <div
+                    key={product.productId}
+                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold">
                         {index + 1}
@@ -203,9 +213,7 @@ export default function NowShoesDashboard() {
               <ShoppingCart className="h-5 w-5 text-blue-500" />
               آخر الطلبات
             </CardTitle>
-            <CardDescription>
-              أحدث {orders.slice(0, 10).length} طلب
-            </CardDescription>
+            <CardDescription>أحدث {orders.slice(0, 10).length} طلب</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingOrders ? (
@@ -215,18 +223,27 @@ export default function NowShoesDashboard() {
             ) : (
               <div className="space-y-3">
                 {orders.slice(0, 10).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  >
                     <div>
                       <p className="font-medium">{order.orderNumber}</p>
                       <p className="text-sm text-muted-foreground">{order.customerName}</p>
                       <p className="text-xs text-muted-foreground">{order.city}</p>
                     </div>
                     <div className="text-left">
-                      <Badge variant={
-                        order.status === 'pending' ? 'secondary' :
-                        order.status === 'confirmed' ? 'default' :
-                        order.status === 'cancelled' ? 'destructive' : 'outline'
-                      }>
+                      <Badge
+                        variant={
+                          order.status === 'pending'
+                            ? 'secondary'
+                            : order.status === 'confirmed'
+                              ? 'default'
+                              : order.status === 'cancelled'
+                                ? 'destructive'
+                                : 'outline'
+                        }
+                      >
                         {order.status}
                       </Badge>
                       <p className="text-sm font-semibold mt-1">

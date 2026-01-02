@@ -3,15 +3,22 @@
  * tRPC procedures for COD order management
  */
 
-import { router, protectedProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { codWorkflowService } from "../services/cod-workflow.service";
-import { shippingAllocatorService } from "../services/shipping-allocator.service";
-import { requireDb } from "../db";
-import { codOrders, shippingPartners, trackingLogs, shippingPerformanceByGovernorate, shippingPerformanceByCenter, shippingPerformanceByPoint } from "../../drizzle/schema";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
-import { logger } from "../_core/logger";
+import { router, protectedProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { codWorkflowService } from '../services/cod-workflow.service';
+import { shippingAllocatorService } from '../services/shipping-allocator.service';
+import { requireDb } from '../db';
+import {
+  codOrders,
+  shippingPartners,
+  trackingLogs,
+  shippingPerformanceByGovernorate,
+  shippingPerformanceByCenter,
+  shippingPerformanceByPoint,
+} from '../../drizzle/schema';
+import { eq, desc, and, gte, lte, sql } from 'drizzle-orm';
+import { logger } from '../_core/logger';
 
 // ============================================
 // SCHEMAS
@@ -61,101 +68,99 @@ export const codRouter = router({
   // ============================================
   // CREATE COD ORDER
   // ============================================
-  createOrder: protectedProcedure
-    .input(createCODOrderSchema)
-    .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
+  createOrder: protectedProcedure.input(createCODOrderSchema).mutation(async ({ input, ctx }) => {
+    const startTime = Date.now();
+    try {
+      // Input validation
+      if (!input.orderId || input.orderId.trim().length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'معرّف الطلب مطلوب',
+        });
+      }
+
+      if (!input.customerName || input.customerName.trim().length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'اسم العميل مطلوب',
+        });
+      }
+
+      if (!input.customerPhone || !/^01[0-9]{9}$/.test(input.customerPhone)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'رقم الهاتف غير صحيح. يجب أن يكون رقم مصري (01XXXXXXXXX)',
+        });
+      }
+
+      if (!input.orderAmount || input.orderAmount <= 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'مبلغ الطلب يجب أن يكون أكبر من صفر',
+        });
+      }
+
+      if (!input.codAmount || input.codAmount <= 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'مبلغ الدفع عند الاستلام يجب أن يكون أكبر من صفر',
+        });
+      }
+
+      logger.info('Creating COD order', {
+        orderId: input.orderId,
+        customerName: input.customerName,
+        orderAmount: input.orderAmount,
+        createdBy: ctx.user?.id,
+      });
+
+      let result;
       try {
-        // Input validation
-        if (!input.orderId || input.orderId.trim().length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'معرّف الطلب مطلوب',
-          });
-        }
-
-        if (!input.customerName || input.customerName.trim().length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'اسم العميل مطلوب',
-          });
-        }
-
-        if (!input.customerPhone || !/^01[0-9]{9}$/.test(input.customerPhone)) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'رقم الهاتف غير صحيح. يجب أن يكون رقم مصري (01XXXXXXXXX)',
-          });
-        }
-
-        if (!input.orderAmount || input.orderAmount <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'مبلغ الطلب يجب أن يكون أكبر من صفر',
-          });
-        }
-
-        if (!input.codAmount || input.codAmount <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'مبلغ الدفع عند الاستلام يجب أن يكون أكبر من صفر',
-          });
-        }
-
-        logger.info('Creating COD order', {
+        result = await codWorkflowService.createCODOrder(input);
+      } catch (serviceError: any) {
+        logger.error('COD workflow service failed', serviceError, {
           orderId: input.orderId,
-          customerName: input.customerName,
-          orderAmount: input.orderAmount,
-          createdBy: ctx.user?.id,
-        });
-
-        let result;
-        try {
-          result = await codWorkflowService.createCODOrder(input);
-        } catch (serviceError: any) {
-          logger.error('COD workflow service failed', serviceError, {
-            orderId: input.orderId,
-          });
-          
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في إنشاء طلب الدفع عند الاستلام. يرجى المحاولة مرة أخرى',
-            cause: serviceError,
-          });
-        }
-
-        const duration = Date.now() - startTime;
-        logger.info('COD order created successfully', {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
-        });
-
-        return result;
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-        
-        if (error instanceof TRPCError) {
-          logger.error('COD order creation failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('COD order creation failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          duration: `${duration}ms`,
         });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء إنشاء طلب الدفع عند الاستلام. يرجى المحاولة مرة أخرى',
-          cause: error,
+          message: 'فشل في إنشاء طلب الدفع عند الاستلام. يرجى المحاولة مرة أخرى',
+          cause: serviceError,
         });
       }
-    }),
+
+      const duration = Date.now() - startTime;
+      logger.info('COD order created successfully', {
+        orderId: input.orderId,
+        duration: `${duration}ms`,
+      });
+
+      return result;
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+
+      if (error instanceof TRPCError) {
+        logger.error('COD order creation failed (TRPCError)', {
+          code: error.code,
+          message: error.message,
+          orderId: input.orderId,
+          duration: `${duration}ms`,
+        });
+        throw error;
+      }
+
+      logger.error('COD order creation failed (Unexpected Error)', error, {
+        orderId: input.orderId,
+        duration: `${duration}ms`,
+      });
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'حدث خطأ أثناء إنشاء طلب الدفع عند الاستلام. يرجى المحاولة مرة أخرى',
+        cause: error,
+      });
+    }
+  }),
 
   // ============================================
   // GET ALL COD ORDERS
@@ -197,7 +202,7 @@ export const codRouter = router({
           orders = await query.limit(limit).offset(offset).orderBy(desc(codOrders.createdAt));
         } catch (dbError: any) {
           logger.error('Database query failed', dbError);
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب الطلبات. يرجى المحاولة مرة أخرى',
@@ -214,7 +219,7 @@ export const codRouter = router({
         return { orders, total: orders.length };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('COD orders fetch failed (TRPCError)', {
             code: error.code,
@@ -261,7 +266,7 @@ export const codRouter = router({
           logger.error('COD workflow service failed', serviceError, {
             orderId: input.orderId,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب حالة الطلب. يرجى المحاولة مرة أخرى',
@@ -285,7 +290,7 @@ export const codRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('COD order fetch failed (TRPCError)', {
             code: error.code,
@@ -312,109 +317,107 @@ export const codRouter = router({
   // ============================================
   // UPDATE STAGE
   // ============================================
-  updateStage: protectedProcedure
-    .input(updateStageSchema)
-    .mutation(async ({ input, ctx }) => {
-      const startTime = Date.now();
+  updateStage: protectedProcedure.input(updateStageSchema).mutation(async ({ input, ctx }) => {
+    const startTime = Date.now();
+    try {
+      // Input validation
+      if (!input.orderId || input.orderId.trim().length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'معرّف الطلب مطلوب',
+        });
+      }
+
+      if (!input.stage) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'المرحلة مطلوبة',
+        });
+      }
+
+      // Validate stage transition (basic check)
+      const validStages = [
+        'customerService',
+        'confirmation',
+        'preparation',
+        'supplier',
+        'shipping',
+        'delivery',
+        'collection',
+        'settlement',
+      ];
+
+      if (!validStages.includes(input.stage)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'المرحلة غير صالحة',
+        });
+      }
+
+      logger.info('Updating COD order stage', {
+        orderId: input.orderId,
+        stage: input.stage,
+        updatedBy: ctx.user?.id,
+      });
+
+      let result;
       try {
-        // Input validation
-        if (!input.orderId || input.orderId.trim().length === 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'معرّف الطلب مطلوب',
-          });
-        }
-
-        if (!input.stage) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'المرحلة مطلوبة',
-          });
-        }
-
-        // Validate stage transition (basic check)
-        const validStages = [
-          'customerService',
-          'confirmation',
-          'preparation',
-          'supplier',
-          'shipping',
-          'delivery',
-          'collection',
-          'settlement',
-        ];
-
-        if (!validStages.includes(input.stage)) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'المرحلة غير صالحة',
-          });
-        }
-
-        logger.info('Updating COD order stage', {
+        result = await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
+      } catch (serviceError: any) {
+        logger.error('COD workflow service failed', serviceError, {
           orderId: input.orderId,
           stage: input.stage,
-          updatedBy: ctx.user?.id,
-        });
-
-        let result;
-        try {
-          result = await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
-        } catch (serviceError: any) {
-          logger.error('COD workflow service failed', serviceError, {
-            orderId: input.orderId,
-            stage: input.stage,
-          });
-          
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل في تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
-            cause: serviceError,
-          });
-        }
-
-        if (!result) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'الطلب غير موجود',
-          });
-        }
-
-        const duration = Date.now() - startTime;
-        logger.info('COD order stage updated successfully', {
-          orderId: input.orderId,
-          stage: input.stage,
-          duration: `${duration}ms`,
-        });
-
-        return result;
-      } catch (error: any) {
-        const duration = Date.now() - startTime;
-        
-        if (error instanceof TRPCError) {
-          logger.error('COD order stage update failed (TRPCError)', {
-            code: error.code,
-            message: error.message,
-            orderId: input.orderId,
-            stage: input.stage,
-            duration: `${duration}ms`,
-          });
-          throw error;
-        }
-
-        logger.error('COD order stage update failed (Unexpected Error)', error, {
-          orderId: input.orderId,
-          stage: input.stage,
-          duration: `${duration}ms`,
         });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'حدث خطأ أثناء تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
-          cause: error,
+          message: 'فشل في تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
+          cause: serviceError,
         });
       }
-    }),
+
+      if (!result) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'الطلب غير موجود',
+        });
+      }
+
+      const duration = Date.now() - startTime;
+      logger.info('COD order stage updated successfully', {
+        orderId: input.orderId,
+        stage: input.stage,
+        duration: `${duration}ms`,
+      });
+
+      return result;
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+
+      if (error instanceof TRPCError) {
+        logger.error('COD order stage update failed (TRPCError)', {
+          code: error.code,
+          message: error.message,
+          orderId: input.orderId,
+          stage: input.stage,
+          duration: `${duration}ms`,
+        });
+        throw error;
+      }
+
+      logger.error('COD order stage update failed (Unexpected Error)', error, {
+        orderId: input.orderId,
+        stage: input.stage,
+        duration: `${duration}ms`,
+      });
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'حدث خطأ أثناء تحديث مرحلة الطلب. يرجى المحاولة مرة أخرى',
+        cause: error,
+      });
+    }
+  }),
 
   // ============================================
   // ALLOCATE SHIPPING PARTNER
@@ -444,7 +447,10 @@ export const codRouter = router({
           });
         }
 
-        if (!input.shippingAddress.governorate || input.shippingAddress.governorate.trim().length === 0) {
+        if (
+          !input.shippingAddress.governorate ||
+          input.shippingAddress.governorate.trim().length === 0
+        ) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'المحافظة مطلوبة',
@@ -475,7 +481,7 @@ export const codRouter = router({
           logger.error('Shipping allocator service failed', serviceError, {
             orderId: input.orderId,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في تخصيص شركة الشحن. يرجى المحاولة مرة أخرى',
@@ -500,7 +506,7 @@ export const codRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Shipping allocation failed (TRPCError)', {
             code: error.code,
@@ -579,7 +585,7 @@ export const codRouter = router({
             orderId: input.orderId,
             originalPartnerId: input.originalPartnerId,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في التبديل إلى شركة شحن بديلة. يرجى المحاولة مرة أخرى',
@@ -604,7 +610,7 @@ export const codRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Shipping fallback failed (TRPCError)', {
             code: error.code,
@@ -657,7 +663,7 @@ export const codRouter = router({
           partners = await query;
         } catch (dbError: any) {
           logger.error('Database query failed', dbError);
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب شركات الشحن. يرجى المحاولة مرة أخرى',
@@ -674,7 +680,7 @@ export const codRouter = router({
         return { partners };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Shipping partners fetch failed (TRPCError)', {
             code: error.code,
@@ -752,14 +758,15 @@ export const codRouter = router({
 
         // Update partner
         try {
-          await db.update(shippingPartners)
+          await db
+            .update(shippingPartners)
             .set(input.data)
             .where(eq(shippingPartners.id, input.id));
         } catch (dbError: any) {
           logger.error('Database update failed', dbError, {
             partnerId: input.id,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في تحديث شركة الشحن. يرجى المحاولة مرة أخرى',
@@ -776,7 +783,7 @@ export const codRouter = router({
         return { success: true };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Shipping partner update failed (TRPCError)', {
             code: error.code,
@@ -824,7 +831,8 @@ export const codRouter = router({
 
         const db = await requireDb();
 
-        const [order] = await db.select()
+        const [order] = await db
+          .select()
           .from(codOrders)
           .where(eq(codOrders.orderId, input.orderId));
 
@@ -837,13 +845,14 @@ export const codRouter = router({
 
         let logs;
         try {
-          logs = await db.select()
+          logs = await db
+            .select()
             .from(trackingLogs)
             .where(eq(trackingLogs.codOrderId, order.id))
             .orderBy(desc(trackingLogs.createdAt));
         } catch (dbError: any) {
           logger.error('Database query failed', dbError, { orderId: input.orderId });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب سجلات التتبع. يرجى المحاولة مرة أخرى',
@@ -861,7 +870,7 @@ export const codRouter = router({
         return { logs };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Tracking logs fetch failed (TRPCError)', {
             code: error.code,
@@ -951,7 +960,7 @@ export const codRouter = router({
             startDate: input.startDate,
             endDate: input.endDate,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في إنشاء التقرير. يرجى المحاولة مرة أخرى',
@@ -969,7 +978,7 @@ export const codRouter = router({
         return result;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('COD report generation failed (TRPCError)', {
             code: error.code,
@@ -1002,40 +1011,44 @@ export const codRouter = router({
       const db = await requireDb();
 
       let stageStats, statusStats, totalCOD, todayOrders;
-      
+
       try {
         // Get counts by stage
-        stageStats = await db.select({
-          stage: codOrders.currentStage,
-          count: sql<number>`count(*)`,
-        })
+        stageStats = await db
+          .select({
+            stage: codOrders.currentStage,
+            count: sql<number>`count(*)`,
+          })
           .from(codOrders)
           .groupBy(codOrders.currentStage);
 
         // Get counts by status
-        statusStats = await db.select({
-          status: codOrders.status,
-          count: sql<number>`count(*)`,
-        })
+        statusStats = await db
+          .select({
+            status: codOrders.status,
+            count: sql<number>`count(*)`,
+          })
           .from(codOrders)
           .groupBy(codOrders.status);
 
         // Get total COD value
-        [totalCOD] = await db.select({
-          total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
-        })
+        [totalCOD] = await db
+          .select({
+            total: sql<number>`SUM(CAST(cod_amount AS DECIMAL(10,2)))`,
+          })
           .from(codOrders);
 
         // Get today's orders
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        todayOrders = await db.select()
+        todayOrders = await db
+          .select()
           .from(codOrders)
           .where(gte(codOrders.createdAt, today.toISOString()));
       } catch (dbError: any) {
         logger.error('Database query failed', dbError);
-        
+
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'فشل في جلب إحصائيات لوحة التحكم. يرجى المحاولة مرة أخرى',
@@ -1056,7 +1069,7 @@ export const codRouter = router({
       };
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       if (error instanceof TRPCError) {
         logger.error('Dashboard stats fetch failed (TRPCError)', {
           code: error.code,
@@ -1093,7 +1106,7 @@ export const codRouter = router({
         companies = await db.select().from(shippingPartners);
       } catch (dbError: any) {
         logger.error('Database query failed', dbError);
-        
+
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'فشل في جلب شركات الشحن. يرجى المحاولة مرة أخرى',
@@ -1110,7 +1123,7 @@ export const codRouter = router({
       return companies;
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       if (error instanceof TRPCError) {
         logger.error('Shipping companies fetch failed (TRPCError)', {
           code: error.code,
@@ -1136,9 +1149,11 @@ export const codRouter = router({
   // GET PERFORMANCE BY GOVERNORATE
   // ============================================
   getPerformanceByGovernorate: protectedProcedure
-    .input(z.object({
-      governorateCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        governorateCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const startTime = Date.now();
       try {
@@ -1147,22 +1162,24 @@ export const codRouter = router({
         });
 
         const db = await requireDb();
-        
+
         let performance;
         try {
           if (input.governorateCode) {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByGovernorate)
               .where(eq(shippingPerformanceByGovernorate.governorateCode, input.governorateCode))
               .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
           } else {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByGovernorate)
               .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
           }
         } catch (dbError: any) {
           logger.error('Database query failed', dbError);
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب أداء المحافظ. يرجى المحاولة مرة أخرى',
@@ -1179,7 +1196,7 @@ export const codRouter = router({
         return performance;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Performance by governorate fetch failed (TRPCError)', {
             code: error.code,
@@ -1205,9 +1222,11 @@ export const codRouter = router({
   // GET PERFORMANCE BY CENTER
   // ============================================
   getPerformanceByCenter: protectedProcedure
-    .input(z.object({
-      centerCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        centerCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const startTime = Date.now();
       try {
@@ -1216,23 +1235,25 @@ export const codRouter = router({
         });
 
         const db = await requireDb();
-        
+
         let performance;
         try {
           if (input.centerCode) {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByCenter)
               .where(eq(shippingPerformanceByCenter.centerCode, input.centerCode))
               .orderBy(desc(shippingPerformanceByCenter.totalShipments));
           } else {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByCenter)
               .orderBy(desc(shippingPerformanceByCenter.totalShipments))
               .limit(50);
           }
         } catch (dbError: any) {
           logger.error('Database query failed', dbError);
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب أداء المراكز. يرجى المحاولة مرة أخرى',
@@ -1249,7 +1270,7 @@ export const codRouter = router({
         return performance;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Performance by center fetch failed (TRPCError)', {
             code: error.code,
@@ -1275,9 +1296,11 @@ export const codRouter = router({
   // GET PERFORMANCE BY POINT
   // ============================================
   getPerformanceByPoint: protectedProcedure
-    .input(z.object({
-      pointCode: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        pointCode: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const startTime = Date.now();
       try {
@@ -1286,23 +1309,25 @@ export const codRouter = router({
         });
 
         const db = await requireDb();
-        
+
         let performance;
         try {
           if (input.pointCode) {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByPoint)
               .where(eq(shippingPerformanceByPoint.pointCode, input.pointCode))
               .orderBy(desc(shippingPerformanceByPoint.totalShipments));
           } else {
-            performance = await db.select()
+            performance = await db
+              .select()
               .from(shippingPerformanceByPoint)
               .orderBy(desc(shippingPerformanceByPoint.totalShipments))
               .limit(50);
           }
         } catch (dbError: any) {
           logger.error('Database query failed', dbError);
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في جلب أداء النقاط. يرجى المحاولة مرة أخرى',
@@ -1319,7 +1344,7 @@ export const codRouter = router({
         return performance;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Performance by point fetch failed (TRPCError)', {
             code: error.code,

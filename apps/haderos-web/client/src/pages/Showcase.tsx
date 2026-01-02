@@ -1,11 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  Github, 
-  CheckCircle2, 
-  Code2, 
-  Database, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Github,
+  CheckCircle2,
+  Code2,
+  Database,
   Rocket,
   Shield,
   Brain,
@@ -14,74 +14,74 @@ import {
   FileCode,
   TestTube,
   BookOpen,
-  ExternalLink
-} from "lucide-react";
+  ExternalLink,
+} from 'lucide-react';
 
 export default function Showcase() {
   const stats = [
-    { label: "Total Files", value: "60", change: "+14", icon: FileCode },
-    { label: "Lines of Code", value: "5,500+", change: "+2,829", icon: Code2 },
-    { label: "Test Cases", value: "38+", change: "+38", icon: TestTube },
-    { label: "Documentation Files", value: "7", change: "+3", icon: BookOpen },
+    { label: 'Total Files', value: '60', change: '+14', icon: FileCode },
+    { label: 'Lines of Code', value: '5,500+', change: '+2,829', icon: Code2 },
+    { label: 'Test Cases', value: '38+', change: '+38', icon: TestTube },
+    { label: 'Documentation Files', value: '7', change: '+3', icon: BookOpen },
   ];
 
   const features = [
     {
       icon: Shield,
-      title: "KAIA Theology Engine",
-      description: "Sharia compliance validation with automated Riba, Gharar, and Maysir detection",
-      status: "complete",
-      items: ["7 database models", "Compliance scoring", "Automated recommendations"]
+      title: 'KAIA Theology Engine',
+      description: 'Sharia compliance validation with automated Riba, Gharar, and Maysir detection',
+      status: 'complete',
+      items: ['7 database models', 'Compliance scoring', 'Automated recommendations'],
     },
     {
       icon: Blocks,
-      title: "ERC-3643 Blockchain",
-      description: "Security token integration with KYC/AML compliance",
-      status: "complete",
-      items: ["Smart contracts", "Token issuance", "Investor registry"]
+      title: 'ERC-3643 Blockchain',
+      description: 'Security token integration with KYC/AML compliance',
+      status: 'complete',
+      items: ['Smart contracts', 'Token issuance', 'Investor registry'],
     },
     {
       icon: Brain,
-      title: "BioModuleFactory",
-      description: "7 bio-inspired modules with state machine workflow",
-      status: "complete",
-      items: ["CLI commands", "Quality gates", "Training academy"]
+      title: 'BioModuleFactory',
+      description: '7 bio-inspired modules with state machine workflow',
+      status: 'complete',
+      items: ['CLI commands', 'Quality gates', 'Training academy'],
     },
     {
       icon: TrendingUp,
-      title: "ML/AI Risk Assessment",
-      description: "Multi-factor risk analysis with intelligent recommendations",
-      status: "complete",
-      items: ["5 risk factors", "Prediction engine", "Smart suggestions"]
+      title: 'ML/AI Risk Assessment',
+      description: 'Multi-factor risk analysis with intelligent recommendations',
+      status: 'complete',
+      items: ['5 risk factors', 'Prediction engine', 'Smart suggestions'],
     },
   ];
 
   const techStack = [
-    { name: "FastAPI", category: "Backend" },
-    { name: "Python 3.11", category: "Language" },
-    { name: "PostgreSQL", category: "Database" },
-    { name: "Redis", category: "Cache" },
-    { name: "Docker", category: "Container" },
-    { name: "Prometheus", category: "Monitoring" },
-    { name: "GitHub Actions", category: "CI/CD" },
-    { name: "Pytest", category: "Testing" },
+    { name: 'FastAPI', category: 'Backend' },
+    { name: 'Python 3.11', category: 'Language' },
+    { name: 'PostgreSQL', category: 'Database' },
+    { name: 'Redis', category: 'Cache' },
+    { name: 'Docker', category: 'Container' },
+    { name: 'Prometheus', category: 'Monitoring' },
+    { name: 'GitHub Actions', category: 'CI/CD' },
+    { name: 'Pytest', category: 'Testing' },
   ];
 
   const achievements = [
-    "✅ Docker + CI/CD (4 files, GitHub Actions)",
-    "✅ Comprehensive testing (38+ test cases)",
-    "✅ Enhanced documentation (10+ examples)",
-    "✅ Frontend integration (API client + React components)",
+    '✅ Docker + CI/CD (4 files, GitHub Actions)',
+    '✅ Comprehensive testing (38+ test cases)',
+    '✅ Enhanced documentation (10+ examples)',
+    '✅ Frontend integration (API client + React components)',
   ];
 
   const commits = [
-    { hash: "cedbe11", message: "Initial Python implementation" },
-    { hash: "8fc1aac", message: "Docker + docker-compose" },
-    { hash: "9a9dbab", message: "GitHub Actions CI/CD" },
-    { hash: "22ba12b", message: "Comprehensive test suite" },
-    { hash: "74cddf0", message: "Real-world examples" },
-    { hash: "2db047d", message: "Frontend integration guide" },
-    { hash: "73798d4", message: "Completion report" },
+    { hash: 'cedbe11', message: 'Initial Python implementation' },
+    { hash: '8fc1aac', message: 'Docker + docker-compose' },
+    { hash: '9a9dbab', message: 'GitHub Actions CI/CD' },
+    { hash: '22ba12b', message: 'Comprehensive test suite' },
+    { hash: '74cddf0', message: 'Real-world examples' },
+    { hash: '2db047d', message: 'Frontend integration guide' },
+    { hash: '73798d4', message: 'Completion report' },
   ];
 
   return (
@@ -93,7 +93,7 @@ export default function Showcase() {
             <Badge variant="secondary" className="text-sm px-4 py-2">
               v2.0.0 - Production Ready
             </Badge>
-            
+
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
               <span className="block bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 HaderOS Platform
@@ -102,17 +102,17 @@ export default function Showcase() {
                 Ethical AI for Islamic Finance
               </span>
             </h1>
-            
+
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              A production-ready platform combining <strong>Sharia compliance</strong>, 
-              <strong> blockchain technology</strong>, and <strong>AI/ML models</strong> for 
-              ethical investment management.
+              A production-ready platform combining <strong>Sharia compliance</strong>,
+              <strong> blockchain technology</strong>, and <strong>AI/ML models</strong> for ethical
+              investment management.
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center">
-              <a 
-                href="https://github.com/ka364/haderos-platform" 
-                target="_blank" 
+              <a
+                href="https://github.com/ka364/haderos-platform"
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 <Button size="lg" className="gap-2">
@@ -142,7 +142,10 @@ export default function Showcase() {
         <div className="container">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-2 hover:border-primary transition-all hover:shadow-lg">
+              <Card
+                key={index}
+                className="border-2 hover:border-primary transition-all hover:shadow-lg"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <stat.icon className="h-5 w-5 text-muted-foreground" />
@@ -191,9 +194,7 @@ export default function Showcase() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <CardDescription className="text-base">
-                    {feature.description}
-                  </CardDescription>
+                  <CardDescription className="text-base">{feature.description}</CardDescription>
                   <ul className="space-y-2">
                     {feature.items.map((item, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
@@ -224,9 +225,7 @@ export default function Showcase() {
               <Badge key={index} variant="outline" className="text-base px-4 py-2">
                 <Code2 className="h-4 w-4 mr-2" />
                 {tech.name}
-                <span className="ml-2 text-xs text-muted-foreground">
-                  {tech.category}
-                </span>
+                <span className="ml-2 text-xs text-muted-foreground">{tech.category}</span>
               </Badge>
             ))}
           </div>
@@ -288,9 +287,9 @@ export default function Showcase() {
             </div>
 
             <div className="mt-8 text-center">
-              <a 
-                href="https://github.com/ka364/haderos-platform/commits/main" 
-                target="_blank" 
+              <a
+                href="https://github.com/ka364/haderos-platform/commits/main"
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 <Button variant="outline" className="gap-2">
@@ -317,7 +316,7 @@ export default function Showcase() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <a 
+                  <a
                     href="https://github.com/ka364/haderos-platform/blob/main/README.md"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -334,7 +333,7 @@ export default function Showcase() {
                     </Card>
                   </a>
 
-                  <a 
+                  <a
                     href="https://github.com/ka364/haderos-platform/blob/main/docs/EXAMPLES.md"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -351,7 +350,7 @@ export default function Showcase() {
                     </Card>
                   </a>
 
-                  <a 
+                  <a
                     href="https://github.com/ka364/haderos-platform/blob/main/docs/TESTING_GUIDE.md"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -368,7 +367,7 @@ export default function Showcase() {
                     </Card>
                   </a>
 
-                  <a 
+                  <a
                     href="https://github.com/ka364/haderos-platform/blob/main/COMPLETION_REPORT.md"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -395,17 +394,15 @@ export default function Showcase() {
       <section className="py-24 border-t">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl font-bold tracking-tight">
-              Ready for Production
-            </h2>
+            <h2 className="text-4xl font-bold tracking-tight">Ready for Production</h2>
             <p className="text-xl text-muted-foreground">
-              All components tested, documented, and deployed to GitHub. 
-              Ready for beta testing and investor presentations.
+              All components tested, documented, and deployed to GitHub. Ready for beta testing and
+              investor presentations.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a 
-                href="https://github.com/ka364/haderos-platform" 
-                target="_blank" 
+              <a
+                href="https://github.com/ka364/haderos-platform"
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 <Button size="lg" className="gap-2">
@@ -430,14 +427,12 @@ export default function Showcase() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="text-center md:text-left">
                 <p className="font-semibold text-lg">HaderOS Platform</p>
-                <p className="text-sm text-muted-foreground">
-                  Ethical AI for Islamic Finance
-                </p>
+                <p className="text-sm text-muted-foreground">Ethical AI for Islamic Finance</p>
               </div>
               <div className="flex gap-4">
-                <a 
-                  href="https://github.com/ka364/haderos-platform" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/ka364/haderos-platform"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
@@ -446,7 +441,10 @@ export default function Showcase() {
               </div>
             </div>
             <div className="border-t pt-6 text-center text-sm text-muted-foreground">
-              <p>© 2024 HaderOS Platform. Built with 🧬 Bio-inspired Intelligence + 🕌 Islamic Finance + 🤖 AI/ML + ⛓️ Blockchain</p>
+              <p>
+                © 2024 HaderOS Platform. Built with 🧬 Bio-inspired Intelligence + 🕌 Islamic
+                Finance + 🤖 AI/ML + ⛓️ Blockchain
+              </p>
               <p className="mt-2">Version 2.0.0 - Production Ready</p>
             </div>
           </div>

@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, User, Lock, Shield } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, User, Lock, Shield } from 'lucide-react';
 
 export default function EmployeeLogin() {
   const [, navigate] = useLocation();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Load remembered username on mount
   useEffect(() => {
-    const rememberedUsername = localStorage.getItem("employee_remembered_username");
+    const rememberedUsername = localStorage.getItem('employee_remembered_username');
     if (rememberedUsername) {
       setUsername(rememberedUsername);
       setRememberMe(true);
@@ -29,42 +29,42 @@ export default function EmployeeLogin() {
     onSuccess: (data) => {
       if (data.success) {
         // Store session
-        localStorage.setItem("employee_session", data.sessionToken || "");
-        localStorage.setItem("employee_data", JSON.stringify(data.employee));
+        localStorage.setItem('employee_session', data.sessionToken || '');
+        localStorage.setItem('employee_data', JSON.stringify(data.employee));
 
         // Handle Remember Me
         if (rememberMe) {
-          localStorage.setItem("employee_remembered_username", username);
+          localStorage.setItem('employee_remembered_username', username);
         } else {
-          localStorage.removeItem("employee_remembered_username");
+          localStorage.removeItem('employee_remembered_username');
         }
 
-        setSuccess("تم تسجيل الدخول بنجاح!");
-        
+        setSuccess('تم تسجيل الدخول بنجاح!');
+
         // Redirect based on email status
         setTimeout(() => {
           if (data.needsEmailRegistration) {
-            navigate("/employee/register-email");
+            navigate('/employee/register-email');
           } else {
-            navigate("/employee-dashboard");
+            navigate('/employee-dashboard');
           }
         }, 1000);
       } else {
-        setError(data.error || "فشل تسجيل الدخول");
+        setError(data.error || 'فشل تسجيل الدخول');
       }
     },
     onError: (err: any) => {
-      setError(err.message || "حدث خطأ في تسجيل الدخول");
+      setError(err.message || 'حدث خطأ في تسجيل الدخول');
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     if (!username || !password) {
-      setError("الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setError('الرجاء إدخال اسم المستخدم وكلمة المرور');
       return;
     }
 
@@ -74,7 +74,10 @@ export default function EmployeeLogin() {
   const isLoading = loginMutation.isPending;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4" dir="rtl">
+    <div
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4"
+      dir="rtl"
+    >
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
@@ -166,7 +169,7 @@ export default function EmployeeLogin() {
                   جاري تسجيل الدخول...
                 </>
               ) : (
-                "تسجيل الدخول"
+                'تسجيل الدخول'
               )}
             </Button>
 
@@ -174,7 +177,7 @@ export default function EmployeeLogin() {
               <Button
                 variant="link"
                 type="button"
-                onClick={() => navigate("/")}
+                onClick={() => navigate('/')}
                 className="text-sm"
               >
                 العودة للصفحة الرئيسية

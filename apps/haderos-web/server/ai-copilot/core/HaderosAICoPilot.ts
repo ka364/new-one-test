@@ -86,20 +86,20 @@ export class HaderosAICoPilot {
       securityAnalysis,
       performanceAnalysis,
       codeQualityAnalysis,
-      architectureAnalysis
+      architectureAnalysis,
     ] = await Promise.all([
       this.systemAnalyzer.analyzeStructure(),
       this.securityAuditor.auditSecurity(),
       this.performanceOptimizer.analyzePerformance(),
       this.codeGenerator.analyzeCodeQuality(),
-      this.systemAnalyzer.analyzeArchitecture()
+      this.systemAnalyzer.analyzeArchitecture(),
     ]);
 
     // دمج النتائج بذكاء
     const criticalIssues = this.mergeCriticalIssues([
       ...securityAnalysis.criticalIssues,
       ...performanceAnalysis.criticalIssues,
-      ...codeQualityAnalysis.criticalIssues
+      ...codeQualityAnalysis.criticalIssues,
     ]);
 
     // توليد التوصيات الذكية
@@ -108,14 +108,14 @@ export class HaderosAICoPilot {
       security: securityAnalysis,
       performance: performanceAnalysis,
       quality: codeQualityAnalysis,
-      architecture: architectureAnalysis
+      architecture: architectureAnalysis,
     });
 
     // حساب صحة النظام
     const systemHealth = this.calculateSystemHealth({
       issues: criticalIssues,
       performance: performanceAnalysis,
-      security: securityAnalysis
+      security: securityAnalysis,
     });
 
     // تطبيق الإصلاحات التلقائية
@@ -125,7 +125,7 @@ export class HaderosAICoPilot {
     const learningInsights = this.extractLearningInsights({
       issues: criticalIssues,
       fixes: autoFixesApplied,
-      recommendations
+      recommendations,
     });
 
     const analysisTime = Date.now() - startTime;
@@ -140,14 +140,10 @@ export class HaderosAICoPilot {
       timestamp: new Date(),
       systemHealth,
       criticalIssues,
-      warnings: this.extractWarnings([
-        structureAnalysis,
-        securityAnalysis,
-        performanceAnalysis
-      ]),
+      warnings: this.extractWarnings([structureAnalysis, securityAnalysis, performanceAnalysis]),
       recommendations,
       autoFixesApplied,
-      learningInsights
+      learningInsights,
     };
   }
 
@@ -161,7 +157,7 @@ export class HaderosAICoPilot {
 
     // معالجة المشاكل الحرجة فقط
     const criticalIssues = analysis.criticalIssues.filter(
-      issue => issue.autoFixable && issue.severity === 'critical'
+      (issue) => issue.autoFixable && issue.severity === 'critical'
     );
 
     for (const issue of criticalIssues) {
@@ -180,9 +176,7 @@ export class HaderosAICoPilot {
   /**
    * توليد توصيات ذكية
    */
-  private async generateIntelligentRecommendations(
-    analysisData: any
-  ): Promise<Recommendation[]> {
+  private async generateIntelligentRecommendations(analysisData: any): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // توصيات الأمان
@@ -192,14 +186,10 @@ export class HaderosAICoPilot {
         priority: 100,
         title: 'تحسين الأمان الشامل',
         description: 'النظام يحتاج تحسينات أمنية حرجة',
-        benefits: [
-          'حماية من الاختراقات',
-          'توافق مع معايير الأمان',
-          'زيادة ثقة العملاء'
-        ],
+        benefits: ['حماية من الاختراقات', 'توافق مع معايير الأمان', 'زيادة ثقة العملاء'],
         estimatedEffort: '2-3 أيام',
         roi: 500,
-        implementation: 'تطبيق Security Headers, Rate Limiting, 2FA'
+        implementation: 'تطبيق Security Headers, Rate Limiting, 2FA',
       });
     }
 
@@ -210,14 +200,10 @@ export class HaderosAICoPilot {
         priority: 90,
         title: 'تحسين الأداء',
         description: 'وقت الاستجابة أعلى من المستهدف',
-        benefits: [
-          'تجربة مستخدم أفضل',
-          'تكاليف سيرفر أقل',
-          'SEO أفضل'
-        ],
+        benefits: ['تجربة مستخدم أفضل', 'تكاليف سيرفر أقل', 'SEO أفضل'],
         estimatedEffort: '3-5 أيام',
         roi: 400,
-        implementation: 'Redis Caching, Database Optimization, CDN'
+        implementation: 'Redis Caching, Database Optimization, CDN',
       });
     }
 
@@ -228,14 +214,10 @@ export class HaderosAICoPilot {
         priority: 85,
         title: 'زيادة تغطية الاختبارات',
         description: 'تغطية الاختبارات منخفضة جداً',
-        benefits: [
-          'أخطاء أقل في Production',
-          'ثقة أعلى في التغييرات',
-          'صيانة أسهل'
-        ],
+        benefits: ['أخطاء أقل في Production', 'ثقة أعلى في التغييرات', 'صيانة أسهل'],
         estimatedEffort: '1-2 أسبوع',
         roi: 350,
-        implementation: 'Unit Tests, Integration Tests, E2E Tests'
+        implementation: 'Unit Tests, Integration Tests, E2E Tests',
       });
     }
 
@@ -283,13 +265,13 @@ export class HaderosAICoPilot {
             issueId: issue.id,
             applied: true,
             timestamp: new Date(),
-            fix
+            fix,
           });
         } catch (error) {
           fixes.push({
             issueId: issue.id,
             applied: false,
-            error: (error as Error).message
+            error: (error as Error).message,
           });
         }
       }
@@ -324,7 +306,7 @@ export class HaderosAICoPilot {
    * استخراج التحذيرات
    */
   private extractWarnings(analyses: any[]): any[] {
-    return analyses.flatMap(analysis => analysis.warnings || []);
+    return analyses.flatMap((analysis) => analysis.warnings || []);
   }
 
   /**
@@ -346,7 +328,7 @@ export class HaderosAICoPilot {
           category,
           observation: `كثرة مشاكل في فئة ${category}`,
           action: 'التركيز على تحسين هذا الجانب',
-          count
+          count,
         });
       }
     }
@@ -357,7 +339,7 @@ export class HaderosAICoPilot {
       insights.push({
         type: 'success',
         observation: `${successfulFixes.length} إصلاحات تلقائية ناجحة`,
-        action: 'الاستمرار في استخدام هذه الأنماط'
+        action: 'الاستمرار في استخدام هذه الأنماط',
       });
     }
 
@@ -404,36 +386,53 @@ ${this.getHealthEmoji(analysis.systemHealth)} ${this.getHealthMessage(analysis.s
 
 ## 🔴 Critical Issues (${analysis.criticalIssues.length})
 
-${analysis.criticalIssues.map((issue, i) => `
+${analysis.criticalIssues
+  .map(
+    (issue, i) => `
 ${i + 1}. **${issue.title}** (${issue.severity})
    - Category: ${issue.category}
    - Auto-fixable: ${issue.autoFixable ? '✅' : '❌'}
    - Impact: ${issue.estimatedImpact}%
    - Fix: ${issue.suggestedFix}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## 💡 Top Recommendations (${analysis.recommendations.length})
 
-${analysis.recommendations.slice(0, 5).map((rec, i) => `
+${analysis.recommendations
+  .slice(0, 5)
+  .map(
+    (rec, i) => `
 ${i + 1}. **${rec.title}** (Priority: ${rec.priority}, ROI: ${rec.roi}%)
    - ${rec.description}
    - Effort: ${rec.estimatedEffort}
    - Benefits:
-${rec.benefits.map(b => `     - ${b}`).join('\n')}
-`).join('\n')}
+${rec.benefits.map((b) => `     - ${b}`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## 🔧 Auto-Fixes Applied (${analysis.autoFixesApplied.length})
 
-${analysis.autoFixesApplied.map((fix, i) => `
+${analysis.autoFixesApplied
+  .map(
+    (fix, i) => `
 ${i + 1}. ${fix.applied ? '✅' : '❌'} Issue ${fix.issueId}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## 🧠 Learning Insights (${analysis.learningInsights.length})
 
-${analysis.learningInsights.map((insight, i) => `
+${analysis.learningInsights
+  .map(
+    (insight, i) => `
 ${i + 1}. **${insight.observation}**
    - Action: ${insight.action}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ---
 *Report generated by HADEROS AI Co-Pilot v1.0.0*

@@ -3,9 +3,9 @@
  * Generates and validates OTP codes for employee authentication
  */
 
-import { requireDb } from "../db";
-import { monthlyEmployeeAccounts } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { requireDb } from '../db';
+import { monthlyEmployeeAccounts } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * Generate a 6-digit OTP code
@@ -19,7 +19,7 @@ export function generateOTP(): string {
  */
 export async function saveOTP(username: string, otpCode: string): Promise<boolean> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   // OTP expires in 10 minutes
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
@@ -36,7 +36,7 @@ export async function saveOTP(username: string, otpCode: string): Promise<boolea
 
     return true;
   } catch (error) {
-    console.error("[OTP] Failed to save OTP:", error);
+    console.error('[OTP] Failed to save OTP:', error);
     return false;
   }
 }
@@ -49,7 +49,7 @@ export async function verifyOTP(
   otpCode: string
 ): Promise<{ valid: boolean; message: string }> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   try {
     const employee = await db
@@ -59,24 +59,24 @@ export async function verifyOTP(
       .limit(1);
 
     if (employee.length === 0) {
-      return { valid: false, message: "Employee not found" };
+      return { valid: false, message: 'Employee not found' };
     }
 
     const emp = employee[0];
 
     // Check if OTP exists
     if (!emp.otpCode) {
-      return { valid: false, message: "No OTP generated" };
+      return { valid: false, message: 'No OTP generated' };
     }
 
     // Check if OTP expired
     if (emp.otpExpiresAt && new Date() > new Date(emp.otpExpiresAt)) {
-      return { valid: false, message: "OTP expired" };
+      return { valid: false, message: 'OTP expired' };
     }
 
     // Check attempts
     if (emp.otpAttempts && emp.otpAttempts >= 3) {
-      return { valid: false, message: "Too many attempts. Please request a new OTP" };
+      return { valid: false, message: 'Too many attempts. Please request a new OTP' };
     }
 
     // Verify OTP
@@ -91,7 +91,7 @@ export async function verifyOTP(
         })
         .where(eq(monthlyEmployeeAccounts.username, username));
 
-      return { valid: true, message: "OTP verified successfully" };
+      return { valid: true, message: 'OTP verified successfully' };
     } else {
       // Increment attempts
       await db
@@ -101,23 +101,20 @@ export async function verifyOTP(
         })
         .where(eq(monthlyEmployeeAccounts.username, username));
 
-      return { valid: false, message: "Invalid OTP code" };
+      return { valid: false, message: 'Invalid OTP code' };
     }
   } catch (error) {
-    console.error("[OTP] Failed to verify OTP:", error);
-    return { valid: false, message: "Verification failed" };
+    console.error('[OTP] Failed to verify OTP:', error);
+    return { valid: false, message: 'Verification failed' };
   }
 }
 
 /**
  * Save employee email (first time setup)
  */
-export async function saveEmployeeEmail(
-  username: string,
-  email: string
-): Promise<boolean> {
+export async function saveEmployeeEmail(username: string, email: string): Promise<boolean> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   try {
     await db
@@ -130,7 +127,7 @@ export async function saveEmployeeEmail(
 
     return true;
   } catch (error) {
-    console.error("[OTP] Failed to save email:", error);
+    console.error('[OTP] Failed to save email:', error);
     return false;
   }
 }
@@ -140,7 +137,7 @@ export async function saveEmployeeEmail(
  */
 export async function markEmailVerified(username: string): Promise<boolean> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   try {
     await db
@@ -152,7 +149,7 @@ export async function markEmailVerified(username: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error("[OTP] Failed to mark email verified:", error);
+    console.error('[OTP] Failed to mark email verified:', error);
     return false;
   }
 }
@@ -162,7 +159,7 @@ export async function markEmailVerified(username: string): Promise<boolean> {
  */
 export async function getEmployeeEmail(username: string): Promise<string | null> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   try {
     const employee = await db
@@ -177,7 +174,7 @@ export async function getEmployeeEmail(username: string): Promise<string | null>
 
     return employee[0].email || null;
   } catch (error) {
-    console.error("[OTP] Failed to get employee email:", error);
+    console.error('[OTP] Failed to get employee email:', error);
     return null;
   }
 }
@@ -187,7 +184,7 @@ export async function getEmployeeEmail(username: string): Promise<string | null>
  */
 export async function hasVerifiedEmail(username: string): Promise<boolean> {
   const db = await requireDb();
-  if (!db) throw new Error("Database not connected");
+  if (!db) throw new Error('Database not connected');
 
   try {
     const employee = await db
@@ -202,7 +199,7 @@ export async function hasVerifiedEmail(username: string): Promise<boolean> {
 
     return employee[0].email !== null && employee[0].emailVerified === 1;
   } catch (error) {
-    console.error("[OTP] Failed to check email verification:", error);
+    console.error('[OTP] Failed to check email verification:', error);
     return false;
   }
 }

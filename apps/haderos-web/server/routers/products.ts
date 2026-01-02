@@ -1,13 +1,13 @@
-import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import { requireDb } from "../db";
-import { products } from "../../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
-import { applyDynamicPricing } from "../bio-modules/orders-bio-integration.js";
-import { schemas } from "../_core/validation";
-import { cache } from "../_core/cache";
-import { logger } from "../_core/logger";
+import { z } from 'zod';
+import { router, protectedProcedure, publicProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import { requireDb } from '../db';
+import { products } from '../../drizzle/schema';
+import { eq, desc } from 'drizzle-orm';
+import { applyDynamicPricing } from '../bio-modules/orders-bio-integration.js';
+import { schemas } from '../_core/validation';
+import { cache } from '../_core/cache';
+import { logger } from '../_core/logger';
 
 export const productsRouter = router({
   // Get all products
@@ -53,7 +53,7 @@ export const productsRouter = router({
     } catch (error: any) {
       const duration = Date.now() - startTime;
       logger.error('Failed to fetch products', error, { duration: `${duration}ms` });
-      
+
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'فشل في جلب المنتجات. يرجى المحاولة مرة أخرى',
@@ -108,7 +108,7 @@ export const productsRouter = router({
           if (cacheError instanceof TRPCError && cacheError.code === 'NOT_FOUND') {
             throw cacheError;
           }
-          
+
           logger.warn('Cache failed, fetching from DB', { error: cacheError.message });
           const db = await requireDb();
           const [productFromDb] = await db
@@ -135,7 +135,7 @@ export const productsRouter = router({
         return product;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Product fetch failed (TRPCError)', {
             code: error.code,
@@ -164,12 +164,14 @@ export const productsRouter = router({
     .input(
       z.object({
         productId: z.number().positive(),
-        context: z.object({
-          customerHistory: z.number().optional(),
-          timeOfDay: z.number().optional(),
-          dayOfWeek: z.number().optional(),
-          currentDemand: z.enum(["low", "medium", "high"]).optional(),
-        }).optional(),
+        context: z
+          .object({
+            customerHistory: z.number().optional(),
+            timeOfDay: z.number().optional(),
+            dayOfWeek: z.number().optional(),
+            currentDemand: z.enum(['low', 'medium', 'high']).optional(),
+          })
+          .optional(),
       })
     )
     .query(async ({ input }) => {
@@ -186,12 +188,9 @@ export const productsRouter = router({
         logger.debug('Calculating dynamic price', { productId: input.productId });
 
         const db = await requireDb();
-        
+
         // Get product
-        const [product] = await db
-          .select()
-          .from(products)
-          .where(eq(products.id, input.productId));
+        const [product] = await db.select().from(products).where(eq(products.id, input.productId));
 
         if (!product) {
           logger.warn('Product not found for dynamic pricing', { productId: input.productId });
@@ -202,8 +201,8 @@ export const productsRouter = router({
         }
 
         // Get base price
-        const basePrice = product.sellingPrice 
-          ? parseFloat(product.sellingPrice) 
+        const basePrice = product.sellingPrice
+          ? parseFloat(product.sellingPrice)
           : parseFloat(product.supplierPrice || '0') * 1.3; // 30% markup if no selling price
 
         if (basePrice <= 0) {
@@ -254,7 +253,7 @@ export const productsRouter = router({
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Dynamic price calculation failed (TRPCError)', {
             code: error.code,
@@ -347,7 +346,7 @@ export const productsRouter = router({
           insertedProduct = result[0];
         } catch (dbError: any) {
           logger.error('Database insert failed', dbError, { sku: input.sku });
-          
+
           if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
             throw new TRPCError({
               code: 'CONFLICT',
@@ -388,11 +387,11 @@ export const productsRouter = router({
         return {
           success: true,
           productId: insertedProduct.id,
-          message: "تم إنشاء المنتج بنجاح",
+          message: 'تم إنشاء المنتج بنجاح',
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Product creation failed (TRPCError)', {
             code: error.code,
@@ -492,13 +491,10 @@ export const productsRouter = router({
 
         // Update product
         try {
-          await db
-            .update(products)
-            .set(updateData)
-            .where(eq(products.id, input.productId));
+          await db.update(products).set(updateData).where(eq(products.id, input.productId));
         } catch (dbError: any) {
           logger.error('Database update failed', dbError, { productId: input.productId });
-          
+
           if (dbError.code === '23505' || dbError.message?.includes('duplicate')) {
             throw new TRPCError({
               code: 'CONFLICT',
@@ -530,11 +526,11 @@ export const productsRouter = router({
 
         return {
           success: true,
-          message: "تم تحديث المنتج بنجاح",
+          message: 'تم تحديث المنتج بنجاح',
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Product update failed (TRPCError)', {
             code: error.code,
@@ -603,7 +599,7 @@ export const productsRouter = router({
             .where(eq(products.id, input.productId));
         } catch (dbError: any) {
           logger.error('Database update failed', dbError, { productId: input.productId });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في حذف المنتج. يرجى المحاولة مرة أخرى',
@@ -628,11 +624,11 @@ export const productsRouter = router({
 
         return {
           success: true,
-          message: "تم حذف المنتج بنجاح",
+          message: 'تم حذف المنتج بنجاح',
         };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Product deletion failed (TRPCError)', {
             code: error.code,

@@ -22,7 +22,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
 
   useEffect(() => {
     startScanning();
-    
+
     return () => {
       stopScanning();
     };

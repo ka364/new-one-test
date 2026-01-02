@@ -73,9 +73,7 @@ describe('Adaptive Learning System - Unit Tests', () => {
 
       const normalize = (prefs: typeof preferences) => {
         const total = Object.values(prefs).reduce((sum, v) => sum + v, 0);
-        return Object.fromEntries(
-          Object.entries(prefs).map(([k, v]) => [k, v / total])
-        );
+        return Object.fromEntries(Object.entries(prefs).map(([k, v]) => [k, v / total]));
       };
 
       const normalized = normalize(preferences);
@@ -184,11 +182,7 @@ describe('Adaptive Learning System - Unit Tests', () => {
     });
 
     it('should adjust weights based on feedback', () => {
-      const adjustWeights = (
-        weights: number[],
-        feedback: number,
-        learningRate = 0.1
-      ) => {
+      const adjustWeights = (weights: number[], feedback: number, learningRate = 0.1) => {
         const adjustment = (feedback - 0.5) * learningRate;
         return weights.map((w) => Math.max(0, Math.min(1, w + adjustment)));
       };

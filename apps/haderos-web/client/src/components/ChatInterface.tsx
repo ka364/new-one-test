@@ -5,18 +5,18 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { 
-  Send, 
-  Paperclip, 
-  X, 
-  FileText, 
-  Image as ImageIcon, 
+import {
+  Send,
+  Paperclip,
+  X,
+  FileText,
+  Image as ImageIcon,
   File,
   Copy,
   Check,
   Loader2,
   Bot,
-  User
+  User,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 
@@ -37,11 +37,12 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
     {
       id: 1,
       role: 'assistant',
-      content: userRole === 'worker' 
-        ? '👋 مرحباً! أنا مساعدك الذكي في HaderOS. يمكنني مساعدتك في:\n\n- **إدارة الطلبات** والشحنات\n- **تحليل المبيعات** والماليات\n- **معالجة الصور** والمستندات\n- **الإجابة على الأسئلة** المتعلقة بالعمل\n\nكيف يمكنني مساعدتك اليوم؟ 🚀'
-        : '👋 مرحباً! أنا مساعدك التنفيذي الذكي في HaderOS. يمكنني:\n\n- **تحليل الأداء** وإعداد التقارير\n- **مراقبة الفريق** والإنتاجية\n- **تحليل البيانات** المالية والتشغيلية\n- **اقتراحات استراتيجية** لتحسين الأداء\n- **إدارة الحملات** التسويقية\n\nما الذي تحتاج إليه؟ 📊',
+      content:
+        userRole === 'worker'
+          ? '👋 مرحباً! أنا مساعدك الذكي في HaderOS. يمكنني مساعدتك في:\n\n- **إدارة الطلبات** والشحنات\n- **تحليل المبيعات** والماليات\n- **معالجة الصور** والمستندات\n- **الإجابة على الأسئلة** المتعلقة بالعمل\n\nكيف يمكنني مساعدتك اليوم؟ 🚀'
+          : '👋 مرحباً! أنا مساعدك التنفيذي الذكي في HaderOS. يمكنني:\n\n- **تحليل الأداء** وإعداد التقارير\n- **مراقبة الفريق** والإنتاجية\n- **تحليل البيانات** المالية والتشغيلية\n- **اقتراحات استراتيجية** لتحسين الأداء\n- **إدارة الحملات** التسويقية\n\nما الذي تحتاج إليه؟ 📊',
       timestamp: new Date().toISOString(),
-    }
+    },
   ]);
   const [input, setInput] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -62,25 +63,26 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
   // File upload with drag & drop
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
-      setFiles(prev => [...prev, ...acceptedFiles]);
+      setFiles((prev) => [...prev, ...acceptedFiles]);
     },
     noClick: true,
     noKeyboard: true,
   });
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) return <ImageIcon className="w-4 h-4" />;
-    if (file.type.includes('sheet') || file.type.includes('excel')) return <FileText className="w-4 h-4" />;
+    if (file.type.includes('sheet') || file.type.includes('excel'))
+      return <FileText className="w-4 h-4" />;
     return <File className="w-4 h-4" />;
   };
 
   const sendMessageMutation = trpc.chat.sendMessage.useMutation({
     onSuccess: (data) => {
-      setMessages(prev => [...prev, data.aiMessage]);
+      setMessages((prev) => [...prev, data.aiMessage]);
       setIsLoading(false);
       setFiles([]);
     },
@@ -97,17 +99,17 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
       id: Date.now(),
       role: 'user',
       content: input,
-      files: files.map(f => ({ name: f.name, size: f.size, type: f.type })),
+      files: files.map((f) => ({ name: f.name, size: f.size, type: f.type })),
       timestamp: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     const messageContent = input;
     setInput('');
     setIsLoading(true);
 
     // TODO: Upload files to storage first
-    const fileUrls = files.map(f => ({
+    const fileUrls = files.map((f) => ({
       name: f.name,
       url: '', // TODO: Upload and get URL
       size: f.size,
@@ -143,8 +145,8 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
   };
 
   return (
-    <div 
-      {...getRootProps()} 
+    <div
+      {...getRootProps()}
       className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
     >
       {/* Drag & Drop Overlay */}
@@ -180,11 +182,13 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
             className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
           >
             {/* Avatar */}
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-              message.role === 'user' 
-                ? 'bg-gradient-to-br from-green-400 to-blue-500' 
-                : 'bg-gradient-to-br from-blue-500 to-purple-600'
-            }`}>
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                message.role === 'user'
+                  ? 'bg-gradient-to-br from-green-400 to-blue-500'
+                  : 'bg-gradient-to-br from-blue-500 to-purple-600'
+              }`}
+            >
               {message.role === 'user' ? (
                 <User className="w-5 h-5 text-white" />
               ) : (
@@ -193,12 +197,16 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
             </div>
 
             {/* Message Content */}
-            <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-              <div className={`rounded-2xl p-4 ${
-                message.role === 'user'
-                  ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md'
-              }`}>
+            <div
+              className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}
+            >
+              <div
+                className={`rounded-2xl p-4 ${
+                  message.role === 'user'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md'
+                }`}
+              >
                 {/* Files */}
                 {message.files && message.files.length > 0 && (
                   <div className="mb-3 space-y-2">
@@ -242,7 +250,9 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
               </div>
 
               {/* Timestamp & Actions */}
-              <div className={`flex items-center gap-2 mt-1 px-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`flex items-center gap-2 mt-1 px-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   {formatTime(message.timestamp)}
                 </span>
@@ -271,9 +281,18 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md">
               <div className="flex gap-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             </div>
           </div>
@@ -317,7 +336,7 @@ export default function ChatInterface({ userRole = 'worker' }: ChatInterfaceProp
               className="hidden"
               onChange={(e) => {
                 if (e.target.files) {
-                  setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                  setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
                 }
               }}
             />

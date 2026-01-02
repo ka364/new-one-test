@@ -1,6 +1,6 @@
-import { Vote, Clock, AlertCircle, ThumbsUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Vote, Clock, AlertCircle, ThumbsUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 interface PendingVote {
   id: string;
@@ -20,10 +20,10 @@ export function BoardDecisionsCard() {
   const data: BoardDecisionsData = {
     pendingCount: 1,
     currentVote: {
-      id: "1",
-      title: "Budget Approval",
-      description: "Proposal to increase marketing budget by 20% (SAR 500K) for Q2 2026",
-      timeRemaining: "2h 15m",
+      id: '1',
+      title: 'Budget Approval',
+      description: 'Proposal to increase marketing budget by 20% (SAR 500K) for Q2 2026',
+      timeRemaining: '2h 15m',
       votesFor: 5,
       totalVotes: 7,
     },
@@ -59,12 +59,8 @@ export function BoardDecisionsCard() {
         <div className="flex items-start gap-3 mb-3">
           <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-medium text-white">
-              1 Pending Vote: {data.currentVote.title}
-            </h4>
-            <p className="text-sm text-gray-400 mt-1">
-              {data.currentVote.description}
-            </p>
+            <h4 className="font-medium text-white">1 Pending Vote: {data.currentVote.title}</h4>
+            <p className="text-sm text-gray-400 mt-1">{data.currentVote.description}</p>
           </div>
         </div>
 

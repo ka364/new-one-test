@@ -120,7 +120,9 @@ export async function example5_EnhancedCoPilot() {
   console.log(`🔴 Critical Issues: ${analysis.criticalIssues.length}`);
   console.log(`💡 Recommendations: ${analysis.recommendations.length}`);
   console.log(`\n💰 AI Cost: $${analysis.cost.totalCost.toFixed(6)}`);
-  console.log(`💵 Savings: $${analysis.savings.amount.toFixed(6)} (${analysis.savings.percentage.toFixed(1)}%)`);
+  console.log(
+    `💵 Savings: $${analysis.savings.amount.toFixed(6)} (${analysis.savings.percentage.toFixed(1)}%)`
+  );
 }
 
 // ============================================
@@ -285,7 +287,7 @@ export async function example10_BatchAnalysis() {
 
 export async function runAllExamples() {
   console.log('🚀 DEEPSEEK USAGE EXAMPLES\n');
-  console.log('=' .repeat(50) + '\n');
+  console.log('='.repeat(50) + '\n');
 
   try {
     console.log('📚 Example 1: Simple Code Analysis');

@@ -10,11 +10,7 @@ import { DollarSign, CheckCircle } from 'lucide-react';
 
 export default function CollectionPage() {
   return (
-    <CODWorkflowLayout
-      currentStage={7}
-      title="التحصيل"
-      description="تحصيل المبالغ من شركات الشحن"
-    >
+    <CODWorkflowLayout currentStage={7} title="التحصيل" description="تحصيل المبالغ من شركات الشحن">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <Card>
@@ -30,9 +26,7 @@ export default function CollectionPage() {
                   <span className="font-medium">المبلغ المحصل:</span>
                   <span className="text-2xl font-bold text-green-600">1,500 ج.م</span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  تم التسليم بتاريخ: 21 ديسمبر 2025
-                </div>
+                <div className="text-sm text-gray-600">تم التسليم بتاريخ: 21 ديسمبر 2025</div>
               </div>
 
               <div className="space-y-2">
@@ -50,10 +44,7 @@ export default function CollectionPage() {
                 </div>
               </div>
 
-              <Button 
-                style={{ backgroundColor: '#C62822' }} 
-                className="text-white w-full"
-              >
+              <Button style={{ backgroundColor: '#C62822' }} className="text-white w-full">
                 <CheckCircle className="h-4 w-4 ml-2" />
                 تأكيد التحصيل
               </Button>

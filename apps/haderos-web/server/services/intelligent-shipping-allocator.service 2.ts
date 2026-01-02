@@ -1,11 +1,11 @@
 /**
  * Intelligent 3-Level Shipping Allocator
- * 
+ *
  * Selects the best shipping company based on performance at 3 levels:
  * 1. Administrative Point (6,109 points) - Most accurate
  * 2. Center (365 centers) - Fallback 1
  * 3. Governorate (27 governorates) - Fallback 2
- * 
+ *
  * Scoring: 50% efficiency + 25% satisfaction + 15% speed + 10% price
  */
 
@@ -46,7 +46,6 @@ interface AllocationResult {
 }
 
 export class IntelligentShippingAllocator {
-  
   /**
    * Get best shipping company for an address
    */
@@ -58,23 +57,23 @@ export class IntelligentShippingAllocator {
         return this.selectBestCompany(pointPerformance, 'point');
       }
     }
-    
+
     // Fallback to Level 2: Center
     const centerPerformance = await this.getPerformanceByCenter(address.centerCode);
     if (centerPerformance.length > 0) {
       return this.selectBestCompany(centerPerformance, 'center');
     }
-    
+
     // Fallback to Level 3: Governorate
     const governoratePerformance = await this.getPerformanceByGovernorate(address.governorateCode);
     if (governoratePerformance.length > 0) {
       return this.selectBestCompany(governoratePerformance, 'governorate');
     }
-    
+
     // No data available - use default company
     return this.getDefaultCompany();
   }
-  
+
   /**
    * Level 1: Get performance by administrative point
    */
@@ -96,7 +95,7 @@ export class IntelligentShippingAllocator {
         AND sp.is_active = 1
       ORDER BY p.success_rate DESC
     `);
-    
+
     return (results as any[]).map((row: any) => ({
       companyId: row.company_id,
       companyName: row.company_name,
@@ -105,10 +104,10 @@ export class IntelligentShippingAllocator {
       customerSatisfaction: parseFloat(row.customer_satisfaction),
       avgPrice: parseFloat(row.avg_price),
       totalShipments: row.total_shipments,
-      level: 'point' as const
+      level: 'point' as const,
     }));
   }
-  
+
   /**
    * Level 2: Get performance by center
    */
@@ -130,7 +129,7 @@ export class IntelligentShippingAllocator {
         AND sp.is_active = 1
       ORDER BY c.success_rate DESC
     `);
-    
+
     return (results as any[]).map((row: any) => ({
       companyId: row.company_id,
       companyName: row.company_name,
@@ -139,14 +138,16 @@ export class IntelligentShippingAllocator {
       customerSatisfaction: parseFloat(row.customer_satisfaction),
       avgPrice: parseFloat(row.avg_price),
       totalShipments: row.total_shipments,
-      level: 'center' as const
+      level: 'center' as const,
     }));
   }
-  
+
   /**
    * Level 3: Get performance by governorate
    */
-  private async getPerformanceByGovernorate(governorateCode: string): Promise<PerformanceMetrics[]> {
+  private async getPerformanceByGovernorate(
+    governorateCode: string
+  ): Promise<PerformanceMetrics[]> {
     const db = await requireDb();
     const results = await db.execute(sql`
       SELECT 
@@ -164,7 +165,7 @@ export class IntelligentShippingAllocator {
         AND sp.is_active = 1
       ORDER BY g.success_rate DESC
     `);
-    
+
     return (results as any[]).map((row: any) => ({
       companyId: row.company_id,
       companyName: row.company_name,
@@ -173,13 +174,13 @@ export class IntelligentShippingAllocator {
       customerSatisfaction: parseFloat(row.customer_satisfaction),
       avgPrice: parseFloat(row.avg_price),
       totalShipments: row.total_shipments,
-      level: 'governorate' as const
+      level: 'governorate' as const,
     }));
   }
-  
+
   /**
    * Calculate score and select best company
-   * 
+   *
    * Scoring formula:
    * - 50% Success Rate (efficiency)
    * - 25% Customer Satisfaction
@@ -191,53 +192,49 @@ export class IntelligentShippingAllocator {
     level: 'point' | 'center' | 'governorate'
   ): AllocationResult {
     // Calculate scores
-    const scored = performance.map(p => {
+    const scored = performance.map((p) => {
       // Normalize metrics (0-100)
       const efficiencyScore = p.successRate; // Already 0-100
       const satisfactionScore = (p.customerSatisfaction / 5) * 100; // 0-5 → 0-100
-      const speedScore = Math.max(0, 100 - (p.avgDeliveryDays * 10)); // Lower days = higher score
-      const priceScore = Math.max(0, 100 - (p.avgPrice / 100)); // Lower price = higher score
-      
+      const speedScore = Math.max(0, 100 - p.avgDeliveryDays * 10); // Lower days = higher score
+      const priceScore = Math.max(0, 100 - p.avgPrice / 100); // Lower price = higher score
+
       // Weighted score
-      const score = (
-        efficiencyScore * 0.50 +
-        satisfactionScore * 0.25 +
-        speedScore * 0.15 +
-        priceScore * 0.10
-      );
-      
+      const score =
+        efficiencyScore * 0.5 + satisfactionScore * 0.25 + speedScore * 0.15 + priceScore * 0.1;
+
       return {
         ...p,
-        score: Math.round(score * 100) / 100
+        score: Math.round(score * 100) / 100,
       };
     });
-    
+
     // Sort by score
     scored.sort((a, b) => b.score - a.score);
-    
+
     const best = scored[0];
-    const alternatives = scored.slice(1, 4).map(s => ({
+    const alternatives = scored.slice(1, 4).map((s) => ({
       companyId: s.companyId,
       companyName: s.companyName,
-      score: s.score
+      score: s.score,
     }));
-    
+
     const levelNames = {
       point: 'النقطة الإدارية',
       center: 'المركز',
-      governorate: 'المحافظة'
+      governorate: 'المحافظة',
     };
-    
+
     return {
       selectedCompanyId: best.companyId,
       selectedCompanyName: best.companyName,
       score: best.score,
       level,
       reason: `تم الاختيار بناءً على أداء ${best.companyName} في ${levelNames[level]} (كفاءة ${best.successRate}%, رضاء ${best.customerSatisfaction}/5, ${best.avgDeliveryDays} يوم)`,
-      alternatives
+      alternatives,
     };
   }
-  
+
   /**
    * Get default company when no data available
    */
@@ -250,19 +247,19 @@ export class IntelligentShippingAllocator {
       ORDER BY id
       LIMIT 1
     `);
-    
+
     const defaultCompany = (results as any[])[0];
-    
+
     return {
       selectedCompanyId: defaultCompany.id,
       selectedCompanyName: defaultCompany.name_ar,
       score: 0,
       level: 'governorate',
       reason: 'لا توجد بيانات أداء متاحة - تم اختيار الشركة الافتراضية',
-      alternatives: []
+      alternatives: [],
     };
   }
-  
+
   /**
    * Update performance after delivery
    */
@@ -275,20 +272,42 @@ export class IntelligentShippingAllocator {
     failureReason?: string;
   }) {
     const { companyId, address, status, deliveryDays, customerRating, failureReason } = params;
-    
+
     // Update all 3 levels
     await Promise.all([
       // Level 1: Point
-      address.pointCode && this.updatePointPerformance(companyId, address, status, deliveryDays, customerRating, failureReason),
-      
+      address.pointCode &&
+        this.updatePointPerformance(
+          companyId,
+          address,
+          status,
+          deliveryDays,
+          customerRating,
+          failureReason
+        ),
+
       // Level 2: Center
-      this.updateCenterPerformance(companyId, address, status, deliveryDays, customerRating, failureReason),
-      
+      this.updateCenterPerformance(
+        companyId,
+        address,
+        status,
+        deliveryDays,
+        customerRating,
+        failureReason
+      ),
+
       // Level 3: Governorate
-      this.updateGovernoratePerformance(companyId, address, status, deliveryDays, customerRating, failureReason)
+      this.updateGovernoratePerformance(
+        companyId,
+        address,
+        status,
+        deliveryDays,
+        customerRating,
+        failureReason
+      ),
     ]);
   }
-  
+
   private async updatePointPerformance(
     companyId: number,
     address: Address,
@@ -298,7 +317,7 @@ export class IntelligentShippingAllocator {
     failureReason?: string
   ) {
     if (!address.pointCode) return;
-    
+
     const db = await requireDb();
     await db.execute(sql`
       INSERT INTO shipping_performance_by_point (
@@ -321,7 +340,7 @@ export class IntelligentShippingAllocator {
         success_rate = (successful_shipments * 100.0) / total_shipments
     `);
   }
-  
+
   private async updateCenterPerformance(
     companyId: number,
     address: Address,
@@ -352,7 +371,7 @@ export class IntelligentShippingAllocator {
         success_rate = (successful_shipments * 100.0) / total_shipments
     `);
   }
-  
+
   private async updateGovernoratePerformance(
     companyId: number,
     address: Address,

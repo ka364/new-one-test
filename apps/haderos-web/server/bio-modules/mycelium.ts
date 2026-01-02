@@ -1,14 +1,19 @@
 /**
  * Mycelium Module - Fungal Network Resource Distribution
- * 
+ *
  * Inspired by: Underground fungal networks (Wood Wide Web)
  * Problem: Imbalanced inventory across branches
  * Solution: Decentralized, automatic resource balancing
  */
 
-import { Branch, BranchInventory, InventoryTransfer, NewInventoryTransfer } from "../../drizzle/schema-branches";
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import {
+  Branch,
+  BranchInventory,
+  InventoryTransfer,
+  NewInventoryTransfer,
+} from '../../drizzle/schema-branches';
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface BalanceOpportunity {
   fromBranch: Branch;
@@ -22,7 +27,7 @@ export interface BalanceOpportunity {
   estimatedCost: number;
   costEfficiency: number; // 0-100
   balanceScore: number; // 0-100
-  priority: "low" | "normal" | "high" | "urgent";
+  priority: 'low' | 'normal' | 'high' | 'urgent';
 }
 
 export interface NetworkBalance {
@@ -36,7 +41,7 @@ export interface NetworkBalance {
 
 /**
  * Mycelium Resource Balancing Engine
- * 
+ *
  * Capabilities:
  * 1. Detect inventory imbalances across branches
  * 2. Calculate optimal transfer routes
@@ -63,7 +68,7 @@ export class MyceliumBalancingEngine {
       await this.checkAndBalance();
     }, this.BALANCE_CHECK_INTERVAL);
 
-    console.log("[Mycelium] Balance monitoring started");
+    console.log('[Mycelium] Balance monitoring started');
   }
 
   /**
@@ -78,19 +83,19 @@ export class MyceliumBalancingEngine {
 
         // Create insight
         await createAgentInsight({
-          agentType: "mycelium",
-          insightType: "network_imbalance",
+          agentType: 'mycelium',
+          insightType: 'network_imbalance',
           title: `🌐 Network Imbalance Detected - Score: ${balance.overallScore.toFixed(0)}`,
           titleAr: `🌐 تم اكتشاف عدم توازن في الشبكة - الدرجة: ${balance.overallScore.toFixed(0)}`,
           description: `${balance.imbalancedBranches} branches are imbalanced. ${balance.opportunities.length} transfer opportunities identified.`,
           descriptionAr: `${balance.imbalancedBranches} فرع غير متوازن. تم تحديد ${balance.opportunities.length} فرصة نقل.`,
-          severity: balance.overallScore < 50 ? "high" : "medium",
+          severity: balance.overallScore < 50 ? 'high' : 'medium',
           actionable: true,
           metadata: {
             overallScore: balance.overallScore,
             opportunities: balance.opportunities.length,
-            recommendations: balance.recommendations
-          }
+            recommendations: balance.recommendations,
+          },
         });
 
         // Auto-trigger high-priority transfers
@@ -100,7 +105,7 @@ export class MyceliumBalancingEngine {
       // Record history
       await this.recordBalanceHistory(balance);
     } catch (error) {
-      console.error("[Mycelium] Error in checkAndBalance:", error);
+      console.error('[Mycelium] Error in checkAndBalance:', error);
     }
   }
 
@@ -108,15 +113,12 @@ export class MyceliumBalancingEngine {
    * Analyze network balance
    */
   async analyzeNetworkBalance(): Promise<NetworkBalance> {
-    const { db } = await import("../db");
-    const { branches, branchInventory } = await import("../../drizzle/schema-branches");
-    const { eq } = await import("drizzle-orm");
+    const { db } = await import('../db');
+    const { branches, branchInventory } = await import('../../drizzle/schema-branches');
+    const { eq } = await import('drizzle-orm');
 
     // Get all active branches
-    const allBranches = await db
-      .select()
-      .from(branches)
-      .where(eq(branches.status, "active"));
+    const allBranches = await db.select().from(branches).where(eq(branches.status, 'active'));
 
     if (allBranches.length === 0) {
       return {
@@ -125,14 +127,12 @@ export class MyceliumBalancingEngine {
         surplusBranches: 0,
         deficitBranches: 0,
         opportunities: [],
-        recommendations: []
+        recommendations: [],
       };
     }
 
     // Get inventory for all branches
-    const allInventory = await db
-      .select()
-      .from(branchInventory);
+    const allInventory = await db.select().from(branchInventory);
 
     // Group inventory by product
     const productMap = new Map<number, BranchInventory[]>();
@@ -149,21 +149,21 @@ export class MyceliumBalancingEngine {
     let deficitBranches = 0;
 
     for (const [productId, inventories] of productMap.entries()) {
-      const surplus = inventories.filter(inv => inv.quantity > inv.maxStock);
-      const deficit = inventories.filter(inv => inv.quantity < inv.minStock);
+      const surplus = inventories.filter((inv) => inv.quantity > inv.maxStock);
+      const deficit = inventories.filter((inv) => inv.quantity < inv.minStock);
 
       surplusBranches += surplus.length;
       deficitBranches += deficit.length;
 
       // Match surplus with deficit
       for (const surplusInv of surplus) {
-        const surplusBranch = allBranches.find(b => b.id === surplusInv.branchId);
+        const surplusBranch = allBranches.find((b) => b.id === surplusInv.branchId);
         if (!surplusBranch) continue;
 
         const surplusAmount = surplusInv.quantity - surplusInv.maxStock;
 
         for (const deficitInv of deficit) {
-          const deficitBranch = allBranches.find(b => b.id === deficitInv.branchId);
+          const deficitBranch = allBranches.find((b) => b.id === deficitInv.branchId);
           if (!deficitBranch) continue;
 
           const deficitAmount = deficitInv.minStock - deficitInv.quantity;
@@ -175,8 +175,16 @@ export class MyceliumBalancingEngine {
           if (distance > this.MAX_TRANSFER_DISTANCE) continue;
 
           const estimatedCost = this.calculateTransferCost(transferQty, distance);
-          const costEfficiency = this.calculateCostEfficiency(transferQty, estimatedCost, deficitInv);
-          const balanceScore = this.calculateBalanceScore(surplusAmount, deficitAmount, transferQty);
+          const costEfficiency = this.calculateCostEfficiency(
+            transferQty,
+            estimatedCost,
+            deficitInv
+          );
+          const balanceScore = this.calculateBalanceScore(
+            surplusAmount,
+            deficitAmount,
+            transferQty
+          );
 
           opportunities.push({
             fromBranch: surplusBranch,
@@ -190,7 +198,7 @@ export class MyceliumBalancingEngine {
             estimatedCost,
             costEfficiency,
             balanceScore,
-            priority: this.determinePriority(deficitInv, balanceScore)
+            priority: this.determinePriority(deficitInv, balanceScore),
           });
         }
       }
@@ -202,7 +210,7 @@ export class MyceliumBalancingEngine {
     // Calculate overall balance score
     const imbalancedBranches = surplusBranches + deficitBranches;
     const totalBranches = allBranches.length;
-    const balanceRatio = 1 - (imbalancedBranches / (totalBranches * 2));
+    const balanceRatio = 1 - imbalancedBranches / (totalBranches * 2);
     const overallScore = balanceRatio * 100;
 
     // Generate recommendations
@@ -214,7 +222,7 @@ export class MyceliumBalancingEngine {
       surplusBranches,
       deficitBranches,
       opportunities,
-      recommendations
+      recommendations,
     };
   }
 
@@ -237,8 +245,10 @@ export class MyceliumBalancingEngine {
     const dLon = this.toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(this.toRad(lat1)) *
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -251,18 +261,22 @@ export class MyceliumBalancingEngine {
    * Calculate transfer cost
    */
   private calculateTransferCost(quantity: number, distance: number): number {
-    return (distance * this.COST_PER_KM) + (quantity * this.COST_PER_ITEM);
+    return distance * this.COST_PER_KM + quantity * this.COST_PER_ITEM;
   }
 
   /**
    * Calculate cost efficiency
    */
-  private calculateCostEfficiency(quantity: number, cost: number, inventory: BranchInventory): number {
-    const sellingPrice = parseFloat(inventory.sellingPrice?.toString() || "0");
+  private calculateCostEfficiency(
+    quantity: number,
+    cost: number,
+    inventory: BranchInventory
+  ): number {
+    const sellingPrice = parseFloat(inventory.sellingPrice?.toString() || '0');
     const potentialRevenue = quantity * sellingPrice;
-    
+
     if (potentialRevenue === 0) return 0;
-    
+
     const efficiency = ((potentialRevenue - cost) / potentialRevenue) * 100;
     return Math.max(0, Math.min(100, efficiency));
   }
@@ -279,30 +293,40 @@ export class MyceliumBalancingEngine {
   /**
    * Determine transfer priority
    */
-  private determinePriority(inventory: BranchInventory, balanceScore: number): BalanceOpportunity["priority"] {
-    if (inventory.quantity === 0) return "urgent";
-    if (balanceScore > 80) return "high";
-    if (balanceScore > 50) return "normal";
-    return "low";
+  private determinePriority(
+    inventory: BranchInventory,
+    balanceScore: number
+  ): BalanceOpportunity['priority'] {
+    if (inventory.quantity === 0) return 'urgent';
+    if (balanceScore > 80) return 'high';
+    if (balanceScore > 50) return 'normal';
+    return 'low';
   }
 
   /**
    * Generate recommendations
    */
-  private generateRecommendations(opportunities: BalanceOpportunity[], overallScore: number): string[] {
+  private generateRecommendations(
+    opportunities: BalanceOpportunity[],
+    overallScore: number
+  ): string[] {
     const recommendations: string[] = [];
 
     if (overallScore < 50) {
-      recommendations.push("Critical: Network is severely imbalanced. Immediate action required.");
+      recommendations.push('Critical: Network is severely imbalanced. Immediate action required.');
     }
 
     if (opportunities.length > 0) {
-      const highPriority = opportunities.filter(o => o.priority === "high" || o.priority === "urgent");
+      const highPriority = opportunities.filter(
+        (o) => o.priority === 'high' || o.priority === 'urgent'
+      );
       if (highPriority.length > 0) {
-        recommendations.push(`${highPriority.length} high-priority transfers should be executed immediately.`);
+        recommendations.push(
+          `${highPriority.length} high-priority transfers should be executed immediately.`
+        );
       }
 
-      const costEfficient = opportunities.filter(o => o.costEfficiency > 70);
+      const costEfficient = opportunities.filter((o) => o.costEfficiency > 70);
       if (costEfficient.length > 0) {
         recommendations.push(`${costEfficient.length} transfers are highly cost-efficient (>70%).`);
       }
@@ -316,15 +340,18 @@ export class MyceliumBalancingEngine {
    */
   private async autoTriggerTransfers(opportunities: BalanceOpportunity[]): Promise<void> {
     const highPriority = opportunities.filter(
-      o => (o.priority === "high" || o.priority === "urgent") && o.costEfficiency > 60
+      (o) => (o.priority === 'high' || o.priority === 'urgent') && o.costEfficiency > 60
     );
 
-    for (const opp of highPriority.slice(0, 5)) { // Max 5 auto-transfers at once
+    for (const opp of highPriority.slice(0, 5)) {
+      // Max 5 auto-transfers at once
       try {
         await this.createTransfer(opp);
-        console.log(`[Mycelium] Auto-triggered transfer: ${opp.sku} from ${opp.fromBranch.name} to ${opp.toBranch.name}`);
+        console.log(
+          `[Mycelium] Auto-triggered transfer: ${opp.sku} from ${opp.fromBranch.name} to ${opp.toBranch.name}`
+        );
       } catch (error) {
-        console.error("[Mycelium] Error auto-triggering transfer:", error);
+        console.error('[Mycelium] Error auto-triggering transfer:', error);
       }
     }
   }
@@ -333,8 +360,8 @@ export class MyceliumBalancingEngine {
    * Create inventory transfer
    */
   async createTransfer(opportunity: BalanceOpportunity): Promise<InventoryTransfer> {
-    const { db } = await import("../db");
-    const { inventoryTransfers } = await import("../../drizzle/schema-branches");
+    const { db } = await import('../db');
+    const { inventoryTransfers } = await import('../../drizzle/schema-branches');
 
     const transferNumber = `TRF-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
 
@@ -345,27 +372,24 @@ export class MyceliumBalancingEngine {
       productId: opportunity.productId,
       sku: opportunity.sku,
       quantity: opportunity.quantity,
-      reason: "balancing",
-      status: "pending",
+      reason: 'balancing',
+      status: 'pending',
       priority: opportunity.priority,
-      triggeredBy: "mycelium_auto",
+      triggeredBy: 'mycelium_auto',
       costEfficiency: opportunity.costEfficiency.toString(),
       balanceScore: opportunity.balanceScore.toString(),
       estimatedCost: opportunity.estimatedCost.toString(),
-      requestedAt: new Date()
+      requestedAt: new Date(),
     };
 
-    const [transfer] = await db
-      .insert(inventoryTransfers)
-      .values(newTransfer)
-      .returning();
+    const [transfer] = await db.insert(inventoryTransfers).values(newTransfer).returning();
 
     // Emit event
     const eventBus = getEventBus();
     await eventBus.emit({
-      type: "inventory.transfer.created",
+      type: 'inventory.transfer.created',
       entityId: transfer.id,
-      entityType: "inventory_transfer",
+      entityType: 'inventory_transfer',
       payload: {
         transferId: transfer.id,
         transferNumber: transfer.transferNumber,
@@ -373,8 +397,8 @@ export class MyceliumBalancingEngine {
         toBranch: opportunity.toBranch.name,
         sku: opportunity.sku,
         quantity: opportunity.quantity,
-        triggeredBy: "mycelium_auto"
-      }
+        triggeredBy: 'mycelium_auto',
+      },
     });
 
     return transfer;
@@ -385,9 +409,10 @@ export class MyceliumBalancingEngine {
    */
   private async recordBalanceHistory(balance: NetworkBalance): Promise<void> {
     try {
-      const { db } = await import("../db");
-      const { myceliumBalanceHistory, inventoryTransfers } = await import("../../drizzle/schema-branches");
-      const { eq, and, gte } = await import("drizzle-orm");
+      const { db } = await import('../db');
+      const { myceliumBalanceHistory, inventoryTransfers } =
+        await import('../../drizzle/schema-branches');
+      const { eq, and, gte } = await import('drizzle-orm');
 
       // Get today's completed transfers
       const today = new Date();
@@ -398,7 +423,7 @@ export class MyceliumBalancingEngine {
         .from(inventoryTransfers)
         .where(
           and(
-            eq(inventoryTransfers.status, "completed"),
+            eq(inventoryTransfers.status, 'completed'),
             gte(inventoryTransfers.deliveredAt!, today)
           )
         );
@@ -407,16 +432,21 @@ export class MyceliumBalancingEngine {
       const activeTransfers = await db
         .select()
         .from(inventoryTransfers)
-        .where(eq(inventoryTransfers.status, "in_transit"));
+        .where(eq(inventoryTransfers.status, 'in_transit'));
 
       // Calculate average transfer cost
-      const avgCost = completedToday.length > 0
-        ? completedToday.reduce((sum, t) => sum + parseFloat(t.actualCost?.toString() || "0"), 0) / completedToday.length
-        : 0;
+      const avgCost =
+        completedToday.length > 0
+          ? completedToday.reduce(
+              (sum, t) => sum + parseFloat(t.actualCost?.toString() || '0'),
+              0
+            ) / completedToday.length
+          : 0;
 
       await db.insert(myceliumBalanceHistory).values({
         timestamp: new Date(),
-        totalBranches: balance.imbalancedBranches + balance.surplusBranches + balance.deficitBranches,
+        totalBranches:
+          balance.imbalancedBranches + balance.surplusBranches + balance.deficitBranches,
         totalProducts: balance.opportunities.length,
         overallBalanceScore: balance.overallScore.toString(),
         imbalancedBranches: balance.imbalancedBranches,
@@ -428,11 +458,11 @@ export class MyceliumBalancingEngine {
         networkEfficiency: balance.overallScore.toString(),
         metadata: {
           opportunities: balance.opportunities.length,
-          recommendations: balance.recommendations
-        }
+          recommendations: balance.recommendations,
+        },
       });
     } catch (error) {
-      console.error("[Mycelium] Error recording balance history:", error);
+      console.error('[Mycelium] Error recording balance history:', error);
     }
   }
 }

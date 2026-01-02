@@ -1,7 +1,7 @@
 /**
  * Orders Router Unit Tests
  * Apple-Level Test Coverage
- * 
+ *
  * Tests cover:
  * - All order procedures
  * - Edge cases
@@ -363,4 +363,3 @@ describe('Orders Router - Unit Tests', () => {
     });
   });
 });
-

@@ -1,7 +1,7 @@
-import { AdvancedHandsontableSpreadsheet } from "@/components/expenses/AdvancedHandsontableSpreadsheet";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Table2, TrendingUp } from "lucide-react";
+import { AdvancedHandsontableSpreadsheet } from '@/components/expenses/AdvancedHandsontableSpreadsheet';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calculator, Table2, TrendingUp } from 'lucide-react';
 
 export default function ExpensesManagement() {
   return (
@@ -80,7 +80,7 @@ export default function ExpensesManagement() {
               stakeholderName="المصروفات العامة"
               sessionId={null} // سيتم إنشاء جلسة جديدة
               onSaveComplete={() => {
-                console.log("تم الحفظ بنجاح!");
+                console.log('تم الحفظ بنجاح!');
               }}
             />
           </CardContent>
@@ -92,11 +92,21 @@ export default function ExpensesManagement() {
             <CardTitle className="text-sm">💡 نصائح الاستخدام</CardTitle>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
-            <p>• <strong>التحرير:</strong> انقر مرتين على أي خلية للتحرير</p>
-            <p>• <strong>النسخ واللصق:</strong> Ctrl+C / Ctrl+V للنسخ واللصق</p>
-            <p>• <strong>الصيغ:</strong> ابدأ بـ = لإضافة صيغة (مثل: =SUM(B2:B10))</p>
-            <p>• <strong>التعليقات:</strong> انقر بالزر الأيمن واختر "إضافة تعليق"</p>
-            <p>• <strong>الحفظ:</strong> يتم الحفظ تلقائياً كل 3 ثوان</p>
+            <p>
+              • <strong>التحرير:</strong> انقر مرتين على أي خلية للتحرير
+            </p>
+            <p>
+              • <strong>النسخ واللصق:</strong> Ctrl+C / Ctrl+V للنسخ واللصق
+            </p>
+            <p>
+              • <strong>الصيغ:</strong> ابدأ بـ = لإضافة صيغة (مثل: =SUM(B2:B10))
+            </p>
+            <p>
+              • <strong>التعليقات:</strong> انقر بالزر الأيمن واختر "إضافة تعليق"
+            </p>
+            <p>
+              • <strong>الحفظ:</strong> يتم الحفظ تلقائياً كل 3 ثوان
+            </p>
           </CardContent>
         </Card>
       </div>

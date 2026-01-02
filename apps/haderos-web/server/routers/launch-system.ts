@@ -1,5 +1,5 @@
-import { router, protectedProcedure } from "../_core/trpc";
-import { z } from "zod";
+import { router, protectedProcedure } from '../_core/trpc';
+import { z } from 'zod';
 import {
   getAllShippingCompanies,
   createShippingCompany,
@@ -26,7 +26,7 @@ import {
   updateActualRevenue,
   getForecastByDate,
   calculateExpectedRevenue,
-} from "../db";
+} from '../db';
 
 // ============================================
 // SHIPPING & LOGISTICS ROUTER
@@ -39,18 +39,20 @@ export const shippingRouter = router({
   }),
 
   createCompany: protectedProcedure
-    .input(z.object({
-      name: z.string(),
-      nameAr: z.string().optional(),
-      code: z.string(),
-      zonesConfig: z.any(),
-      codFeeConfig: z.any().optional(),
-      insuranceFeeConfig: z.any().optional(),
-      returnFeePercentage: z.string().optional(),
-      exchangeFeePercentage: z.string().optional(),
-      bankTransfersPerWeek: z.number().optional(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        name: z.string(),
+        nameAr: z.string().optional(),
+        code: z.string(),
+        zonesConfig: z.any(),
+        codFeeConfig: z.any().optional(),
+        insuranceFeeConfig: z.any().optional(),
+        returnFeePercentage: z.string().optional(),
+        exchangeFeePercentage: z.string().optional(),
+        bankTransfersPerWeek: z.number().optional(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       return await createShippingCompany(input);
     }),
@@ -64,18 +66,20 @@ export const shippingRouter = router({
 
   // Shipments
   createShipment: protectedProcedure
-    .input(z.object({
-      orderId: z.number(),
-      companyId: z.number(),
-      trackingNumber: z.string().optional(),
-      zoneId: z.number(),
-      weight: z.string(),
-      shippingCost: z.string(),
-      codFee: z.string().optional(),
-      insuranceFee: z.string().optional(),
-      totalCost: z.string(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        orderId: z.number(),
+        companyId: z.number(),
+        trackingNumber: z.string().optional(),
+        zoneId: z.number(),
+        weight: z.string(),
+        shippingCost: z.string(),
+        codFee: z.string().optional(),
+        insuranceFee: z.string().optional(),
+        totalCost: z.string(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       return await createShipment({
         ...input,
@@ -90,14 +94,25 @@ export const shippingRouter = router({
     }),
 
   updateShipmentStatus: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      status: z.enum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'returned', 'lost', 'cancelled']),
-      shippedAt: z.string().optional(),
-      deliveredAt: z.string().optional(),
-      returnedAt: z.string().optional(),
-      returnReason: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum([
+          'pending',
+          'picked_up',
+          'in_transit',
+          'out_for_delivery',
+          'delivered',
+          'returned',
+          'lost',
+          'cancelled',
+        ]),
+        shippedAt: z.string().optional(),
+        deliveredAt: z.string().optional(),
+        returnedAt: z.string().optional(),
+        returnReason: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const { id, status, ...updates } = input;
       return await updateShipmentStatus(id, status, updates);
@@ -105,13 +120,15 @@ export const shippingRouter = router({
 
   // Shipment Returns
   createReturn: protectedProcedure
-    .input(z.object({
-      shipmentId: z.number(),
-      returnType: z.enum(['full_return', 'exchange', 'delivery_failed']),
-      returnReason: z.string().optional(),
-      returnCost: z.string(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        shipmentId: z.number(),
+        returnType: z.enum(['full_return', 'exchange', 'delivery_failed']),
+        returnReason: z.string().optional(),
+        returnCost: z.string(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       return await createShipmentReturn(input);
     }),
@@ -123,15 +140,17 @@ export const shippingRouter = router({
 
 export const collectionsRouter = router({
   create: protectedProcedure
-    .input(z.object({
-      collectionType: z.enum(['cash', 'bank_transfer']),
-      companyId: z.number(),
-      amount: z.string(),
-      collectionDate: z.string(),
-      receiptNumber: z.string().optional(),
-      bankReference: z.string().optional(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        collectionType: z.enum(['cash', 'bank_transfer']),
+        companyId: z.number(),
+        amount: z.string(),
+        collectionDate: z.string(),
+        receiptNumber: z.string().optional(),
+        bankReference: z.string().optional(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       return await createCollection({
         ...input,
@@ -140,17 +159,15 @@ export const collectionsRouter = router({
     }),
 
   getByCompany: protectedProcedure
-    .input(z.object({
-      companyId: z.number(),
-      startDate: z.string().optional(),
-      endDate: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        companyId: z.number(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
-      return await getCollectionsByCompany(
-        input.companyId,
-        input.startDate,
-        input.endDate
-      );
+      return await getCollectionsByCompany(input.companyId, input.startDate, input.endDate);
     }),
 
   confirm: protectedProcedure
@@ -160,11 +177,13 @@ export const collectionsRouter = router({
     }),
 
   addItem: protectedProcedure
-    .input(z.object({
-      collectionId: z.number(),
-      orderId: z.number(),
-      amount: z.string(),
-    }))
+    .input(
+      z.object({
+        collectionId: z.number(),
+        orderId: z.number(),
+        amount: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       return await addCollectionItem(input);
     }),
@@ -198,25 +217,27 @@ export const metricsRouter = router({
     }),
 
   updateMetrics: protectedProcedure
-    .input(z.object({
-      date: z.string(),
-      ordersCreated: z.number().optional(),
-      ordersCreatedValue: z.string().optional(),
-      ordersConfirmed: z.number().optional(),
-      ordersConfirmedValue: z.string().optional(),
-      ordersShipped: z.number().optional(),
-      ordersShippedValue: z.string().optional(),
-      ordersReturned: z.number().optional(),
-      ordersReturnedValue: z.string().optional(),
-      ordersDelivered: z.number().optional(),
-      ordersDeliveredValue: z.string().optional(),
-      totalCollection: z.string().optional(),
-      cashCollection: z.string().optional(),
-      bankCollection: z.string().optional(),
-      operatingExpenses: z.string().optional(),
-      adSpend: z.string().optional(),
-      treasuryPaid: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        date: z.string(),
+        ordersCreated: z.number().optional(),
+        ordersCreatedValue: z.string().optional(),
+        ordersConfirmed: z.number().optional(),
+        ordersConfirmedValue: z.string().optional(),
+        ordersShipped: z.number().optional(),
+        ordersShippedValue: z.string().optional(),
+        ordersReturned: z.number().optional(),
+        ordersReturnedValue: z.string().optional(),
+        ordersDelivered: z.number().optional(),
+        ordersDeliveredValue: z.string().optional(),
+        totalCollection: z.string().optional(),
+        cashCollection: z.string().optional(),
+        bankCollection: z.string().optional(),
+        operatingExpenses: z.string().optional(),
+        adSpend: z.string().optional(),
+        treasuryPaid: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const { date, ...data } = input;
       await updateDailyMetrics(date, data);
@@ -230,31 +251,35 @@ export const metricsRouter = router({
     }),
 
   getMetricsByRange: protectedProcedure
-    .input(z.object({
-      startDate: z.string(),
-      endDate: z.string(),
-    }))
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      })
+    )
     .query(async ({ input }) => {
       return await getMetricsByDateRange(input.startDate, input.endDate);
     }),
 
   // Ad Campaigns
   createAdCampaign: protectedProcedure
-    .input(z.object({
-      date: z.string(),
-      campaignName: z.string(),
-      platform: z.enum(['facebook', 'instagram', 'google', 'tiktok', 'snapchat', 'other']),
-      spend: z.string(),
-      results: z.number(),
-      costPerResult: z.string(),
-      reach: z.number().optional(),
-      impressions: z.number().optional(),
-      clicks: z.number().optional(),
-      conversions: z.number().optional(),
-      messagesStarted: z.number().optional(),
-      costPerMessage: z.string().optional(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        date: z.string(),
+        campaignName: z.string(),
+        platform: z.enum(['facebook', 'instagram', 'google', 'tiktok', 'snapchat', 'other']),
+        spend: z.string(),
+        results: z.number(),
+        costPerResult: z.string(),
+        reach: z.number().optional(),
+        impressions: z.number().optional(),
+        clicks: z.number().optional(),
+        conversions: z.number().optional(),
+        messagesStarted: z.number().optional(),
+        costPerMessage: z.string().optional(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       return await createAdCampaign({
         ...input,
@@ -270,15 +295,17 @@ export const metricsRouter = router({
 
   // Revenue Forecasts
   calculateExpectedRevenue: protectedProcedure
-    .input(z.object({
-      adSpend: z.number(),
-      lastCampaignEfficiency: z.number().optional(),
-      averageOrderValue: z.number(),
-      shipmentRate: z.number(),
-      deliverySuccessRate: z.number(),
-    }))
+    .input(
+      z.object({
+        adSpend: z.number(),
+        lastCampaignEfficiency: z.number().optional(),
+        averageOrderValue: z.number(),
+        shipmentRate: z.number(),
+        deliverySuccessRate: z.number(),
+      })
+    )
     .query(async ({ input }) => {
-      const efficiency = input.lastCampaignEfficiency || await getLastCampaignEfficiency();
+      const efficiency = input.lastCampaignEfficiency || (await getLastCampaignEfficiency());
       return calculateExpectedRevenue(
         input.adSpend,
         efficiency,
@@ -289,17 +316,19 @@ export const metricsRouter = router({
     }),
 
   createForecast: protectedProcedure
-    .input(z.object({
-      date: z.string(),
-      adSpend: z.string(),
-      lastCampaignEfficiency: z.string(),
-      expectedOrders: z.number(),
-      averageOrderValue: z.string(),
-      shipmentRate: z.string(),
-      deliverySuccessRate: z.string(),
-      expectedRevenue: z.string(),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        date: z.string(),
+        adSpend: z.string(),
+        lastCampaignEfficiency: z.string(),
+        expectedOrders: z.number(),
+        averageOrderValue: z.string(),
+        shipmentRate: z.string(),
+        deliverySuccessRate: z.string(),
+        expectedRevenue: z.string(),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       return await createRevenueForecast({
         ...input,
@@ -308,10 +337,12 @@ export const metricsRouter = router({
     }),
 
   updateActualRevenue: protectedProcedure
-    .input(z.object({
-      date: z.string(),
-      actualRevenue: z.string(),
-    }))
+    .input(
+      z.object({
+        date: z.string(),
+        actualRevenue: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       return await updateActualRevenue(input.date, input.actualRevenue);
     }),

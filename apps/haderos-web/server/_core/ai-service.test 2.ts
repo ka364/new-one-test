@@ -17,8 +17,8 @@ describe('Unified AI Service', () => {
 
     it('should return provider info for all available providers', () => {
       const providers = aiService.getAvailableProviders();
-      
-      providers.forEach(provider => {
+
+      providers.forEach((provider) => {
         const info = aiService.getProviderInfo(provider);
         expect(info).toHaveProperty('name');
         expect(info).toHaveProperty('cost');
@@ -33,8 +33,8 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'قل "مرحباً" فقط'
-        }
+          content: 'قل "مرحباً" فقط',
+        },
       ];
 
       const response = await aiService.invokeManusLLM(messages);
@@ -51,8 +51,8 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'test'
-        }
+          content: 'test',
+        },
       ];
 
       const response = await aiService.invokeManusLLM(messages);
@@ -65,13 +65,13 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'مرحباً'
-        }
+          content: 'مرحباً',
+        },
       ];
 
       const response = await aiService.generateResponse(messages, {
         autoSelect: true,
-        maxCost: 0.1
+        maxCost: 0.1,
       });
 
       expect(response.provider).toBe(AIProvider.MANUS);
@@ -82,13 +82,13 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'اكتب دالة JavaScript بسيطة'
-        }
+          content: 'اكتب دالة JavaScript بسيطة',
+        },
       ];
 
       const response = await aiService.generateResponse(messages, {
         autoSelect: true,
-        maxCost: 0.05
+        maxCost: 0.05,
       });
 
       expect(response).toHaveProperty('provider');
@@ -102,7 +102,7 @@ describe('Unified AI Service', () => {
     it('should check if DeepSeek is available', () => {
       const providers = aiService.getAvailableProviders();
       const hasDeepSeek = providers.includes(AIProvider.DEEPSEEK);
-      
+
       if (process.env.DEEPSEEK_API_KEY) {
         expect(hasDeepSeek).toBe(true);
       } else {
@@ -119,13 +119,13 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'Say hello in one word'
-        }
+          content: 'Say hello in one word',
+        },
       ];
 
       try {
         const response = await aiService.invokeDeepSeek(messages);
-        
+
         expect(response.provider).toBe(AIProvider.DEEPSEEK);
         expect(response.content).toBeTruthy();
         expect(response.cost).toBeGreaterThanOrEqual(0);
@@ -144,7 +144,7 @@ describe('Unified AI Service', () => {
     it('should check if Claude is available', () => {
       const providers = aiService.getAvailableProviders();
       const hasClaude = providers.includes(AIProvider.CLAUDE);
-      
+
       if (process.env.CLAUDE_API_KEY) {
         expect(hasClaude).toBe(true);
       } else {
@@ -161,13 +161,13 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'Say hello in one word'
-        }
+          content: 'Say hello in one word',
+        },
       ];
 
       try {
         const response = await aiService.invokeClaude(messages);
-        
+
         expect(response.provider).toBe(AIProvider.CLAUDE);
         expect(response.content).toBeTruthy();
         expect(response.cost).toBeGreaterThanOrEqual(0);
@@ -187,8 +187,8 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'test fallback'
-        }
+          content: 'test fallback',
+        },
       ];
 
       // Force using a provider that might not be available
@@ -196,7 +196,7 @@ describe('Unified AI Service', () => {
         provider: AIProvider.DEEPSEEK,
         autoSelect: false,
         fallback: true, // Enable fallback
-        maxCost: 0.1
+        maxCost: 0.1,
       });
 
       // Should get a response from either DeepSeek or fallback to Manus
@@ -211,8 +211,8 @@ describe('Unified AI Service', () => {
       const messages = [
         {
           role: 'user' as const,
-          content: 'quick test'
-        }
+          content: 'quick test',
+        },
       ];
 
       const response = await aiService.invokeManusLLM(messages);

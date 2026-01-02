@@ -24,46 +24,46 @@ const ETA_CONFIG = {
 
 // Invoice Types
 export enum InvoiceType {
-  INVOICE = 'I',           // فاتورة
-  CREDIT_NOTE = 'C',       // إشعار دائن
-  DEBIT_NOTE = 'D',        // إشعار مدين
+  INVOICE = 'I', // فاتورة
+  CREDIT_NOTE = 'C', // إشعار دائن
+  DEBIT_NOTE = 'D', // إشعار مدين
 }
 
 // Document Types
 export enum DocumentType {
-  INVOICE = 'i',           // Invoice
-  CREDIT = 'c',            // Credit Note
-  DEBIT = 'd',             // Debit Note
+  INVOICE = 'i', // Invoice
+  CREDIT = 'c', // Credit Note
+  DEBIT = 'd', // Debit Note
 }
 
 // Tax Types
 export enum TaxType {
-  VAT = 'T1',              // Value Added Tax (ضريبة القيمة المضافة)
-  TABLE_TAX = 'T2',        // Table Tax (ضريبة الجدول)
-  WHT = 'T3',              // Withholding Tax (ضريبة الخصم)
-  STAMP_TAX = 'T4',        // Stamp Tax (ضريبة الدمغة)
-  ENTERTAINMENT = 'T5',    // Entertainment Tax (ضريبة الملاهي)
-  RESOURCE_DEV = 'T6',     // Resource Development Fee (رسم تنمية الموارد)
-  SERVICE_CHARGE = 'T7',   // Service Charge (رسم خدمة)
-  MUNICIPAL_TAX = 'T8',    // Municipal Tax (ضريبة البلدية)
+  VAT = 'T1', // Value Added Tax (ضريبة القيمة المضافة)
+  TABLE_TAX = 'T2', // Table Tax (ضريبة الجدول)
+  WHT = 'T3', // Withholding Tax (ضريبة الخصم)
+  STAMP_TAX = 'T4', // Stamp Tax (ضريبة الدمغة)
+  ENTERTAINMENT = 'T5', // Entertainment Tax (ضريبة الملاهي)
+  RESOURCE_DEV = 'T6', // Resource Development Fee (رسم تنمية الموارد)
+  SERVICE_CHARGE = 'T7', // Service Charge (رسم خدمة)
+  MUNICIPAL_TAX = 'T8', // Municipal Tax (ضريبة البلدية)
   MEDICAL_INSURANCE = 'T9', // Medical Insurance (تأمين طبي)
-  OTHER = 'T10',           // Other Taxes (ضرائب أخرى)
+  OTHER = 'T10', // Other Taxes (ضرائب أخرى)
 }
 
 // Tax Subtypes for VAT
 export enum VATSubtype {
-  VAT_14 = 'V001',         // 14% VAT
-  VAT_0 = 'V002',          // 0% VAT (Zero Rated)
-  VAT_EXEMPT = 'V003',     // VAT Exempt
-  VAT_5 = 'V004',          // 5% VAT (specific goods)
+  VAT_14 = 'V001', // 14% VAT
+  VAT_0 = 'V002', // 0% VAT (Zero Rated)
+  VAT_EXEMPT = 'V003', // VAT Exempt
+  VAT_5 = 'V004', // 5% VAT (specific goods)
 }
 
 // Activity Codes (based on ISIC)
 export const ACTIVITY_CODES = {
-  RETAIL_FOOTWEAR: '4772',      // Retail sale of footwear in specialized stores
-  RETAIL_CLOTHING: '4771',      // Retail sale of clothing
-  WHOLESALE_FOOTWEAR: '4641',   // Wholesale of textiles, clothing, footwear
-  ECOMMERCE: '4791',            // Retail via mail order or internet
+  RETAIL_FOOTWEAR: '4772', // Retail sale of footwear in specialized stores
+  RETAIL_CLOTHING: '4771', // Retail sale of clothing
+  WHOLESALE_FOOTWEAR: '4641', // Wholesale of textiles, clothing, footwear
+  ECOMMERCE: '4791', // Retail via mail order or internet
   MANUFACTURING_FOOTWEAR: '1520', // Manufacture of footwear
 };
 
@@ -77,11 +77,11 @@ export interface ETACredentials {
 
 export interface ETAAddress {
   branchId?: string;
-  country: string;           // ISO 3166-1 alpha-2 (e.g., 'EG')
-  governate: string;         // المحافظة
-  regionCity: string;        // المدينة
-  street: string;            // الشارع
-  buildingNumber: string;    // رقم المبنى
+  country: string; // ISO 3166-1 alpha-2 (e.g., 'EG')
+  governate: string; // المحافظة
+  regionCity: string; // المدينة
+  street: string; // الشارع
+  buildingNumber: string; // رقم المبنى
   postalCode?: string;
   floor?: string;
   room?: string;
@@ -90,40 +90,40 @@ export interface ETAAddress {
 }
 
 export interface ETATaxpayer {
-  rin: string;               // Registration ID Number (الرقم الضريبي)
-  companyTradeName: string;  // الاسم التجاري
-  branchCode: string;        // كود الفرع
+  rin: string; // Registration ID Number (الرقم الضريبي)
+  companyTradeName: string; // الاسم التجاري
+  branchCode: string; // كود الفرع
   branchAddress: ETAAddress;
   deviceSerialNumber?: string;
-  activityCode: string;      // كود النشاط
-  name: string;              // اسم الشركة
-  type: 'B' | 'P' | 'F';     // B=Business, P=Person, F=Foreigner
+  activityCode: string; // كود النشاط
+  name: string; // اسم الشركة
+  type: 'B' | 'P' | 'F'; // B=Business, P=Person, F=Foreigner
 }
 
 export interface ETAInvoiceLine {
-  description: string;       // وصف المنتج
-  itemType: 'GS1' | 'EGS';   // GS1 = Global, EGS = Egyptian
-  itemCode: string;          // كود المنتج
-  unitType: string;          // وحدة القياس (e.g., 'EA' = Each)
+  description: string; // وصف المنتج
+  itemType: 'GS1' | 'EGS'; // GS1 = Global, EGS = Egyptian
+  itemCode: string; // كود المنتج
+  unitType: string; // وحدة القياس (e.g., 'EA' = Each)
   quantity: number;
   unitValue: {
-    currencySold: string;    // العملة (e.g., 'EGP')
-    amountEGP: number;       // المبلغ بالجنيه
-    amountSold?: number;     // المبلغ بالعملة الأجنبية (if different)
+    currencySold: string; // العملة (e.g., 'EGP')
+    amountEGP: number; // المبلغ بالجنيه
+    amountSold?: number; // المبلغ بالعملة الأجنبية (if different)
     currencyExchangeRate?: number;
   };
-  salesTotal: number;        // إجمالي المبيعات
-  total: number;             // الإجمالي بعد الضريبة
+  salesTotal: number; // إجمالي المبيعات
+  total: number; // الإجمالي بعد الضريبة
   valueDifference?: number;
   totalTaxableFees?: number;
-  netTotal: number;          // الصافي
-  itemsDiscount?: number;    // الخصم
+  netTotal: number; // الصافي
+  itemsDiscount?: number; // الخصم
   discount?: {
     rate: number;
     amount: number;
   };
   taxableItems: ETATaxItem[];
-  internalCode?: string;     // كود داخلي
+  internalCode?: string; // كود داخلي
 }
 
 export interface ETATaxItem {
@@ -138,9 +138,9 @@ export interface ETAInvoice {
   receiver: ETATaxpayer;
   documentType: DocumentType;
   documentTypeVersion: string;
-  dateTimeIssued: string;    // ISO 8601 format
+  dateTimeIssued: string; // ISO 8601 format
   taxpayerActivityCode: string;
-  internalID: string;        // رقم الفاتورة الداخلي
+  internalID: string; // رقم الفاتورة الداخلي
   purchaseOrderReference?: string;
   purchaseOrderDescription?: string;
   salesOrderReference?: string;
@@ -158,7 +158,7 @@ export interface ETAInvoice {
 }
 
 export interface ETASignature {
-  signatureType: 'I' | 'S';  // I=Issuer, S=Submitter
+  signatureType: 'I' | 'S'; // I=Issuer, S=Submitter
   value: string;
 }
 
@@ -266,11 +266,11 @@ export class ETAEInvoiceService {
     if (obj === null || obj === undefined) return '';
     if (typeof obj !== 'object') return String(obj);
     if (Array.isArray(obj)) {
-      return obj.map(item => this.canonicalize(item)).join('');
+      return obj.map((item) => this.canonicalize(item)).join('');
     }
     return Object.keys(obj)
       .sort()
-      .map(key => `"${key}"${this.canonicalize(obj[key])}`)
+      .map((key) => `"${key}"${this.canonicalize(obj[key])}`)
       .join('');
   }
 
@@ -289,7 +289,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documentsubmissions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -315,7 +315,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documentsubmissions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -341,7 +341,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documents/${uuid}/raw`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -376,7 +376,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documents/recent?${params}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -398,7 +398,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documents/state/${uuid}/state`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -423,7 +423,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documents/state/${uuid}/state`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -448,7 +448,7 @@ export class ETAEInvoiceService {
     const response = await fetch(`${urls.apiUrl}/documents/${uuid}/pdf`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -548,10 +548,15 @@ export function createInvoiceFromOrder(
   });
 
   const totalSalesAmount = invoiceLines.reduce((sum, line) => sum + line.salesTotal, 0);
-  const totalDiscountAmount = invoiceLines.reduce((sum, line) => sum + (line.itemsDiscount || 0), 0);
+  const totalDiscountAmount = invoiceLines.reduce(
+    (sum, line) => sum + (line.itemsDiscount || 0),
+    0
+  );
   const netAmount = invoiceLines.reduce((sum, line) => sum + line.netTotal, 0);
-  const totalVAT = invoiceLines.reduce((sum, line) =>
-    sum + line.taxableItems.reduce((taxSum, tax) => taxSum + tax.amount, 0), 0);
+  const totalVAT = invoiceLines.reduce(
+    (sum, line) => sum + line.taxableItems.reduce((taxSum, tax) => taxSum + tax.amount, 0),
+    0
+  );
   const totalAmount = invoiceLines.reduce((sum, line) => sum + line.total, 0);
 
   return {

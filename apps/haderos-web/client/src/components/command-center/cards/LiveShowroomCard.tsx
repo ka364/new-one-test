@@ -1,4 +1,4 @@
-import { Video, Eye, Play, Wifi } from "lucide-react";
+import { Video, Eye, Play, Wifi } from 'lucide-react';
 
 interface LiveShowroomData {
   viewers: number;
@@ -9,7 +9,7 @@ interface LiveShowroomData {
 export function LiveShowroomCard() {
   const data: LiveShowroomData = {
     viewers: 1239,
-    duration: "2:34:12",
+    duration: '2:34:12',
     isLive: true,
   };
 

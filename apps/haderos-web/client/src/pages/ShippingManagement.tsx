@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -19,49 +19,50 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Package, Truck, MapPin, Plus, Search } from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Package, Truck, MapPin, Plus, Search } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 export default function ShippingManagement() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   // Fetch shipping companies
   const { data: companies, isLoading: companiesLoading } = trpc.shipping.getAllCompanies.useQuery();
 
   // Fetch shipments (we'll need to add this query)
-  const { data: shipments, isLoading: shipmentsLoading } = trpc.shipping.getShipmentsByOrder.useQuery(
-    { orderId: 1 }, // This should be dynamic based on selected order
-    { enabled: false } // Disable for now until we have proper order selection
-  );
+  const { data: shipments, isLoading: shipmentsLoading } =
+    trpc.shipping.getShipmentsByOrder.useQuery(
+      { orderId: 1 }, // This should be dynamic based on selected order
+      { enabled: false } // Disable for now until we have proper order selection
+    );
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-yellow-500",
-      picked_up: "bg-blue-500",
-      in_transit: "bg-purple-500",
-      out_for_delivery: "bg-indigo-500",
-      delivered: "bg-green-500",
-      returned: "bg-red-500",
-      lost: "bg-gray-500",
-      cancelled: "bg-gray-400",
+      pending: 'bg-yellow-500',
+      picked_up: 'bg-blue-500',
+      in_transit: 'bg-purple-500',
+      out_for_delivery: 'bg-indigo-500',
+      delivered: 'bg-green-500',
+      returned: 'bg-red-500',
+      lost: 'bg-gray-500',
+      cancelled: 'bg-gray-400',
     };
-    return colors[status] || "bg-gray-500";
+    return colors[status] || 'bg-gray-500';
   };
 
   const getStatusText = (status: string) => {
     const texts: Record<string, string> = {
-      pending: "قيد الانتظار",
-      picked_up: "تم الاستلام",
-      in_transit: "في الطريق",
-      out_for_delivery: "خارج للتوصيل",
-      delivered: "تم التوصيل",
-      returned: "مرتجع",
-      lost: "مفقود",
-      cancelled: "ملغي",
+      pending: 'قيد الانتظار',
+      picked_up: 'تم الاستلام',
+      in_transit: 'في الطريق',
+      out_for_delivery: 'خارج للتوصيل',
+      delivered: 'تم التوصيل',
+      returned: 'مرتجع',
+      lost: 'مفقود',
+      cancelled: 'ملغي',
     };
     return texts[status] || status;
   };
@@ -87,11 +88,9 @@ export default function ShippingManagement() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>إنشاء شحنة جديدة</DialogTitle>
-              <DialogDescription>
-                أدخل بيانات الشحنة وحدد شركة الشحن
-              </DialogDescription>
+              <DialogDescription>أدخل بيانات الشحنة وحدد شركة الشحن</DialogDescription>
             </DialogHeader>
-            <CreateShipmentForm 
+            <CreateShipmentForm
               companies={companies || []}
               onSuccess={() => setIsCreateDialogOpen(false)}
             />
@@ -101,38 +100,36 @@ export default function ShippingManagement() {
 
       {/* Shipping Companies Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {companiesLoading ? (
-          [...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          companies?.map((company) => (
-            <Card key={company.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Truck className="h-4 w-4" />
-                  {company.nameAr || company.name}
-                </CardTitle>
-                <CardDescription className="text-xs">{company.code}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">نشط</span>
-                  <Badge variant={company.isActive ? "default" : "secondary"}>
-                    {company.isActive ? "نشط" : "غير نشط"}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+        {companiesLoading
+          ? [...Array(4)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="pb-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))
+          : companies?.map((company) => (
+              <Card key={company.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Truck className="h-4 w-4" />
+                    {company.nameAr || company.name}
+                  </CardTitle>
+                  <CardDescription className="text-xs">{company.code}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">نشط</span>
+                    <Badge variant={company.isActive ? 'default' : 'secondary'}>
+                      {company.isActive ? 'نشط' : 'غير نشط'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
       </div>
 
       {/* Filters */}
@@ -195,14 +192,16 @@ export default function ShippingManagement() {
               <div key={company.id} className="border rounded-lg p-4">
                 <h4 className="font-medium mb-2">{company.nameAr || company.name}</h4>
                 <div className="space-y-1 text-sm">
-                  {company.zonesConfig && typeof company.zonesConfig === 'object' && (
-                    Object.entries(company.zonesConfig as Record<string, any>).map(([zone, price]) => (
-                      <div key={zone} className="flex justify-between">
-                        <span className="text-muted-foreground">{zone}:</span>
-                        <span className="font-medium">{price} جنيه</span>
-                      </div>
-                    ))
-                  )}
+                  {company.zonesConfig &&
+                    typeof company.zonesConfig === 'object' &&
+                    Object.entries(company.zonesConfig as Record<string, any>).map(
+                      ([zone, price]) => (
+                        <div key={zone} className="flex justify-between">
+                          <span className="text-muted-foreground">{zone}:</span>
+                          <span className="font-medium">{price} جنيه</span>
+                        </div>
+                      )
+                    )}
                 </div>
               </div>
             ))}
@@ -213,29 +212,23 @@ export default function ShippingManagement() {
   );
 }
 
-function CreateShipmentForm({ 
-  companies, 
-  onSuccess 
-}: { 
-  companies: any[]; 
-  onSuccess: () => void;
-}) {
+function CreateShipmentForm({ companies, onSuccess }: { companies: any[]; onSuccess: () => void }) {
   const [formData, setFormData] = useState({
-    orderId: "",
-    companyId: "",
-    trackingNumber: "",
-    zoneId: "",
-    weight: "",
-    shippingCost: "",
-    codFee: "",
-    insuranceFee: "",
-    totalCost: "",
-    notes: "",
+    orderId: '',
+    companyId: '',
+    trackingNumber: '',
+    zoneId: '',
+    weight: '',
+    shippingCost: '',
+    codFee: '',
+    insuranceFee: '',
+    totalCost: '',
+    notes: '',
   });
 
   const createShipment = trpc.shipping.createShipment.useMutation({
     onSuccess: () => {
-      toast.success("تم إنشاء الشحنة بنجاح");
+      toast.success('تم إنشاء الشحنة بنجاح');
       onSuccess();
     },
     onError: (error) => {
@@ -352,7 +345,7 @@ function CreateShipmentForm({
           إلغاء
         </Button>
         <Button type="submit" disabled={createShipment.isPending}>
-          {createShipment.isPending ? "جاري الإنشاء..." : "إنشاء شحنة"}
+          {createShipment.isPending ? 'جاري الإنشاء...' : 'إنشاء شحنة'}
         </Button>
       </div>
     </form>

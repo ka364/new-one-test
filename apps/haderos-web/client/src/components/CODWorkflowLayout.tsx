@@ -61,8 +61,8 @@ export function CODWorkflowLayout({
                         currentStage === stage.id
                           ? 'bg-[#C62822] text-white'
                           : currentStage > stage.id
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 text-gray-600'
                       }
                     `}
                   >

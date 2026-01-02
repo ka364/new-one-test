@@ -1,11 +1,11 @@
 import { getDb } from './db.js';
-import { 
-  userBehavior, 
-  taskPatterns, 
-  userPreferences, 
-  dynamicIcons, 
-  aiSuggestions, 
-  googleDriveFiles 
+import {
+  userBehavior,
+  taskPatterns,
+  userPreferences,
+  dynamicIcons,
+  aiSuggestions,
+  googleDriveFiles,
 } from '../drizzle/schema.js';
 import { eq, desc, and, gte } from 'drizzle-orm';
 
@@ -28,7 +28,9 @@ export async function getAllTaskPatterns(limit?: number) {
 
 export async function getTaskPatternsByUser(userId: number) {
   const db = await getConnection();
-  return db.select().from(taskPatterns)
+  return db
+    .select()
+    .from(taskPatterns)
     .where(eq(taskPatterns.userId, userId))
     .orderBy(desc(taskPatterns.frequency));
 }
@@ -45,18 +47,19 @@ export async function getAllAiSuggestions(limit?: number) {
 
 export async function getAiSuggestionsByUser(userId: number) {
   const db = await getConnection();
-  return db.select().from(aiSuggestions)
+  return db
+    .select()
+    .from(aiSuggestions)
     .where(eq(aiSuggestions.userId, userId))
     .orderBy(desc(aiSuggestions.createdAt));
 }
 
 export async function getPendingAiSuggestions(userId: number) {
   const db = await getConnection();
-  return db.select().from(aiSuggestions)
-    .where(and(
-      eq(aiSuggestions.userId, userId),
-      eq(aiSuggestions.status, 'pending')
-    ))
+  return db
+    .select()
+    .from(aiSuggestions)
+    .where(and(eq(aiSuggestions.userId, userId), eq(aiSuggestions.status, 'pending')))
     .orderBy(desc(aiSuggestions.confidence));
 }
 
@@ -72,7 +75,9 @@ export async function getAllDynamicIcons(limit?: number) {
 
 export async function getDynamicIconsByUser(userId: number) {
   const db = await getConnection();
-  return db.select().from(dynamicIcons)
+  return db
+    .select()
+    .from(dynamicIcons)
     .where(eq(dynamicIcons.userId, userId))
     .orderBy(desc(dynamicIcons.usageCount));
 }
@@ -83,7 +88,9 @@ export async function getDynamicIconsByUser(userId: number) {
 
 export async function getUserBehaviorHistory(userId: number, limit: number = 100) {
   const db = await getConnection();
-  return db.select().from(userBehavior)
+  return db
+    .select()
+    .from(userBehavior)
     .where(eq(userBehavior.userId, userId))
     .orderBy(desc(userBehavior.timestamp))
     .limit(limit);
@@ -92,11 +99,10 @@ export async function getUserBehaviorHistory(userId: number, limit: number = 100
 export async function getRecentUserBehavior(userId: number, hours: number = 24) {
   const db = await getConnection();
   const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
-  return db.select().from(userBehavior)
-    .where(and(
-      eq(userBehavior.userId, userId),
-      gte(userBehavior.timestamp, cutoffTime)
-    ))
+  return db
+    .select()
+    .from(userBehavior)
+    .where(and(eq(userBehavior.userId, userId), gte(userBehavior.timestamp, cutoffTime)))
     .orderBy(desc(userBehavior.timestamp));
 }
 
@@ -106,7 +112,9 @@ export async function getRecentUserBehavior(userId: number, hours: number = 24) 
 
 export async function getUserPreferences(userId: number) {
   const db = await getConnection();
-  const result = await db.select().from(userPreferences)
+  const result = await db
+    .select()
+    .from(userPreferences)
     .where(eq(userPreferences.userId, userId))
     .limit(1);
   return result[0] || null;
@@ -115,12 +123,13 @@ export async function getUserPreferences(userId: number) {
 export async function updateUserPreferences(userId: number, preferences: Record<string, any>) {
   const db = await getConnection();
   const existing = await getUserPreferences(userId);
-  
+
   if (existing) {
-    return db.update(userPreferences)
-      .set({ 
+    return db
+      .update(userPreferences)
+      .set({
         customSettings: preferences,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(userPreferences.userId, userId));
   } else {
@@ -142,14 +151,18 @@ export async function getAllGoogleDriveFiles() {
 
 export async function getGoogleDriveFilesByUser(userId: number) {
   const db = await getConnection();
-  return db.select().from(googleDriveFiles)
+  return db
+    .select()
+    .from(googleDriveFiles)
     .where(eq(googleDriveFiles.userId, userId))
     .orderBy(desc(googleDriveFiles.createdAt));
 }
 
 export async function getGoogleDriveFilesByType(fileType: string) {
   const db = await getConnection();
-  return db.select().from(googleDriveFiles)
+  return db
+    .select()
+    .from(googleDriveFiles)
     .where(eq(googleDriveFiles.fileType, fileType))
     .orderBy(desc(googleDriveFiles.createdAt));
 }

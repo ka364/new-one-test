@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
-import { useRoute, useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from 'react';
+import { useRoute, useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   User,
   Phone,
@@ -20,19 +20,20 @@ import {
   XCircle,
   Clock,
   ArrowRight,
-} from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
+} from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function EmployeeProfile() {
-  const [, params] = useRoute("/hr/employee/:id");
+  const [, params] = useRoute('/hr/employee/:id');
   const [, setLocation] = useLocation();
   const employeeId = params?.id ? parseInt(params.id) : null;
 
   // Fetch employee details
-  const { data: employee, isLoading, error } = trpc.hr.getEmployee.useQuery(
-    { id: employeeId! },
-    { enabled: !!employeeId }
-  );
+  const {
+    data: employee,
+    isLoading,
+    error,
+  } = trpc.hr.getEmployee.useQuery({ id: employeeId! }, { enabled: !!employeeId });
 
   // Fetch employee documents
   const { data: documents } = trpc.hr.getEmployeeDocuments.useQuery(
@@ -67,9 +68,7 @@ export default function EmployeeProfile() {
     return (
       <DashboardLayout>
         <Alert variant="destructive">
-          <AlertDescription>
-            {error?.message || "لم يتم العثور على الموظف"}
-          </AlertDescription>
+          <AlertDescription>{error?.message || 'لم يتم العثور على الموظف'}</AlertDescription>
         </Alert>
       </DashboardLayout>
     );
@@ -77,21 +76,21 @@ export default function EmployeeProfile() {
 
   const getDocumentStatusBadge = (status: string) => {
     switch (status) {
-      case "verified":
+      case 'verified':
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
             <CheckCircle2 className="ml-1 h-3 w-3" />
             تم التحقق
           </Badge>
         );
-      case "pending":
+      case 'pending':
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
             <Clock className="ml-1 h-3 w-3" />
             قيد المراجعة
           </Badge>
         );
-      case "rejected":
+      case 'rejected':
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
             <XCircle className="ml-1 h-3 w-3" />
@@ -117,7 +116,7 @@ export default function EmployeeProfile() {
             <h1 className="text-3xl font-bold text-gray-900">الملف الشخصي للموظف</h1>
             <p className="text-gray-600 mt-1">عرض تفاصيل الموظف وحالة وثائقه</p>
           </div>
-          <Button variant="outline" onClick={() => setLocation("/hr/supervisors")}>
+          <Button variant="outline" onClick={() => setLocation('/hr/supervisors')}>
             <ArrowRight className="ml-2 h-4 w-4" />
             العودة
           </Button>
@@ -150,14 +149,16 @@ export default function EmployeeProfile() {
                     <Phone className="h-4 w-4" />
                     رقم الهاتف
                   </label>
-                  <p className="text-lg mt-1" dir="ltr">{employee.phoneNumber}</p>
+                  <p className="text-lg mt-1" dir="ltr">
+                    {employee.phoneNumber}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     البريد الإلكتروني
                   </label>
-                  <p className="text-lg mt-1">{employee.email || "غير متوفر"}</p>
+                  <p className="text-lg mt-1">{employee.email || 'غير متوفر'}</p>
                 </div>
               </div>
 
@@ -182,7 +183,7 @@ export default function EmployeeProfile() {
                     الراتب
                   </label>
                   <p className="text-lg font-semibold mt-1">
-                    {employee.salary ? `${employee.salary} جنيه` : "غير محدد"}
+                    {employee.salary ? `${employee.salary} جنيه` : 'غير محدد'}
                   </p>
                 </div>
                 <div>
@@ -191,7 +192,7 @@ export default function EmployeeProfile() {
                     تاريخ التعيين
                   </label>
                   <p className="text-lg mt-1">
-                    {new Date(employee.hireDate).toLocaleDateString("ar-EG")}
+                    {new Date(employee.hireDate).toLocaleDateString('ar-EG')}
                   </p>
                 </div>
               </div>
@@ -199,11 +200,14 @@ export default function EmployeeProfile() {
 
             <div className="mt-6 pt-6 border-t">
               <div className="flex items-center gap-4 flex-wrap">
-                <Badge variant={employee.role === "supervisor" ? "default" : "secondary"} className="text-sm">
-                  {employee.role === "supervisor" ? "مشرف" : "موظف"}
+                <Badge
+                  variant={employee.role === 'supervisor' ? 'default' : 'secondary'}
+                  className="text-sm"
+                >
+                  {employee.role === 'supervisor' ? 'مشرف' : 'موظف'}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
-                  {employee.contractType === "permanent" ? "عقد دائم" : "عقد مؤقت"}
+                  {employee.contractType === 'permanent' ? 'عقد دائم' : 'عقد مؤقت'}
                 </Badge>
                 {employee.parentId && (
                   <div className="text-sm text-gray-600">
@@ -236,14 +240,14 @@ export default function EmployeeProfile() {
                       <FileText className="h-8 w-8 text-blue-600" />
                       <div>
                         <p className="font-semibold">
-                          {doc.documentType === "national_id" && "البطاقة الشخصية"}
-                          {doc.documentType === "military_certificate" && "شهادة الخدمة العسكرية"}
-                          {doc.documentType === "personal_photo" && "الصورة الشخصية"}
-                          {doc.documentType === "birth_certificate" && "شهادة الميلاد"}
-                          {doc.documentType === "qualification" && "المؤهل الدراسي"}
+                          {doc.documentType === 'national_id' && 'البطاقة الشخصية'}
+                          {doc.documentType === 'military_certificate' && 'شهادة الخدمة العسكرية'}
+                          {doc.documentType === 'personal_photo' && 'الصورة الشخصية'}
+                          {doc.documentType === 'birth_certificate' && 'شهادة الميلاد'}
+                          {doc.documentType === 'qualification' && 'المؤهل الدراسي'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          تم الرفع: {new Date(doc.uploadedAt).toLocaleDateString("ar-EG")}
+                          تم الرفع: {new Date(doc.uploadedAt).toLocaleDateString('ar-EG')}
                         </p>
                       </div>
                     </div>

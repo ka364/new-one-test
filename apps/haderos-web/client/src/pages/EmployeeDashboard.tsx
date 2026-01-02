@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, LogOut, CheckCircle2, Calendar, User, Clock } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, LogOut, CheckCircle2, Calendar, User, Clock } from 'lucide-react';
 
 interface EmployeeSession {
   accountId: number;
@@ -19,23 +19,23 @@ interface EmployeeSession {
 export default function EmployeeDashboard() {
   const [, setLocation] = useLocation();
   const [session, setSession] = useState<EmployeeSession | null>(null);
-  const [dataType, setDataType] = useState("");
-  const [dataContent, setDataContent] = useState("");
+  const [dataType, setDataType] = useState('');
+  const [dataContent, setDataContent] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("employeeSession");
+    const stored = localStorage.getItem('employeeSession');
     if (!stored) {
-      setLocation("/employee/login");
+      setLocation('/employee/login');
       return;
     }
 
     const parsed = JSON.parse(stored);
-    
+
     // Check if expired
     if (new Date(parsed.expiresAt) < new Date()) {
-      localStorage.removeItem("employeeSession");
-      setLocation("/employee/login");
+      localStorage.removeItem('employeeSession');
+      setLocation('/employee/login');
       return;
     }
 
@@ -50,16 +50,16 @@ export default function EmployeeDashboard() {
   const submitMutation = trpc.employees.submitData.useMutation({
     onSuccess: () => {
       setSuccess(true);
-      setDataType("");
-      setDataContent("");
+      setDataType('');
+      setDataContent('');
       submissionsQuery.refetch();
       setTimeout(() => setSuccess(false), 3000);
     },
   });
 
   const handleLogout = () => {
-    localStorage.removeItem("employeeSession");
-    setLocation("/employee/login");
+    localStorage.removeItem('employeeSession');
+    setLocation('/employee/login');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -74,7 +74,7 @@ export default function EmployeeDashboard() {
         dataJson,
       });
     } catch (error) {
-      alert("خطأ: البيانات يجب أن تكون بصيغة JSON صحيحة");
+      alert('خطأ: البيانات يجب أن تكون بصيغة JSON صحيحة');
     }
   };
 
@@ -93,9 +93,7 @@ export default function EmployeeDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                مرحباً، {session.employeeName}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">مرحباً، {session.employeeName}</h1>
               <p className="text-sm text-gray-600 mt-1">
                 <Calendar className="inline w-4 h-4 mr-1" />
                 الشهر: {session.month}
@@ -115,9 +113,7 @@ export default function EmployeeDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>إدخال بيانات جديدة</CardTitle>
-              <CardDescription>
-                أدخل البيانات الخاصة بشهر {session.month}
-              </CardDescription>
+              <CardDescription>أدخل البيانات الخاصة بشهر {session.month}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,23 +151,17 @@ export default function EmployeeDashboard() {
                     className="font-mono text-sm"
                     dir="ltr"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    💡 أدخل البيانات بصيغة JSON
-                  </p>
+                  <p className="text-xs text-muted-foreground">💡 أدخل البيانات بصيغة JSON</p>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={submitMutation.isPending}
-                >
+                <Button type="submit" className="w-full" disabled={submitMutation.isPending}>
                   {submitMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       جاري الحفظ...
                     </>
                   ) : (
-                    "حفظ البيانات"
+                    'حفظ البيانات'
                   )}
                 </Button>
               </form>
@@ -182,9 +172,7 @@ export default function EmployeeDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>البيانات المحفوظة</CardTitle>
-              <CardDescription>
-                جميع البيانات التي أدخلتها هذا الشهر
-              </CardDescription>
+              <CardDescription>جميع البيانات التي أدخلتها هذا الشهر</CardDescription>
             </CardHeader>
             <CardContent>
               {submissionsQuery.isLoading ? (
@@ -194,20 +182,18 @@ export default function EmployeeDashboard() {
               ) : submissionsQuery.data && submissionsQuery.data.length > 0 ? (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {submissionsQuery.data.map((submission: any) => (
-                    <div
-                      key={submission.id}
-                      className="p-4 bg-gray-50 rounded-lg border"
-                    >
+                    <div key={submission.id} className="p-4 bg-gray-50 rounded-lg border">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">
-                          {submission.dataType}
-                        </span>
+                        <span className="font-medium text-sm">{submission.dataType}</span>
                         <span className="text-xs text-gray-500 flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
-                          {new Date(submission.submittedAt).toLocaleDateString("ar-EG")}
+                          {new Date(submission.submittedAt).toLocaleDateString('ar-EG')}
                         </span>
                       </div>
-                      <pre className="text-xs bg-white p-2 rounded border overflow-x-auto" dir="ltr">
+                      <pre
+                        className="text-xs bg-white p-2 rounded border overflow-x-auto"
+                        dir="ltr"
+                      >
                         {JSON.stringify(submission.dataJson, null, 2)}
                       </pre>
                     </div>
@@ -249,7 +235,7 @@ export default function EmployeeDashboard() {
                 <div>
                   <p className="text-sm text-gray-600">ينتهي في</p>
                   <p className="font-medium">
-                    {new Date(session.expiresAt).toLocaleDateString("ar-EG")}
+                    {new Date(session.expiresAt).toLocaleDateString('ar-EG')}
                   </p>
                 </div>
               </div>

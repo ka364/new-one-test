@@ -1,9 +1,9 @@
-import { Truck, MapPin } from "lucide-react";
+import { Truck, MapPin } from 'lucide-react';
 
 interface ShippingData {
   activeTrucks: number;
   deliveries: number;
-  locations: { x: number; y: number; status: "active" | "pending" | "completed" }[];
+  locations: { x: number; y: number; status: 'active' | 'pending' | 'completed' }[];
 }
 
 export function SmartShippingCard() {
@@ -11,21 +11,25 @@ export function SmartShippingCard() {
     activeTrucks: 8,
     deliveries: 24,
     locations: [
-      { x: 30, y: 40, status: "active" },
-      { x: 50, y: 50, status: "active" },
-      { x: 70, y: 35, status: "pending" },
-      { x: 45, y: 65, status: "completed" },
-      { x: 60, y: 55, status: "active" },
-      { x: 35, y: 55, status: "pending" },
+      { x: 30, y: 40, status: 'active' },
+      { x: 50, y: 50, status: 'active' },
+      { x: 70, y: 35, status: 'pending' },
+      { x: 45, y: 65, status: 'completed' },
+      { x: 60, y: 55, status: 'active' },
+      { x: 35, y: 55, status: 'pending' },
     ],
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "#A855F7"; // Purple
-      case "pending": return "#3B82F6"; // Blue
-      case "completed": return "#10B981"; // Green
-      default: return "#6B7280";
+      case 'active':
+        return '#A855F7'; // Purple
+      case 'pending':
+        return '#3B82F6'; // Blue
+      case 'completed':
+        return '#10B981'; // Green
+      default:
+        return '#6B7280';
     }
   };
 
@@ -48,7 +52,12 @@ export function SmartShippingCard() {
         <div className="absolute inset-0 opacity-20">
           <svg width="100%" height="100%">
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5"/>
+              <path
+                d="M 20 0 L 0 0 0 20"
+                fill="none"
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="0.5"
+              />
             </pattern>
             <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
@@ -68,12 +77,7 @@ export function SmartShippingCard() {
                 className="animate-ping"
               />
               {/* Main dot */}
-              <circle
-                cx={`${loc.x}%`}
-                cy={`${loc.y}%`}
-                r="4"
-                fill={getStatusColor(loc.status)}
-              />
+              <circle cx={`${loc.x}%`} cy={`${loc.y}%`} r="4" fill={getStatusColor(loc.status)} />
             </g>
           ))}
           {/* Connection lines */}

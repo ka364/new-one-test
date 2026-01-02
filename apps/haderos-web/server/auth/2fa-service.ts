@@ -101,9 +101,7 @@ export class TwoFactorService {
    */
   verifyTempToken(token: string): { userId: number } | null {
     try {
-      const payload = JSON.parse(
-        Buffer.from(token, 'base64').toString('utf-8')
-      );
+      const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
 
       if (payload.exp < Date.now()) {
         return null; // Expired

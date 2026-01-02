@@ -96,13 +96,16 @@ export const authExampleRouter = router({
         const passwordHash = await hashPassword(input.password);
 
         // TODO: Create user in database
-        const newUser = await ctx.db.insert(users).values({
-          email: input.email,
-          name: input.name,
-          passwordHash,
-          phone: input.phone,
-          createdAt: new Date(),
-        }).returning();
+        const newUser = await ctx.db
+          .insert(users)
+          .values({
+            email: input.email,
+            name: input.name,
+            passwordHash,
+            phone: input.phone,
+            createdAt: new Date(),
+          })
+          .returning();
 
         logger.info('Registration successful', { userId: newUser[0].id, email: input.email });
 
@@ -128,59 +131,56 @@ export const authExampleRouter = router({
   /**
    * Reset Password Request - with validation
    */
-  resetPassword: publicProcedure
-    .input(schemas.resetPassword)
-    .mutation(async ({ input, ctx }) => {
-      logger.info('Password reset requested', { email: input.email });
+  resetPassword: publicProcedure.input(schemas.resetPassword).mutation(async ({ input, ctx }) => {
+    logger.info('Password reset requested', { email: input.email });
 
-      try {
-        const user = await ctx.db.query.users.findFirst({
-          where: (users, { eq }) => eq(users.email, input.email),
-        });
+    try {
+      const user = await ctx.db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.email, input.email),
+      });
 
-        // Don't reveal if email exists or not (security best practice)
-        if (!user) {
-          logger.warn('Password reset: User not found', { email: input.email });
-          return {
-            success: true,
-            message: 'If the email exists, a reset link will be sent',
-          };
-        }
-
-        // TODO: Generate reset token and send email
-        // const resetToken = generateResetToken();
-        // await sendPasswordResetEmail(user.email, resetToken);
-
-        logger.info('Password reset email sent', { userId: user.id });
-
+      // Don't reveal if email exists or not (security best practice)
+      if (!user) {
+        logger.warn('Password reset: User not found', { email: input.email });
         return {
           success: true,
           message: 'If the email exists, a reset link will be sent',
         };
-      } catch (error) {
-        logger.error('Password reset error', error as Error, { email: input.email });
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred',
-        });
       }
-    }),
+
+      // TODO: Generate reset token and send email
+      // const resetToken = generateResetToken();
+      // await sendPasswordResetEmail(user.email, resetToken);
+
+      logger.info('Password reset email sent', { userId: user.id });
+
+      return {
+        success: true,
+        message: 'If the email exists, a reset link will be sent',
+      };
+    } catch (error) {
+      logger.error('Password reset error', error as Error, { email: input.email });
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An error occurred',
+      });
+    }
+  }),
 
   /**
    * Get Current User - protected route
    */
-  me: protectedProcedure
-    .query(async ({ ctx }) => {
-      // ctx.user is guaranteed to exist (enforced by protectedProcedure)
-      logger.debug('Fetching current user', { userId: ctx.user.id });
+  me: protectedProcedure.query(async ({ ctx }) => {
+    // ctx.user is guaranteed to exist (enforced by protectedProcedure)
+    logger.debug('Fetching current user', { userId: ctx.user.id });
 
-      return {
-        id: ctx.user.id,
-        email: ctx.user.email,
-        name: ctx.user.name,
-        role: ctx.user.role,
-      };
-    }),
+    return {
+      id: ctx.user.id,
+      email: ctx.user.email,
+      name: ctx.user.name,
+      role: ctx.user.role,
+    };
+  }),
 });
 
 // Export type for frontend

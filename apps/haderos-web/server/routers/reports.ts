@@ -474,7 +474,7 @@ class ReportGenerator {
         title: 'Scenario Comparison',
         titleAr: 'مقارنة السيناريوهات',
         type: 'tables',
-        data: results.map(r => ({
+        data: results.map((r) => ({
           scenario: r.scenario,
           revenue: r.predictions?.nextMonth || 0,
           growth: r.metrics?.revenue?.growth || 0,
@@ -570,12 +570,7 @@ class ReportGenerator {
     ];
 
     // دمج جميع التنبيهات
-    const alerts = [
-      ...financial.alerts,
-      ...operations.alerts,
-      ...hr.alerts,
-      ...simulation.alerts,
-    ];
+    const alerts = [...financial.alerts, ...operations.alerts, ...hr.alerts, ...simulation.alerts];
 
     return {
       id: `comp-report-${Date.now()}`,
@@ -788,7 +783,9 @@ export const reportsRouter = router({
 
       let report: Report;
       const period = {
-        start: input.startDate ? new Date(input.startDate) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+        start: input.startDate
+          ? new Date(input.startDate)
+          : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
         end: input.endDate ? new Date(input.endDate) : new Date(),
       };
 

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
+import { z } from 'zod';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import {
   getAllProducts,
   getProductById,
@@ -8,8 +8,7 @@ import {
   getAllOrders,
   getDailySalesStats,
   getTopSellingProducts,
-} from "../db-nowshoes";
-
+} from '../db-nowshoes';
 
 export const nowshoesRouter = router({
   getAllProducts: protectedProcedure.query(async () => {

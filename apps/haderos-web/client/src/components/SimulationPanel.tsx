@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { trpc } from "@/lib/trpc";
-import { Play, Pause, RotateCcw, Activity, Zap, Brain, Heart } from "lucide-react";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { trpc } from '@/lib/trpc';
+import { Play, Pause, RotateCcw, Activity, Zap, Brain, Heart } from 'lucide-react';
 
 interface SimulationPanelProps {
   className?: string;
@@ -13,8 +13,8 @@ interface SimulationPanelProps {
 
 export function SimulationPanel({ className }: SimulationPanelProps) {
   const [selectedScenario, setSelectedScenario] = useState<
-    "resource_distribution" | "stress_response" | "learning_propagation" | "healing"
-  >("resource_distribution");
+    'resource_distribution' | 'stress_response' | 'learning_propagation' | 'healing'
+  >('resource_distribution');
   const [intensity, setIntensity] = useState(5);
   const [isRunning, setIsRunning] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
@@ -25,44 +25,44 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
       setIsRunning(false);
     },
     onError: (error) => {
-      console.error("Simulation error:", error);
+      console.error('Simulation error:', error);
       setIsRunning(false);
-    }
+    },
   });
 
   const scenarios = [
     {
-      id: "resource_distribution",
-      name: "توزيع الموارد",
-      nameEn: "Resource Distribution",
+      id: 'resource_distribution',
+      name: 'توزيع الموارد',
+      nameEn: 'Resource Distribution',
       icon: Activity,
-      color: "from-green-500 to-emerald-600",
-      description: "محاكاة توزيع الموارد من العقد الغنية إلى الفقيرة"
+      color: 'from-green-500 to-emerald-600',
+      description: 'محاكاة توزيع الموارد من العقد الغنية إلى الفقيرة',
     },
     {
-      id: "stress_response",
-      name: "الاستجابة للضغط",
-      nameEn: "Stress Response",
+      id: 'stress_response',
+      name: 'الاستجابة للضغط',
+      nameEn: 'Stress Response',
       icon: Zap,
-      color: "from-orange-500 to-red-600",
-      description: "محاكاة استجابة الشبكة للضغوط الخارجية"
+      color: 'from-orange-500 to-red-600',
+      description: 'محاكاة استجابة الشبكة للضغوط الخارجية',
     },
     {
-      id: "learning_propagation",
-      name: "انتشار المعرفة",
-      nameEn: "Learning Propagation",
+      id: 'learning_propagation',
+      name: 'انتشار المعرفة',
+      nameEn: 'Learning Propagation',
       icon: Brain,
-      color: "from-blue-500 to-purple-600",
-      description: "محاكاة انتشار التعلم والمعرفة عبر الشبكة"
+      color: 'from-blue-500 to-purple-600',
+      description: 'محاكاة انتشار التعلم والمعرفة عبر الشبكة',
     },
     {
-      id: "healing",
-      name: "الإصلاح الذاتي",
-      nameEn: "Self-Healing",
+      id: 'healing',
+      name: 'الإصلاح الذاتي',
+      nameEn: 'Self-Healing',
       icon: Heart,
-      color: "from-pink-500 to-rose-600",
-      description: "محاكاة قدرة الشبكة على التعافي والإصلاح الذاتي"
-    }
+      color: 'from-pink-500 to-rose-600',
+      description: 'محاكاة قدرة الشبكة على التعافي والإصلاح الذاتي',
+    },
   ];
 
   const handleRunSimulation = () => {
@@ -70,11 +70,11 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
     runSimulation.mutate({
       scenario: selectedScenario,
       duration: 10,
-      intensity
+      intensity,
     });
   };
 
-  const selectedScenarioData = scenarios.find(s => s.id === selectedScenario);
+  const selectedScenarioData = scenarios.find((s) => s.id === selectedScenario);
 
   return (
     <Card className={className}>
@@ -83,9 +83,7 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
           <span className="text-2xl">🌱</span>
           محاكاة الشبكة الفطرية
         </CardTitle>
-        <CardDescription>
-          اختبر سلوك الشبكة في سيناريوهات مختلفة
-        </CardDescription>
+        <CardDescription>اختبر سلوك الشبكة في سيناريوهات مختلفة</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* اختيار السيناريو */}
@@ -102,18 +100,21 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
                   disabled={isRunning}
                   className={`
                     relative p-4 rounded-lg border-2 transition-all text-right
-                    ${isSelected
-                      ? 'border-primary bg-primary/5 shadow-md'
-                      : 'border-border hover:border-primary/50 hover:bg-accent'
+                    ${
+                      isSelected
+                        ? 'border-primary bg-primary/5 shadow-md'
+                        : 'border-border hover:border-primary/50 hover:bg-accent'
                     }
                     ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`
+                    <div
+                      className={`
                       p-2 rounded-lg bg-gradient-to-br ${scenario.color}
                       text-white
-                    `}>
+                    `}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
@@ -154,12 +155,7 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
 
         {/* أزرار التحكم */}
         <div className="flex gap-3">
-          <Button
-            onClick={handleRunSimulation}
-            disabled={isRunning}
-            className="flex-1"
-            size="lg"
-          >
+          <Button onClick={handleRunSimulation} disabled={isRunning} className="flex-1" size="lg">
             {isRunning ? (
               <>
                 <Pause className="ml-2 h-4 w-4 animate-pulse" />
@@ -173,11 +169,7 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
             )}
           </Button>
           {lastResult && (
-            <Button
-              onClick={() => setLastResult(null)}
-              variant="outline"
-              size="lg"
-            >
+            <Button onClick={() => setLastResult(null)} variant="outline" size="lg">
               <RotateCcw className="ml-2 h-4 w-4" />
               إعادة
             </Button>
@@ -230,7 +222,9 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
                   </div>
                   <div className="flex justify-between">
                     <span>إجمالي الموارد:</span>
-                    <span className="font-mono">{lastResult.startState.totalResources.toFixed(0)}</span>
+                    <span className="font-mono">
+                      {lastResult.startState.totalResources.toFixed(0)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>متوسط الصحة:</span>
@@ -243,15 +237,21 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>عدد العقد:</span>
-                    <span className="font-mono font-semibold">{lastResult.endState.totalNodes}</span>
+                    <span className="font-mono font-semibold">
+                      {lastResult.endState.totalNodes}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>إجمالي الموارد:</span>
-                    <span className="font-mono font-semibold">{lastResult.endState.totalResources.toFixed(0)}</span>
+                    <span className="font-mono font-semibold">
+                      {lastResult.endState.totalResources.toFixed(0)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>متوسط الصحة:</span>
-                    <span className="font-mono font-semibold">{lastResult.endState.avgHealth.toFixed(1)}%</span>
+                    <span className="font-mono font-semibold">
+                      {lastResult.endState.avgHealth.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -287,9 +287,9 @@ export function SimulationPanel({ className }: SimulationPanelProps) {
         {!lastResult && (
           <Alert>
             <AlertDescription className="text-sm">
-              💡 <strong>كيف يعمل:</strong> هذه المحاكاة تحاكي سلوك الشبكة الفطرية (Mycelium)
-              في توزيع الموارد، الاستجابة للضغط، نشر المعرفة، والإصلاح الذاتي.
-              اختر سيناريو واضبط الشدة ثم اضغط "تشغيل المحاكاة".
+              💡 <strong>كيف يعمل:</strong> هذه المحاكاة تحاكي سلوك الشبكة الفطرية (Mycelium) في
+              توزيع الموارد، الاستجابة للضغط، نشر المعرفة، والإصلاح الذاتي. اختر سيناريو واضبط الشدة
+              ثم اضغط "تشغيل المحاكاة".
             </AlertDescription>
           </Alert>
         )}

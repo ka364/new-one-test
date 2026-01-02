@@ -30,11 +30,11 @@ export enum InstaPayStatus {
 
 // Transaction Types
 export enum InstaPayTransactionType {
-  P2P = 'P2P',           // Person to Person
-  P2M = 'P2M',           // Person to Merchant
-  M2P = 'M2P',           // Merchant to Person (Refund)
-  BILL = 'BILL',         // Bill Payment
-  QR = 'QR',             // QR Code Payment
+  P2P = 'P2P', // Person to Person
+  P2M = 'P2M', // Person to Merchant
+  M2P = 'M2P', // Merchant to Person (Refund)
+  BILL = 'BILL', // Bill Payment
+  QR = 'QR', // QR Code Payment
 }
 
 // Interfaces
@@ -46,30 +46,30 @@ export interface InstaPayCredentials {
 }
 
 export interface InstaPayCustomer {
-  mobileNumber: string;      // رقم الموبايل (01xxxxxxxxx)
-  nationalId?: string;       // الرقم القومي
+  mobileNumber: string; // رقم الموبايل (01xxxxxxxxx)
+  nationalId?: string; // الرقم القومي
   name?: string;
   email?: string;
 }
 
 export interface InstaPayPaymentRequest {
-  amount: number;            // المبلغ بالجنيه
-  currency?: string;         // العملة (default: EGP)
-  orderId: string;           // رقم الطلب
-  description?: string;      // وصف المعاملة
+  amount: number; // المبلغ بالجنيه
+  currency?: string; // العملة (default: EGP)
+  orderId: string; // رقم الطلب
+  description?: string; // وصف المعاملة
   customer: InstaPayCustomer;
-  expiryMinutes?: number;    // مدة صلاحية الطلب (default: 15)
-  callbackUrl?: string;      // URL للإشعار
-  returnUrl?: string;        // URL بعد الدفع
+  expiryMinutes?: number; // مدة صلاحية الطلب (default: 15)
+  callbackUrl?: string; // URL للإشعار
+  returnUrl?: string; // URL بعد الدفع
   metadata?: Record<string, any>;
 }
 
 export interface InstaPayPaymentResponse {
   transactionId: string;
-  paymentUrl: string;        // رابط الدفع
-  qrCode?: string;           // رمز QR
-  deepLink?: string;         // رابط التطبيق
-  expiresAt: string;         // تاريخ انتهاء الصلاحية
+  paymentUrl: string; // رابط الدفع
+  qrCode?: string; // رمز QR
+  deepLink?: string; // رابط التطبيق
+  expiresAt: string; // تاريخ انتهاء الصلاحية
   status: InstaPayStatus;
 }
 
@@ -88,9 +88,9 @@ export interface InstaPayTransaction {
 }
 
 export interface InstaPayRefundRequest {
-  transactionId: string;     // معرف المعاملة الأصلية
-  amount?: number;           // المبلغ (للاسترجاع الجزئي)
-  reason?: string;           // سبب الاسترجاع
+  transactionId: string; // معرف المعاملة الأصلية
+  amount?: number; // المبلغ (للاسترجاع الجزئي)
+  reason?: string; // سبب الاسترجاع
 }
 
 export interface InstaPayWebhookPayload {
@@ -167,7 +167,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/payments`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -206,7 +206,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/payments/${transactionId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -228,7 +228,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/payments/order/${orderId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -250,7 +250,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/refunds`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -282,7 +282,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/payments/qr`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -326,7 +326,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/transactions?${queryParams}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -388,7 +388,7 @@ export class InstaPayService {
     const response = await fetch(`${urls.apiUrl}/v1/payments/${transactionId}/cancel`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

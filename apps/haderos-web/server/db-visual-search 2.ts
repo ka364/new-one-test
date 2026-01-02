@@ -3,9 +3,9 @@
  * Database functions for Visual Search
  */
 
-import { requireDb } from "./db";
-import { productImages, imageEmbeddings, visualSearchHistory, products } from "../drizzle/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { requireDb } from './db';
+import { productImages, imageEmbeddings, visualSearchHistory, products } from '../drizzle/schema';
+import { eq, desc, inArray } from 'drizzle-orm';
 
 /**
  * Get all image embeddings for similarity search
@@ -13,7 +13,7 @@ import { eq, desc, inArray } from "drizzle-orm";
 export async function getAllImageEmbeddings() {
   const db = await requireDb();
   if (!db) return [];
-  
+
   const results = await db
     .select({
       imageId: imageEmbeddings.imageId,
@@ -23,11 +23,11 @@ export async function getAllImageEmbeddings() {
     .from(imageEmbeddings)
     .innerJoin(productImages, eq(imageEmbeddings.imageId, productImages.id))
     .execute();
-  
-  return results.map(item => ({
+
+  return results.map((item) => ({
     imageId: item.imageId,
     productId: item.productId,
-    embedding: JSON.parse(item.embedding as string) as number[]
+    embedding: JSON.parse(item.embedding as string) as number[],
   }));
 }
 
@@ -37,7 +37,7 @@ export async function getAllImageEmbeddings() {
 export async function getProductImages(productId: number) {
   const db = await requireDb();
   if (!db) return [];
-  
+
   return await db
     .select()
     .from(productImages)
@@ -51,14 +51,10 @@ export async function getProductImages(productId: number) {
 export async function getProductsByIds(productIds: number[]) {
   const db = await requireDb();
   if (!db) return [];
-  
+
   if (productIds.length === 0) return [];
-  
-  return await db
-    .select()
-    .from(products)
-    .where(inArray(products.id, productIds))
-    .execute();
+
+  return await db.select().from(products).where(inArray(products.id, productIds)).execute();
 }
 
 /**
@@ -67,13 +63,13 @@ export async function getProductsByIds(productIds: number[]) {
 export async function getImageEmbedding(imageId: number) {
   const db = await requireDb();
   if (!db) return null;
-  
+
   const results = await db
     .select()
     .from(imageEmbeddings)
     .where(eq(imageEmbeddings.imageId, imageId))
     .execute();
-  
+
   return results[0] || null;
 }
 
@@ -91,7 +87,7 @@ export async function createImageEmbedding(data: {
 }) {
   const db = await requireDb();
   if (!db) throw new Error('Database connection failed');
-  
+
   const result = await db.insert(imageEmbeddings).values(data).execute();
   return result;
 }
@@ -112,7 +108,7 @@ export async function logVisualSearch(data: {
 }) {
   const db = await requireDb();
   if (!db) throw new Error('Database connection failed');
-  
+
   const result = await db.insert(visualSearchHistory).values(data).execute();
   return result;
 }
@@ -123,17 +119,17 @@ export async function logVisualSearch(data: {
 export async function getSearchHistory(limit: number = 50, userId?: number) {
   const db = await requireDb();
   if (!db) return [];
-  
+
   let query = db
     .select()
     .from(visualSearchHistory)
     .orderBy(desc(visualSearchHistory.searchedAt))
     .limit(limit);
-  
+
   if (userId) {
     query = query.where(eq(visualSearchHistory.userId, userId)) as any;
   }
-  
+
   return await query.execute();
 }
 
@@ -147,7 +143,7 @@ export async function updateSearchFeedback(
 ) {
   const db = await requireDb();
   if (!db) throw new Error('Database connection failed');
-  
+
   await db
     .update(visualSearchHistory)
     .set({
@@ -156,6 +152,6 @@ export async function updateSearchFeedback(
     })
     .where(eq(visualSearchHistory.id, searchId))
     .execute();
-  
+
   return { success: true };
 }

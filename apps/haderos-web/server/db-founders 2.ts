@@ -4,10 +4,10 @@
  * Handles founder authentication, account management, and audit trail
  */
 
-import { requireDb } from "./db";
-import { founderAccounts, founderLoginHistory } from "../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+import { requireDb } from './db';
+import { founderAccounts, founderLoginHistory } from '../drizzle/schema';
+import { eq, desc } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 // ============================================
 // FOUNDER ACCOUNT MANAGEMENT
@@ -28,10 +28,10 @@ export async function createFounderAccount(data: {
 }) {
   const db = await requireDb();
   if (!db) throw new Error('Database connection failed');
-  
+
   // Hash password
   const passwordHash = await bcrypt.hash(data.password, 10);
-  
+
   const [account] = await db.insert(founderAccounts).values({
     fullName: data.fullName,
     email: data.email,
@@ -45,7 +45,7 @@ export async function createFounderAccount(data: {
     permissions: ['*'], // Full admin access
     loginCount: 0,
   });
-  
+
   return account;
 }
 
@@ -60,7 +60,7 @@ export async function getFounderByUsername(username: string) {
     .from(founderAccounts)
     .where(eq(founderAccounts.username, username))
     .limit(1);
-  
+
   return founder || null;
 }
 
@@ -75,7 +75,7 @@ export async function getFounderByEmail(email: string) {
     .from(founderAccounts)
     .where(eq(founderAccounts.email, email))
     .limit(1);
-  
+
   return founder || null;
 }
 
@@ -90,7 +90,7 @@ export async function getFounderById(id: number) {
     .from(founderAccounts)
     .where(eq(founderAccounts.id, id))
     .limit(1);
-  
+
   return founder || null;
 }
 
@@ -109,18 +109,18 @@ export async function getAllFounders() {
 export async function verifyFounderPassword(username: string, password: string) {
   const founder = await getFounderByUsername(username);
   if (!founder) return null;
-  
+
   const isValid = await bcrypt.compare(password, founder.passwordHash);
   if (!isValid) return null;
-  
+
   // Check if account is active
   if (!founder.isActive) return null;
-  
+
   // Check if password expired
   if (new Date() > new Date(founder.passwordExpiresAt)) {
     return { expired: true, founder };
   }
-  
+
   return { expired: false, founder };
 }
 
@@ -134,7 +134,7 @@ export async function updateFounderLastLogin(founderId: number, ipAddress?: stri
     .select({ loginCount: founderAccounts.loginCount })
     .from(founderAccounts)
     .where(eq(founderAccounts.id, founderId));
-  
+
   await db
     .update(founderAccounts)
     .set({
@@ -157,7 +157,7 @@ export async function updateFounderPassword(
   const db = await requireDb();
   if (!db) return;
   const passwordHash = await bcrypt.hash(newPassword, 10);
-  
+
   await db
     .update(founderAccounts)
     .set({
@@ -175,10 +175,7 @@ export async function updateFounderPassword(
 export async function deactivateFounderAccount(founderId: number) {
   const db = await requireDb();
   if (!db) return;
-  await db
-    .update(founderAccounts)
-    .set({ isActive: 0 })
-    .where(eq(founderAccounts.id, founderId));
+  await db.update(founderAccounts).set({ isActive: 0 }).where(eq(founderAccounts.id, founderId));
 }
 
 /**
@@ -187,10 +184,7 @@ export async function deactivateFounderAccount(founderId: number) {
 export async function activateFounderAccount(founderId: number) {
   const db = await requireDb();
   if (!db) return;
-  await db
-    .update(founderAccounts)
-    .set({ isActive: 1 })
-    .where(eq(founderAccounts.id, founderId));
+  await db.update(founderAccounts).set({ isActive: 1 }).where(eq(founderAccounts.id, founderId));
 }
 
 // ============================================
@@ -259,12 +253,12 @@ export async function getFoundersNeedingPasswordRotation() {
   const db = await requireDb();
   if (!db) return [];
   const now = new Date();
-  
+
   return db
     .select()
     .from(founderAccounts)
     .where(eq(founderAccounts.isActive, 1))
-    .then(founders => founders.filter(f => new Date(f.passwordExpiresAt) < now));
+    .then((founders) => founders.filter((f) => new Date(f.passwordExpiresAt) < now));
 }
 
 /**

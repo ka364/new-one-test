@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { z } from "zod";
+import { COOKIE_NAME } from '@shared/const';
+import { getSessionCookieOptions } from './_core/cookies';
+import { systemRouter } from './_core/systemRouter';
+import { publicProcedure, protectedProcedure, router } from './_core/trpc';
+import { z } from 'zod';
 import {
   getAllOrders,
   createOrder,
@@ -41,38 +41,38 @@ import {
   getDashboardStats,
   getAllUsers,
   updateUserRole,
-} from "./db";
-import { evaluateTransactionWithKAIA } from "./kaia/engine";
-import { publishEvent } from "./events/eventBus";
-import { getFinancialAgent } from "./agents/financialAgent";
-import { getDemandPlannerAgent } from "./agents/demandPlannerAgent";
-import { getCampaignOrchestratorAgent } from "./agents/campaignOrchestratorAgent";
-import { invokeLLM } from "./_core/llm";
-import { nanoid } from "nanoid";
+} from './db';
+import { evaluateTransactionWithKAIA } from './kaia/engine';
+import { publishEvent } from './events/eventBus';
+import { getFinancialAgent } from './agents/financialAgent';
+import { getDemandPlannerAgent } from './agents/demandPlannerAgent';
+import { getCampaignOrchestratorAgent } from './agents/campaignOrchestratorAgent';
+import { invokeLLM } from './_core/llm';
+import { nanoid } from 'nanoid';
 // import { adaptiveRouter } from './routers/adaptive'; // Disabled - missing db functions
 // import { contentCreatorRouter } from './routers/contentCreator'; // Disabled - missing db functions
-import { nowshoesRouter } from "./routers/nowshoes";
-import { employeesRouter } from "./routers/employees";
-import { shipmentsRouter } from "./routers/shipments";
-import { hrRouter } from "./routers/hr";
-import { visualSearchRouter } from "./routers/visual-search";
-import { codRouter } from "./routers/cod.router";
-import { foundersRouter } from "./routers/founders";
-import { shopifyRouter } from "./routers/shopify";
-import { employeeAuthRouter } from "./routers/employee-auth";
-import { adminRouter } from "./routers/admin";
-import { webhooksRouter } from "./routers/webhooks";
-import { shippingRouter, collectionsRouter, metricsRouter } from "./routers/launch-system";
-import { investorsRouter } from "./routers/investors";
-import { financialRouter } from "./routers/financial";
-import { kaiaRouter } from "./routers/kaia";
-import { chatRouter } from "./routers/chat";
-import { uploadRouter } from "./routers/upload";
-import { ordersRouter } from "./routers/orders";
-import { productsRouter } from "./routers/products";
-import { bioDashboardRouter } from "./routers/bio-dashboard";
-import { inventoryRouter } from "./routers/inventory";
-import { vitalSignsRouter } from "./routers/vital-signs";
+import { nowshoesRouter } from './routers/nowshoes';
+import { employeesRouter } from './routers/employees';
+import { shipmentsRouter } from './routers/shipments';
+import { hrRouter } from './routers/hr';
+import { visualSearchRouter } from './routers/visual-search';
+import { codRouter } from './routers/cod.router';
+import { foundersRouter } from './routers/founders';
+import { shopifyRouter } from './routers/shopify';
+import { employeeAuthRouter } from './routers/employee-auth';
+import { adminRouter } from './routers/admin';
+import { webhooksRouter } from './routers/webhooks';
+import { shippingRouter, collectionsRouter, metricsRouter } from './routers/launch-system';
+import { investorsRouter } from './routers/investors';
+import { financialRouter } from './routers/financial';
+import { kaiaRouter } from './routers/kaia';
+import { chatRouter } from './routers/chat';
+import { uploadRouter } from './routers/upload';
+import { ordersRouter } from './routers/orders';
+import { productsRouter } from './routers/products';
+import { bioDashboardRouter } from './routers/bio-dashboard';
+import { inventoryRouter } from './routers/inventory';
+import { vitalSignsRouter } from './routers/vital-signs';
 
 export const appRouter = router({
   system: systemRouter,
@@ -104,7 +104,7 @@ export const appRouter = router({
   cod: codRouter,
 
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -118,19 +118,21 @@ export const appRouter = router({
   dashboard: router({
     stats: protectedProcedure.query(async () => {
       const stats = await getDashboardStats();
-      return stats || {
-        totalOrders: 0,
-        totalRevenue: 0,
-        pendingTransactions: 0,
-        activeUsers: 0
-      };
+      return (
+        stats || {
+          totalOrders: 0,
+          totalRevenue: 0,
+          pendingTransactions: 0,
+          activeUsers: 0,
+        }
+      );
     }),
 
     recentActivity: protectedProcedure.query(async () => {
       const [orders, transactions, insights] = await Promise.all([
         getAllOrders(10),
         getAllTransactions(10),
-        getAllAgentInsights(10)
+        getAllAgentInsights(10),
       ]);
       return { orders, transactions, insights };
     }),
@@ -146,27 +148,27 @@ export const appRouter = router({
         return await getAllOrders(input?.limit || 100);
       }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await getOrderById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getOrderById(input.id);
+    }),
 
     create: protectedProcedure
-      .input(z.object({
-        orderNumber: z.string(),
-        customerName: z.string(),
-        customerEmail: z.string().email().optional(),
-        customerPhone: z.string().optional(),
-        productName: z.string(),
-        productDescription: z.string().optional(),
-        quantity: z.number().min(1),
-        unitPrice: z.string(),
-        totalAmount: z.string(),
-        currency: z.string().default("USD"),
-        shippingAddress: z.string().optional(),
-        notes: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          orderNumber: z.string(),
+          customerName: z.string(),
+          customerEmail: z.string().email().optional(),
+          customerPhone: z.string().optional(),
+          productName: z.string(),
+          productDescription: z.string().optional(),
+          quantity: z.number().min(1),
+          unitPrice: z.string(),
+          totalAmount: z.string(),
+          currency: z.string().default('USD'),
+          shippingAddress: z.string().optional(),
+          notes: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const order = await createOrder({
           ...input,
@@ -175,7 +177,7 @@ export const appRouter = router({
 
         // Publish event
         await publishEvent({
-          type: "order.created",
+          type: 'order.created',
           data: { order: { ...input, id: order[0].insertId } },
           userId: ctx.user.id,
         });
@@ -184,18 +186,28 @@ export const appRouter = router({
       }),
 
     updateStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(["pending", "processing", "confirmed", "shipped", "delivered", "cancelled", "refunded"]),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          status: z.enum([
+            'pending',
+            'processing',
+            'confirmed',
+            'shipped',
+            'delivered',
+            'cancelled',
+            'refunded',
+          ]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await updateOrderStatus(input.id, input.status);
 
         // Create audit log
         await createAuditLog({
-          entityType: "order",
+          entityType: 'order',
           entityId: input.id,
-          action: "update",
+          action: 'update',
           actionDescription: `Order status updated to ${input.status}`,
           performedBy: ctx.user.id,
         });
@@ -203,11 +215,9 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    search: protectedProcedure
-      .input(z.object({ query: z.string() }))
-      .query(async ({ input }) => {
-        return await searchOrders(input.query);
-      }),
+    search: protectedProcedure.input(z.object({ query: z.string() })).query(async ({ input }) => {
+      return await searchOrders(input.query);
+    }),
   }),
 
   // ============================================
@@ -220,23 +230,23 @@ export const appRouter = router({
         return await getAllTransactions(input?.limit || 100);
       }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await getTransactionById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getTransactionById(input.id);
+    }),
 
     create: protectedProcedure
-      .input(z.object({
-        transactionNumber: z.string(),
-        type: z.enum(["income", "expense", "transfer", "payment", "refund", "subscription"]),
-        category: z.string().optional(),
-        amount: z.string(),
-        currency: z.string().default("USD"),
-        description: z.string().optional(),
-        relatedOrderId: z.number().optional(),
-        paymentMethod: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          transactionNumber: z.string(),
+          type: z.enum(['income', 'expense', 'transfer', 'payment', 'refund', 'subscription']),
+          category: z.string().optional(),
+          amount: z.string(),
+          currency: z.string().default('USD'),
+          description: z.string().optional(),
+          relatedOrderId: z.number().optional(),
+          paymentMethod: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         // Evaluate with KAIA first
         const kaiaDecision = await evaluateTransactionWithKAIA(input);
@@ -244,18 +254,22 @@ export const appRouter = router({
         const transaction = await createTransaction({
           ...input,
           shariaCompliant: kaiaDecision.approved,
-          ethicalCheckStatus: kaiaDecision.decision === "approved" ? "approved" : 
-                             kaiaDecision.decision === "rejected" ? "rejected" : "review_required",
+          ethicalCheckStatus:
+            kaiaDecision.decision === 'approved'
+              ? 'approved'
+              : kaiaDecision.decision === 'rejected'
+                ? 'rejected'
+                : 'review_required',
           ethicalCheckNotes: kaiaDecision.overallReason,
           createdBy: ctx.user.id,
         });
 
         // Create audit log with KAIA decision
         await createAuditLog({
-          entityType: "transaction",
+          entityType: 'transaction',
           entityId: transaction[0].insertId,
-          action: "create",
-          actionDescription: "Transaction created and evaluated by KAIA",
+          action: 'create',
+          actionDescription: 'Transaction created and evaluated by KAIA',
           kaiaDecision: kaiaDecision.decision,
           appliedRules: kaiaDecision.appliedRules,
           decisionReason: kaiaDecision.overallReason,
@@ -265,37 +279,34 @@ export const appRouter = router({
 
         // Publish event
         await publishEvent({
-          type: "transaction.created",
+          type: 'transaction.created',
           data: { transaction: { ...input, id: transaction[0].insertId } },
           userId: ctx.user.id,
           priority: kaiaDecision.requiresHumanReview ? 50 : 100,
         });
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           transactionId: transaction[0].insertId,
-          kaiaDecision 
+          kaiaDecision,
         };
       }),
 
     updateEthicalStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(["pending", "approved", "rejected", "review_required"]),
-        notes: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          status: z.enum(['pending', 'approved', 'rejected', 'review_required']),
+          notes: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        await updateTransactionEthicalStatus(
-          input.id,
-          input.status,
-          input.notes,
-          ctx.user.id
-        );
+        await updateTransactionEthicalStatus(input.id, input.status, input.notes, ctx.user.id);
 
         await createAuditLog({
-          entityType: "transaction",
+          entityType: 'transaction',
           entityId: input.id,
-          action: "update",
+          action: 'update',
           actionDescription: `Ethical status updated to ${input.status}`,
           performedBy: ctx.user.id,
         });
@@ -304,15 +315,14 @@ export const appRouter = router({
       }),
 
     getByDateRange: protectedProcedure
-      .input(z.object({
-        startDate: z.string(),
-        endDate: z.string(),
-      }))
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
       .query(async ({ input }) => {
-        return await getTransactionsByDateRange(
-          new Date(input.startDate),
-          new Date(input.endDate)
-        );
+        return await getTransactionsByDateRange(new Date(input.startDate), new Date(input.endDate));
       }),
   }),
 
@@ -328,34 +338,42 @@ export const appRouter = router({
       return await getActiveEthicalRules();
     }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await getEthicalRuleById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getEthicalRuleById(input.id);
+    }),
 
     create: protectedProcedure
-      .input(z.object({
-        ruleName: z.string(),
-        ruleNameAr: z.string().optional(),
-        ruleDescription: z.string(),
-        ruleDescriptionAr: z.string().optional(),
-        ruleType: z.enum(["sharia_financial", "sharia_commercial", "ethical_business", "compliance", "risk_management"]),
-        category: z.string().optional(),
-        severity: z.enum(["low", "medium", "high", "critical"]).default("medium"),
-        ruleLogic: z.object({
-          conditions: z.array(z.object({
-            field: z.string(),
-            operator: z.string(),
-            value: z.any(),
-          })),
-          action: z.string(),
-        }),
-        requiresReview: z.boolean().default(false),
-        priority: z.number().default(100),
-        referenceSource: z.string().optional(),
-        referenceSourceAr: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          ruleName: z.string(),
+          ruleNameAr: z.string().optional(),
+          ruleDescription: z.string(),
+          ruleDescriptionAr: z.string().optional(),
+          ruleType: z.enum([
+            'sharia_financial',
+            'sharia_commercial',
+            'ethical_business',
+            'compliance',
+            'risk_management',
+          ]),
+          category: z.string().optional(),
+          severity: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+          ruleLogic: z.object({
+            conditions: z.array(
+              z.object({
+                field: z.string(),
+                operator: z.string(),
+                value: z.any(),
+              })
+            ),
+            action: z.string(),
+          }),
+          requiresReview: z.boolean().default(false),
+          priority: z.number().default(100),
+          referenceSource: z.string().optional(),
+          referenceSourceAr: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const rule = await createEthicalRule({
           ...input,
@@ -366,10 +384,12 @@ export const appRouter = router({
       }),
 
     updateStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        isActive: z.boolean(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          isActive: z.boolean(),
+        })
+      )
       .mutation(async ({ input }) => {
         await updateEthicalRuleStatus(input.id, input.isActive);
         return { success: true };
@@ -387,10 +407,12 @@ export const appRouter = router({
       }),
 
     getByEntity: protectedProcedure
-      .input(z.object({
-        entityType: z.string(),
-        entityId: z.number(),
-      }))
+      .input(
+        z.object({
+          entityType: z.string(),
+          entityId: z.number(),
+        })
+      )
       .query(async ({ input }) => {
         return await getAuditLogsByEntity(input.entityType, input.entityId);
       }),
@@ -422,25 +444,25 @@ export const appRouter = router({
       return await getAllCampaigns();
     }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await getCampaignById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getCampaignById(input.id);
+    }),
 
     create: protectedProcedure
-      .input(z.object({
-        campaignName: z.string(),
-        campaignNameAr: z.string().optional(),
-        description: z.string().optional(),
-        descriptionAr: z.string().optional(),
-        type: z.enum(["email", "social_media", "sms", "multi_channel"]),
-        budget: z.string().optional(),
-        currency: z.string().default("USD"),
-        startDate: z.string(),
-        endDate: z.string().optional(),
-        aiOptimizationEnabled: z.boolean().default(true),
-      }))
+      .input(
+        z.object({
+          campaignName: z.string(),
+          campaignNameAr: z.string().optional(),
+          description: z.string().optional(),
+          descriptionAr: z.string().optional(),
+          type: z.enum(['email', 'social_media', 'sms', 'multi_channel']),
+          budget: z.string().optional(),
+          currency: z.string().default('USD'),
+          startDate: z.string(),
+          endDate: z.string().optional(),
+          aiOptimizationEnabled: z.boolean().default(true),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const campaign = await createCampaign({
           ...input,
@@ -451,7 +473,7 @@ export const appRouter = router({
 
         // Publish event
         await publishEvent({
-          type: "campaign.created",
+          type: 'campaign.created',
           data: { campaign: { ...input, id: campaign[0].insertId } },
           userId: ctx.user.id,
         });
@@ -460,21 +482,23 @@ export const appRouter = router({
       }),
 
     updateMetrics: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        impressions: z.number().optional(),
-        clicks: z.number().optional(),
-        conversions: z.number().optional(),
-        revenue: z.string().optional(),
-        spent: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          impressions: z.number().optional(),
+          clicks: z.number().optional(),
+          conversions: z.number().optional(),
+          revenue: z.string().optional(),
+          spent: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { id, ...metrics } = input;
         await updateCampaignMetrics(id, metrics);
 
         // Publish performance update event
         await publishEvent({
-          type: "campaign.performance_update",
+          type: 'campaign.performance_update',
           data: { campaignId: id, metrics },
         });
 
@@ -498,9 +522,16 @@ export const appRouter = router({
       }),
 
     getByAgentType: protectedProcedure
-      .input(z.object({
-        agentType: z.enum(["financial", "demand_planner", "campaign_orchestrator", "ethics_gatekeeper"]),
-      }))
+      .input(
+        z.object({
+          agentType: z.enum([
+            'financial',
+            'demand_planner',
+            'campaign_orchestrator',
+            'ethics_gatekeeper',
+          ]),
+        })
+      )
       .query(async ({ input }) => {
         return await getAgentInsightsByType(input.agentType);
       }),
@@ -523,10 +554,12 @@ export const appRouter = router({
     }),
 
     generateSummary: protectedProcedure
-      .input(z.object({
-        startDate: z.string(),
-        endDate: z.string(),
-      }))
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
       .query(async ({ input }) => {
         const agent = getFinancialAgent();
         return await agent.generateFinancialSummary(
@@ -541,10 +574,12 @@ export const appRouter = router({
   // ============================================
   demandPlanner: router({
     forecastDemand: protectedProcedure
-      .input(z.object({
-        product: z.string(),
-        months: z.number().default(3),
-      }))
+      .input(
+        z.object({
+          product: z.string(),
+          months: z.number().default(3),
+        })
+      )
       .query(async ({ input }) => {
         const agent = getDemandPlannerAgent();
         return await agent.forecastDemand(input.product, input.months);
@@ -580,29 +615,38 @@ export const appRouter = router({
       return await getAllReports();
     }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await getReportById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await getReportById(input.id);
+    }),
 
     create: protectedProcedure
-      .input(z.object({
-        reportName: z.string(),
-        reportNameAr: z.string().optional(),
-        reportType: z.enum(["sales", "financial", "orders", "transactions", "ethical_compliance", "custom"]),
-        description: z.string().optional(),
-        descriptionAr: z.string().optional(),
-        reportConfig: z.object({
-          dateRange: z.object({
-            start: z.string(),
-            end: z.string(),
-          }).optional(),
-          filters: z.record(z.string(), z.any()).optional(),
-          groupBy: z.array(z.string()).optional(),
-          metrics: z.array(z.string()).optional(),
-        }),
-      }))
+      .input(
+        z.object({
+          reportName: z.string(),
+          reportNameAr: z.string().optional(),
+          reportType: z.enum([
+            'sales',
+            'financial',
+            'orders',
+            'transactions',
+            'ethical_compliance',
+            'custom',
+          ]),
+          description: z.string().optional(),
+          descriptionAr: z.string().optional(),
+          reportConfig: z.object({
+            dateRange: z
+              .object({
+                start: z.string(),
+                end: z.string(),
+              })
+              .optional(),
+            filters: z.record(z.string(), z.any()).optional(),
+            groupBy: z.array(z.string()).optional(),
+            metrics: z.array(z.string()).optional(),
+          }),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const report = await createReport({
           ...input,
@@ -618,6 +662,5 @@ export const appRouter = router({
   // ============================================
   cod: codRouter,
 });
-
 
 export type AppRouter = typeof appRouter;

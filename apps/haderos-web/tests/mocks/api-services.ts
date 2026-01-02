@@ -7,9 +7,7 @@ import { vi } from 'vitest';
 
 // ==================== SendGrid Mock ====================
 export const mockSendGrid = {
-  send: vi.fn().mockResolvedValue([
-    { statusCode: 202, body: '', headers: {} }
-  ]),
+  send: vi.fn().mockResolvedValue([{ statusCode: 202, body: '', headers: {} }]),
   setApiKey: vi.fn(),
 };
 
@@ -22,9 +20,11 @@ vi.mock('@sendgrid/mail', () => ({
 // ==================== Shopify Mock ====================
 export const mockShopifyClient = {
   product: {
-    list: vi.fn().mockResolvedValue([
-      { id: 1, title: 'Test Product', price: '29.99', inventory_quantity: 100 }
-    ]),
+    list: vi
+      .fn()
+      .mockResolvedValue([
+        { id: 1, title: 'Test Product', price: '29.99', inventory_quantity: 100 },
+      ]),
     get: vi.fn().mockResolvedValue({ id: 1, title: 'Test Product' }),
     create: vi.fn().mockResolvedValue({ id: 2, title: 'New Product' }),
     update: vi.fn().mockResolvedValue({ id: 1, title: 'Updated Product' }),
@@ -53,7 +53,7 @@ export const mockOpenAI = {
               role: 'assistant',
             },
             finish_reason: 'stop',
-          }
+          },
         ],
         usage: {
           prompt_tokens: 10,
@@ -90,9 +90,7 @@ export const mockGoogleDrive = {
   files: {
     list: vi.fn().mockResolvedValue({
       data: {
-        files: [
-          { id: 'file1', name: 'test.pdf', mimeType: 'application/pdf' }
-        ],
+        files: [{ id: 'file1', name: 'test.pdf', mimeType: 'application/pdf' }],
       },
     }),
     get: vi.fn().mockResolvedValue({

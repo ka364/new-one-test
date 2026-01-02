@@ -3,23 +3,26 @@
  * راوتر الدفع الموحد
  */
 
-import { router, publicProcedure, protectedProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { getUnifiedPaymentService } from "../services/unified-payment.service";
-import { db } from "../db";
-import { paymentTransactions, paymentProviders, paymentRefunds } from "../../drizzle/schema-payments";
-import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
+import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { getUnifiedPaymentService } from '../services/unified-payment.service';
+import { db } from '../db';
+import {
+  paymentTransactions,
+  paymentProviders,
+  paymentRefunds,
+} from '../../drizzle/schema-payments';
+import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
 import {
   validatePaymentWithArachnid,
   trackPaymentLifecycle,
   handlePaymentFailure,
   getPaymentInsights,
-} from "../bio-modules/payment-bio-integration.js";
-import { logger } from "../_core/logger";
+} from '../bio-modules/payment-bio-integration.js';
+import { logger } from '../_core/logger';
 
 export const paymentRouter = router({
-
   // ============================================
   // PUBLIC ENDPOINTS
   // ============================================
@@ -28,14 +31,18 @@ export const paymentRouter = router({
    * Get available payment methods
    */
   getPaymentMethods: publicProcedure
-    .input(z.object({
-      amount: z.number().optional(),
-    }).optional())
+    .input(
+      z
+        .object({
+          amount: z.number().optional(),
+        })
+        .optional()
+    )
     .query(async ({ input }) => {
       const service = getUnifiedPaymentService();
       const providers = await service.getAvailableProviders(input?.amount);
 
-      return providers.map(p => ({
+      return providers.map((p) => ({
         code: p.code,
         name: p.name,
         nameAr: p.nameAr,
@@ -56,10 +63,12 @@ export const paymentRouter = router({
    * Calculate payment fee
    */
   calculateFee: publicProcedure
-    .input(z.object({
-      amount: z.number(),
-      providerCode: z.string(),
-    }))
+    .input(
+      z.object({
+        amount: z.number(),
+        providerCode: z.string(),
+      })
+    )
     .query(async ({ input }) => {
       try {
         // Input validation
@@ -70,7 +79,8 @@ export const paymentRouter = router({
           });
         }
 
-        const [provider] = await db.select()
+        const [provider] = await db
+          .select()
           .from(paymentProviders)
           .where(eq(paymentProviders.code, input.providerCode))
           .limit(1);
@@ -113,23 +123,25 @@ export const paymentRouter = router({
    * Create payment
    */
   createPayment: publicProcedure
-    .input(z.object({
-      orderId: z.number(),
-      orderNumber: z.string(),
-      amount: z.number(),
-      providerCode: z.string(),
-      customer: z.object({
-        name: z.string(),
-        phone: z.string(),
-        email: z.string().optional(),
-      }),
-      returnUrl: z.string().optional(),
-      callbackUrl: z.string().optional(),
-      metadata: z.record(z.any()).optional(),
-    }))
+    .input(
+      z.object({
+        orderId: z.number(),
+        orderNumber: z.string(),
+        amount: z.number(),
+        providerCode: z.string(),
+        customer: z.object({
+          name: z.string(),
+          phone: z.string(),
+          email: z.string().optional(),
+        }),
+        returnUrl: z.string().optional(),
+        callbackUrl: z.string().optional(),
+        metadata: z.record(z.any()).optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const startTime = Date.now();
-      
+
       try {
         // Input validation
         if (input.amount <= 0) {
@@ -155,7 +167,7 @@ export const paymentRouter = router({
         });
 
         const service = getUnifiedPaymentService();
-        
+
         // Create payment
         let paymentResult;
         try {
@@ -165,7 +177,7 @@ export const paymentRouter = router({
             orderId: input.orderId,
             providerCode: input.providerCode,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في إنشاء الدفعة. يرجى المحاولة مرة أخرى',
@@ -202,7 +214,7 @@ export const paymentRouter = router({
                 transactionId: paymentResult.transactionId,
                 anomalies: validation.anomalies,
               });
-              
+
               // In production, you might want to block the payment here
               // For now, we'll just log and continue
             }
@@ -221,7 +233,7 @@ export const paymentRouter = router({
             await trackPaymentLifecycle(
               paymentResult.transactionId,
               paymentResult.transactionNumber || '',
-              "pending"
+              'pending'
             );
           } catch (trackError: any) {
             logger.warn('Payment lifecycle tracking failed', {
@@ -244,7 +256,7 @@ export const paymentRouter = router({
         return paymentResult;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Payment creation failed (TRPCError)', {
             code: error.code,
@@ -274,10 +286,12 @@ export const paymentRouter = router({
    * Get payment status
    */
   getPaymentStatus: publicProcedure
-    .input(z.object({
-      transactionId: z.number().optional(),
-      transactionNumber: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        transactionId: z.number().optional(),
+        transactionNumber: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       try {
         if (!input.transactionId && !input.transactionNumber) {
@@ -294,10 +308,7 @@ export const paymentRouter = router({
           condition = eq(paymentTransactions.transactionNumber, input.transactionNumber!);
         }
 
-        const [transaction] = await db.select()
-          .from(paymentTransactions)
-          .where(condition)
-          .limit(1);
+        const [transaction] = await db.select().from(paymentTransactions).where(condition).limit(1);
 
         if (!transaction) {
           throw new TRPCError({
@@ -342,15 +353,17 @@ export const paymentRouter = router({
    * Handle webhook (called by payment providers)
    */
   webhook: publicProcedure
-    .input(z.object({
-      provider: z.string(),
-      eventType: z.string(),
-      payload: z.any(),
-      signature: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        provider: z.string(),
+        eventType: z.string(),
+        payload: z.any(),
+        signature: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const startTime = Date.now();
-      
+
       try {
         logger.info('Processing payment webhook', {
           provider: input.provider,
@@ -358,7 +371,7 @@ export const paymentRouter = router({
         });
 
         const service = getUnifiedPaymentService();
-        
+
         try {
           await service.handleWebhook(
             input.provider,
@@ -371,7 +384,7 @@ export const paymentRouter = router({
             provider: input.provider,
             eventType: input.eventType,
           });
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في معالجة webhook. يرجى المحاولة مرة أخرى',
@@ -384,9 +397,13 @@ export const paymentRouter = router({
           await trackPaymentLifecycle(
             0, // transactionId will be extracted from payload if available
             input.payload?.transactionNumber || '',
-            input.eventType === 'payment.completed' ? 'completed' :
-            input.eventType === 'payment.failed' ? 'failed' :
-            input.eventType === 'payment.refunded' ? 'refunded' : 'processing'
+            input.eventType === 'payment.completed'
+              ? 'completed'
+              : input.eventType === 'payment.failed'
+                ? 'failed'
+                : input.eventType === 'payment.refunded'
+                  ? 'refunded'
+                  : 'processing'
           );
         } catch (trackError: any) {
           logger.warn('Payment lifecycle tracking failed for webhook', {
@@ -405,7 +422,7 @@ export const paymentRouter = router({
         return { success: true };
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Webhook processing failed (TRPCError)', {
             code: error.code,
@@ -438,16 +455,19 @@ export const paymentRouter = router({
    * Get order payments
    */
   getOrderPayments: protectedProcedure
-    .input(z.object({
-      orderId: z.number(),
-    }))
+    .input(
+      z.object({
+        orderId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
-      const transactions = await db.select()
+      const transactions = await db
+        .select()
         .from(paymentTransactions)
         .where(eq(paymentTransactions.orderId, input.orderId))
         .orderBy(desc(paymentTransactions.createdAt));
 
-      return transactions.map(t => ({
+      return transactions.map((t) => ({
         id: t.id,
         transactionNumber: t.transactionNumber,
         amount: Number(t.amount),
@@ -464,14 +484,16 @@ export const paymentRouter = router({
    * Get all transactions with filters
    */
   getTransactions: protectedProcedure
-    .input(z.object({
-      status: z.string().optional(),
-      providerCode: z.string().optional(),
-      dateFrom: z.string().optional(),
-      dateTo: z.string().optional(),
-      limit: z.number().default(50),
-      offset: z.number().default(0),
-    }))
+    .input(
+      z.object({
+        status: z.string().optional(),
+        providerCode: z.string().optional(),
+        dateFrom: z.string().optional(),
+        dateTo: z.string().optional(),
+        limit: z.number().default(50),
+        offset: z.number().default(0),
+      })
+    )
     .query(async ({ input }) => {
       let conditions = [];
 
@@ -490,19 +512,21 @@ export const paymentRouter = router({
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      const transactions = await db.select()
+      const transactions = await db
+        .select()
         .from(paymentTransactions)
         .where(whereClause)
         .orderBy(desc(paymentTransactions.createdAt))
         .limit(input.limit)
         .offset(input.offset);
 
-      const [countResult] = await db.select({ count: sql<number>`count(*)` })
+      const [countResult] = await db
+        .select({ count: sql<number>`count(*)` })
         .from(paymentTransactions)
         .where(whereClause);
 
       return {
-        transactions: transactions.map(t => ({
+        transactions: transactions.map((t) => ({
           id: t.id,
           transactionNumber: t.transactionNumber,
           orderNumber: t.orderNumber,
@@ -523,14 +547,16 @@ export const paymentRouter = router({
    * Refund payment
    */
   refund: protectedProcedure
-    .input(z.object({
-      transactionId: z.number(),
-      amount: z.number().optional(),
-      reason: z.string(),
-    }))
+    .input(
+      z.object({
+        transactionId: z.number(),
+        amount: z.number().optional(),
+        reason: z.string(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const startTime = Date.now();
-      
+
       try {
         // Input validation
         if (input.amount && input.amount <= 0) {
@@ -554,7 +580,8 @@ export const paymentRouter = router({
         });
 
         // Verify transaction exists
-        const [transaction] = await db.select()
+        const [transaction] = await db
+          .select()
           .from(paymentTransactions)
           .where(eq(paymentTransactions.id, input.transactionId))
           .limit(1);
@@ -575,7 +602,7 @@ export const paymentRouter = router({
         }
 
         const service = getUnifiedPaymentService();
-        
+
         let refundResult;
         try {
           refundResult = await service.refund({
@@ -588,7 +615,7 @@ export const paymentRouter = router({
           logger.error('Refund processing failed', refundError, {
             transactionId: input.transactionId,
           });
-          
+
           // Track failure with Bio-Modules
           try {
             await handlePaymentFailure(
@@ -609,7 +636,7 @@ export const paymentRouter = router({
               error: bioError.message,
             });
           }
-          
+
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'فشل في معالجة الاسترداد. يرجى المحاولة مرة أخرى',
@@ -622,7 +649,7 @@ export const paymentRouter = router({
           await trackPaymentLifecycle(
             input.transactionId,
             transaction.transactionNumber,
-            "refunded"
+            'refunded'
           );
         } catch (trackError: any) {
           logger.warn('Payment lifecycle tracking failed for refund', {
@@ -641,7 +668,7 @@ export const paymentRouter = router({
         return refundResult;
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        
+
         if (error instanceof TRPCError) {
           logger.error('Refund processing failed (TRPCError)', {
             code: error.code,
@@ -669,65 +696,75 @@ export const paymentRouter = router({
    * Get payment analytics
    */
   getAnalytics: protectedProcedure
-    .input(z.object({
-      dateFrom: z.string(),
-      dateTo: z.string(),
-    }))
+    .input(
+      z.object({
+        dateFrom: z.string(),
+        dateTo: z.string(),
+      })
+    )
     .query(async ({ input }) => {
       const dateFrom = new Date(input.dateFrom);
       const dateTo = new Date(input.dateTo);
 
       // Total by status
-      const byStatus = await db.select({
-        status: paymentTransactions.status,
-        count: sql<number>`count(*)`,
-        total: sql<number>`sum(${paymentTransactions.amount}::numeric)`,
-      })
+      const byStatus = await db
+        .select({
+          status: paymentTransactions.status,
+          count: sql<number>`count(*)`,
+          total: sql<number>`sum(${paymentTransactions.amount}::numeric)`,
+        })
         .from(paymentTransactions)
-        .where(and(
-          gte(paymentTransactions.createdAt, dateFrom),
-          lte(paymentTransactions.createdAt, dateTo)
-        ))
+        .where(
+          and(
+            gte(paymentTransactions.createdAt, dateFrom),
+            lte(paymentTransactions.createdAt, dateTo)
+          )
+        )
         .groupBy(paymentTransactions.status);
 
       // Total by provider
-      const byProvider = await db.select({
-        providerCode: paymentTransactions.providerCode,
-        count: sql<number>`count(*)`,
-        total: sql<number>`sum(${paymentTransactions.amount}::numeric)`,
-        fees: sql<number>`sum(${paymentTransactions.fee}::numeric)`,
-      })
+      const byProvider = await db
+        .select({
+          providerCode: paymentTransactions.providerCode,
+          count: sql<number>`count(*)`,
+          total: sql<number>`sum(${paymentTransactions.amount}::numeric)`,
+          fees: sql<number>`sum(${paymentTransactions.fee}::numeric)`,
+        })
         .from(paymentTransactions)
-        .where(and(
-          gte(paymentTransactions.createdAt, dateFrom),
-          lte(paymentTransactions.createdAt, dateTo),
-          eq(paymentTransactions.status, 'completed')
-        ))
+        .where(
+          and(
+            gte(paymentTransactions.createdAt, dateFrom),
+            lte(paymentTransactions.createdAt, dateTo),
+            eq(paymentTransactions.status, 'completed')
+          )
+        )
         .groupBy(paymentTransactions.providerCode);
 
       // Success rate
-      const [totals] = await db.select({
-        total: sql<number>`count(*)`,
-        completed: sql<number>`count(*) filter (where status = 'completed')`,
-        failed: sql<number>`count(*) filter (where status = 'failed')`,
-      })
+      const [totals] = await db
+        .select({
+          total: sql<number>`count(*)`,
+          completed: sql<number>`count(*) filter (where status = 'completed')`,
+          failed: sql<number>`count(*) filter (where status = 'failed')`,
+        })
         .from(paymentTransactions)
-        .where(and(
-          gte(paymentTransactions.createdAt, dateFrom),
-          lte(paymentTransactions.createdAt, dateTo)
-        ));
+        .where(
+          and(
+            gte(paymentTransactions.createdAt, dateFrom),
+            lte(paymentTransactions.createdAt, dateTo)
+          )
+        );
 
-      const successRate = totals.total > 0
-        ? ((totals.completed / totals.total) * 100).toFixed(2)
-        : "0.00";
+      const successRate =
+        totals.total > 0 ? ((totals.completed / totals.total) * 100).toFixed(2) : '0.00';
 
       return {
-        byStatus: byStatus.map(s => ({
+        byStatus: byStatus.map((s) => ({
           status: s.status,
           count: Number(s.count),
           total: Number(s.total) || 0,
         })),
-        byProvider: byProvider.map(p => ({
+        byProvider: byProvider.map((p) => ({
           providerCode: p.providerCode,
           count: Number(p.count),
           total: Number(p.total) || 0,
@@ -745,23 +782,24 @@ export const paymentRouter = router({
   /**
    * Initialize payment providers
    */
-  initializeProviders: protectedProcedure
-    .mutation(async () => {
-      const service = getUnifiedPaymentService();
-      await service.initializeProviders();
-      return { success: true, message: "Payment providers initialized" };
-    }),
+  initializeProviders: protectedProcedure.mutation(async () => {
+    const service = getUnifiedPaymentService();
+    await service.initializeProviders();
+    return { success: true, message: 'Payment providers initialized' };
+  }),
 
   /**
    * Update provider configuration
    */
   updateProvider: protectedProcedure
-    .input(z.object({
-      code: z.string(),
-      config: z.any(),
-      isActive: z.boolean().optional(),
-      displayOrder: z.number().optional(),
-    }))
+    .input(
+      z.object({
+        code: z.string(),
+        config: z.any(),
+        isActive: z.boolean().optional(),
+        displayOrder: z.number().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const updateData: any = {
         updatedAt: new Date(),
@@ -771,11 +809,11 @@ export const paymentRouter = router({
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
       if (input.displayOrder !== undefined) updateData.displayOrder = input.displayOrder;
 
-      await db.update(paymentProviders)
+      await db
+        .update(paymentProviders)
         .set(updateData)
         .where(eq(paymentProviders.code, input.code));
 
       return { success: true };
     }),
-
 });

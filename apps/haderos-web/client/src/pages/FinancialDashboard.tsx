@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -15,9 +15,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DollarSign,
   TrendingUp,
@@ -30,10 +30,10 @@ import {
   Download,
   Calendar,
   AlertCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function FinancialDashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   // Mock data - will be replaced with real tRPC data
   const summary = {
@@ -53,75 +53,75 @@ export default function FinancialDashboard() {
 
   const recentTransactions = [
     {
-      id: "1",
-      date: "2025-12-18",
-      category: "إعلانات",
-      description: "Facebook Ads - حملة ديسمبر",
+      id: '1',
+      date: '2025-12-18',
+      category: 'إعلانات',
+      description: 'Facebook Ads - حملة ديسمبر',
       amount: -3000,
-      type: "expense",
+      type: 'expense',
     },
     {
-      id: "2",
-      date: "2025-12-18",
-      category: "مبيعات",
-      description: "طلبات اليوم (47 طلب)",
+      id: '2',
+      date: '2025-12-18',
+      category: 'مبيعات',
+      description: 'طلبات اليوم (47 طلب)',
       amount: 21390,
-      type: "revenue",
+      type: 'revenue',
     },
     {
-      id: "3",
-      date: "2025-12-17",
-      category: "رواتب",
-      description: "راتب ديسمبر - فريق المبيعات",
+      id: '3',
+      date: '2025-12-17',
+      category: 'رواتب',
+      description: 'راتب ديسمبر - فريق المبيعات',
       amount: -75000,
-      type: "expense",
+      type: 'expense',
     },
     {
-      id: "4",
-      date: "2025-12-17",
-      category: "اشتراكات",
-      description: "Manus Platform - شهري",
+      id: '4',
+      date: '2025-12-17',
+      category: 'اشتراكات',
+      description: 'Manus Platform - شهري',
       amount: -500,
-      type: "expense",
+      type: 'expense',
     },
     {
-      id: "5",
-      date: "2025-12-16",
-      category: "شحن",
-      description: "Bosta - تسوية COD",
+      id: '5',
+      date: '2025-12-16',
+      category: 'شحن',
+      description: 'Bosta - تسوية COD',
       amount: 65134,
-      type: "revenue",
+      type: 'revenue',
     },
   ];
 
   const subscriptions = [
     {
-      name: "Google Workspace",
+      name: 'Google Workspace',
       cost: 300,
-      frequency: "شهري",
-      nextBilling: "2025-01-01",
-      status: "active",
+      frequency: 'شهري',
+      nextBilling: '2025-01-01',
+      status: 'active',
     },
     {
-      name: "Manus Platform",
+      name: 'Manus Platform',
       cost: 500,
-      frequency: "شهري",
-      nextBilling: "2025-01-05",
-      status: "active",
+      frequency: 'شهري',
+      nextBilling: '2025-01-05',
+      status: 'active',
     },
     {
-      name: "Facebook Ads",
+      name: 'Facebook Ads',
       cost: 90000,
-      frequency: "شهري",
-      nextBilling: "2025-12-31",
-      status: "active",
+      frequency: 'شهري',
+      nextBilling: '2025-12-31',
+      status: 'active',
     },
     {
-      name: "Shopify",
+      name: 'Shopify',
       cost: 1200,
-      frequency: "شهري",
-      nextBilling: "2025-01-10",
-      status: "pending",
+      frequency: 'شهري',
+      nextBilling: '2025-01-10',
+      status: 'pending',
     },
   ];
 
@@ -132,9 +132,7 @@ export default function FinancialDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">الإدارة المالية</h1>
-            <p className="text-gray-600 mt-1">
-              متابعة المصروفات، الإيرادات، والربحية
-            </p>
+            <p className="text-gray-600 mt-1">متابعة المصروفات، الإيرادات، والربحية</p>
           </div>
           <div className="flex gap-3">
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -216,9 +214,7 @@ export default function FinancialDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">هامش الربح</p>
-                <p className="text-3xl font-bold text-purple-600 mt-2">
-                  {summary.profitMargin}%
-                </p>
+                <p className="text-3xl font-bold text-purple-600 mt-2">{summary.profitMargin}%</p>
                 <div className="flex items-center gap-1 mt-2">
                   <TrendingUp className="w-4 h-4 text-purple-600" />
                   <span className="text-sm text-purple-600">+2.1%</span>
@@ -242,9 +238,7 @@ export default function FinancialDashboard() {
                     <Users className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-medium">الرواتب</span>
                   </div>
-                  <span className="text-sm font-bold">
-                    {expenses.payroll.toLocaleString()} ج.م
-                  </span>
+                  <span className="text-sm font-bold">{expenses.payroll.toLocaleString()} ج.م</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -255,8 +249,7 @@ export default function FinancialDashboard() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {((expenses.payroll / summary.expenses) * 100).toFixed(1)}% من
-                  المصروفات
+                  {((expenses.payroll / summary.expenses) * 100).toFixed(1)}% من المصروفات
                 </p>
               </div>
 
@@ -279,8 +272,7 @@ export default function FinancialDashboard() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {((expenses.advertising / summary.expenses) * 100).toFixed(1)}%
-                  من المصروفات
+                  {((expenses.advertising / summary.expenses) * 100).toFixed(1)}% من المصروفات
                 </p>
               </div>
 
@@ -303,8 +295,7 @@ export default function FinancialDashboard() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {((expenses.subscriptions / summary.expenses) * 100).toFixed(1)}%
-                  من المصروفات
+                  {((expenses.subscriptions / summary.expenses) * 100).toFixed(1)}% من المصروفات
                 </p>
               </div>
 
@@ -327,8 +318,7 @@ export default function FinancialDashboard() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {((expenses.shipping / summary.expenses) * 100).toFixed(1)}% من
-                  المصروفات
+                  {((expenses.shipping / summary.expenses) * 100).toFixed(1)}% من المصروفات
                 </p>
               </div>
             </div>
@@ -355,7 +345,7 @@ export default function FinancialDashboard() {
                   </div>
                   <div className="text-left">
                     <p className="font-bold">{sub.cost.toLocaleString()} ج.م</p>
-                    {sub.status === "active" ? (
+                    {sub.status === 'active' ? (
                       <Badge variant="outline" className="text-green-600">
                         نشط
                       </Badge>
@@ -410,24 +400,18 @@ export default function FinancialDashboard() {
                       <TableCell>
                         <span
                           className={`font-bold ${
-                            transaction.type === "revenue"
-                              ? "text-green-600"
-                              : "text-red-600"
+                            transaction.type === 'revenue' ? 'text-green-600' : 'text-red-600'
                           }`}
                         >
-                          {transaction.amount > 0 ? "+" : ""}
+                          {transaction.amount > 0 ? '+' : ''}
                           {transaction.amount.toLocaleString()} ج.م
                         </span>
                       </TableCell>
                       <TableCell>
-                        {transaction.type === "revenue" ? (
-                          <Badge className="bg-green-100 text-green-800">
-                            إيراد
-                          </Badge>
+                        {transaction.type === 'revenue' ? (
+                          <Badge className="bg-green-100 text-green-800">إيراد</Badge>
                         ) : (
-                          <Badge className="bg-red-100 text-red-800">
-                            مصروف
-                          </Badge>
+                          <Badge className="bg-red-100 text-red-800">مصروف</Badge>
                         )}
                       </TableCell>
                     </TableRow>

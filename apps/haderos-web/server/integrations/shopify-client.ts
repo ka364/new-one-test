@@ -3,7 +3,7 @@
  * Handles all communication with Shopify Admin API
  */
 
-import { ENV } from "../_core/env";
+import { ENV } from '../_core/env';
 
 interface ShopifyGraphQLResponse<T = any> {
   data?: T;
@@ -38,10 +38,12 @@ export class ShopifyClient {
     this.accessToken = ENV.shopifyAdminApiToken;
 
     // Allow Shopify to be disabled in development
-    this.isEnabled = !!this.accessToken && this.accessToken !== "dummy_token_for_dev";
+    this.isEnabled = !!this.accessToken && this.accessToken !== 'dummy_token_for_dev';
 
     if (!this.isEnabled) {
-      console.warn("[ShopifyClient] Shopify integration disabled - using dummy token or no token provided");
+      console.warn(
+        '[ShopifyClient] Shopify integration disabled - using dummy token or no token provided'
+      );
     }
   }
 
@@ -59,10 +61,10 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(this.apiUrl, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": this.accessToken,
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': this.accessToken,
         },
         body: JSON.stringify({
           query,
@@ -78,13 +80,13 @@ export class ShopifyClient {
 
       // Check for GraphQL errors
       if (result.errors && result.errors.length > 0) {
-        console.error("Shopify GraphQL errors:", result.errors);
+        console.error('Shopify GraphQL errors:', result.errors);
         throw new Error(`GraphQL Error: ${result.errors[0].message}`);
       }
 
       return result;
     } catch (error) {
-      console.error("Shopify API request failed:", error);
+      console.error('Shopify API request failed:', error);
       throw error;
     }
   }
@@ -368,7 +370,7 @@ export class ShopifyClient {
 
     const webhookSubscription = {
       callbackUrl,
-      format: "JSON",
+      format: 'JSON',
     };
 
     const result = await this.query(mutation, { topic, webhookSubscription });

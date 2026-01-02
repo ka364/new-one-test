@@ -12,11 +12,25 @@
  * - Customer segmentation (تقسيم العملاء)
  */
 
-import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
-import { db } from "../db";
-import { eq, and, desc, asc, sql, gte, lte, count, avg, sum, inArray, notInArray, ne } from "drizzle-orm";
-import { products, orders } from "../../drizzle/schema";
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
+import { db } from '../db';
+import {
+  eq,
+  and,
+  desc,
+  asc,
+  sql,
+  gte,
+  lte,
+  count,
+  avg,
+  sum,
+  inArray,
+  notInArray,
+  ne,
+} from 'drizzle-orm';
+import { products, orders } from '../../drizzle/schema';
 
 // ============================================
 // TYPES
@@ -85,7 +99,7 @@ async function getCollaborativeRecommendations(
   return (result.rows || []).map((row: any) => ({
     productId: row.product_id,
     score: Number(row.score) || 0,
-    reason: "frequently_bought_together",
+    reason: 'frequently_bought_together',
   }));
 }
 
@@ -98,11 +112,7 @@ async function getContentBasedRecommendations(
   limit: number = 5
 ): Promise<ProductScore[]> {
   // الحصول على بيانات المنتج الأصلي
-  const [product] = await db
-    .select()
-    .from(products)
-    .where(eq(products.id, productId))
-    .limit(1);
+  const [product] = await db.select().from(products).where(eq(products.id, productId)).limit(1);
 
   if (!product) {
     return [];
@@ -117,18 +127,20 @@ async function getContentBasedRecommendations(
       price: products.price,
     })
     .from(products)
-    .where(and(
-      ne(products.id, productId),
-      eq(products.category, product.category),
-      eq(products.isActive, true)
-    ))
+    .where(
+      and(
+        ne(products.id, productId),
+        eq(products.category, product.category),
+        eq(products.isActive, true)
+      )
+    )
     .limit(limit * 2);
 
   // حساب التشابه (simplified)
   return similarProducts.slice(0, limit).map((p, index) => ({
     productId: p.id,
-    score: 1 - (index * 0.1),
-    reason: "similar_category",
+    score: 1 - index * 0.1,
+    reason: 'similar_category',
   }));
 }
 
@@ -145,12 +157,14 @@ export const aiRecommendationsRouter = router({
    * توصيات مخصصة للعميل
    */
   getPersonalizedRecommendations: publicProcedure
-    .input(z.object({
-      customerId: z.string().uuid().optional(),
-      sessionId: z.string().optional(),
-      limit: z.number().default(10),
-      excludeProductIds: z.array(z.string().uuid()).optional(),
-    }))
+    .input(
+      z.object({
+        customerId: z.string().uuid().optional(),
+        sessionId: z.string().optional(),
+        limit: z.number().default(10),
+        excludeProductIds: z.array(z.string().uuid()).optional(),
+      })
+    )
     .query(async ({ input }) => {
       let recommendations: ProductScore[] = [];
 
@@ -176,7 +190,7 @@ export const aiRecommendationsRouter = router({
       // إزالة المنتجات المستبعدة
       if (input.excludeProductIds?.length) {
         recommendations = recommendations.filter(
-          r => !input.excludeProductIds!.includes(r.productId)
+          (r) => !input.excludeProductIds!.includes(r.productId)
         );
       }
 
@@ -209,26 +223,23 @@ export const aiRecommendationsRouter = router({
 
         return {
           products: topProducts,
-          algorithm: "trending",
-          reason: "no_personalization_data",
+          algorithm: 'trending',
+          reason: 'no_personalization_data',
         };
       }
 
-      const productIds = sortedRecs.map(r => r.productId);
-      const productData = await db
-        .select()
-        .from(products)
-        .where(inArray(products.id, productIds));
+      const productIds = sortedRecs.map((r) => r.productId);
+      const productData = await db.select().from(products).where(inArray(products.id, productIds));
 
       // ترتيب المنتجات حسب النقاط
-      const productMap = new Map(productData.map(p => [p.id, p]));
+      const productMap = new Map(productData.map((p) => [p.id, p]));
       const orderedProducts = sortedRecs
-        .map(rec => productMap.get(rec.productId))
+        .map((rec) => productMap.get(rec.productId))
         .filter(Boolean);
 
       return {
         products: orderedProducts,
-        algorithm: "collaborative_filtering",
+        algorithm: 'collaborative_filtering',
         recommendations: sortedRecs,
       };
     }),
@@ -237,28 +248,24 @@ export const aiRecommendationsRouter = router({
    * منتجات تُشترى معاً (Frequently Bought Together)
    */
   getFrequentlyBoughtTogether: publicProcedure
-    .input(z.object({
-      productId: z.string().uuid(),
-      limit: z.number().default(5),
-    }))
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        limit: z.number().default(5),
+      })
+    )
     .query(async ({ input }) => {
-      const recommendations = await getCollaborativeRecommendations(
-        input.productId,
-        input.limit
-      );
+      const recommendations = await getCollaborativeRecommendations(input.productId, input.limit);
 
       if (recommendations.length === 0) {
-        return { products: [], message: "لا توجد بيانات كافية" };
+        return { products: [], message: 'لا توجد بيانات كافية' };
       }
 
-      const productIds = recommendations.map(r => r.productId);
+      const productIds = recommendations.map((r) => r.productId);
       const productData = await db
         .select()
         .from(products)
-        .where(and(
-          inArray(products.id, productIds),
-          eq(products.isActive, true)
-        ));
+        .where(and(inArray(products.id, productIds), eq(products.isActive, true)));
 
       return {
         products: productData,
@@ -270,28 +277,24 @@ export const aiRecommendationsRouter = router({
    * منتجات مشابهة (Similar Products)
    */
   getSimilarProducts: publicProcedure
-    .input(z.object({
-      productId: z.string().uuid(),
-      limit: z.number().default(5),
-    }))
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        limit: z.number().default(5),
+      })
+    )
     .query(async ({ input }) => {
-      const recommendations = await getContentBasedRecommendations(
-        input.productId,
-        input.limit
-      );
+      const recommendations = await getContentBasedRecommendations(input.productId, input.limit);
 
       if (recommendations.length === 0) {
         return { products: [] };
       }
 
-      const productIds = recommendations.map(r => r.productId);
+      const productIds = recommendations.map((r) => r.productId);
       const productData = await db
         .select()
         .from(products)
-        .where(and(
-          inArray(products.id, productIds),
-          eq(products.isActive, true)
-        ));
+        .where(and(inArray(products.id, productIds), eq(products.isActive, true)));
 
       return {
         products: productData,
@@ -303,23 +306,25 @@ export const aiRecommendationsRouter = router({
    * المنتجات الرائجة (Trending)
    */
   getTrendingProducts: publicProcedure
-    .input(z.object({
-      limit: z.number().default(10),
-      categoryId: z.string().uuid().optional(),
-      period: z.enum(["day", "week", "month"]).default("week"),
-    }))
+    .input(
+      z.object({
+        limit: z.number().default(10),
+        categoryId: z.string().uuid().optional(),
+        period: z.enum(['day', 'week', 'month']).default('week'),
+      })
+    )
     .query(async ({ input }) => {
       const now = new Date();
       let startDate: Date;
 
       switch (input.period) {
-        case "day":
+        case 'day':
           startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
           break;
-        case "week":
+        case 'week':
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case "month":
+        case 'month':
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
       }
@@ -364,16 +369,11 @@ export const aiRecommendationsRouter = router({
       }
 
       const productIds = (trending.rows || []).map((row: any) => row.product_id);
-      const productData = await db
-        .select()
-        .from(products)
-        .where(inArray(products.id, productIds));
+      const productData = await db.select().from(products).where(inArray(products.id, productIds));
 
       // ترتيب حسب الـ trending
-      const productMap = new Map(productData.map(p => [p.id, p]));
-      const orderedProducts = productIds
-        .map((id: string) => productMap.get(id))
-        .filter(Boolean);
+      const productMap = new Map(productData.map((p) => [p.id, p]));
+      const orderedProducts = productIds.map((id: string) => productMap.get(id)).filter(Boolean);
 
       return {
         products: orderedProducts,
@@ -391,10 +391,12 @@ export const aiRecommendationsRouter = router({
    * المنتجات الأكثر مبيعاً (Best Sellers)
    */
   getBestSellers: publicProcedure
-    .input(z.object({
-      limit: z.number().default(10),
-      categoryId: z.string().uuid().optional(),
-    }))
+    .input(
+      z.object({
+        limit: z.number().default(10),
+        categoryId: z.string().uuid().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const conditions = [eq(products.isActive, true)];
 
@@ -416,17 +418,16 @@ export const aiRecommendationsRouter = router({
    * المنتجات الجديدة (New Arrivals)
    */
   getNewArrivals: publicProcedure
-    .input(z.object({
-      limit: z.number().default(10),
-      categoryId: z.string().uuid().optional(),
-      days: z.number().default(30),
-    }))
+    .input(
+      z.object({
+        limit: z.number().default(10),
+        categoryId: z.string().uuid().optional(),
+        days: z.number().default(30),
+      })
+    )
     .query(async ({ input }) => {
       const startDate = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      const conditions = [
-        eq(products.isActive, true),
-        gte(products.createdAt, startDate),
-      ];
+      const conditions = [eq(products.isActive, true), gte(products.createdAt, startDate)];
 
       if (input.categoryId) {
         conditions.push(eq(products.category, input.categoryId));
@@ -450,10 +451,12 @@ export const aiRecommendationsRouter = router({
    * التنبؤ بالطلب (Demand Forecasting)
    */
   getDemandForecast: publicProcedure
-    .input(z.object({
-      productId: z.string().uuid(),
-      days: z.number().default(30),
-    }))
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        days: z.number().default(30),
+      })
+    )
     .query(async ({ input }) => {
       // تحليل المبيعات السابقة
       const historicalData = await db.execute(sql`
@@ -474,10 +477,9 @@ export const aiRecommendationsRouter = router({
       }));
 
       // حساب المتوسط والانحراف المعياري
-      const quantities = history.map(h => h.quantity);
-      const avgQuantity = quantities.length > 0
-        ? quantities.reduce((a, b) => a + b, 0) / quantities.length
-        : 0;
+      const quantities = history.map((h) => h.quantity);
+      const avgQuantity =
+        quantities.length > 0 ? quantities.reduce((a, b) => a + b, 0) / quantities.length : 0;
 
       // حساب trend بسيط
       let trend = 0;
@@ -494,7 +496,7 @@ export const aiRecommendationsRouter = router({
       for (let i = 1; i <= input.days; i++) {
         const date = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
         // تطبيق الـ trend
-        currentPrediction *= (1 + trend / 100 / 30);
+        currentPrediction *= 1 + trend / 100 / 30;
 
         // تعديلات موسمية بسيطة (نهاية الأسبوع)
         const dayOfWeek = date.getDay();
@@ -504,7 +506,7 @@ export const aiRecommendationsRouter = router({
         }
 
         forecast.push({
-          date: date.toISOString().split("T")[0],
+          date: date.toISOString().split('T')[0],
           predictedQuantity: Math.round(currentPrediction * seasonalFactor),
           confidence: 0.7, // 70% confidence
         });
@@ -532,9 +534,11 @@ export const aiRecommendationsRouter = router({
    * المنتجات التي تحتاج إعادة طلب (Reorder Alerts)
    */
   getReorderAlerts: publicProcedure
-    .input(z.object({
-      threshold: z.number().default(7), // أيام المخزون المتبقية
-    }))
+    .input(
+      z.object({
+        threshold: z.number().default(7), // أيام المخزون المتبقية
+      })
+    )
     .query(async ({ input }) => {
       // المنتجات ذات المخزون المنخفض
       const lowStockProducts = await db.execute(sql`
@@ -579,7 +583,7 @@ export const aiRecommendationsRouter = router({
           currentStock: Number(row.stock_quantity),
           avgDailySales: Math.round(Number(row.avg_daily_sales) * 10) / 10,
           daysOfStock: Math.round(Number(row.days_of_stock)),
-          urgency: Number(row.days_of_stock) <= 3 ? "critical" : "warning",
+          urgency: Number(row.days_of_stock) <= 3 ? 'critical' : 'warning',
           recommendedOrderQty: Math.ceil(Number(row.avg_daily_sales) * 30), // شهر
         })),
         threshold: input.threshold,
@@ -630,39 +634,39 @@ export const aiRecommendationsRouter = router({
 
     const segments: CustomerSegment[] = [
       {
-        id: "champions",
-        name: "Champions",
-        nameAr: "الأبطال",
+        id: 'champions',
+        name: 'Champions',
+        nameAr: 'الأبطال',
         criteria: { recency: { days: 30 }, orderFrequency: { min: 3 }, totalSpend: { min: 5000 } },
       },
       {
-        id: "loyal",
-        name: "Loyal Customers",
-        nameAr: "العملاء الأوفياء",
+        id: 'loyal',
+        name: 'Loyal Customers',
+        nameAr: 'العملاء الأوفياء',
         criteria: { recency: { days: 60 }, orderFrequency: { min: 2 }, totalSpend: { min: 2000 } },
       },
       {
-        id: "new",
-        name: "New Customers",
-        nameAr: "العملاء الجدد",
+        id: 'new',
+        name: 'New Customers',
+        nameAr: 'العملاء الجدد',
         criteria: { recency: { days: 30 }, orderFrequency: { min: 1, max: 1 } },
       },
       {
-        id: "potential",
-        name: "Potential Loyalists",
-        nameAr: "محتملون للولاء",
+        id: 'potential',
+        name: 'Potential Loyalists',
+        nameAr: 'محتملون للولاء',
         criteria: { recency: { days: 90 }, totalSpend: { min: 3000 } },
       },
       {
-        id: "at_risk",
-        name: "At Risk",
-        nameAr: "معرضون للخطر",
+        id: 'at_risk',
+        name: 'At Risk',
+        nameAr: 'معرضون للخطر',
         criteria: { recency: { days: 180 }, orderFrequency: { min: 2 } },
       },
       {
-        id: "lost",
-        name: "Lost Customers",
-        nameAr: "عملاء مفقودون",
+        id: 'lost',
+        name: 'Lost Customers',
+        nameAr: 'عملاء مفقودون',
         criteria: { recency: { days: 365 } },
       },
     ];
@@ -680,7 +684,7 @@ export const aiRecommendationsRouter = router({
     );
 
     return {
-      segments: segments.map(seg => ({
+      segments: segments.map((seg) => ({
         ...seg,
         stats: segmentStats.get(seg.id) || {
           customerCount: 0,
@@ -700,9 +704,11 @@ export const aiRecommendationsRouter = router({
    * توقع قيمة العميل مدى الحياة (CLV Prediction)
    */
   predictCustomerCLV: publicProcedure
-    .input(z.object({
-      customerId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        customerId: z.string().uuid(),
+      })
+    )
     .query(async ({ input }) => {
       // الحصول على بيانات العميل
       const customerData = await db.execute(sql`
@@ -724,7 +730,7 @@ export const aiRecommendationsRouter = router({
         return {
           customerId: input.customerId,
           clv: 0,
-          message: "لا توجد طلبات لهذا العميل",
+          message: 'لا توجد طلبات لهذا العميل',
         };
       }
 
@@ -765,8 +771,12 @@ export const aiRecommendationsRouter = router({
           churnProbability: Math.round(churnProbability * 100),
           adjustedCLV: Math.round(adjustedCLV),
         },
-        segment: churnProbability < 0.2 ? "high_value" :
-                 churnProbability < 0.5 ? "medium_value" : "at_risk",
+        segment:
+          churnProbability < 0.2
+            ? 'high_value'
+            : churnProbability < 0.5
+              ? 'medium_value'
+              : 'at_risk',
       };
     }),
 
@@ -778,10 +788,12 @@ export const aiRecommendationsRouter = router({
    * بحث ذكي مع اقتراحات (Smart Search)
    */
   getSearchSuggestions: publicProcedure
-    .input(z.object({
-      query: z.string().min(2),
-      limit: z.number().default(10),
-    }))
+    .input(
+      z.object({
+        query: z.string().min(2),
+        limit: z.number().default(10),
+      })
+    )
     .query(async ({ input }) => {
       const searchQuery = input.query.toLowerCase();
 

@@ -1,13 +1,13 @@
 /**
  * Ant Colony Module - Swarm Intelligence for Route Optimization
- * 
+ *
  * Inspired by: Ant colony optimization algorithms
  * Problem: Inefficient delivery routes
  * Solution: Swarm intelligence for logistics optimization
  */
 
-import { getEventBus } from "../events/eventBus";
-import { createAgentInsight } from "../db";
+import { getEventBus } from '../events/eventBus';
+import { createAgentInsight } from '../db';
 
 export interface DeliveryPoint {
   id: number;
@@ -43,7 +43,7 @@ export interface OptimizationResult {
 
 /**
  * Ant Colony Optimizer
- * 
+ *
  * Uses Ant Colony Optimization (ACO) algorithm to find optimal delivery routes
  */
 export class AntColonyOptimizer {
@@ -59,11 +59,14 @@ export class AntColonyOptimizer {
   /**
    * Optimize delivery routes using ACO
    */
-  async optimizeRoutes(deliveries: DeliveryPoint[], startPoint?: { lat: number; lng: number }): Promise<OptimizationResult> {
+  async optimizeRoutes(
+    deliveries: DeliveryPoint[],
+    startPoint?: { lat: number; lng: number }
+  ): Promise<OptimizationResult> {
     const startTime = Date.now();
 
     if (deliveries.length === 0) {
-      throw new Error("No deliveries to optimize");
+      throw new Error('No deliveries to optimize');
     }
 
     if (deliveries.length === 1) {
@@ -74,7 +77,7 @@ export class AntColonyOptimizer {
         alternativeRoutes: [],
         improvement: 0,
         computationTime: Date.now() - startTime,
-        iterations: 0
+        iterations: 0,
       };
     }
 
@@ -120,18 +123,23 @@ export class AntColonyOptimizer {
 
     // Calculate improvement over naive route
     const naiveRoute = this.createNaiveRoute(deliveries);
-    const improvement = ((naiveRoute.totalCost - bestRoute!.totalCost) / naiveRoute.totalCost) * 100;
+    const improvement =
+      ((naiveRoute.totalCost - bestRoute!.totalCost) / naiveRoute.totalCost) * 100;
 
     const computationTime = Date.now() - startTime;
 
     // Log optimization result
-    console.log(`[Ant] Optimized route for ${deliveries.length} deliveries in ${computationTime}ms (${iteration} iterations)`);
-    console.log(`[Ant] Improvement: ${improvement.toFixed(1)}% (${naiveRoute.totalCost.toFixed(0)} → ${bestRoute!.totalCost.toFixed(0)} EGP)`);
+    console.log(
+      `[Ant] Optimized route for ${deliveries.length} deliveries in ${computationTime}ms (${iteration} iterations)`
+    );
+    console.log(
+      `[Ant] Improvement: ${improvement.toFixed(1)}% (${naiveRoute.totalCost.toFixed(0)} → ${bestRoute!.totalCost.toFixed(0)} EGP)`
+    );
 
     // Create insight
     await createAgentInsight({
-      agentType: "ant",
-      insightType: "route_optimized",
+      agentType: 'ant',
+      insightType: 'route_optimized',
       title: `🐜 Route Optimized - ${improvement.toFixed(0)}% Improvement`,
       titleAr: `🐜 تم تحسين المسار - تحسين ${improvement.toFixed(0)}٪`,
       description: `Optimized delivery route for ${deliveries.length} stops. Saved ${(naiveRoute.totalCost - bestRoute!.totalCost).toFixed(0)} EGP.`,
@@ -142,8 +150,8 @@ export class AntColonyOptimizer {
         deliveries: deliveries.length,
         improvement: improvement,
         savedCost: naiveRoute.totalCost - bestRoute!.totalCost,
-        computationTime
-      }
+        computationTime,
+      },
     });
 
     return {
@@ -151,7 +159,7 @@ export class AntColonyOptimizer {
       alternativeRoutes: alternativeRoutes.slice(0, 3),
       improvement,
       computationTime,
-      iterations: iteration
+      iterations: iteration,
     };
   }
 
@@ -196,8 +204,10 @@ export class AntColonyOptimizer {
     const dLon = this.toRad(p2.longitude - p1.longitude);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(p1.latitude)) * Math.cos(this.toRad(p2.latitude)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(this.toRad(p1.latitude)) *
+        Math.cos(this.toRad(p2.latitude)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -209,7 +219,11 @@ export class AntColonyOptimizer {
   /**
    * Construct route using ACO algorithm
    */
-  private constructRoute(points: DeliveryPoint[], pheromones: number[][], distances: number[][]): Route {
+  private constructRoute(
+    points: DeliveryPoint[],
+    pheromones: number[][],
+    distances: number[][]
+  ): Route {
     const visited = new Set<number>();
     const route: DeliveryPoint[] = [];
     let currentIndex = 0; // Start from first point
@@ -284,7 +298,7 @@ export class AntColonyOptimizer {
     // Evaporation
     for (let i = 0; i < pheromones.length; i++) {
       for (let j = 0; j < pheromones[i].length; j++) {
-        pheromones[i][j] *= (1 - this.EVAPORATION_RATE);
+        pheromones[i][j] *= 1 - this.EVAPORATION_RATE;
       }
     }
 
@@ -313,7 +327,7 @@ export class AntColonyOptimizer {
     }
     totalDuration += points[points.length - 1].estimatedDuration;
 
-    const totalCost = (totalDistance * this.COST_PER_KM) + (totalDuration * this.COST_PER_MINUTE);
+    const totalCost = totalDistance * this.COST_PER_KM + totalDuration * this.COST_PER_MINUTE;
     const efficiency = Math.min(100, (1 / (totalCost / 100)) * 100);
 
     return {
@@ -323,7 +337,7 @@ export class AntColonyOptimizer {
       totalDuration,
       totalCost,
       efficiency,
-      pheromoneLevel: 1.0
+      pheromoneLevel: 1.0,
     };
   }
 

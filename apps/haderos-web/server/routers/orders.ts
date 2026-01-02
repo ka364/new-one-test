@@ -152,8 +152,8 @@ export const ordersRouter = router({
       let insertedOrders;
       try {
         insertedOrders = await db.insert(orders).values(orderValues).returning();
-      } catch (dbError: any) {
-        logger.error('Database insert failed', dbError, {
+      } catch (dbError: unknown) {
+        logger.error('Database insert failed', dbError instanceof Error ? dbError : new Error(String(dbError)), {
           orderNumber,
           itemCount: input.items.length,
         });
@@ -195,9 +195,9 @@ export const ordersRouter = router({
           items: input.items,
           shippingAddress: input.shippingAddress || '',
         });
-      } catch (bioError: any) {
+      } catch (bioError: unknown) {
         logger.warn('Bio-Module validation failed, continuing anyway', {
-          error: bioError.message,
+          error: bioError instanceof Error ? bioError.message : String(bioError),
           orderId: orderIds[0],
         });
         // Continue with default validation if Bio-Module fails
@@ -213,9 +213,9 @@ export const ordersRouter = router({
       // Track order lifecycle - with error handling
       try {
         await trackOrderLifecycle(orderIds[0], orderNumber, 'created');
-      } catch (trackError: any) {
+      } catch (trackError: unknown) {
         logger.warn('Order lifecycle tracking failed', {
-          error: trackError.message,
+          error: trackError instanceof Error ? trackError.message : String(trackError),
           orderId: orderIds[0],
         });
         // Continue even if tracking fails
@@ -237,9 +237,9 @@ export const ordersRouter = router({
           cache.delete(`orders:customer:${input.customerPhone}`);
         }
         cache.delete('orders:status:pending');
-      } catch (cacheError: any) {
+      } catch (cacheError: unknown) {
         logger.warn('Cache invalidation failed', {
-          error: cacheError.message,
+          error: cacheError instanceof Error ? cacheError.message : String(cacheError),
         });
         // Continue even if cache invalidation fails
       }
@@ -270,7 +270,7 @@ export const ordersRouter = router({
       }
 
       // Log unexpected errors
-      logger.error('Order creation failed (Unexpected Error)', error, {
+      logger.error('Order creation failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
         customerName: input.customerName,
         itemCount: input.items?.length || 0,
         duration: `${duration}ms`,
@@ -406,9 +406,9 @@ export const ordersRouter = router({
             | 'delivered'
             | 'cancelled';
           await trackOrderLifecycle(input.orderId, order.orderNumber, lifecycleStatus);
-        } catch (trackError: any) {
+        } catch (trackError: unknown) {
           logger.warn('Order lifecycle tracking failed', {
-            error: trackError.message,
+            error: trackError instanceof Error ? trackError.message : String(trackError),
             orderId: input.orderId,
           });
           // Continue even if tracking fails
@@ -428,9 +428,9 @@ export const ordersRouter = router({
           cache.delete(`orders:${input.orderId}`);
           cache.delete(`orders:status:${order.status}`);
           cache.delete(`orders:status:${input.status}`);
-        } catch (cacheError: any) {
+        } catch (cacheError: unknown) {
           logger.warn('Cache invalidation failed', {
-            error: cacheError.message,
+            error: cacheError instanceof Error ? cacheError.message : String(cacheError),
           });
           // Continue even if cache invalidation fails
         }
@@ -530,9 +530,9 @@ export const ordersRouter = router({
           cache.delete(`orders:${input.orderId}`);
           cache.delete(`orders:payment:${order.paymentStatus}`);
           cache.delete(`orders:payment:${input.paymentStatus}`);
-        } catch (cacheError: any) {
+        } catch (cacheError: unknown) {
           logger.warn('Cache invalidation failed', {
-            error: cacheError.message,
+            error: cacheError instanceof Error ? cacheError.message : String(cacheError),
           });
           // Continue even if cache invalidation fails
         }

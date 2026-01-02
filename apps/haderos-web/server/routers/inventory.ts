@@ -90,7 +90,7 @@ export const inventoryRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -191,7 +191,7 @@ export const inventoryRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -283,7 +283,7 @@ export const inventoryRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -377,7 +377,7 @@ export const inventoryRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -488,7 +488,7 @@ export const inventoryRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {

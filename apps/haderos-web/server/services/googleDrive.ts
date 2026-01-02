@@ -1,16 +1,67 @@
+/**
+ * @fileoverview Google Drive Service using rclone
+ * خدمة Google Drive باستخدام rclone
+ *
+ * @description
+ * Provides Google Drive integration for file storage, sharing, and document management.
+ * Uses rclone for reliable file operations including upload, download, and folder management.
+ * Supports creating invoices and daily reports as Google Sheets (CSV format).
+ *
+ * توفر تكامل Google Drive لتخزين الملفات والمشاركة وإدارة المستندات.
+ * تستخدم rclone لعمليات الملفات الموثوقة بما في ذلك الرفع والتنزيل وإدارة المجلدات.
+ * تدعم إنشاء الفواتير والتقارير اليومية كـ Google Sheets (صيغة CSV).
+ *
+ * @module services/googleDrive
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires child_process
+ * @requires util
+ * @requires fs/promises
+ *
+ * @example
+ * ```typescript
+ * import { uploadFile, createInvoice, getShareableLink } from './googleDrive';
+ *
+ * // Upload a file
+ * const path = await uploadFile('/local/file.pdf', 'documents/file.pdf');
+ *
+ * // Create an invoice
+ * const invoice = await createInvoice('username', {
+ *   invoiceNumber: 'INV-001',
+ *   customerName: 'أحمد محمد',
+ *   items: [{ name: 'Product', quantity: 2, price: 100 }],
+ *   total: 200
+ * });
+ *
+ * console.log(`Invoice link: ${invoice.link}`);
+ * ```
+ *
+ * @see https://rclone.org/ for rclone documentation
+ */
+
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-/**
- * Google Drive Service using rclone
- * يستخدم rclone المُعد مسبقاً للتفاعل مع Google Drive
- */
-
+/** rclone configuration file path */
 const RCLONE_CONFIG = '/home/ubuntu/.gdrive-rclone.ini';
+
+/** Remote name configured in rclone for Google Drive */
 const REMOTE_NAME = 'manus_google_drive';
 
+/**
+ * Google Drive file information
+ * معلومات ملف Google Drive
+ *
+ * @interface GoogleDriveFile
+ * @property {string} name - File name
+ * @property {string} path - Full path in Google Drive
+ * @property {number} size - File size in bytes
+ * @property {string} modTime - Last modification time (ISO format)
+ * @property {boolean} isDir - Whether the item is a directory
+ */
 interface GoogleDriveFile {
   name: string;
   path: string;
@@ -20,7 +71,19 @@ interface GoogleDriveFile {
 }
 
 /**
+ * Create a folder in Google Drive
  * إنشاء مجلد في Google Drive
+ *
+ * @async
+ * @param {string} folderPath - Path for the new folder
+ * @returns {Promise<void>}
+ *
+ * @throws {Error} Failed to create folder
+ *
+ * @example
+ * ```typescript
+ * await createFolder('reports/2024/january');
+ * ```
  */
 export async function createFolder(folderPath: string): Promise<void> {
   const remotePath = `${REMOTE_NAME}:${folderPath}`;
@@ -34,7 +97,21 @@ export async function createFolder(folderPath: string): Promise<void> {
 }
 
 /**
+ * Upload a file to Google Drive
  * رفع ملف إلى Google Drive
+ *
+ * @async
+ * @param {string} localFilePath - Local file path to upload
+ * @param {string} remotePath - Destination path in Google Drive
+ * @returns {Promise<string>} Remote path where file was uploaded
+ *
+ * @throws {Error} Failed to upload file
+ *
+ * @example
+ * ```typescript
+ * const remotePath = await uploadFile('/tmp/report.pdf', 'reports/report.pdf');
+ * console.log(`Uploaded to: ${remotePath}`);
+ * ```
  */
 export async function uploadFile(localFilePath: string, remotePath: string): Promise<string> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
@@ -49,9 +126,34 @@ export async function uploadFile(localFilePath: string, remotePath: string): Pro
 }
 
 /**
+ * Create a new Google Sheet
  * إنشاء Google Sheet جديد
- * ملاحظة: rclone لا يدعم إنشاء Google Sheets مباشرة
- * سنستخدم طريقة بديلة: إنشاء ملف CSV ورفعه
+ *
+ * @async
+ * @param {string} sheetName - Name for the new sheet
+ * @param {string} folderPath - Destination folder in Google Drive
+ * @param {string[][]} data - 2D array of data (rows and columns)
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @throws {Error} Failed to create or upload sheet
+ *
+ * @description
+ * Note: rclone doesn't support creating native Google Sheets directly.
+ * This function creates a CSV file and uploads it, which Google Drive
+ * can then convert to a Google Sheet format.
+ *
+ * ملاحظة: rclone لا يدعم إنشاء Google Sheets مباشرة.
+ * هذه الدالة تنشئ ملف CSV وترفعه، ثم يمكن لـ Google Drive تحويله لصيغة Sheets.
+ *
+ * @example
+ * ```typescript
+ * const sheet = await createGoogleSheet('Sales Report', 'reports', [
+ *   ['Product', 'Quantity', 'Price'],
+ *   ['Widget A', '10', '100'],
+ *   ['Widget B', '5', '200']
+ * ]);
+ * console.log(`Sheet link: ${sheet.link}`);
+ * ```
  */
 export async function createGoogleSheet(
   sheetName: string,
@@ -80,7 +182,20 @@ export async function createGoogleSheet(
 }
 
 /**
+ * Get a shareable link for a file
  * الحصول على رابط مشاركة للملف
+ *
+ * @async
+ * @param {string} remotePath - Path to the file in Google Drive
+ * @returns {Promise<string>} Shareable URL
+ *
+ * @throws {Error} Failed to get shareable link
+ *
+ * @example
+ * ```typescript
+ * const link = await getShareableLink('reports/sales.csv');
+ * console.log(`Share this link: ${link}`);
+ * ```
  */
 export async function getShareableLink(remotePath: string): Promise<string> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
@@ -95,7 +210,20 @@ export async function getShareableLink(remotePath: string): Promise<string> {
 }
 
 /**
- * قراءة محتوى ملف من Google Drive
+ * Download a file from Google Drive
+ * تنزيل ملف من Google Drive
+ *
+ * @async
+ * @param {string} remotePath - Path to the file in Google Drive
+ * @param {string} localPath - Local destination directory
+ * @returns {Promise<void>}
+ *
+ * @throws {Error} Failed to download file
+ *
+ * @example
+ * ```typescript
+ * await downloadFile('reports/sales.csv', '/tmp/downloads/');
+ * ```
  */
 export async function downloadFile(remotePath: string, localPath: string): Promise<void> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
@@ -109,7 +237,20 @@ export async function downloadFile(remotePath: string, localPath: string): Promi
 }
 
 /**
+ * List files in a folder
  * عرض قائمة الملفات في مجلد
+ *
+ * @async
+ * @param {string} folderPath - Folder path in Google Drive
+ * @returns {Promise<GoogleDriveFile[]>} Array of file information objects
+ *
+ * @throws {Error} Failed to list files
+ *
+ * @example
+ * ```typescript
+ * const files = await listFiles('reports/2024');
+ * files.forEach(f => console.log(`${f.name} (${f.size} bytes)`));
+ * ```
  */
 export async function listFiles(folderPath: string): Promise<GoogleDriveFile[]> {
   const remotePath = `${REMOTE_NAME}:${folderPath}`;
@@ -131,7 +272,19 @@ export async function listFiles(folderPath: string): Promise<GoogleDriveFile[]> 
 }
 
 /**
+ * Delete a file or folder
  * حذف ملف أو مجلد
+ *
+ * @async
+ * @param {string} remotePath - Path to the file/folder in Google Drive
+ * @returns {Promise<void>}
+ *
+ * @throws {Error} Failed to delete file
+ *
+ * @example
+ * ```typescript
+ * await deleteFile('temp/old-report.csv');
+ * ```
  */
 export async function deleteFile(remotePath: string): Promise<void> {
   const remoteFullPath = `${REMOTE_NAME}:${remotePath}`;
@@ -145,8 +298,18 @@ export async function deleteFile(remotePath: string): Promise<void> {
 }
 
 /**
+ * Generate an organized file path
  * إنشاء مسار منظم للملفات
- * Format: YYYY-MM-DD/username/HH-MM-SS-filename.ext
+ *
+ * @param {string} username - Username for the path
+ * @param {string} filename - Original filename
+ * @returns {string} Organized path in format: YYYY-MM-DD/username/HH-MM-SS-filename.ext
+ *
+ * @example
+ * ```typescript
+ * const path = generateOrganizedPath('ahmed', 'report.pdf');
+ * // Returns: "2024-01-15/ahmed/14-30-00-report.pdf"
+ * ```
  */
 export function generateOrganizedPath(username: string, filename: string): string {
   const now = new Date();
@@ -157,7 +320,30 @@ export function generateOrganizedPath(username: string, filename: string): strin
 }
 
 /**
+ * Create an invoice in Google Sheets
  * إنشاء فاتورة في Google Sheets
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {Object} invoiceData - Invoice information
+ * @param {string} invoiceData.invoiceNumber - Unique invoice number
+ * @param {string} invoiceData.customerName - Customer's name
+ * @param {Array<{name: string, quantity: number, price: number}>} invoiceData.items - Line items
+ * @param {number} invoiceData.total - Total invoice amount
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @example
+ * ```typescript
+ * const invoice = await createInvoice('ahmed', {
+ *   invoiceNumber: 'INV-2024-001',
+ *   customerName: 'شركة ABC',
+ *   items: [
+ *     { name: 'منتج أ', quantity: 10, price: 50 },
+ *     { name: 'منتج ب', quantity: 5, price: 100 }
+ *   ],
+ *   total: 1000
+ * });
+ * ```
  */
 export async function createInvoice(
   username: string,
@@ -195,7 +381,27 @@ export async function createInvoice(
 }
 
 /**
+ * Create a daily report in Google Sheets
  * إنشاء تقرير يومي في Google Sheets
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {Object} reportData - Report information
+ * @param {string} reportData.date - Report date
+ * @param {Array<{name: string, value: string}>} reportData.metrics - Key metrics
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @example
+ * ```typescript
+ * const report = await createDailyReport('ahmed', {
+ *   date: '2024-01-15',
+ *   metrics: [
+ *     { name: 'المبيعات', value: '15,000 ج.م' },
+ *     { name: 'الطلبات', value: '45' },
+ *     { name: 'العملاء الجدد', value: '12' }
+ *   ]
+ * });
+ * ```
  */
 export async function createDailyReport(
   username: string,

@@ -1,6 +1,46 @@
 /**
- * Marketer Landing Page Builder Service
+ * @fileoverview Marketer Landing Page Builder Service
  * خدمة منشئ صفحات الهبوط للمسوقين
+ *
+ * @description
+ * Comprehensive landing page builder for affiliate marketers. Provides template-based
+ * page creation, customization, analytics tracking, and conversion optimization.
+ * Supports tier-based access control and bilingual content (Arabic/English).
+ *
+ * منشئ صفحات هبوط شامل للمسوقين بالعمولة. يوفر إنشاء صفحات بناءً على قوالب،
+ * تخصيص، تتبع التحليلات، وتحسين التحويلات. يدعم التحكم بالوصول حسب المستوى
+ * والمحتوى ثنائي اللغة (عربي/إنجليزي).
+ *
+ * @module services/marketer-landing-page
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../db
+ * @requires ../../drizzle/schema-marketer-tools
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { getMarketerLandingPageService } from './marketer-landing-page.service';
+ *
+ * const service = getMarketerLandingPageService();
+ *
+ * // Create a landing page
+ * const page = await service.createLandingPage({
+ *   marketerId: 123,
+ *   templateId: 'product-showcase',
+ *   title: 'Summer Sale',
+ *   titleAr: 'تخفيضات الصيف',
+ *   slug: 'summer-sale-2024'
+ * });
+ *
+ * // Publish the page
+ * await service.publishLandingPage(page.id, 123);
+ *
+ * // Get analytics
+ * const analytics = await service.getLandingPageAnalytics(page.id, 123);
+ * console.log(`Conversion Rate: ${analytics.conversionRate}%`);
+ * ```
  */
 
 import { db } from '../db';
@@ -45,9 +85,34 @@ export interface UpdateLandingPageInput {
   customDomain?: string;
 }
 
+/**
+ * Marketer Landing Page Service Class
+ * فئة خدمة صفحات الهبوط للمسوقين
+ *
+ * @class MarketerLandingPageService
+ * @description
+ * Provides CRUD operations for marketer landing pages with tier-based access control,
+ * template management, analytics tracking, and conversion optimization features.
+ *
+ * توفر عمليات CRUD لصفحات الهبوط للمسوقين مع التحكم بالوصول حسب المستوى،
+ * إدارة القوالب، تتبع التحليلات، وميزات تحسين التحويلات.
+ */
 export class MarketerLandingPageService {
   /**
    * Check if marketer can create more landing pages
+   * التحقق من إمكانية إنشاء صفحات هبوط إضافية
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<{canCreate: boolean, reason?: string}>} Permission status with optional reason
+   *
+   * @example
+   * ```typescript
+   * const check = await service.canCreateLandingPage(123);
+   * if (!check.canCreate) {
+   *   console.log(`Cannot create: ${check.reason}`);
+   * }
+   * ```
    */
   async canCreateLandingPage(marketerId: number): Promise<{ canCreate: boolean; reason?: string }> {
     const marketer = await db
@@ -91,6 +156,17 @@ export class MarketerLandingPageService {
 
   /**
    * Generate unique slug
+   * إنشاء رابط فريد
+   *
+   * @async
+   * @param {string} baseSlug - Base slug to use
+   * @returns {Promise<string>} Unique slug (appends number if collision)
+   *
+   * @example
+   * ```typescript
+   * const slug = await service.generateUniqueSlug('summer-sale');
+   * // Returns 'summer-sale' or 'summer-sale-2' if collision
+   * ```
    */
   async generateUniqueSlug(baseSlug: string): Promise<string> {
     let slug = baseSlug
@@ -122,6 +198,33 @@ export class MarketerLandingPageService {
 
   /**
    * Create a new landing page
+   * إنشاء صفحة هبوط جديدة
+   *
+   * @async
+   * @param {CreateLandingPageInput} input - Landing page creation parameters
+   * @param {number} input.marketerId - Marketer ID
+   * @param {string} input.templateId - Template ID to use
+   * @param {string} input.title - Page title in English
+   * @param {string} [input.titleAr] - Page title in Arabic
+   * @param {string} input.slug - URL slug for the page
+   * @param {string} [input.description] - Page description in English
+   * @param {string} [input.descriptionAr] - Page description in Arabic
+   * @returns {Promise<LandingPage>} Created landing page record
+   *
+   * @throws {Error} Cannot create more landing pages (tier limit)
+   * @throws {Error} Template not found
+   * @throws {Error} Template requires higher tier
+   *
+   * @example
+   * ```typescript
+   * const page = await service.createLandingPage({
+   *   marketerId: 123,
+   *   templateId: 'product-showcase',
+   *   title: 'New Product Launch',
+   *   titleAr: 'إطلاق منتج جديد',
+   *   slug: 'new-product-2024'
+   * });
+   * ```
    */
   async createLandingPage(input: CreateLandingPageInput) {
     // Check if marketer can create
@@ -211,6 +314,23 @@ export class MarketerLandingPageService {
 
   /**
    * Update landing page
+   * تحديث صفحة الهبوط
+   *
+   * @async
+   * @param {number} id - Landing page ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @param {UpdateLandingPageInput} input - Update parameters
+   * @returns {Promise<LandingPage>} Updated landing page record
+   *
+   * @throws {Error} Landing page not found or no permission
+   *
+   * @example
+   * ```typescript
+   * const updated = await service.updateLandingPage(456, 123, {
+   *   title: 'Updated Title',
+   *   facebookPixelId: 'FB-123456'
+   * });
+   * ```
    */
   async updateLandingPage(id: number, marketerId: number, input: UpdateLandingPageInput) {
     // Verify ownership
@@ -262,6 +382,21 @@ export class MarketerLandingPageService {
 
   /**
    * Publish landing page
+   * نشر صفحة الهبوط
+   *
+   * @async
+   * @param {number} id - Landing page ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<LandingPage>} Published landing page record
+   *
+   * @throws {Error} Landing page not found or no permission
+   * @throws {Error} Must have title and content before publishing
+   *
+   * @example
+   * ```typescript
+   * const published = await service.publishLandingPage(456, 123);
+   * console.log(`Published at: ${published.publishedAt}`);
+   * ```
    */
   async publishLandingPage(id: number, marketerId: number) {
     // Verify ownership
@@ -297,6 +432,14 @@ export class MarketerLandingPageService {
 
   /**
    * Unpublish landing page
+   * إلغاء نشر صفحة الهبوط
+   *
+   * @async
+   * @param {number} id - Landing page ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<LandingPage>} Paused landing page record
+   *
+   * @throws {Error} Landing page not found or no permission
    */
   async unpublishLandingPage(id: number, marketerId: number) {
     const [paused] = await db
@@ -316,7 +459,15 @@ export class MarketerLandingPageService {
   }
 
   /**
-   * Delete landing page
+   * Delete landing page (archives, does not permanently delete)
+   * حذف صفحة الهبوط (أرشفة، ليس حذف دائم)
+   *
+   * @async
+   * @param {number} id - Landing page ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<LandingPage>} Archived landing page record
+   *
+   * @throws {Error} Landing page not found or no permission
    */
   async deleteLandingPage(id: number, marketerId: number) {
     const [archived] = await db
@@ -337,7 +488,24 @@ export class MarketerLandingPageService {
   }
 
   /**
-   * Get landing page by slug (public)
+   * Get landing page by slug (public endpoint)
+   * الحصول على صفحة الهبوط بالرابط (عام)
+   *
+   * @async
+   * @param {string} slug - Landing page URL slug
+   * @returns {Promise<LandingPage|null>} Landing page if found and published, null otherwise
+   *
+   * @description
+   * Retrieves a published landing page and increments its view count.
+   * This is the public-facing method used when visitors access the page.
+   *
+   * @example
+   * ```typescript
+   * const page = await service.getLandingPageBySlug('summer-sale-2024');
+   * if (page) {
+   *   // Render the page
+   * }
+   * ```
    */
   async getLandingPageBySlug(slug: string) {
     const [page] = await db
@@ -363,6 +531,23 @@ export class MarketerLandingPageService {
 
   /**
    * Get marketer's landing pages
+   * الحصول على صفحات الهبوط للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} [options] - Query options
+   * @param {string} [options.status] - Filter by status (draft, published, paused, archived)
+   * @param {number} [options.limit] - Maximum results to return
+   * @param {number} [options.offset] - Offset for pagination
+   * @returns {Promise<LandingPage[]>} Array of marketer's landing pages
+   *
+   * @example
+   * ```typescript
+   * const pages = await service.getMarketerLandingPages(123, {
+   *   status: 'published',
+   *   limit: 10
+   * });
+   * ```
    */
   async getMarketerLandingPages(
     marketerId: number,
@@ -400,6 +585,11 @@ export class MarketerLandingPageService {
 
   /**
    * Track click on landing page
+   * تتبع النقر على صفحة الهبوط
+   *
+   * @async
+   * @param {number} landingPageId - Landing page ID
+   * @returns {Promise<void>}
    */
   async trackClick(landingPageId: number) {
     await db
@@ -412,6 +602,12 @@ export class MarketerLandingPageService {
 
   /**
    * Track conversion on landing page
+   * تتبع التحويل على صفحة الهبوط
+   *
+   * @async
+   * @param {number} landingPageId - Landing page ID
+   * @param {number} revenue - Revenue amount from the conversion
+   * @returns {Promise<void>}
    */
   async trackConversion(landingPageId: number, revenue: number) {
     await db
@@ -425,6 +621,29 @@ export class MarketerLandingPageService {
 
   /**
    * Get landing page analytics
+   * الحصول على تحليلات صفحة الهبوط
+   *
+   * @async
+   * @param {number} id - Landing page ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<Object>} Analytics object with views, clicks, conversions, and rates
+   * @returns {number} .views - Total page views
+   * @returns {number} .clicks - Total CTA clicks
+   * @returns {number} .conversions - Total conversions
+   * @returns {number} .revenue - Total revenue generated
+   * @returns {string} .clickRate - Click rate percentage
+   * @returns {string} .conversionRate - Conversion rate percentage
+   * @returns {string} .revenuePerView - Revenue per view
+   * @returns {string} .revenuePerClick - Revenue per click
+   *
+   * @throws {Error} Landing page not found
+   *
+   * @example
+   * ```typescript
+   * const analytics = await service.getLandingPageAnalytics(456, 123);
+   * console.log(`Views: ${analytics.views}`);
+   * console.log(`Conversion Rate: ${analytics.conversionRate}%`);
+   * ```
    */
   async getLandingPageAnalytics(id: number, marketerId: number) {
     const [page] = await db
@@ -456,6 +675,21 @@ export class MarketerLandingPageService {
 
   /**
    * Duplicate landing page
+   * نسخ صفحة الهبوط
+   *
+   * @async
+   * @param {number} id - Landing page ID to duplicate
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<LandingPage>} Newly created duplicate page (as draft)
+   *
+   * @throws {Error} Cannot create more landing pages (tier limit)
+   * @throws {Error} Landing page not found
+   *
+   * @example
+   * ```typescript
+   * const copy = await service.duplicateLandingPage(456, 123);
+   * console.log(`Created copy: ${copy.slug}`);
+   * ```
    */
   async duplicateLandingPage(id: number, marketerId: number) {
     // Check if can create new page
@@ -503,6 +737,23 @@ export class MarketerLandingPageService {
 
   /**
    * Get available templates for marketer
+   * الحصول على القوالب المتاحة للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<Template[]>} Array of templates available for marketer's tier
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @description
+   * Returns templates that the marketer can use based on their tier level.
+   * Higher tiers have access to more premium templates.
+   *
+   * @example
+   * ```typescript
+   * const templates = await service.getAvailableTemplates(123);
+   * templates.forEach(t => console.log(`${t.id}: ${t.name}`));
+   * ```
    */
   async getAvailableTemplates(marketerId: number) {
     const [marketer] = await db
@@ -528,6 +779,19 @@ export class MarketerLandingPageService {
 // Singleton instance
 let service: MarketerLandingPageService | null = null;
 
+/**
+ * Get singleton instance of MarketerLandingPageService
+ * الحصول على نسخة واحدة من خدمة صفحات الهبوط
+ *
+ * @function getMarketerLandingPageService
+ * @returns {MarketerLandingPageService} Singleton service instance
+ *
+ * @example
+ * ```typescript
+ * const service = getMarketerLandingPageService();
+ * const pages = await service.getMarketerLandingPages(123);
+ * ```
+ */
 export function getMarketerLandingPageService(): MarketerLandingPageService {
   if (!service) {
     service = new MarketerLandingPageService();

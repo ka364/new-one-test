@@ -1,8 +1,60 @@
+/**
+ * @fileoverview Google Sheets Templates Service
+ * خدمة قوالب Google Sheets
+ *
+ * @description
+ * Provides pre-built Google Sheets templates for business operations including
+ * content calendars, campaign tracking, performance reports, inventory management,
+ * competitor analysis, and budget planning. All templates support Arabic localization.
+ *
+ * توفر قوالب Google Sheets جاهزة للعمليات التجارية بما في ذلك جداول المحتوى،
+ * تتبع الحملات، تقارير الأداء، إدارة المخزون، تحليل المنافسين، وتخطيط الميزانية.
+ * جميع القوالب تدعم اللغة العربية.
+ *
+ * @module services/googleSheetsTemplates
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ./googleDrive
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   createMonthlyContentCalendar,
+ *   createDailyPerformanceReport,
+ *   createInventoryTrackingSheet
+ * } from './googleSheetsTemplates';
+ *
+ * // Create a content calendar
+ * const calendar = await createMonthlyContentCalendar('ahmed', 'يناير', 2024);
+ *
+ * // Create a performance report
+ * const report = await createDailyPerformanceReport('ahmed', '15/01/2024', campaigns);
+ * ```
+ */
+
 import { createGoogleSheet } from './googleDrive';
 
 /**
+ * Create a monthly content calendar template
  * قالب جدول المحتوى الشهري
- * Monthly Content Calendar Template
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {string} month - Month name (Arabic or English)
+ * @param {number} year - Year (e.g., 2024)
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates a content calendar with daily entries for the specified month.
+ * Includes columns for platform, content type, title, description, hashtags,
+ * status, views, engagement, and notes.
+ *
+ * @example
+ * ```typescript
+ * const calendar = await createMonthlyContentCalendar('ahmed', 'يناير', 2024);
+ * console.log(`Calendar link: ${calendar.link}`);
+ * ```
  */
 export async function createMonthlyContentCalendar(username: string, month: string, year: number) {
   const sheetName = `Content_Calendar_${month}_${year}`;
@@ -48,8 +100,33 @@ export async function createMonthlyContentCalendar(username: string, month: stri
 }
 
 /**
- * قالب التقرير اليومي
- * Daily Performance Report Template
+ * Create a daily performance report template
+ * قالب التقرير اليومي للأداء
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {string} date - Report date
+ * @param {Array<Object>} campaigns - Array of campaign data
+ * @param {string} campaigns[].name - Campaign name
+ * @param {number} campaigns[].budget - Campaign budget
+ * @param {number} campaigns[].spent - Amount spent
+ * @param {number} campaigns[].impressions - Total impressions
+ * @param {number} campaigns[].clicks - Total clicks
+ * @param {number} campaigns[].conversions - Total conversions
+ * @param {number} campaigns[].revenue - Total revenue
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates a detailed daily performance report with campaign metrics including
+ * CTR, ROI, budget status, and totals row with aggregated metrics.
+ *
+ * @example
+ * ```typescript
+ * const report = await createDailyPerformanceReport('ahmed', '15/01/2024', [
+ *   { name: 'حملة فيسبوك', budget: 1000, spent: 800, impressions: 50000,
+ *     clicks: 500, conversions: 25, revenue: 2500 }
+ * ]);
+ * ```
  */
 export async function createDailyPerformanceReport(
   username: string,
@@ -143,8 +220,23 @@ export async function createDailyPerformanceReport(
 }
 
 /**
+ * Create a campaign tracking template
  * قالب تتبع الحملات التسويقية
- * Campaign Tracking Template
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {string} campaignName - Name of the campaign
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates a 30-day campaign tracking sheet with columns for daily metrics
+ * including budget, spend, impressions, clicks, CTR, conversions, CPA, revenue, and ROI.
+ *
+ * @example
+ * ```typescript
+ * const tracker = await createCampaignTrackingSheet('ahmed', 'Summer Sale 2024');
+ * console.log(`Tracker link: ${tracker.link}`);
+ * ```
  */
 export async function createCampaignTrackingSheet(username: string, campaignName: string) {
   const sheetName = `Campaign_${campaignName.replace(/\s+/g, '_')}`;
@@ -194,8 +286,37 @@ export async function createCampaignTrackingSheet(username: string, campaignName
 }
 
 /**
+ * Create an inventory tracking template
  * قالب تتبع المخزون
- * Inventory Tracking Template
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {Array<Object>} products - Array of product data
+ * @param {string} products[].sku - Product SKU
+ * @param {string} products[].name - Product name
+ * @param {number} products[].currentStock - Current stock quantity
+ * @param {number} products[].monthlySales - Average monthly sales
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates an inventory tracking sheet with automatic calculations for:
+ * - Days remaining based on sales velocity
+ * - Status indicators (urgent/warning/good)
+ * - Suggested reorder quantities
+ *
+ * Status levels:
+ * - 🔴 عاجل: Stock will run out within 1 week
+ * - ⚠️ تحذير: Stock will run out within 2 weeks
+ * - ⚡ متابعة: Stock will run out within 1 month
+ * - ✅ جيد: Sufficient stock
+ *
+ * @example
+ * ```typescript
+ * const inventory = await createInventoryTrackingSheet('ahmed', [
+ *   { sku: 'PRD-001', name: 'منتج أ', currentStock: 50, monthlySales: 100 },
+ *   { sku: 'PRD-002', name: 'منتج ب', currentStock: 200, monthlySales: 50 }
+ * ]);
+ * ```
  */
 export async function createInventoryTrackingSheet(
   username: string,
@@ -257,8 +378,27 @@ export async function createInventoryTrackingSheet(
 }
 
 /**
+ * Create a competitor analysis template
  * قالب تحليل المنافسين
- * Competitor Analysis Template
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {string[]} competitors - Array of competitor names
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates a competitor analysis sheet with columns for platform, content type,
+ * posting frequency, average engagement, best times, hashtags used,
+ * strengths, weaknesses, and opportunities.
+ *
+ * @example
+ * ```typescript
+ * const analysis = await createCompetitorAnalysisSheet('ahmed', [
+ *   'منافس أ',
+ *   'منافس ب',
+ *   'منافس ج'
+ * ]);
+ * ```
  */
 export async function createCompetitorAnalysisSheet(username: string, competitors: string[]) {
   const sheetName = `Competitor_Analysis_${new Date().toISOString().split('T')[0]}`;
@@ -298,8 +438,26 @@ export async function createCompetitorAnalysisSheet(username: string, competitor
 }
 
 /**
+ * Create a campaign budget template
  * قالب ميزانية الحملات
- * Campaign Budget Template
+ *
+ * @async
+ * @param {string} username - Username for folder organization
+ * @param {string} month - Month name
+ * @param {number} year - Year
+ * @param {number} totalBudget - Total monthly budget
+ * @returns {Promise<{path: string, link: string}>} Path and shareable link
+ *
+ * @description
+ * Creates a budget planning sheet for 23 campaigns with columns for
+ * platform, allocated budget, spent amount, remaining budget,
+ * usage percentage, expected performance, and recommendations.
+ *
+ * @example
+ * ```typescript
+ * const budget = await createCampaignBudgetSheet('ahmed', 'يناير', 2024, 50000);
+ * console.log(`Budget sheet: ${budget.link}`);
+ * ```
  */
 export async function createCampaignBudgetSheet(
   username: string,
@@ -344,7 +502,20 @@ export async function createCampaignBudgetSheet(
   return await createGoogleSheet(sheetName, folderPath, rows);
 }
 
-// Helper function
+/**
+ * Convert month name to number
+ * تحويل اسم الشهر إلى رقم
+ *
+ * @private
+ * @param {string} month - Month name in Arabic or English
+ * @returns {number} Month number (1-12), defaults to 1 if not found
+ *
+ * @example
+ * ```typescript
+ * getMonthNumber('يناير');  // Returns 1
+ * getMonthNumber('January'); // Returns 1
+ * ```
+ */
 function getMonthNumber(month: string): number {
   const months: { [key: string]: number } = {
     يناير: 1,

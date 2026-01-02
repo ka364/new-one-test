@@ -1,12 +1,54 @@
 /**
- * Marketer Shopify Integration Service
+ * @fileoverview Marketer Shopify Integration Service
  * خدمة ربط شوبيفاي للمسوقين
  *
- * Allows marketers to:
- * 1. Connect their Shopify stores
- * 2. Sync products from Haderos to Shopify
- * 3. Track orders from Shopify
- * 4. Manage inventory sync
+ * @description
+ * Comprehensive Shopify integration for affiliate marketers. Enables store connection,
+ * product synchronization, order tracking, inventory management, and OAuth authentication.
+ * Supports tier-based access (Gold+ required) and automatic commission calculation.
+ *
+ * تكامل شوبيفاي شامل للمسوقين بالعمولة. يتيح ربط المتاجر، مزامنة المنتجات،
+ * تتبع الطلبات، إدارة المخزون، ومصادقة OAuth.
+ * يدعم الوصول حسب المستوى (ذهبي+ مطلوب) وحساب العمولة تلقائياً.
+ *
+ * Features / الميزات:
+ * - Connect Shopify stores via OAuth or direct API credentials
+ * - Sync products from Haderos catalog to marketer's Shopify store
+ * - Automatic price markup based on commission rate
+ * - Order webhook handling for commission tracking
+ * - Real-time sync status monitoring
+ *
+ * @module services/marketer-shopify
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../db
+ * @requires ../../drizzle/schema-marketer-tools
+ * @requires ../../drizzle/schema
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { getMarketerShopifyService } from './marketer-shopify.service';
+ *
+ * const service = getMarketerShopifyService();
+ *
+ * // Check if marketer can connect Shopify
+ * const check = await service.canConnectShopify(123);
+ * if (check.canConnect) {
+ *   // Generate OAuth URL for store connection
+ *   const authUrl = service.generateOAuthUrl(123, 'mystore.myshopify.com');
+ *
+ *   // After OAuth callback, sync products
+ *   const results = await service.syncProductsToShopify(storeId, 123, [1, 2, 3]);
+ *   console.log(`Synced ${results.synced} products`);
+ * }
+ * ```
+ *
+ * @security
+ * - Access tokens should be encrypted at rest
+ * - Requires Gold tier or higher for Shopify integration
+ * - Webhook verification for order processing
  */
 
 import { db } from '../db';
@@ -41,9 +83,38 @@ interface ShopifyProduct {
   }>;
 }
 
+/**
+ * Marketer Shopify Service Class
+ * فئة خدمة شوبيفاي للمسوقين
+ *
+ * @class MarketerShopifyService
+ * @description
+ * Provides Shopify integration capabilities for affiliate marketers including
+ * store connection, product synchronization, order tracking, and OAuth flow.
+ *
+ * توفر إمكانيات تكامل شوبيفاي للمسوقين بالعمولة بما في ذلك
+ * ربط المتاجر، مزامنة المنتجات، تتبع الطلبات، وتدفق OAuth.
+ */
 export class MarketerShopifyService {
   /**
    * Check if marketer can connect Shopify
+   * التحقق من إمكانية ربط شوبيفاي
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<{canConnect: boolean, reason?: string}>} Permission status
+   *
+   * @description
+   * Verifies that the marketer has the required tier (Gold+) and active status
+   * to connect a Shopify store.
+   *
+   * @example
+   * ```typescript
+   * const check = await service.canConnectShopify(123);
+   * if (!check.canConnect) {
+   *   console.log(`Cannot connect: ${check.reason}`);
+   * }
+   * ```
    */
   async canConnectShopify(marketerId: number): Promise<{ canConnect: boolean; reason?: string }> {
     const [marketer] = await db
@@ -72,6 +143,30 @@ export class MarketerShopifyService {
 
   /**
    * Connect a Shopify store
+   * ربط متجر شوبيفاي
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {ShopifyAuthConfig} config - Shopify authentication configuration
+   * @param {string} config.shopDomain - Shopify store domain (e.g., 'mystore.myshopify.com')
+   * @param {string} config.accessToken - Shopify API access token
+   * @param {string} [config.apiVersion='2025-01'] - Shopify API version
+   * @returns {Promise<ShopifyStore>} Connected store record
+   *
+   * @throws {Error} Shopify integration requires Gold tier or higher
+   * @throws {Error} Account is not active
+   * @throws {Error} Invalid Shopify credentials
+   *
+   * @security Access tokens should be encrypted before storage
+   *
+   * @example
+   * ```typescript
+   * const store = await service.connectShopifyStore(123, {
+   *   shopDomain: 'mystore.myshopify.com',
+   *   accessToken: 'shpat_xxxxx',
+   *   apiVersion: '2025-01'
+   * });
+   * ```
    */
   async connectShopifyStore(marketerId: number, config: ShopifyAuthConfig) {
     // Check permission
@@ -140,6 +235,14 @@ export class MarketerShopifyService {
 
   /**
    * Validate Shopify credentials
+   * التحقق من بيانات اعتماد شوبيفاي
+   *
+   * @async
+   * @param {ShopifyAuthConfig} config - Shopify authentication configuration
+   * @returns {Promise<{valid: boolean, error?: string}>} Validation result
+   *
+   * @description
+   * Makes a test API call to Shopify to verify the access token is valid.
    */
   async validateShopifyCredentials(
     config: ShopifyAuthConfig
@@ -166,6 +269,14 @@ export class MarketerShopifyService {
 
   /**
    * Disconnect Shopify store
+   * قطع الاتصال بمتجر شوبيفاي
+   *
+   * @async
+   * @param {number} storeId - Store ID to disconnect
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<ShopifyStore>} Disconnected store record
+   *
+   * @throws {Error} Store not found or no permission
    */
   async disconnectShopifyStore(storeId: number, marketerId: number) {
     const [disconnected] = await db
@@ -190,6 +301,17 @@ export class MarketerShopifyService {
 
   /**
    * Get marketer's Shopify stores
+   * الحصول على متاجر شوبيفاي للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<ShopifyStore[]>} Array of connected Shopify stores
+   *
+   * @example
+   * ```typescript
+   * const stores = await service.getMarketerShopifyStores(123);
+   * stores.forEach(s => console.log(`${s.storeName}: ${s.status}`));
+   * ```
    */
   async getMarketerShopifyStores(marketerId: number) {
     return await db
@@ -200,6 +322,32 @@ export class MarketerShopifyService {
 
   /**
    * Sync products to Shopify
+   * مزامنة المنتجات إلى شوبيفاي
+   *
+   * @async
+   * @param {number} storeId - Shopify store ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @param {number[]} productIds - Array of Haderos product IDs to sync
+   * @returns {Promise<{synced: number, failed: number, errors: string[]}>} Sync results
+   *
+   * @throws {Error} Store not found
+   * @throws {Error} Store is not connected
+   * @throws {Error} No products found to sync
+   *
+   * @description
+   * Syncs products from the Haderos catalog to the marketer's Shopify store.
+   * Prices are automatically marked up based on the marketer's commission rate.
+   *
+   * @performance May take several seconds for large product batches
+   *
+   * @example
+   * ```typescript
+   * const results = await service.syncProductsToShopify(1, 123, [1, 2, 3, 4, 5]);
+   * console.log(`Synced: ${results.synced}, Failed: ${results.failed}`);
+   * if (results.errors.length > 0) {
+   *   console.log('Errors:', results.errors);
+   * }
+   * ```
    */
   async syncProductsToShopify(storeId: number, marketerId: number, productIds: number[]) {
     // Get store
@@ -330,6 +478,21 @@ export class MarketerShopifyService {
 
   /**
    * Fetch products from Shopify
+   * جلب المنتجات من شوبيفاي
+   *
+   * @async
+   * @param {number} storeId - Shopify store ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<ShopifyProduct[]>} Array of Shopify products
+   *
+   * @throws {Error} Store not found or not connected
+   * @throws {Error} Failed to fetch products from Shopify API
+   *
+   * @example
+   * ```typescript
+   * const products = await service.fetchShopifyProducts(1, 123);
+   * products.forEach(p => console.log(`${p.title}: ${p.variants[0].price}`));
+   * ```
    */
   async fetchShopifyProducts(storeId: number, marketerId: number): Promise<ShopifyProduct[]> {
     const [store] = await db
@@ -378,6 +541,21 @@ export class MarketerShopifyService {
 
   /**
    * Get store sync status
+   * الحصول على حالة المزامنة للمتجر
+   *
+   * @async
+   * @param {number} storeId - Shopify store ID
+   * @param {number} marketerId - Marketer ID (for ownership verification)
+   * @returns {Promise<Object>} Sync status with product and order counts
+   *
+   * @throws {Error} Store not found
+   *
+   * @example
+   * ```typescript
+   * const status = await service.getStoreSyncStatus(1, 123);
+   * console.log(`Status: ${status.status}`);
+   * console.log(`Synced: ${status.syncedProducts}/${status.totalProducts}`);
+   * ```
    */
   async getStoreSyncStatus(storeId: number, marketerId: number) {
     const [store] = await db
@@ -405,6 +583,24 @@ export class MarketerShopifyService {
 
   /**
    * Handle Shopify webhook (order created)
+   * معالجة webhook من شوبيفاي (إنشاء طلب)
+   *
+   * @async
+   * @param {string} shopifyDomain - Shopify store domain
+   * @param {any} orderData - Order data from Shopify webhook
+   * @returns {Promise<void>}
+   *
+   * @description
+   * Processes incoming order webhooks from Shopify.
+   * Updates order counts and calculates commission for the marketer.
+   *
+   * @security Should verify webhook signature before processing
+   *
+   * @example
+   * ```typescript
+   * // In webhook endpoint handler
+   * await service.handleOrderWebhook('mystore.myshopify.com', req.body);
+   * ```
    */
   async handleOrderWebhook(shopifyDomain: string, orderData: any) {
     // Find store by domain
@@ -458,6 +654,21 @@ export class MarketerShopifyService {
 
   /**
    * Generate Shopify OAuth URL for marketer
+   * إنشاء رابط OAuth لشوبيفاي
+   *
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {string} shopDomain - Shopify store domain
+   * @returns {string} OAuth authorization URL
+   *
+   * @description
+   * Generates the OAuth URL for the marketer to authorize their Shopify store.
+   * The state parameter contains encrypted marketer and shop information.
+   *
+   * @example
+   * ```typescript
+   * const authUrl = service.generateOAuthUrl(123, 'mystore.myshopify.com');
+   * // Redirect user to authUrl for authorization
+   * ```
    */
   generateOAuthUrl(marketerId: number, shopDomain: string): string {
     const clientId = process.env.SHOPIFY_CLIENT_ID;
@@ -471,6 +682,26 @@ export class MarketerShopifyService {
 
   /**
    * Complete OAuth flow
+   * إكمال تدفق OAuth
+   *
+   * @async
+   * @param {string} code - Authorization code from Shopify
+   * @param {string} shopDomain - Shopify store domain
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<ShopifyStore>} Connected store record
+   *
+   * @throws {Error} OAuth failed with error status
+   * @throws {Error} Failed to complete OAuth
+   *
+   * @description
+   * Exchanges the authorization code for an access token and connects the store.
+   *
+   * @example
+   * ```typescript
+   * // In OAuth callback handler
+   * const store = await service.completeOAuth(code, shopDomain, marketerId);
+   * console.log(`Connected store: ${store.storeName}`);
+   * ```
    */
   async completeOAuth(code: string, shopDomain: string, marketerId: number) {
     const clientId = process.env.SHOPIFY_CLIENT_ID;
@@ -510,6 +741,19 @@ export class MarketerShopifyService {
 // Singleton instance
 let service: MarketerShopifyService | null = null;
 
+/**
+ * Get singleton instance of MarketerShopifyService
+ * الحصول على نسخة واحدة من خدمة شوبيفاي للمسوقين
+ *
+ * @function getMarketerShopifyService
+ * @returns {MarketerShopifyService} Singleton service instance
+ *
+ * @example
+ * ```typescript
+ * const service = getMarketerShopifyService();
+ * const stores = await service.getMarketerShopifyStores(123);
+ * ```
+ */
 export function getMarketerShopifyService(): MarketerShopifyService {
   if (!service) {
     service = new MarketerShopifyService();

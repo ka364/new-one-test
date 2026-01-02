@@ -1,12 +1,51 @@
 /**
- * Marketer Tools Service
+ * @fileoverview Marketer Tools Service
  * خدمة أدوات المسوقين
  *
- * Provides:
- * 1. Ad campaign templates
- * 2. Marketing materials (images, videos, text)
- * 3. Content generation with AI
- * 4. Social media post templates
+ * @description
+ * Comprehensive marketing toolkit for affiliate marketers. Provides ad campaign
+ * templates, marketing materials, AI-powered content generation, social media
+ * post templates, lead tracking, and dashboard analytics.
+ *
+ * مجموعة أدوات تسويقية شاملة للمسوقين بالعمولة. توفر قوالب الحملات
+ * الإعلانية، المواد التسويقية، إنشاء المحتوى بالذكاء الاصطناعي،
+ * قوالب منشورات السوشيال ميديا، تتبع العملاء المحتملين، ولوحة التحليلات.
+ *
+ * @module services/marketer-tools
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../db
+ * @requires ../../drizzle/schema-marketer-tools
+ * @requires ../../drizzle/schema
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { getMarketerToolsService } from './marketer-tools.service';
+ *
+ * const service = getMarketerToolsService();
+ *
+ * // Get ad templates for marketer
+ * const templates = await service.getAdTemplates(marketerId, {
+ *   platform: 'facebook',
+ *   campaignType: 'conversion'
+ * });
+ *
+ * // Generate ad content
+ * const content = await service.generateAdContent(marketerId, {
+ *   platform: 'instagram',
+ *   campaignType: 'awareness',
+ *   productId: 123
+ * });
+ *
+ * // Track lead
+ * await service.trackLead(marketerId, {
+ *   name: 'Ahmed',
+ *   phone: '+201234567890',
+ *   sourceType: 'landing_page'
+ * });
+ * ```
  */
 
 import { db } from '../db';
@@ -46,9 +85,39 @@ export interface SocialMediaPost {
   };
 }
 
+/**
+ * Marketer Tools Service Class
+ * فئة خدمة أدوات المسوقين
+ *
+ * @class MarketerToolsService
+ * @description
+ * Provides comprehensive marketing tools for affiliate marketers including
+ * ad templates, content generation, social media posts, and lead management.
+ *
+ * توفر أدوات تسويقية شاملة للمسوقين بالعمولة بما في ذلك قوالب الإعلانات،
+ * إنشاء المحتوى، منشورات السوشيال ميديا، وإدارة العملاء المحتملين.
+ */
 export class MarketerToolsService {
   /**
    * Get ad templates for marketer
+   * الحصول على قوالب الإعلانات للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} [filters] - Optional filters for templates
+   * @param {string} [filters.platform] - Platform filter (facebook, instagram, tiktok, etc.)
+   * @param {string} [filters.campaignType] - Campaign type filter (awareness, conversion, etc.)
+   * @returns {Promise<AdTemplate[]>} Array of available ad templates based on marketer tier
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @example
+   * ```typescript
+   * const templates = await service.getAdTemplates(123, {
+   *   platform: 'facebook',
+   *   campaignType: 'conversion'
+   * });
+   * ```
    */
   async getAdTemplates(
     marketerId: number,
@@ -90,6 +159,25 @@ export class MarketerToolsService {
 
   /**
    * Get marketing materials for marketer
+   * الحصول على المواد التسويقية للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} [filters] - Optional filters for materials
+   * @param {string} [filters.type] - Material type filter (image, video, banner)
+   * @param {string} [filters.category] - Category filter
+   * @param {string} [filters.platform] - Platform filter
+   * @returns {Promise<MarketingMaterial[]>} Array of active marketing materials
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @example
+   * ```typescript
+   * const materials = await service.getMarketingMaterials(123, {
+   *   type: 'banner',
+   *   platform: 'facebook'
+   * });
+   * ```
    */
   async getMarketingMaterials(
     marketerId: number,
@@ -119,6 +207,35 @@ export class MarketerToolsService {
 
   /**
    * Generate personalized ad content
+   * إنشاء محتوى إعلاني مخصص
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {GenerateAdContentInput} input - Content generation parameters
+   * @param {string} input.platform - Target platform (facebook, instagram, tiktok, google, snapchat)
+   * @param {string} input.campaignType - Campaign type (awareness, consideration, conversion, traffic, lead_generation)
+   * @param {number} [input.productId] - Optional product ID for product-specific content
+   * @param {string} [input.productName] - Optional product name
+   * @param {string} [input.productDescription] - Optional product description
+   * @param {string} [input.targetAudience] - Target audience description
+   * @param {string} [input.language] - Content language (en, ar, both)
+   * @param {string} [input.tone] - Content tone (professional, casual, urgent, friendly)
+   * @returns {Promise<Object>} Generated content with headlines, descriptions, CTAs, and tips in both languages
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @example
+   * ```typescript
+   * const content = await service.generateAdContent(123, {
+   *   platform: 'instagram',
+   *   campaignType: 'conversion',
+   *   productId: 456,
+   *   language: 'both'
+   * });
+   *
+   * console.log(content.headlines);     // English headlines
+   * console.log(content.headlinesAr);   // Arabic headlines
+   * ```
    */
   async generateAdContent(
     marketerId: number,
@@ -160,7 +277,15 @@ export class MarketerToolsService {
   }
 
   /**
-   * Build ad content (non-AI version for now)
+   * Build ad content (non-AI version)
+   * بناء محتوى إعلاني (نسخة بدون ذكاء اصطناعي)
+   *
+   * @private
+   * @param {GenerateAdContentInput} input - Content generation parameters
+   * @param {string} productName - Product name for personalization
+   * @param {string} productDesc - Product description
+   * @param {string} marketerCode - Marketer's referral code for URL generation
+   * @returns {Object} Platform-specific ad content with translations
    */
   private buildAdContent(
     input: GenerateAdContentInput,
@@ -321,6 +446,30 @@ export class MarketerToolsService {
 
   /**
    * Generate social media posts
+   * إنشاء منشورات السوشيال ميديا
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} options - Post generation options
+   * @param {number} [options.productId] - Optional product ID for product-specific content
+   * @param {string[]} options.platforms - Target platforms (facebook, instagram, tiktok, whatsapp)
+   * @param {boolean} [options.includeHashtags=true] - Include hashtags in posts
+   * @returns {Promise<SocialMediaPost[]>} Array of platform-optimized social media posts
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @example
+   * ```typescript
+   * const posts = await service.generateSocialMediaPosts(123, {
+   *   productId: 456,
+   *   platforms: ['instagram', 'tiktok', 'whatsapp'],
+   *   includeHashtags: true
+   * });
+   *
+   * posts.forEach(post => {
+   *   console.log(`${post.platform}: ${post.content}`);
+   * });
+   * ```
    */
   async generateSocialMediaPosts(
     marketerId: number,
@@ -370,6 +519,14 @@ export class MarketerToolsService {
 
   /**
    * Generate post for specific platform
+   * إنشاء منشور لمنصة محددة
+   *
+   * @private
+   * @param {string} platform - Target platform
+   * @param {string} productName - Product name
+   * @param {string} referralLink - Marketer's referral link
+   * @param {boolean} [includeHashtags=true] - Include hashtags
+   * @returns {SocialMediaPost} Platform-optimized post with bilingual content
    */
   private generatePostForPlatform(
     platform: string,
@@ -424,6 +581,37 @@ export class MarketerToolsService {
 
   /**
    * Track lead from marketer
+   * تتبع عميل محتمل من المسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} leadData - Lead information
+   * @param {string} [leadData.name] - Lead's name
+   * @param {string} [leadData.phone] - Lead's phone number
+   * @param {string} [leadData.email] - Lead's email address
+   * @param {string} leadData.sourceType - Lead source type (landing_page, ad, social, etc.)
+   * @param {number} [leadData.sourceId] - Source identifier
+   * @param {string} [leadData.message] - Lead's message or inquiry
+   * @param {number[]} [leadData.productInterest] - Product IDs of interest
+   * @param {string} [leadData.utmSource] - UTM source parameter
+   * @param {string} [leadData.utmMedium] - UTM medium parameter
+   * @param {string} [leadData.utmCampaign] - UTM campaign parameter
+   * @param {string} [leadData.ipAddress] - Lead's IP address
+   * @param {string} [leadData.userAgent] - Browser user agent
+   * @param {string} [leadData.referrer] - Referrer URL
+   * @returns {Promise<Lead>} Created lead record
+   *
+   * @example
+   * ```typescript
+   * const lead = await service.trackLead(123, {
+   *   name: 'Ahmed',
+   *   phone: '+201234567890',
+   *   sourceType: 'landing_page',
+   *   sourceId: 456,
+   *   utmSource: 'facebook',
+   *   utmCampaign: 'summer_sale'
+   * });
+   * ```
    */
   async trackLead(
     marketerId: number,
@@ -479,6 +667,26 @@ export class MarketerToolsService {
 
   /**
    * Get marketer leads
+   * الحصول على العملاء المحتملين للمسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @param {Object} [options] - Query options
+   * @param {string} [options.status] - Filter by lead status (new, contacted, interested, converted, lost)
+   * @param {number} [options.limit] - Maximum number of leads to return
+   * @param {number} [options.offset] - Offset for pagination
+   * @param {Date} [options.dateFrom] - Filter leads from this date
+   * @param {Date} [options.dateTo] - Filter leads until this date
+   * @returns {Promise<Lead[]>} Array of leads matching the criteria
+   *
+   * @example
+   * ```typescript
+   * const leads = await service.getMarketerLeads(123, {
+   *   status: 'new',
+   *   limit: 20,
+   *   dateFrom: new Date('2024-01-01')
+   * });
+   * ```
    */
   async getMarketerLeads(
     marketerId: number,
@@ -523,6 +731,21 @@ export class MarketerToolsService {
 
   /**
    * Update lead status
+   * تحديث حالة العميل المحتمل
+   *
+   * @async
+   * @param {number} leadId - Unique identifier of the lead
+   * @param {number} marketerId - Unique identifier of the marketer (for ownership verification)
+   * @param {string} status - New status (new, contacted, interested, converted, lost)
+   * @param {string} [notes] - Optional notes about the status change
+   * @returns {Promise<Lead>} Updated lead record
+   *
+   * @throws {Error} Lead not found
+   *
+   * @example
+   * ```typescript
+   * const updated = await service.updateLeadStatus(456, 123, 'contacted', 'Called and left voicemail');
+   * ```
    */
   async updateLeadStatus(leadId: number, marketerId: number, status: string, notes?: string) {
     const [updated] = await db
@@ -544,6 +767,21 @@ export class MarketerToolsService {
 
   /**
    * Convert lead to order
+   * تحويل عميل محتمل إلى طلب
+   *
+   * @async
+   * @param {number} leadId - Unique identifier of the lead
+   * @param {number} marketerId - Unique identifier of the marketer (for ownership verification)
+   * @param {number} orderId - Order ID that the lead converted to
+   * @returns {Promise<Lead>} Updated lead record with converted status
+   *
+   * @throws {Error} Lead not found
+   *
+   * @example
+   * ```typescript
+   * const converted = await service.convertLead(456, 123, 789);
+   * console.log(`Lead converted at: ${converted.convertedAt}`);
+   * ```
    */
   async convertLead(leadId: number, marketerId: number, orderId: number) {
     const [converted] = await db
@@ -566,6 +804,34 @@ export class MarketerToolsService {
 
   /**
    * Get marketer dashboard stats
+   * الحصول على إحصائيات لوحة تحكم المسوق
+   *
+   * @async
+   * @param {number} marketerId - Unique identifier of the marketer
+   * @returns {Promise<Object>} Comprehensive dashboard statistics
+   * @returns {string} .tier - Marketer tier (bronze, silver, gold, platinum, diamond)
+   * @returns {number} .commissionRate - Commission rate percentage
+   * @returns {number} .totalSales - Total sales amount
+   * @returns {number} .totalCommission - Total commission earned
+   * @returns {number} .pendingCommission - Commission pending payout
+   * @returns {number} .paidCommission - Commission already paid
+   * @returns {number} .totalOrders - Total number of orders
+   * @returns {number} .totalLeads - Total number of leads
+   * @returns {number} .conversionRate - Lead to order conversion rate
+   * @returns {Object} .leads - Lead counts by status
+   * @returns {Object} .capabilities - Marketer's tier capabilities
+   *
+   * @throws {Error} Marketer not found
+   *
+   * @example
+   * ```typescript
+   * const stats = await service.getMarketerDashboardStats(123);
+   *
+   * console.log(`Tier: ${stats.tier}`);
+   * console.log(`Total Sales: ${stats.totalSales} EGP`);
+   * console.log(`Pending Commission: ${stats.pendingCommission} EGP`);
+   * console.log(`New Leads: ${stats.leads.new}`);
+   * ```
    */
   async getMarketerDashboardStats(marketerId: number) {
     const [marketer] = await db
@@ -626,6 +892,19 @@ export class MarketerToolsService {
 // Singleton instance
 let service: MarketerToolsService | null = null;
 
+/**
+ * Get singleton instance of MarketerToolsService
+ * الحصول على نسخة واحدة من خدمة أدوات المسوقين
+ *
+ * @function getMarketerToolsService
+ * @returns {MarketerToolsService} Singleton service instance
+ *
+ * @example
+ * ```typescript
+ * const service = getMarketerToolsService();
+ * const templates = await service.getAdTemplates(123);
+ * ```
+ */
 export function getMarketerToolsService(): MarketerToolsService {
   if (!service) {
     service = new MarketerToolsService();

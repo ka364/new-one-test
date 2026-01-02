@@ -136,7 +136,7 @@ export const codRouter = router({
       });
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
 
       if (error instanceof TRPCError) {
@@ -217,7 +217,7 @@ export const codRouter = router({
         });
 
         return { orders, total: orders.length };
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -288,7 +288,7 @@ export const codRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -301,7 +301,7 @@ export const codRouter = router({
           throw error;
         }
 
-        logger.error('COD order fetch failed (Unexpected Error)', error, {
+        logger.error('COD order fetch failed (Unexpected Error)', error instanceof Error ? error : new Error(String(error)), {
           orderId: input.orderId,
           duration: `${duration}ms`,
         });
@@ -391,7 +391,7 @@ export const codRouter = router({
       });
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
 
       if (error instanceof TRPCError) {
@@ -504,7 +504,7 @@ export const codRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -608,7 +608,7 @@ export const codRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -678,7 +678,7 @@ export const codRouter = router({
         });
 
         return { partners };
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -781,7 +781,7 @@ export const codRouter = router({
         });
 
         return { success: true };
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -868,7 +868,7 @@ export const codRouter = router({
         });
 
         return { logs };
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -976,7 +976,7 @@ export const codRouter = router({
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -1067,7 +1067,7 @@ export const codRouter = router({
         totalCODValue: totalCOD?.total || 0,
         todayOrdersCount: todayOrders.length,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
 
       if (error instanceof TRPCError) {
@@ -1121,7 +1121,7 @@ export const codRouter = router({
       });
 
       return companies;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime;
 
       if (error instanceof TRPCError) {
@@ -1194,7 +1194,7 @@ export const codRouter = router({
         });
 
         return performance;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -1268,7 +1268,7 @@ export const codRouter = router({
         });
 
         return performance;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {
@@ -1342,7 +1342,7 @@ export const codRouter = router({
         });
 
         return performance;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const duration = Date.now() - startTime;
 
         if (error instanceof TRPCError) {

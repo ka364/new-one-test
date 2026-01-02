@@ -1,11 +1,52 @@
 /**
- * نظام التقارير المالية المتقدم
+ * @fileoverview نظام التقارير المالية المتقدم
  * Advanced Financial Reporting System
+ *
+ * @description
+ * Provides comprehensive financial reporting capabilities including profit/loss
+ * statements, cash flow analysis, and performance metrics. Supports multiple
+ * export formats and date range filtering.
+ *
+ * يوفر إمكانيات إعداد التقارير المالية الشاملة بما في ذلك بيانات
+ * الأرباح/الخسائر، وتحليل التدفق النقدي، ومقاييس الأداء.
+ *
+ * @module services/reports/financial-reports
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../../db
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { FinancialReportService } from './financial-reports';
+ *
+ * const report = await FinancialReportService.getProfitAndLossReport({
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-12-31')
+ * });
+ *
+ * console.log(`Net Profit: ${report.netProfit} EGP`);
+ * ```
  */
 
 import { getDb } from '../../db';
 import { sql } from 'drizzle-orm';
 
+/**
+ * Financial report data structure
+ * هيكل بيانات التقرير المالي
+ *
+ * @interface FinancialReport
+ * @property {string} period - Report period display string
+ * @property {number} totalRevenue - Total revenue in EGP
+ * @property {number} totalExpenses - Total expenses in EGP
+ * @property {number} netProfit - Net profit (revenue - expenses)
+ * @property {number} profitMargin - Profit margin percentage
+ * @property {number} roi - Return on investment percentage
+ * @property {Record<string, number>} revenueBySource - Revenue breakdown by source
+ * @property {Record<string, number>} expensesByCategory - Expenses breakdown by category
+ */
 export interface FinancialReport {
   period: string;
   totalRevenue: number;
@@ -17,6 +58,16 @@ export interface FinancialReport {
   expensesByCategory: Record<string, number>;
 }
 
+/**
+ * Options for generating financial reports
+ * خيارات إنشاء التقارير المالية
+ *
+ * @interface ReportOptions
+ * @property {Date} startDate - Report start date
+ * @property {Date} endDate - Report end date
+ * @property {'day'|'week'|'month'|'quarter'|'year'} [groupBy] - Grouping period
+ * @property {boolean} [includeComparisons] - Include period-over-period comparisons
+ */
 export interface ReportOptions {
   startDate: Date;
   endDate: Date;
@@ -24,10 +75,50 @@ export interface ReportOptions {
   includeComparisons?: boolean;
 }
 
+/**
+ * Financial Report Service
+ * خدمة التقارير المالية
+ *
+ * @class FinancialReportService
+ * @description
+ * Provides static methods for generating various financial reports including
+ * profit/loss statements, cash flow reports, and comprehensive performance analysis.
+ *
+ * توفر طرق ثابتة لإنشاء تقارير مالية متنوعة بما في ذلك
+ * بيانات الأرباح/الخسائر وتقارير التدفق النقدي وتحليل الأداء الشامل.
+ */
 export class FinancialReportService {
   /**
+   * Generate Profit & Loss Report
    * تقرير الأرباح والخسائر
-   * Profit & Loss Report
+   *
+   * @description
+   * Generates a comprehensive profit and loss statement for the specified period.
+   * Calculates revenue, expenses, net profit, profit margin, and ROI.
+   *
+   * ينشئ بيان أرباح وخسائر شامل للفترة المحددة.
+   * يحسب الإيرادات والمصروفات وصافي الربح وهامش الربح والعائد على الاستثمار.
+   *
+   * @async
+   * @static
+   * @param {ReportOptions} options - Report generation options
+   * @param {Date} options.startDate - Start date for the report period
+   * @param {Date} options.endDate - End date for the report period
+   * @returns {Promise<FinancialReport>} Complete financial report
+   *
+   * @throws {Error} Database not available
+   *
+   * @example
+   * ```typescript
+   * const report = await FinancialReportService.getProfitAndLossReport({
+   *   startDate: new Date('2024-01-01'),
+   *   endDate: new Date('2024-03-31')
+   * });
+   *
+   * console.log(`Revenue: ${report.totalRevenue} EGP`);
+   * console.log(`Net Profit: ${report.netProfit} EGP`);
+   * console.log(`Profit Margin: ${report.profitMargin}%`);
+   * ```
    */
   static async getProfitAndLossReport(options: ReportOptions): Promise<FinancialReport> {
     const db = await getDb();
@@ -75,8 +166,34 @@ export class FinancialReportService {
   }
 
   /**
+   * Generate Cash Flow Report
    * تقرير التدفق النقدي
-   * Cash Flow Report
+   *
+   * @description
+   * Generates a detailed cash flow report showing daily cash inflows and outflows.
+   * Tracks completed orders as cash in and refunds as cash out.
+   *
+   * ينشئ تقرير تدفق نقدي مفصل يوضح التدفقات النقدية الداخلة والخارجة اليومية.
+   * يتتبع الطلبات المكتملة كنقد داخل والمبالغ المستردة كنقد خارج.
+   *
+   * @async
+   * @static
+   * @param {ReportOptions} options - Report generation options
+   * @returns {Promise<Object>} Cash flow report with daily breakdown
+   *
+   * @throws {Error} Database not available
+   *
+   * @example
+   * ```typescript
+   * const cashFlow = await FinancialReportService.getCashFlowReport({
+   *   startDate: new Date('2024-01-01'),
+   *   endDate: new Date('2024-01-31')
+   * });
+   *
+   * cashFlow.dailyCashFlow.forEach(day => {
+   *   console.log(`${day.date}: In=${day.cashIn}, Out=${day.cashOut}`);
+   * });
+   * ```
    */
   static async getCashFlowReport(options: ReportOptions) {
     const db = await getDb();
@@ -108,8 +225,31 @@ export class FinancialReportService {
   }
 
   /**
+   * Generate Comprehensive Financial Performance Report
    * تقرير الأداء المالي الشامل
-   * Comprehensive Financial Performance Report
+   *
+   * @description
+   * Combines profit/loss and cash flow data with key performance indicators.
+   * Calculates AOV, CAC, and CLV metrics.
+   *
+   * يجمع بيانات الأرباح/الخسائر والتدفق النقدي مع مؤشرات الأداء الرئيسية.
+   *
+   * @async
+   * @static
+   * @param {ReportOptions} options - Report generation options
+   * @returns {Promise<Object>} Combined performance report with KPIs
+   *
+   * @throws {Error} Database not available
+   *
+   * @example
+   * ```typescript
+   * const performance = await FinancialReportService.getPerformanceReport({
+   *   startDate: new Date('2024-01-01'),
+   *   endDate: new Date('2024-12-31')
+   * });
+   *
+   * console.log(`AOV: ${performance.kpis.averageOrderValue} EGP`);
+   * ```
    */
   static async getPerformanceReport(options: ReportOptions) {
     const [profitLoss, cashFlow] = await Promise.all([
@@ -131,7 +271,14 @@ export class FinancialReportService {
   }
 
   /**
-   * دوال مساعدة
+   * Get order count for period
+   * الحصول على عدد الطلبات للفترة
+   *
+   * @async
+   * @static
+   * @private
+   * @param {ReportOptions} options - Report options with date range
+   * @returns {Promise<number>} Total order count
    */
   private static async getOrderCount(options: ReportOptions): Promise<number> {
     const db = await getDb();
@@ -166,14 +313,39 @@ export class FinancialReportService {
   }
 
   /**
+   * Export report to JSON format
    * تصدير التقرير إلى JSON
+   *
+   * @async
+   * @static
+   * @param {any} report - Report data to export
+   * @returns {Promise<string>} JSON formatted string
+   *
+   * @example
+   * ```typescript
+   * const report = await FinancialReportService.getProfitAndLossReport(options);
+   * const json = await FinancialReportService.exportToJSON(report);
+   * ```
    */
   static async exportToJSON(report: any): Promise<string> {
     return JSON.stringify(report, null, 2);
   }
 
   /**
+   * Export report to CSV format
    * تصدير التقرير إلى CSV
+   *
+   * @async
+   * @static
+   * @param {FinancialReport} report - Financial report to export
+   * @returns {Promise<string>} CSV formatted string with Arabic headers
+   *
+   * @example
+   * ```typescript
+   * const report = await FinancialReportService.getProfitAndLossReport(options);
+   * const csv = await FinancialReportService.exportToCSV(report);
+   * // Download or save csv string
+   * ```
    */
   static async exportToCSV(report: FinancialReport): Promise<string> {
     const headers = ['المؤشر', 'القيمة'];

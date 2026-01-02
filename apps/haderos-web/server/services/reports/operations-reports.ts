@@ -1,6 +1,32 @@
 /**
- * نظام التقارير التشغيلية المتقدم
+ * @fileoverview نظام التقارير التشغيلية المتقدم
  * Advanced Operations Reporting System
+ *
+ * @description
+ * Comprehensive operations reporting system providing order metrics, inventory
+ * analysis, shipping statistics, efficiency tracking, and resource utilization.
+ *
+ * نظام تقارير تشغيلية شامل يوفر مقاييس الطلبات، تحليل المخزون،
+ * إحصائيات الشحن، تتبع الكفاءة، واستخدام الموارد.
+ *
+ * @module services/reports/operations-reports
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../../db
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { OperationsReportService } from './operations-reports';
+ *
+ * const report = await OperationsReportService.getComprehensiveOperationsReport({
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-12-31')
+ * });
+ *
+ * console.log(`Fulfillment Rate: ${report.orderMetrics.fulfillmentRate}%`);
+ * ```
  */
 
 import { getDb } from '../../db';

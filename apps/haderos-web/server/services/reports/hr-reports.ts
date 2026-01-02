@@ -1,6 +1,33 @@
 /**
- * نظام التقارير البشرية المتقدم
+ * @fileoverview نظام التقارير البشرية المتقدم
  * Advanced HR Reporting System
+ *
+ * @description
+ * Comprehensive HR reporting system providing employee statistics, performance
+ * tracking, attendance monitoring, payroll analysis, and recruitment metrics.
+ *
+ * نظام تقارير موارد بشرية شامل يوفر إحصائيات الموظفين، تتبع الأداء،
+ * مراقبة الحضور، تحليل الرواتب، ومقاييس التوظيف.
+ *
+ * @module services/reports/hr-reports
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../../db
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { HRReportService } from './hr-reports';
+ *
+ * const report = await HRReportService.getComprehensiveHRReport({
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-12-31')
+ * });
+ *
+ * console.log(`Total Employees: ${report.totalEmployees}`);
+ * console.log(`Turnover Rate: ${report.turnoverRate}%`);
+ * ```
  */
 
 import { getDb } from '../../db';

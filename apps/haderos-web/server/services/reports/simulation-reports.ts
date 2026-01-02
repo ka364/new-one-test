@@ -1,6 +1,39 @@
 /**
- * نظام تقارير المحاكاة المتقدم
+ * @fileoverview نظام تقارير المحاكاة المتقدم
  * Advanced Simulation Reporting System
+ *
+ * @description
+ * Comprehensive simulation reporting system for business forecasting, scenario
+ * analysis, sensitivity testing, and stress testing. Provides projections and
+ * growth metrics for strategic planning.
+ *
+ * نظام تقارير محاكاة شامل للتنبؤ بالأعمال، تحليل السيناريوهات،
+ * اختبار الحساسية، واختبار الضغط. يوفر توقعات ومقاييس نمو للتخطيط الاستراتيجي.
+ *
+ * @module services/reports/simulation-reports
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../../db
+ * @requires drizzle-orm
+ *
+ * @example
+ * ```typescript
+ * import { SimulationReportService } from './simulation-reports';
+ *
+ * // Get comprehensive simulation report
+ * const report = await SimulationReportService.getComprehensiveSimulationReport({
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-12-31')
+ * });
+ *
+ * // Get future projections
+ * const projections = await SimulationReportService.getProjectionsReport({
+ *   startDate: new Date('2024-01-01'),
+ *   endDate: new Date('2024-12-31'),
+ *   includeProjections: true
+ * });
+ * ```
  */
 
 import { getDb } from '../../db';

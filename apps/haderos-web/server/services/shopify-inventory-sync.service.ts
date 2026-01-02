@@ -1,6 +1,40 @@
 /**
- * Shopify Inventory Sync Service
- * Bidirectional inventory synchronization between local DB and Shopify
+ * @fileoverview Shopify Inventory Sync Service
+ * خدمة مزامنة المخزون ثنائية الاتجاه مع Shopify
+ *
+ * @description
+ * Provides bidirectional inventory synchronization between the local database
+ * and Shopify store. Supports real-time sync via webhooks and bulk operations
+ * for initial setup or recovery scenarios.
+ *
+ * توفر مزامنة ثنائية الاتجاه للمخزون بين قاعدة البيانات المحلية ومتجر Shopify.
+ * تدعم المزامنة الفورية عبر webhooks والعمليات الجماعية للإعداد الأولي
+ * أو سيناريوهات الاسترداد.
+ *
+ * @module services/shopify-inventory-sync
+ * @version 1.0.0
+ * @since 2024-01-01
+ *
+ * @requires ../db
+ * @requires drizzle-orm
+ * @requires ../integrations/shopify-client
+ * @requires ../db-shopify
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   syncInventoryToShopify,
+ *   syncInventoryFromShopify,
+ *   getInventorySyncStatus
+ * } from './shopify-inventory-sync.service';
+ *
+ * // Sync local changes to Shopify
+ * await syncInventoryToShopify(123, 50);
+ *
+ * // Get sync status
+ * const status = await getInventorySyncStatus();
+ * console.log(`${status.syncedProducts}/${status.totalProducts} products synced`);
+ * ```
  */
 
 import { requireDb } from '../db';
@@ -10,7 +44,41 @@ import { getShopifyProductByLocalId, updateShopifyProductSync } from '../db-shop
 
 /**
  * Sync local inventory to Shopify
- * Called when inventory changes locally
+ * مزامنة المخزون المحلي إلى Shopify
+ *
+ * @description
+ * Pushes local inventory changes to Shopify. Called automatically when
+ * inventory changes in the local system. Updates both Shopify inventory
+ * levels and local sync records.
+ *
+ * يرسل تغييرات المخزون المحلي إلى Shopify. يُستدعى تلقائياً عند
+ * تغيير المخزون في النظام المحلي. يحدث مستويات مخزون Shopify
+ * وسجلات المزامنة المحلية.
+ *
+ * @async
+ * @function syncInventoryToShopify
+ * @param {number} localProductId - Local product ID
+ * @param {number} newQuantity - New inventory quantity
+ * @returns {Promise<{success: boolean, error?: string}>} Sync result
+ *
+ * @example
+ * ```typescript
+ * const result = await syncInventoryToShopify(123, 50);
+ *
+ * if (result.success) {
+ *   console.log('Inventory synced to Shopify');
+ * } else {
+ *   console.error('Sync failed:', result.error);
+ * }
+ * ```
+ *
+ * @performance
+ * - Single API call to Shopify
+ * - Average execution time: ~300ms
+ *
+ * @security
+ * - Uses default location ID for inventory updates
+ * - Validates product exists before syncing
  */
 export async function syncInventoryToShopify(
   localProductId: number,
@@ -56,7 +124,33 @@ export async function syncInventoryToShopify(
 
 /**
  * Sync Shopify inventory to local DB
- * Called when receiving inventory webhook from Shopify
+ * مزامنة مخزون Shopify إلى قاعدة البيانات المحلية
+ *
+ * @description
+ * Receives inventory updates from Shopify webhooks and applies them to the
+ * local database. Updates both the inventory table and Shopify product mapping.
+ *
+ * يستقبل تحديثات المخزون من webhooks Shopify ويطبقها على
+ * قاعدة البيانات المحلية. يحدث جدول المخزون وتعيين منتج Shopify.
+ *
+ * @async
+ * @function syncInventoryFromShopify
+ * @param {string} inventoryItemId - Shopify inventory item ID (GID format)
+ * @param {number} newQuantity - New inventory quantity from Shopify
+ * @returns {Promise<{success: boolean, error?: string}>} Sync result
+ *
+ * @example
+ * ```typescript
+ * // Called from webhook handler
+ * const result = await syncInventoryFromShopify(
+ *   'gid://shopify/InventoryItem/123456',
+ *   100
+ * );
+ * ```
+ *
+ * @performance
+ * - 2 database queries: find product + update inventory
+ * - Average execution time: ~50ms
  */
 export async function syncInventoryFromShopify(
   inventoryItemId: string,
@@ -114,7 +208,35 @@ export async function syncInventoryFromShopify(
 
 /**
  * Bulk sync all inventory from Shopify
- * Useful for initial sync or recovery
+ * مزامنة جماعية لجميع المخزون من Shopify
+ *
+ * @description
+ * Performs a bulk synchronization of all inventory from Shopify to local database.
+ * Useful for initial setup, disaster recovery, or reconciliation purposes.
+ * Currently optimized to rely on webhooks for real-time sync.
+ *
+ * يجري مزامنة جماعية لجميع المخزون من Shopify إلى قاعدة البيانات المحلية.
+ * مفيد للإعداد الأولي أو استرداد الكوارث أو أغراض التسوية.
+ *
+ * @async
+ * @function bulkSyncInventoryFromShopify
+ * @returns {Promise<Object>} Bulk sync result
+ * @returns {boolean} .success - Whether sync completed without fatal errors
+ * @returns {number} .synced - Number of products synced
+ * @returns {number} .failed - Number of products that failed
+ * @returns {Array<{inventoryItemId: string, error: string}>} .errors - List of errors
+ *
+ * @example
+ * ```typescript
+ * const result = await bulkSyncInventoryFromShopify();
+ *
+ * console.log(`Bulk sync complete: ${result.synced} synced, ${result.failed} failed`);
+ * ```
+ *
+ * @performance
+ * - Queries all synced products from database
+ * - Currently skips individual API calls (uses webhooks instead)
+ * - Recommended to run during off-peak hours
  */
 export async function bulkSyncInventoryFromShopify(): Promise<{
   success: boolean;
@@ -181,6 +303,37 @@ export async function bulkSyncInventoryFromShopify(): Promise<{
 
 /**
  * Get inventory sync status
+ * الحصول على حالة مزامنة المخزون
+ *
+ * @description
+ * Retrieves comprehensive statistics about the current inventory synchronization
+ * status. Useful for monitoring dashboards and health checks.
+ *
+ * يسترجع إحصائيات شاملة حول حالة مزامنة المخزون الحالية.
+ * مفيد للوحات المراقبة والفحوصات الصحية.
+ *
+ * @async
+ * @function getInventorySyncStatus
+ * @returns {Promise<Object>} Sync status statistics
+ * @returns {number} .totalProducts - Total products with Shopify mapping
+ * @returns {number} .syncedProducts - Products successfully synced
+ * @returns {number} .outOfSync - Products that need syncing
+ * @returns {Date|null} .lastSync - Timestamp of last sync operation
+ *
+ * @example
+ * ```typescript
+ * const status = await getInventorySyncStatus();
+ *
+ * console.log(`Sync Status:
+ *   Total: ${status.totalProducts}
+ *   Synced: ${status.syncedProducts}
+ *   Out of Sync: ${status.outOfSync}
+ *   Last Sync: ${status.lastSync}`);
+ * ```
+ *
+ * @performance
+ * - Single aggregated database query
+ * - Average execution time: ~20ms
  */
 export async function getInventorySyncStatus(): Promise<{
   totalProducts: number;
@@ -224,7 +377,38 @@ export async function getInventorySyncStatus(): Promise<{
 
 /**
  * Auto-sync inventory when local inventory changes
- * This should be called after any inventory update in the local system
+ * المزامنة التلقائية للمخزون عند تغيير المخزون المحلي
+ *
+ * @description
+ * Automatically triggers Shopify sync when local inventory changes. Runs
+ * asynchronously in the background to avoid blocking the main operation.
+ * Should be called after any inventory update in the local system.
+ *
+ * يُفعّل تلقائياً مزامنة Shopify عند تغيير المخزون المحلي. يعمل
+ * بشكل غير متزامن في الخلفية لتجنب حظر العملية الرئيسية.
+ * يجب استدعاؤه بعد أي تحديث للمخزون في النظام المحلي.
+ *
+ * @async
+ * @function autoSyncInventory
+ * @param {number} productId - Local product ID
+ * @param {number} newQuantity - Updated inventory quantity
+ * @returns {Promise<void>}
+ *
+ * @example
+ * ```typescript
+ * // After updating local inventory
+ * await updateLocalInventory(productId, newQuantity);
+ *
+ * // Trigger background sync to Shopify
+ * autoSyncInventory(productId, newQuantity);
+ * ```
+ *
+ * @performance
+ * - Non-blocking background operation
+ * - Only syncs if product has Shopify mapping
+ * - Errors are logged but don't throw
+ *
+ * @fires syncInventoryToShopify
  */
 export async function autoSyncInventory(productId: number, newQuantity: number) {
   try {

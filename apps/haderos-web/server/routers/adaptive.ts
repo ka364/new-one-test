@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { z } from "zod";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import {
   trackUserBehavior,
   analyzeUserPatterns,
@@ -8,15 +8,19 @@ import {
   getUserDynamicIcons,
   getPendingSuggestions,
   incrementIconUsage,
-} from '../services/adaptiveLearning';
-import { getAllTaskPatterns, getAllAiSuggestions, getAllDynamicIcons } from '../db-adaptive';
+} from "../services/adaptiveLearning";
+import {
+  getAllTaskPatterns,
+  getAllAiSuggestions,
+  getAllDynamicIcons,
+} from "../db-adaptive";
 import {
   createGoogleSheet,
   createInvoice,
   createDailyReport,
   getShareableLink,
   listFiles,
-} from '../services/googleDrive';
+} from "../services/googleDrive";
 
 /**
  * Adaptive Learning & Dynamic UI Router
@@ -32,7 +36,12 @@ export const adaptiveRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await trackUserBehavior(ctx.user.id, input.actionType, input.actionData, input.context);
+      await trackUserBehavior(
+        ctx.user.id,
+        input.actionType,
+        input.actionData,
+        input.context
+      );
       return { success: true };
     }),
 
@@ -72,10 +81,10 @@ export const adaptiveRouter = router({
     .input(z.object({ iconId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await incrementIconUsage(input.iconId, ctx.user.id);
-
+      
       // تتبع الاستخدام
-      await trackUserBehavior(ctx.user.id, 'use_icon', { iconId: input.iconId });
-
+      await trackUserBehavior(ctx.user.id, "use_icon", { iconId: input.iconId });
+      
       return { success: true };
     }),
 
@@ -124,10 +133,10 @@ export const adaptiveRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       // تتبع السلوك
-      await trackUserBehavior(ctx.user.id, 'create_invoice', input);
+      await trackUserBehavior(ctx.user.id, "create_invoice", input);
 
       // إنشاء الفاتورة
-      const result = await createInvoice(ctx.user.name || 'user', input);
+      const result = await createInvoice(ctx.user.name || "user", input);
 
       return {
         success: true,
@@ -151,10 +160,10 @@ export const adaptiveRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       // تتبع السلوك
-      await trackUserBehavior(ctx.user.id, 'daily_report', input);
+      await trackUserBehavior(ctx.user.id, "daily_report", input);
 
       // إنشاء التقرير
-      const result = await createDailyReport(ctx.user.name || 'user', input);
+      const result = await createDailyReport(ctx.user.name || "user", input);
 
       return {
         success: true,
@@ -182,7 +191,11 @@ export const adaptiveRouter = router({
       }
 
       // إنشاء الملف
-      const result = await createGoogleSheet(input.sheetName, input.folderPath, input.data);
+      const result = await createGoogleSheet(
+        input.sheetName,
+        input.folderPath,
+        input.data
+      );
 
       return {
         success: true,
@@ -195,7 +208,7 @@ export const adaptiveRouter = router({
   listUserFiles: protectedProcedure
     .input(z.object({ folderPath: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      const folderPath = input.folderPath || ctx.user.name || 'user';
+      const folderPath = input.folderPath || ctx.user.name || "user";
       return await listFiles(folderPath);
     }),
 

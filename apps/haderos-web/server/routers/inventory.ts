@@ -177,9 +177,9 @@ export const inventoryRouter = router({
         let result;
         try {
           result = await checkInventoryAvailability(input.items);
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module availability check failed, using fallback', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
           });
 
           // Fallback response
@@ -267,9 +267,9 @@ export const inventoryRouter = router({
         let result;
         try {
           result = await requestReplenishment(input.productId, input.quantity, input.urgency);
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module replenishment request failed', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
             productId: input.productId,
           });
 
@@ -361,9 +361,9 @@ export const inventoryRouter = router({
             input.context,
             input.requiredApprovers || []
           );
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module decision making failed', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
             decisionType: input.decisionType,
           });
 
@@ -468,9 +468,9 @@ export const inventoryRouter = router({
             input.authority,
             input.duration
           );
-        } catch (bioError: any) {
+        } catch (bioError: unknown) {
           logger.warn('Bio-Module authority delegation failed', {
-            error: bioError.message,
+            error: bioError instanceof Error ? bioError.message : String(bioError),
           });
 
           // Fallback response

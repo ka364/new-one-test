@@ -131,7 +131,7 @@ export const codRouter = router({
       let result;
       try {
         result = await codWorkflowService.createCODOrder(input);
-      } catch (serviceError: any) {
+      } catch (serviceError: unknown) {
         logger.error('COD workflow service failed', serviceError, {
           orderId: input.orderId,
         });
@@ -202,7 +202,7 @@ export const codRouter = router({
           }
 
           orders = await query.limit(limit).offset(offset).orderBy(desc(codOrders.createdAt));
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError);
 
           throw new TRPCError({
@@ -249,7 +249,7 @@ export const codRouter = router({
         let result;
         try {
           result = await codWorkflowService.getTrackingStatus(input.orderId);
-        } catch (serviceError: any) {
+        } catch (serviceError: unknown) {
           logger.error('COD workflow service failed', serviceError, {
             orderId: input.orderId,
           });
@@ -340,7 +340,7 @@ export const codRouter = router({
       let result;
       try {
         result = await codWorkflowService.updateStage(input.orderId, input.stage, input.data);
-      } catch (serviceError: any) {
+      } catch (serviceError: unknown) {
         logger.error('COD workflow service failed', serviceError, {
           orderId: input.orderId,
           stage: input.stage,
@@ -451,7 +451,7 @@ export const codRouter = router({
             input.orderId,
             input.shippingAddress
           );
-        } catch (serviceError: any) {
+        } catch (serviceError: unknown) {
           logger.error('Shipping allocator service failed', serviceError, {
             orderId: input.orderId,
           });
@@ -552,7 +552,7 @@ export const codRouter = router({
             input.originalPartnerId,
             input.reason
           );
-        } catch (serviceError: any) {
+        } catch (serviceError: unknown) {
           logger.error('Shipping fallback service failed', serviceError, {
             orderId: input.orderId,
             originalPartnerId: input.originalPartnerId,
@@ -622,7 +622,7 @@ export const codRouter = router({
           }
 
           partners = await query;
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError);
 
           throw new TRPCError({
@@ -714,7 +714,7 @@ export const codRouter = router({
             .update(shippingPartners)
             .set(input.data)
             .where(eq(shippingPartners.id, input.id));
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database update failed', dbError, {
             partnerId: input.id,
           });
@@ -785,7 +785,7 @@ export const codRouter = router({
             .from(trackingLogs)
             .where(eq(trackingLogs.codOrderId, order.id))
             .orderBy(desc(trackingLogs.createdAt));
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError, { orderId: input.orderId });
 
           throw new TRPCError({
@@ -879,7 +879,7 @@ export const codRouter = router({
         let result;
         try {
           result = await codWorkflowService.generateReport(startDate, endDate);
-        } catch (serviceError: any) {
+        } catch (serviceError: unknown) {
           logger.error('COD report generation failed', serviceError, {
             startDate: input.startDate,
             endDate: input.endDate,
@@ -1043,7 +1043,7 @@ export const codRouter = router({
               .from(shippingPerformanceByGovernorate)
               .orderBy(desc(shippingPerformanceByGovernorate.totalShipments));
           }
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError);
 
           throw new TRPCError({
@@ -1099,7 +1099,7 @@ export const codRouter = router({
               .orderBy(desc(shippingPerformanceByCenter.totalShipments))
               .limit(50);
           }
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError);
 
           throw new TRPCError({
@@ -1155,7 +1155,7 @@ export const codRouter = router({
               .orderBy(desc(shippingPerformanceByPoint.totalShipments))
               .limit(50);
           }
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
           logger.error('Database query failed', dbError);
 
           throw new TRPCError({

@@ -77,7 +77,9 @@ export function isNotFoundError(error: unknown): boolean {
   if (!hasErrorCode(error)) {
     return false;
   }
-  return error.code === '23505' || error.message?.includes('not found') || false;
+  // Check for "not found" or "no rows" in error message
+  const errorMessage = error.message?.toLowerCase() || '';
+  return errorMessage.includes('not found') || errorMessage.includes('no rows') || false;
 }
 
 /**

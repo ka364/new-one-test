@@ -2,24 +2,26 @@
 
 # 🧬 HADEROS AI Cloud
 
-### نظام تشغيل للاقتصاد الأخلاقي
-### Operating System for Ethical Economy
+### نظام تشغيل للاقتصاد الأخلاقي | Operating System for Ethical Economy
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/ka364/HADEROS-AI-CLOUD/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![CI Pipeline](https://github.com/ka364/HADEROS-AI-CLOUD/actions/workflows/ci.yml/badge.svg)](https://github.com/ka364/HADEROS-AI-CLOUD/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-3.0-00DC82.svg?logo=nuxt.js&logoColor=white)](https://nuxt.com/)
 [![tRPC](https://img.shields.io/badge/tRPC-11-398CCB.svg)](https://trpc.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com/)
 
 <br>
 
-**منصة متكاملة للتجارة الإلكترونية في مصر والشرق الأوسط**
+**🌍 أول نظام تشغيل للتجارة الإلكترونية مبني على الذكاء الحيوي (Bio-Intelligence)**
+
+*منصة متكاملة للتجارة الإلكترونية في مصر والشرق الأوسط مع حوكمة أخلاقية إسلامية*
 
 [البدء السريع](#-البدء-السريع) •
-[الميزات](#-الميزات) •
-[التوثيق](#-التوثيق) •
-[المساهمة](#-المساهمة)
+[الميزات](#-الميزات-الفريدة) •
+[Bio-Modules](#-bio-modules) •
+[التوثيق](#-التوثيق)
 
 </div>
 
@@ -28,58 +30,77 @@
 ## 📊 نظرة سريعة
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      HADEROS AI Cloud v1.0.0                        │
-├─────────────────────────────────────────────────────────────────────┤
-│  📁 34 Database Schemas    │  🔌 70+ API Routers                    │
-│  🧬 70 Bio-Modules         │  📝 66,000+ Lines of Code              │
-│  🔗 6 External Integrations│  📚 30+ Documentation Files            │
-└─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        HADEROS AI Cloud v1.0.0                                │
+│                    نظام تشغيل للاقتصاد الأخلاقي                               │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   📁 24 Database Schemas      🔌 45+ API Routers       🧬 32 Bio-Modules     │
+│   📝 66,000+ Lines of Code    🔗 11 Integrations       🕌 KAIA Engine        │
+│                                                                              │
+│   ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐             │
+│   │  🦠 Tardigrade  │  │  🦎 Chameleon   │  │  🐜 Ant Colony  │             │
+│   │   Resilience    │  │ Dynamic Pricing │  │  Route Optim.   │             │
+│   └─────────────────┘  └─────────────────┘  └─────────────────┘             │
+│                                                                              │
+│   ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐             │
+│   │  🕷️ Arachnid    │  │  🍄 Mycelium    │  │  🐦 Corvid      │             │
+│   │ Fraud Detection │  │ Inventory Sync  │  │ ML Learning     │             │
+│   └─────────────────┘  └─────────────────┘  └─────────────────┘             │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ✨ الميزات
+## ✨ الميزات الفريدة
+
+### 🧬 Bio-Modules - الذكاء الحيوي
+
+نظام فريد من نوعه مستوحى من الطبيعة يجعل HADEROS مختلفاً عن أي منصة أخرى:
+
+| Module | الوظيفة | الإلهام | التكامل |
+|--------|---------|---------|---------|
+| 🕷️ **Arachnid** | كشف الاحتيال في الوقت الفعلي | شبكة العنكبوت | الطلبات، المدفوعات |
+| 🦎 **Chameleon** | التسعير الديناميكي الذكي | تكيف الحرباء | المنتجات، العروض |
+| 🐜 **Ant Colony** | تحسين مسارات التوصيل | مستعمرة النمل | الشحن، التوصيل |
+| 🍄 **Mycelium** | مزامنة المخزون الموزع | شبكة الفطريات | المخازن، الفروع |
+| 🦠 **Tardigrade** | المرونة والتعافي التلقائي | دب الماء | كل النظام |
+| 🐦 **Corvid** | التعلم الآلي المستمر | ذكاء الغراب | التوقعات، التحليل |
+
+### 🕌 KAIA Engine - محرك الحوكمة الأخلاقية
+
+**Knowledge-Augmented Islamic AI** - نظام فريد يضمن توافق جميع المعاملات مع الضوابط الشرعية:
+
+- ✅ فحص المنتجات للتوافق مع الشريعة
+- ✅ التحقق من عقود البيع والتقسيط
+- ✅ مراجعة العلماء للقرارات الحساسة
+- ✅ تقارير الامتثال الشرعي
+
+---
+
+## 🛒 الميزات الأساسية
 
 <table>
 <tr>
 <td width="50%">
 
-### 🛒 إدارة الطلبات
-- نظام طلبات متكامل (7 حالات)
-- تتبع في الوقت الفعلي
-- إدارة المرتجعات
-- حساب تلقائي للضرائب
+### 💳 بوابات الدفع المصرية
+- PayMob Integration
+- Fawry
+- InstaPay
+- المحافظ الإلكترونية
+- COD (الدفع عند الاستلام)
 
 </td>
 <td width="50%">
 
-### 💳 بوابات الدفع المصرية
-- COD (الدفع عند الاستلام)
-- InstaPay
-- PayMob
-- Fawry
-- المحافظ الإلكترونية
-
-</td>
-</tr>
-<tr>
-<td>
-
-### 🚚 نظام الشحن
-- تكامل Bosta
-- تكامل J&T Express
-- تتبع الشحنات
-- COD Collection
-
-</td>
-<td>
-
-### 📱 WhatsApp Commerce
-- إنشاء الطلبات عبر WhatsApp
-- الكتالوجات التفاعلية
-- الرد الآلي
-- تتبع المحادثات
+### 🚚 نظام الشحن المتكامل
+- Bosta API
+- J&T Express
+- تتبع الشحنات في الوقت الفعلي
+- COD Collection & Reconciliation
+- Smart Locker Integration
 
 </td>
 </tr>
@@ -91,8 +112,20 @@
 - Sympl
 - Souhoola
 - Contact
+- فحص شرعي لكل عقد
 
 </td>
+<td>
+
+### 📱 WhatsApp Commerce
+- إنشاء الطلبات عبر WhatsApp
+- الكتالوجات التفاعلية
+- الرد الآلي الذكي
+- تتبع المحادثات
+
+</td>
+</tr>
+<tr>
 <td>
 
 ### 🏪 Shopify Integration
@@ -102,23 +135,17 @@
 - مزامنة الطلبات
 
 </td>
+<td>
+
+### 👥 Group Buying (الشراء الجماعي)
+- تخفيضات تصاعدية
+- حملات جماعية
+- مشاركة اجتماعية
+- تتبع المشاركين
+
+</td>
 </tr>
 </table>
-
----
-
-## 🧬 Bio-Modules
-
-نظام مستوحى من الطبيعة لتحقيق المرونة والذكاء:
-
-| Module | الوظيفة | الإلهام |
-|--------|---------|---------|
-| 🦠 **Tardigrade** | المرونة والاستدامة | دب الماء |
-| 🦎 **Chameleon** | التكيف التلقائي | الحرباء |
-| 🐙 **Cephalopod** | الذكاء الموزع | الأخطبوط |
-| 🍄 **Mycelium** | الشبكات والتواصل | الفطريات |
-| 🐦 **Corvid** | الذكاء والتعلم | الغراب |
-| 🐜 **Ant Colony** | التنظيم الجماعي | مستعمرة النمل |
 
 ---
 
@@ -126,35 +153,70 @@
 
 ### المتطلبات
 
-- **Node.js** 18.0+
+- **Node.js** 20.0+ (LTS)
 - **pnpm** 8.0+
 - **PostgreSQL** 15.0+
-- **Git** 2.30+
+- **Redis** 7.0+
+- **Docker** (اختياري)
 
-### التثبيت
+### التثبيت السريع
 
 ```bash
 # 1. Clone المشروع
 git clone https://github.com/ka364/HADEROS-AI-CLOUD.git
 cd HADEROS-AI-CLOUD
 
-# 2. تشغيل سكريبت الإعداد التفاعلي
-chmod +x scripts/full-setup.sh
-./scripts/full-setup.sh
-
-# أو التثبيت اليدوي:
-cd apps/haderos-web
+# 2. تثبيت Dependencies
 pnpm install
+
+# 3. إعداد البيئة
 cp .env.example .env
+# قم بتعديل المتغيرات في .env
+
+# 4. إعداد قاعدة البيانات
 pnpm drizzle-kit push
+
+# 5. تشغيل التطبيق
 pnpm dev
 ```
 
-### التحقق من الصحة
+### التشغيل بـ Docker
 
 ```bash
-./scripts/health-check.sh
+# الخدمات الأساسية
+docker-compose up -d
+
+# مع Monitoring (Prometheus, Grafana)
+docker-compose --profile monitoring up -d
+
+# كل الخدمات
+docker-compose --profile monitoring --profile queue --profile search up -d
 ```
+
+---
+
+## 🏗️ البنية التحتية
+
+### CI/CD Pipeline
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│    Lint     │───▶│   Tests     │───▶│   Build     │───▶│   Deploy    │
+│  ESLint     │    │ Unit + E2E  │    │   Docker    │    │  K8s/Cloud  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+```
+
+- ✅ **GitHub Actions** - CI/CD متكامل
+- ✅ **Docker Multi-stage** - بناء محسّن للإنتاج
+- ✅ **Kubernetes Ready** - جاهز للتوسع
+- ✅ **Auto-rollback** - تراجع تلقائي عند الفشل
+
+### Monitoring Stack
+
+- **Prometheus** - جمع المقاييس
+- **Grafana** - لوحات التحكم
+- **Loki** - تجميع السجلات
+- **Alert Rules** - تنبيهات Bio-Modules
 
 ---
 
@@ -163,32 +225,31 @@ pnpm dev
 ```
 HADEROS-AI-CLOUD/
 ├── 📁 apps/
-│   └── haderos-web/           # التطبيق الرئيسي
-│       ├── src/               # React Components
-│       ├── server/            # Backend (tRPC)
-│       │   ├── _core/         # Core utilities
-│       │   ├── routers/       # 70+ API routers
-│       │   └── services/      # Business logic
-│       └── drizzle/           # 34 Database schemas
+│   └── haderos-web/              # التطبيق الرئيسي (Nuxt.js)
+│       ├── client/               # Frontend Components
+│       ├── server/               # Backend (tRPC + Nitro)
+│       │   ├── _core/            # Core utilities
+│       │   ├── bio-modules/      # 🧬 Bio-Modules (32 modules)
+│       │   ├── kaia/             # 🕌 KAIA Engine
+│       │   ├── routers/          # 45+ API routers
+│       │   └── services/         # Business logic
+│       └── drizzle/              # 24 Database schemas
 │
-├── 📁 docs/                   # التوثيق الشامل
-│   ├── QUICK_START_AR.md      # البدء السريع
-│   ├── API_REFERENCE_AR.md    # مرجع الـ API
-│   ├── TECHNICAL_REFERENCE_AR.md  # المرجع الفني
-│   └── generated/             # توثيق مُولّد تلقائياً
+├── 📁 docs/                      # التوثيق الشامل
+│   ├── ARCHITECTURE/             # معمارية النظام
+│   ├── IMPLEMENTATION/           # خطة التنفيذ
+│   └── PRD/                      # متطلبات المنتج
 │
-├── 📁 scripts/                # أدوات المساعدة
-│   ├── full-setup.sh          # إعداد كامل
-│   ├── generate-docs.sh       # توليد التوثيق
-│   └── health-check.sh        # فحص الصحة
+├── 📁 .github/workflows/         # CI/CD Pipelines
+│   ├── ci.yml                    # Main CI
+│   ├── deploy-staging.yml        # Staging
+│   └── deploy-production.yml     # Production
 │
-├── 📁 .github/                # GitHub templates
-│   ├── ISSUE_TEMPLATE/        # قوالب الـ Issues
-│   └── PULL_REQUEST_TEMPLATE.md
-│
-├── CONTRIBUTING.md            # دليل المساهمة
-├── CHANGELOG.md               # سجل التغييرات
-└── README.md                  # هذا الملف
+├── 📁 monitoring/                # Prometheus & Grafana
+├── 📁 nginx/                     # Reverse Proxy Config
+├── docker-compose.yml            # Docker Stack
+├── Dockerfile                    # Multi-stage Build
+└── .env.example                  # Environment Template
 ```
 
 ---
@@ -198,38 +259,46 @@ HADEROS-AI-CLOUD/
 <table>
 <tr>
 <td align="center" width="96">
-<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="48" height="48" alt="React" />
-<br>React 19
+<img src="https://nuxt.com/assets/design-kit/logo/icon-green.svg" width="48" height="48" alt="Nuxt" />
+<br>Nuxt 3
 </td>
 <td align="center" width="96">
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="48" height="48" alt="TypeScript" />
 <br>TypeScript
 </td>
 <td align="center" width="96">
-<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" width="48" height="48" alt="Node.js" />
-<br>Node.js
+<img src="https://trpc.io/img/logo.svg" width="48" height="48" alt="tRPC" />
+<br>tRPC 11
 </td>
 <td align="center" width="96">
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" width="48" height="48" alt="PostgreSQL" />
 <br>PostgreSQL
 </td>
-</tr>
-<tr>
-<td align="center" width="96">
-<img src="https://trpc.io/img/logo.svg" width="48" height="48" alt="tRPC" />
-<br>tRPC
-</td>
 <td align="center" width="96">
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" width="48" height="48" alt="Redis" />
 <br>Redis
 </td>
+</tr>
+<tr>
 <td align="center" width="96">
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" width="48" height="48" alt="Docker" />
 <br>Docker
 </td>
 <td align="center" width="96">
-<img src="https://vitejs.dev/logo.svg" width="48" height="48" alt="Vite" />
-<br>Vite
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" width="48" height="48" alt="Kubernetes" />
+<br>Kubernetes
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="48" height="48" alt="GitHub Actions" />
+<br>Actions
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/grafana/grafana-original.svg" width="48" height="48" alt="Grafana" />
+<br>Grafana
+</td>
+<td align="center" width="96">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg" width="48" height="48" alt="Nginx" />
+<br>Nginx
 </td>
 </tr>
 </table>
@@ -238,28 +307,14 @@ HADEROS-AI-CLOUD/
 
 ## 📚 التوثيق
 
-### للمطورين
 | الوثيقة | الوصف |
 |---------|-------|
-| [البدء السريع](docs/QUICK_START_AR.md) | إعداد في 5 دقائق |
-| [مرجع الـ API](docs/API_REFERENCE_AR.md) | جميع الـ endpoints |
-| [المرجع الفني](docs/TECHNICAL_REFERENCE_AR.md) | البنية والخدمات |
-| [مخططات البنية](docs/ARCHITECTURE_DIAGRAMS.md) | Mermaid diagrams |
-
-### للمستخدمين
-| الوثيقة | الوصف |
-|---------|-------|
-| [دليل المبيعات الهاتفية](docs/USER_MANUAL_PHONE_SALES_AR.md) | للموظفين |
-| [دليل WhatsApp Commerce](docs/USER_MANUAL_WHATSAPP_COMMERCE_AR.md) | للتجار |
-| [دليل التقسيط](docs/USER_MANUAL_BNPL_AR.md) | نظام BNPL |
-| [دليل CRM](docs/USER_MANUAL_UNIFIED_CRM_AR.md) | إدارة العملاء |
-
-### للتشغيل
-| الوثيقة | الوصف |
-|---------|-------|
-| [دليل النشر](docs/DEPLOYMENT_GUIDE_AR.md) | النشر للإنتاج |
-| [حل المشاكل](docs/TROUBLESHOOTING_AR.md) | المشاكل الشائعة |
-| [فهرس الوثائق](docs/INDEX.md) | جميع الوثائق |
+| [System Architecture](docs/ARCHITECTURE/SYSTEM_ARCHITECTURE.md) | معمارية النظام الشاملة |
+| [Implementation Plan](docs/IMPLEMENTATION/MASTER_IMPLEMENTATION_PLAN.md) | خطة التنفيذ (33 أسبوع) |
+| [Testing Strategy](docs/IMPLEMENTATION/TESTING_STRATEGY.md) | استراتيجية الاختبار |
+| [Pre-Launch Checklist](docs/IMPLEMENTATION/PRE_LAUNCH_CHECKLIST.md) | قائمة ما قبل الإطلاق |
+| [API Reference](docs/API_REFERENCE_AR.md) | مرجع الـ API |
+| [Deployment Guide](docs/DEPLOYMENT_GUIDE_AR.md) | دليل النشر |
 
 ---
 
@@ -272,11 +327,14 @@ pnpm typecheck
 # فحص الأسلوب
 pnpm lint
 
-# البناء
+# الاختبارات
+pnpm test
+
+# البناء للإنتاج
 pnpm build
 
-# التشغيل للإنتاج
-pnpm start
+# فحص الصحة
+./scripts/health-check.sh
 ```
 
 ---
@@ -301,34 +359,15 @@ git push origin feature/amazing-feature
 
 ---
 
-## 📋 سجل التغييرات
-
-راجع [CHANGELOG.md](CHANGELOG.md) للتفاصيل الكاملة.
+## 📋 آخر التحديثات
 
 ### v1.0.0 (2026-01-02)
-- ✨ الإصدار الأول الكامل
-- 🛒 نظام الطلبات المتكامل
-- 💳 بوابات الدفع المصرية
-- 🚚 تكامل الشحن
-- 📱 WhatsApp Commerce
-- 💰 نظام التقسيط
-
----
-
-## 👥 أنواع المستخدمين
-
-<table>
-<tr>
-<td align="center">🏭<br><b>المُصنّع</b><br>إدارة المنتجات</td>
-<td align="center">🏪<br><b>التاجر</b><br>إدارة الطلبات</td>
-<td align="center">🚚<br><b>شركة الشحن</b><br>تتبع الشحنات</td>
-</tr>
-<tr>
-<td align="center">👔<br><b>الموظف</b><br>المبيعات الهاتفية</td>
-<td align="center">📣<br><b>المسوّق</b><br>الحملات التسويقية</td>
-<td align="center">👤<br><b>العميل</b><br>التسوق</td>
-</tr>
-</table>
+- 🔧 CI/CD Pipeline متكامل (GitHub Actions)
+- 🐳 Docker Multi-stage Build
+- 📊 Monitoring Stack (Prometheus, Grafana, Loki)
+- 🧬 32 Bio-Module جاهز للإنتاج
+- 🕌 KAIA Engine للحوكمة الأخلاقية
+- 📋 خطة تنفيذ 33 أسبوع
 
 ---
 
@@ -336,7 +375,7 @@ git push origin feature/amazing-feature
 
 - **التوثيق:** [docs/](docs/)
 - **Issues:** [GitHub Issues](https://github.com/ka364/HADEROS-AI-CLOUD/issues)
-- **Email:** support@haderos.ai
+- **Email:** support@haderos.com
 
 ---
 
@@ -350,7 +389,7 @@ git push origin feature/amazing-feature
 
 **صُنع بـ ❤️ من فريق HADEROS**
 
-*نظام تشغيل للاقتصاد الأخلاقي*
+*🧬 أول نظام تشغيل للتجارة الإلكترونية مبني على الذكاء الحيوي*
 
 [![GitHub stars](https://img.shields.io/github/stars/ka364/HADEROS-AI-CLOUD?style=social)](https://github.com/ka364/HADEROS-AI-CLOUD)
 [![GitHub forks](https://img.shields.io/github/forks/ka364/HADEROS-AI-CLOUD?style=social)](https://github.com/ka364/HADEROS-AI-CLOUD/fork)

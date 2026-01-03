@@ -1,12 +1,12 @@
 {
-  "users_created": 50,
-  "products_created": 83,
-  "orders_created": 50,
-  "payments_processed": 50,
+  "users_created": 199,
+  "products_created": 150,
+  "orders_created": 200,
+  "payments_processed": 200,
   "deliveries_assigned": 0,
-  "notifications_sent": 50,
-  "total_revenue": "42,072.50 EGP",
+  "notifications_sent": 200,
+  "total_revenue": "152,312.50 EGP",
   "errors": 0,
-  "duration": "0.09 seconds",
-  "orders_per_second": "579.35"
+  "duration": "0.19 seconds",
+  "orders_per_second": "1041.08"
 }

@@ -444,17 +444,27 @@ class HADEROSSimulator:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description='HADEROS Microservices Simulation')
+    parser.add_argument('--limit', type=int, default=50, help='Number of orders to process')
+    parser.add_argument('--live', action='store_true', help='Run against live services')
+    args = parser.parse_args()
+
     # Define Excel files to process
     excel_files = [
+        # Delivery files (Waybill format)
         'data/deliveries/تسليمات 12و13و14 يوم 16.12.xlsx',
-        'data/archive/pasted_file_3RXuB6_طلب15-12.xlsx'
+        'data/deliveries/17تسليمات 5و6و7 يوم 9.12.xlsx',
+        'data/deliveries/18تسليمات 8 و 9 يوم 11.12.xlsx',
+        # Arabic order files
+        'data/archive/pasted_file_3RXuB6_طلب15-12.xlsx',
+        'data/archive/pasted_file_w2N57v_طلباتيوم4-8-2025.xlsx',
+        'data/archive/pasted_file_SWr1sQ_bazooka-orders-2025-04-198.xlsx',
     ]
 
-    # Run simulation in mock mode (no actual services needed)
-    simulator = HADEROSSimulator(mock_mode=True)
-
-    # Limit to 50 orders for demo
-    results = simulator.run_simulation(excel_files, limit=50)
+    # Run simulation
+    simulator = HADEROSSimulator(mock_mode=not args.live)
+    results = simulator.run_simulation(excel_files, limit=args.limit)
 
     # Save results
     with open('simulation_results.json', 'w', encoding='utf-8') as f:

@@ -81,6 +81,7 @@ import { messagingRouter } from './routers/messaging';
 import { egyptianCommerceRouter } from './routers/egyptian-commerce';
 import { monitoringRouter } from './routers/monitoring';
 import { etaRouter } from './routers/eta';
+import { liveCommerceRouter } from './routers/live-commerce';
 
 export const appRouter = router({
   system: systemRouter,
@@ -118,6 +119,7 @@ export const appRouter = router({
   egyptianCommerce: egyptianCommerceRouter,
   monitoring: monitoringRouter,
   eta: etaRouter,
+  liveCommerce: liveCommerceRouter,
 
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),

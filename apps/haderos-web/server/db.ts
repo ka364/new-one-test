@@ -55,8 +55,82 @@ const { Pool } = pg;
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: pg.Pool | null = null;
 
+
 // Export db instance for direct access (will be null until getDb() is called)
 export { _db as db };
+
+// ============================================
+// LIVE COMMERCE
+// ============================================
+
+import { liveStreams, streamProducts, streamCHATMessages } from '../drizzle/schema-live-commerce';
+
+export type InsertLiveStream = InferInsertModel<typeof liveStreams>;
+export type LiveStream = InferSelectModel<typeof liveStreams>;
+export type InsertStreamProduct = InferInsertModel<typeof streamProducts>;
+export type InsertStreamChatMessage = InferInsertModel<typeof streamCHATMessages>;
+
+export async function createLiveStream(stream: InsertLiveStream) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const result = await db.insert(liveStreams).values(stream).returning();
+  return result[0];
+}
+
+export async function getLiveStreamById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(liveStreams).where(eq(liveStreams.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllLiveStreams(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(liveStreams).orderBy(desc(liveStreams.startedAt)).limit(limit);
+}
+
+export async function updateLiveStreamStatus(id: number, status: LiveStream['status'], updates?: Partial<LiveStream>) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(liveStreams)
+    .set({ status, ...updates, updatedAt: new Date() })
+    .where(eq(liveStreams.id, id));
+}
+
+export async function addProductToStream(data: InsertStreamProduct) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.insert(streamProducts).values(data);
+}
+
+export async function getStreamProducts(streamId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(streamProducts)
+    .where(eq(streamProducts.streamId, streamId))
+    .orderBy(desc(streamProducts.isPinned));
+}
+
+export async function saveStreamChatMessage(data: InsertStreamChatMessage) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.insert(streamCHATMessages).values(data);
+}
+
+export async function getStreamMessages(streamId: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(streamCHATMessages)
+    .where(eq(streamCHATMessages.streamId, streamId))
+    .orderBy(streamCHATMessages.timestamp)
+    .limit(limit);
+}
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {

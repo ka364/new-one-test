@@ -80,6 +80,22 @@ import { spreadsheetCollabRouter } from './routers/spreadsheet-collab';
 import { messagingRouter } from './routers/messaging';
 import { egyptianCommerceRouter } from './routers/egyptian-commerce';
 import { monitoringRouter } from './routers/monitoring';
+// New routers - Phase 1: Core services from 21:12:2025
+import { affiliateRouter } from './routers/affiliate';
+import { liveShowroomRouter } from './routers/live-showroom';
+import { securityRouter } from './routers/security';
+import { developerAuthRouter } from './routers/developer-auth';
+import { developerDashboardRouter } from './routers/developer-dashboard';
+import { developerToolsRouter } from './routers/developer-tools';
+import { unifiedCommunicationRouter } from './routers/unified-communication';
+import { expensesIntegratedRouter } from './routers/expenses-integrated';
+import { unifiedExpensesRouter } from './routers/unified-expenses';
+import { smartShippingRouter } from './routers/smart-shipping';
+import { simulationRouter } from './routers/simulation';
+import { parallelSimulationRouter } from './routers/parallel-simulation';
+import { scaling7x7Router } from './routers/scaling-7x7';
+import { superAdminRouter } from './routers/super-admin';
+import { fetchServiceRouter } from './routers/fetch-service';
 
 export const appRouter = router({
   system: systemRouter,
@@ -116,6 +132,22 @@ export const appRouter = router({
   messaging: messagingRouter,
   egyptianCommerce: egyptianCommerceRouter,
   monitoring: monitoringRouter,
+  // New routers - Phase 1: Core services
+  affiliate: affiliateRouter,
+  liveShowroom: liveShowroomRouter,
+  security: securityRouter,
+  developerAuth: developerAuthRouter,
+  developerDashboard: developerDashboardRouter,
+  developerTools: developerToolsRouter,
+  unifiedCommunication: unifiedCommunicationRouter,
+  expensesIntegrated: expensesIntegratedRouter,
+  unifiedExpenses: unifiedExpensesRouter,
+  smartShipping: smartShippingRouter,
+  simulation: simulationRouter,
+  parallelSimulation: parallelSimulationRouter,
+  scaling7x7: scaling7x7Router,
+  superAdmin: superAdminRouter,
+  fetchService: fetchServiceRouter,
 
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),

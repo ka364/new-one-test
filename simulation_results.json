@@ -1,0 +1,12 @@
+{
+  "users_created": 199,
+  "products_created": 150,
+  "orders_created": 200,
+  "payments_processed": 200,
+  "deliveries_assigned": 0,
+  "notifications_sent": 200,
+  "total_revenue": "152,312.50 EGP",
+  "errors": 0,
+  "duration": "0.19 seconds",
+  "orders_per_second": "1041.08"
+}

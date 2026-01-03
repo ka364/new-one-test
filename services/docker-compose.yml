@@ -1,0 +1,247 @@
+version: '3.8'
+
+services:
+  # ==================== API Gateway ====================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - USER_SERVICE_URL=http://user-service:8081
+      - PRODUCT_SERVICE_URL=http://product-service:8082
+      - ORDER_SERVICE_URL=http://order-service:8083
+      - GROUP_BUYING_SERVICE_URL=http://group-buying-service:8084
+      - DELIVERY_SERVICE_URL=http://delivery-service:8085
+      - COMMUNITY_SERVICE_URL=http://community-service:8086
+      - LOCKER_SERVICE_URL=http://locker-service:8087
+      - PAYMENT_SERVICE_URL=http://payment-service:8088
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8089
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+    networks:
+      - haderos-network
+
+  # ==================== User Service ====================
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      - PORT=8081
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/users_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-haderos-jwt-secret-2025}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Product Service ====================
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - NODE_ENV=production
+      - PORT=8082
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/products_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Order Service ====================
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - NODE_ENV=production
+      - PORT=8083
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/orders_db
+      - REDIS_URL=redis://redis:6379
+      - PRODUCT_SERVICE_URL=http://product-service:8082
+      - USER_SERVICE_URL=http://user-service:8081
+      - PAYMENT_SERVICE_URL=http://payment-service:8088
+    depends_on:
+      - postgres
+      - redis
+      - product-service
+    networks:
+      - haderos-network
+
+  # ==================== Group Buying Service ====================
+  group-buying-service:
+    build:
+      context: ./group-buying-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - NODE_ENV=production
+      - PORT=8084
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/group_deals_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Delivery Service ====================
+  delivery-service:
+    build:
+      context: ./delivery-service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      - NODE_ENV=production
+      - PORT=8085
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/delivery_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Community Service ====================
+  community-service:
+    build:
+      context: ./community-service
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    environment:
+      - NODE_ENV=production
+      - PORT=8086
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/community_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Locker Service ====================
+  locker-service:
+    build:
+      context: ./locker-service
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    environment:
+      - NODE_ENV=production
+      - PORT=8087
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/lockers_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Payment Service ====================
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    environment:
+      - NODE_ENV=production
+      - PORT=8088
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/payments_db
+      - REDIS_URL=redis://redis:6379
+      - PAYMOB_API_KEY=${PAYMOB_API_KEY}
+      - FAWRY_MERCHANT_CODE=${FAWRY_MERCHANT_CODE}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Notification Service ====================
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    environment:
+      - NODE_ENV=production
+      - PORT=8089
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/notifications_db
+      - REDIS_URL=redis://redis:6379
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - WHATSAPP_API_KEY=${WHATSAPP_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - haderos-network
+
+  # ==================== Infrastructure ====================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_MULTIPLE_DATABASES: users_db,products_db,orders_db,group_deals_db,delivery_db,community_db,lockers_db,payments_db,notifications_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
+    ports:
+      - "5432:5432"
+    networks:
+      - haderos-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - haderos-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: haderos
+      RABBITMQ_DEFAULT_PASS: haderos123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - haderos-network
+
+networks:
+  haderos-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  rabbitmq-data:

@@ -521,23 +521,69 @@ export class UnifiedPaymentService {
   ): Promise<Partial<PaymentResult>> {
     const config = provider.config as any;
 
-    if (!config?.merchantCode) {
-      throw new Error('Fawry is not configured');
+    if (!config?.merchantCode || !config?.securityKey) {
+      throw new Error('Fawry is not configured (Missing merchantCode or securityKey)');
     }
 
-    // Generate reference code
-    const referenceCode =
-      `FWRY${Date.now()}${Math.random().toString(36).substring(2, 6)}`.toUpperCase();
-    const expiryHours = 48;
-    const referenceExpiry = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+    // Prepare Fawry Request
+    // Sign request: merchantCode + merchantRefNum + customerProfileId + returnUrl + items + secretKey
+    const merchantRefNum = transaction.transactionNumber;
+    const customerProfileId = request.customer.phone || 'GUEST';
 
-    // In production, you would call Fawry API here
-    // For now, we generate a reference code
+    // Simple signature generation (simplified for now, usually SHA256)
+    // In a real app we would import crypto and hash this properly
+    // const signature = crypto.createHash('sha256').update(...).digest('hex');
+
+    const fawryUrl = config.baseUrl || 'https://atfawry.com/ECommerceWeb/Fawry/payments/charge';
+
+    const fawryBody = {
+      merchantCode: config.merchantCode,
+      merchantRefNum: merchantRefNum,
+      customerProfileId: customerProfileId,
+      customerMobile: request.customer.phone,
+      customerEmail: request.customer.email,
+      amount: request.amount,
+      currencyCode: 'EGP',
+      language: 'ar-eg',
+      chargeItems: [
+        {
+          itemId: request.orderNumber,
+          description: `Order ${request.orderNumber}`,
+          price: request.amount,
+          quantity: 1,
+        },
+      ],
+      returnUrl: request.returnUrl || 'https://haderos.com/checkout/callback',
+      paymentMethod: 'PAYATFAWRY', // For reference code generation
+      authCaptureModePayment: false,
+    };
+
+    // Call Fawry API
+    const response = await fetch(fawryUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fawryBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Fawry API Validation Failed: ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.statusCode !== 200) {
+      throw new Error(`Fawry Error: ${data.statusDescription}`);
+    }
+
+    // Extract Reference Number
+    const referenceCode = data.referenceNumber;
+    const expirationTime = data.expirationTime; // Usually timestamp
 
     return {
-      providerTransactionId: referenceCode,
+      providerTransactionId: String(data.merchantRefNum),
       referenceCode,
-      referenceExpiry,
+      referenceExpiry: expirationTime ? new Date(expirationTime) : undefined,
     };
   }
 

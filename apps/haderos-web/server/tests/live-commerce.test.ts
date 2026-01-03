@@ -3,6 +3,31 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { liveCommerceRouter } from '../routers/live-commerce';
 import type { User } from '../db';
 
+// Mock Mux DB interactions if needed, or rely on service mocks
+vi.mock('../services/unified-payment.service', () => ({
+    UnifiedPaymentService: vi.fn().mockImplementation(() => ({
+        // Mock implementation if needed
+    }))
+}));
+
+// Mock @mux/mux-node
+vi.mock('@mux/mux-node', () => {
+    return {
+        default: vi.fn().mockImplementation(() => ({
+            video: {
+                liveStreams: {
+                    create: vi.fn().mockResolvedValue({
+                        id: 'mux_live_123',
+                        playback_ids: [{ id: 'mux_playback_456' }],
+                        stream_key: 'mux_key_789',
+                    }),
+                    complete: vi.fn().mockResolvedValue({}),
+                }
+            }
+        }))
+    };
+});
+
 // Mock DB functions with state
 let mockStatus = 'scheduled';
 

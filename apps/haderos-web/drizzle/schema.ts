@@ -28,7 +28,7 @@ export const agentInsights = pgTable("agentInsights", {
 	relatedEntityType: varchar({ length: 100 }),
 	relatedEntityId: integer(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const aiSuggestions = pgTable("ai_suggestions", {
@@ -80,7 +80,7 @@ export const campaigns = pgTable("campaigns", {
 	clicks: integer().default(0).notNull(),
 	conversions: integer().default(0).notNull(),
 	revenue: decimal({ precision: 10, scale: 2 }).default('0.00').notNull(),
-	aiOptimizationEnabled: tinyinteger().default(1).notNull(),
+	aiOptimizationEnabled: integer().default(1).notNull(),
 	lastOptimizedAt: timestamp({ mode: 'string' }),
 	optimizationNotes: text(),
 	startDate: timestamp({ mode: 'string' }).notNull(),
@@ -89,7 +89,7 @@ export const campaigns = pgTable("campaigns", {
 	campaignConfig: json(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const chatMessages = pgTable("chatMessages", {
@@ -126,7 +126,7 @@ export const contentCalendar = pgTable("content_calendar", {
 	relatedCampaignId: integer(),
 	relatedProductId: integer(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const contentTemplates = pgTable("content_templates", {
@@ -141,10 +141,10 @@ export const contentTemplates = pgTable("content_templates", {
 	placeholders: json(),
 	usageCount: integer().default(0).notNull(),
 	lastUsed: timestamp({ mode: 'string' }),
-	isPublic: tinyinteger().default(0).notNull(),
-	isActive: tinyinteger().default(1).notNull(),
+	isPublic: integer().default(0).notNull(),
+	isActive: integer().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const dailySalesReports = pgTable("daily_sales_reports", {
@@ -183,7 +183,7 @@ export const documentVerificationLogs = pgTable("document_verification_logs", {
 	details: text(),
 	errorMessage: text("error_message"),
 	performedBy: integer("performed_by"),
-	performedAt: timestamp("performed_at", { mode: 'string'}).notNull(),
+	performedAt: timestamp("performed_at", { mode: 'string' }).notNull(),
 });
 
 export const dynamicIcons = pgTable("dynamic_icons", {
@@ -198,10 +198,10 @@ export const dynamicIcons = pgTable("dynamic_icons", {
 	actionConfig: json().notNull(),
 	usageCount: integer().default(0).notNull(),
 	lastUsed: timestamp({ mode: 'string' }),
-	isVisible: tinyinteger().default(1).notNull(),
+	isVisible: integer().default(1).notNull(),
 	displayOrder: integer().default(0).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const employeeDocuments = pgTable("employee_documents", {
@@ -219,8 +219,8 @@ export const employeeDocuments = pgTable("employee_documents", {
 	verificationNotes: text("verification_notes"),
 	extractedData: text("extracted_data"),
 	uploadedBy: integer("uploaded_by"),
-	uploadedAt: timestamp("uploaded_at", { mode: 'string'}).notNull(),
-	verifiedAt: timestamp("verified_at", { mode: 'string'}),
+	uploadedAt: timestamp("uploaded_at", { mode: 'string' }).notNull(),
+	verifiedAt: timestamp("verified_at", { mode: 'string' }),
 	verifiedBy: integer("verified_by"),
 });
 
@@ -230,7 +230,7 @@ export const employeeMonthlyData = pgTable("employee_monthly_data", {
 	dataType: varchar("data_type", { length: 100 }).notNull(),
 	dataJson: json("data_json").notNull(),
 	submittedAt: timestamp("submitted_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 });
 
 export const employees = pgTable("employees", {
@@ -248,22 +248,22 @@ export const employees = pgTable("employees", {
 	jobTitle: varchar("job_title", { length: 255 }).notNull(),
 	department: varchar({ length: 255 }).notNull(),
 	salary: decimal({ precision: 10, scale: 2 }),
-	hireDate: timestamp("hire_date", { mode: 'string'}).notNull(),
+	hireDate: timestamp("hire_date", { mode: 'string' }).notNull(),
 	contractType: varchar("contract_type", { length: 50 }),
 	isActive: integer("is_active").default(1),
 	documentsVerified: integer("documents_verified").default(0),
 	verificationStatus: varchar("verification_status", { length: 50 }).default('pending'),
 	verificationNotes: text("verification_notes"),
 	createdBy: integer("created_by"),
-	createdAt: timestamp("created_at", { mode: 'string'}).notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string'}),
+	createdAt: timestamp("created_at", { mode: 'string' }).notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }),
 	role: varchar({ length: 50 }).default('employee'),
 	parentId: integer("parent_id"),
 	childrenCount: integer("children_count").default(0),
 },
-(table) => [
-	index("national_id").on(table.nationalId),
-]);
+	(table) => [
+		index("national_id").on(table.nationalId),
+	]);
 
 export const ethicalRules = pgTable("ethicalRules", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -275,15 +275,15 @@ export const ethicalRules = pgTable("ethicalRules", {
 	category: varchar({ length: 100 }),
 	severity: text().default('medium').notNull(),
 	ruleLogic: json().notNull(),
-	isActive: tinyinteger().default(1).notNull(),
-	autoApply: tinyinteger().default(1).notNull(),
-	requiresReview: tinyinteger().default(0).notNull(),
+	isActive: integer().default(1).notNull(),
+	autoApply: integer().default(1).notNull(),
+	requiresReview: integer().default(0).notNull(),
 	priority: integer().default(100).notNull(),
 	referenceSource: text(),
 	referenceSourceAr: text(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const events = pgTable("events", {
@@ -317,12 +317,12 @@ export const externalShipments = pgTable("external_shipments", {
 	fileSource: varchar("file_source", { length: 255 }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 },
-(table) => [
-	index("idx_company").on(table.shippingCompany),
-	index("idx_date").on(table.shipmentDate),
-	index("idx_tracking").on(table.trackingNumber),
-	index("idx_order").on(table.orderNumber),
-]);
+	(table) => [
+		index("idx_company").on(table.shippingCompany),
+		index("idx_date").on(table.shipmentDate),
+		index("idx_tracking").on(table.trackingNumber),
+		index("idx_order").on(table.orderNumber),
+	]);
 
 export const factoryBatches = pgTable("factory_batches", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -354,12 +354,12 @@ export const founderAccounts = pgTable("founder_accounts", {
 	lastLoginIp: varchar("last_login_ip", { length: 45 }),
 	loginCount: integer("login_count").default(0),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("email").on(table.email),
-	index("username").on(table.username),
-]);
+	(table) => [
+		index("email").on(table.email),
+		index("username").on(table.username),
+	]);
 
 export const founderLoginHistory = pgTable("founder_login_history", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -367,7 +367,7 @@ export const founderLoginHistory = pgTable("founder_login_history", {
 	loginAt: timestamp("login_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	ipAddress: varchar("ip_address", { length: 45 }),
 	userAgent: text("user_agent"),
-	success: tinyinteger().notNull(),
+	success: integer().notNull(),
 	failureReason: varchar("failure_reason", { length: 255 }),
 	sessionId: varchar("session_id", { length: 255 }),
 	sessionDuration: integer("session_duration"),
@@ -385,7 +385,7 @@ export const googleDriveFiles = pgTable("google_drive_files", {
 	metadata: json(),
 	createdBy: integer().notNull().references(() => users.id),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	lastModified: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	lastModified: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const imageEmbeddings = pgTable("image_embeddings", {
@@ -398,12 +398,12 @@ export const imageEmbeddings = pgTable("image_embeddings", {
 	processingTime: integer("processing_time"),
 	confidence: decimal({ precision: 5, scale: 4 }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
-(table) => [
-	index("image_id_idx").on(table.imageId),
-	index("model_idx").on(table.modelName, table.modelVersion),
-]);
+	(table) => [
+		index("image_id_idx").on(table.imageId),
+		index("model_idx").on(table.modelName, table.modelVersion),
+	]);
 
 export const inventory = pgTable("inventory", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -414,7 +414,7 @@ export const inventory = pgTable("inventory", {
 	minStockLevel: integer("min_stock_level").default(10),
 	location: varchar({ length: 100 }),
 	lastRestocked: timestamp("last_restocked", { mode: 'string' }),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 });
 
 export const monthlyEmployeeAccounts = pgTable("monthly_employee_accounts", {
@@ -433,9 +433,9 @@ export const monthlyEmployeeAccounts = pgTable("monthly_employee_accounts", {
 	otpExpiresAt: timestamp("otp_expires_at", { mode: 'string' }),
 	otpAttempts: integer("otp_attempts").default(0),
 },
-(table) => [
-	index("username").on(table.username),
-]);
+	(table) => [
+		index("username").on(table.username),
+	]);
 
 export const notifications = pgTable("notifications", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -447,7 +447,7 @@ export const notifications = pgTable("notifications", {
 	messageAr: text(),
 	relatedEntityType: varchar({ length: 100 }),
 	relatedEntityId: integer(),
-	isRead: tinyinteger().default(0).notNull(),
+	isRead: integer().default(0).notNull(),
 	readAt: timestamp({ mode: 'string' }),
 	metadata: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
@@ -492,11 +492,11 @@ export const orders = pgTable("orders", {
 	notes: text(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("orders_orderNumber_unique").on(table.orderNumber),
-]);
+	(table) => [
+		index("orders_orderNumber_unique").on(table.orderNumber),
+	]);
 
 export const otpVerifications = pgTable("otp_verifications", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -505,20 +505,20 @@ export const otpVerifications = pgTable("otp_verifications", {
 	email: varchar({ length: 255 }),
 	otpCode: varchar("otp_code", { length: 6 }).notNull(),
 	method: text().default('email').notNull(),
-	expiresAt: timestamp("expires_at", { mode: 'string'}).notNull(),
-	verifiedAt: timestamp("verified_at", { mode: 'string'}),
+	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
+	verifiedAt: timestamp("verified_at", { mode: 'string' }),
 	latitude: decimal({ precision: 10, scale: 8 }),
 	longitude: decimal({ precision: 11, scale: 8 }),
 	ipAddress: varchar("ip_address", { length: 45 }),
 	verificationAttempts: integer("verification_attempts").default(0),
-	createdAt: timestamp("created_at", { mode: 'string'}).default('CURRENT_TIMESTAMP'),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 },
-(table) => [
-	index("idx_phone").on(table.phoneNumber),
-	index("idx_email").on(table.email),
-	index("idx_otp").on(table.otpCode),
-	index("idx_expires").on(table.expiresAt),
-]);
+	(table) => [
+		index("idx_phone").on(table.phoneNumber),
+		index("idx_email").on(table.email),
+		index("idx_otp").on(table.otpCode),
+		index("idx_expires").on(table.expiresAt),
+	]);
 
 export const productBarcodes = pgTable("product_barcodes", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -530,13 +530,13 @@ export const productBarcodes = pgTable("product_barcodes", {
 	isActive: integer("is_active").default(1),
 	notes: text(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
-(table) => [
-	index("product_id_idx").on(table.productId),
-	index("barcode_value_idx").on(table.barcodeValue),
-	index("barcode_value").on(table.barcodeValue),
-]);
+	(table) => [
+		index("product_id_idx").on(table.productId),
+		index("barcode_value_idx").on(table.barcodeValue),
+		index("barcode_value").on(table.barcodeValue),
+	]);
 
 export const productImageRequests = pgTable("product_image_requests", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -559,11 +559,11 @@ export const productImageRequests = pgTable("product_image_requests", {
 	rating: integer(),
 	feedback: text(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("product_image_requests_requestNumber_unique").on(table.requestNumber),
-]);
+	(table) => [
+		index("product_image_requests_requestNumber_unique").on(table.requestNumber),
+	]);
 
 export const productImages = pgTable("product_images", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -579,12 +579,12 @@ export const productImages = pgTable("product_images", {
 	fileSize: integer("file_size"),
 	mimeType: varchar("mime_type", { length: 50 }),
 	uploadedAt: timestamp("uploaded_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
-(table) => [
-	index("product_id_idx").on(table.productId),
-	index("is_primary_idx").on(table.isPrimary),
-]);
+	(table) => [
+		index("product_id_idx").on(table.productId),
+		index("is_primary_idx").on(table.isPrimary),
+	]);
 
 export const productSizeCharts = pgTable("product_size_charts", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -594,7 +594,7 @@ export const productSizeCharts = pgTable("product_size_charts", {
 	widthCm: decimal("width_cm", { precision: 5, scale: 2 }),
 	notes: text(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 });
 
 export const products = pgTable("products", {
@@ -605,11 +605,11 @@ export const products = pgTable("products", {
 	category: varchar({ length: 50 }),
 	isActive: integer("is_active").default(1),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
-(table) => [
-	index("products_model_code_unique").on(table.modelCode),
-]);
+	(table) => [
+		index("products_model_code_unique").on(table.modelCode),
+	]);
 
 export const replacements = pgTable("replacements", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -630,14 +630,14 @@ export const reports = pgTable("reports", {
 	descriptionAr: text(),
 	reportConfig: json().notNull(),
 	reportData: json(),
-	isScheduled: tinyinteger().default(0).notNull(),
+	isScheduled: integer().default(0).notNull(),
 	scheduleFrequency: text(),
 	nextRunAt: timestamp({ mode: 'string' }),
 	lastRunAt: timestamp({ mode: 'string' }),
 	status: text().default('draft').notNull(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const returns = pgTable("returns", {
@@ -664,7 +664,7 @@ export const shopifyConfig = pgTable("shopify_config", {
 	autoSyncEnabled: integer("auto_sync_enabled").default(1).notNull(),
 	syncIntervalMinutes: integer("sync_interval_minutes").default(15).notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 export const shopifyOrders = pgTable("shopify_orders", {
@@ -693,11 +693,11 @@ export const shopifyOrders = pgTable("shopify_orders", {
 	trackingUrl: text("tracking_url"),
 	fulfilledAt: timestamp("fulfilled_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("shopify_order_id").on(table.shopifyOrderId),
-]);
+	(table) => [
+		index("shopify_order_id").on(table.shopifyOrderId),
+	]);
 
 export const shopifyProducts = pgTable("shopify_products", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -714,11 +714,11 @@ export const shopifyProducts = pgTable("shopify_products", {
 	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
 	syncError: text("sync_error"),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("shopify_product_id").on(table.shopifyProductId),
-]);
+	(table) => [
+		index("shopify_product_id").on(table.shopifyProductId),
+	]);
 
 export const shopifySyncLogs = pgTable("shopify_sync_logs", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -754,9 +754,9 @@ export const shopifyVariants = pgTable("shopify_variants", {
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 },
-(table) => [
-	index("shopify_variant_id").on(table.shopifyVariantId),
-]);
+	(table) => [
+		index("shopify_variant_id").on(table.shopifyVariantId),
+	]);
 
 export const shopifyWebhookLogs = pgTable("shopify_webhook_logs", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -764,7 +764,7 @@ export const shopifyWebhookLogs = pgTable("shopify_webhook_logs", {
 	shopifyId: varchar("shopify_id", { length: 255 }),
 	payload: json().notNull(),
 	headers: json(),
-	processed: tinyinteger().default(0).notNull(),
+	processed: integer().default(0).notNull(),
 	processedAt: timestamp("processed_at", { mode: 'string' }),
 	error: text(),
 	retryCount: integer("retry_count").default(0),
@@ -798,14 +798,14 @@ export const subscriptions = pgTable("subscriptions", {
 	paymentMethod: varchar({ length: 50 }),
 	lastPaymentDate: timestamp({ mode: 'string' }),
 	lastPaymentAmount: decimal({ precision: 10, scale: 2 }),
-	shariaCompliant: tinyinteger().default(1).notNull(),
+	shariaCompliant: integer().default(1).notNull(),
 	metadata: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("subscriptions_subscriptionNumber_unique").on(table.subscriptionNumber),
-]);
+	(table) => [
+		index("subscriptions_subscriptionNumber_unique").on(table.subscriptionNumber),
+	]);
 
 export const taskPatterns = pgTable("task_patterns", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -818,9 +818,9 @@ export const taskPatterns = pgTable("task_patterns", {
 	avgTimeSpent: integer(),
 	confidence: decimal({ precision: 5, scale: 2 }).default('0.00'),
 	suggestedIcon: varchar({ length: 50 }),
-	isActive: tinyinteger().default(1).notNull(),
+	isActive: integer().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const transactions = pgTable("transactions", {
@@ -835,7 +835,7 @@ export const transactions = pgTable("transactions", {
 	relatedSubscriptionId: integer(),
 	paymentMethod: varchar({ length: 50 }),
 	status: text().default('pending').notNull(),
-	shariaCompliant: tinyinteger().default(1).notNull(),
+	shariaCompliant: integer().default(1).notNull(),
 	ethicalCheckStatus: text().default('pending').notNull(),
 	ethicalCheckNotes: text(),
 	ethicalCheckBy: integer(),
@@ -843,11 +843,11 @@ export const transactions = pgTable("transactions", {
 	metadata: json(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("transactions_transactionNumber_unique").on(table.transactionNumber),
-]);
+	(table) => [
+		index("transactions_transactionNumber_unique").on(table.transactionNumber),
+	]);
 
 export const userBehavior = pgTable("user_behavior", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -863,15 +863,15 @@ export const userPreferences = pgTable("user_preferences", {
 	userId: integer().notNull().references(() => users.id),
 	preferredLanguage: varchar({ length: 10 }).default('ar').notNull(),
 	theme: varchar({ length: 20 }).default('light').notNull(),
-	notificationsEnabled: tinyinteger().default(1).notNull(),
-	autoSuggestIcons: tinyinteger().default(1).notNull(),
+	notificationsEnabled: integer().default(1).notNull(),
+	autoSuggestIcons: integer().default(1).notNull(),
 	customSettings: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 },
-(table) => [
-	index("userId").on(table.userId),
-]);
+	(table) => [
+		index("userId").on(table.userId),
+	]);
 
 export const investors = pgTable("investors", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -885,12 +885,12 @@ export const investors = pgTable("investors", {
 	notes: text(),
 	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	lastLoginAt: timestamp({ mode: 'string' }),
 },
-(table) => [
-	index("investors_email_unique").on(table.email),
-]);
+	(table) => [
+		index("investors_email_unique").on(table.email),
+	]);
 
 export const investorActivity = pgTable("investor_activity", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -904,10 +904,10 @@ export const investorActivity = pgTable("investor_activity", {
 	userAgent: text(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 },
-(table) => [
-	index("investor_activity_investor_id").on(table.investorId),
-	index("investor_activity_action_type").on(table.actionType),
-]);
+	(table) => [
+		index("investor_activity_investor_id").on(table.investorId),
+		index("investor_activity_action_type").on(table.actionType),
+	]);
 
 export const users = pgTable("users", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -917,14 +917,14 @@ export const users = pgTable("users", {
 	loginMethod: varchar({ length: 64 }),
 	role: text().default('user').notNull(),
 	permissions: json(),
-	isActive: tinyinteger().default(1).notNull(),
+	isActive: integer().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	lastSignedIn: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 },
-(table) => [
-	index("users_openId_unique").on(table.openId),
-]);
+	(table) => [
+		index("users_openId_unique").on(table.openId),
+	]);
 
 export const visualSearchHistory = pgTable("visual_search_history", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
@@ -941,79 +941,79 @@ export const visualSearchHistory = pgTable("visual_search_history", {
 	selectedProductId: integer("selected_product_id").references(() => products.id),
 	searchedAt: timestamp("searched_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 },
-(table) => [
-	index("searched_at_idx").on(table.searchedAt),
-	index("user_id_idx").on(table.userId),
-	index("context_idx").on(table.searchContext),
-]);
+	(table) => [
+		index("searched_at_idx").on(table.searchedAt),
+		index("user_id_idx").on(table.userId),
+		index("context_idx").on(table.searchContext),
+	]);
 
 // ============================================
 // SHIPPING & LOGISTICS SYSTEM
 // ============================================
 
 export const shippingCompanies = pgTable("shipping_companies", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  name: varchar({ length: 100 }).notNull(),
-  nameAr: varchar("name_ar", { length: 100 }),
-  code: varchar({ length: 50 }).notNull().unique(),
-  active: tinyinteger().default(1).notNull(),
-  zonesConfig: json("zones_config").notNull(), // Zone pricing configuration
-  codFeeConfig: json("cod_fee_config"), // COD fee configuration
-  insuranceFeeConfig: json("insurance_fee_config"), // Insurance configuration
-  returnFeePercentage: decimal("return_fee_percentage", { precision: 5, scale: 2 }).default('40.00'),
-  exchangeFeePercentage: decimal("exchange_fee_percentage", { precision: 5, scale: 2 }).default('150.00'),
-  bankTransfersPerWeek: integer("bank_transfers_per_week").default(3),
-  notes: text(),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	name: varchar({ length: 100 }).notNull(),
+	nameAr: varchar("name_ar", { length: 100 }),
+	code: varchar({ length: 50 }).notNull().unique(),
+	active: integer().default(1).notNull(),
+	zonesConfig: json("zones_config").notNull(), // Zone pricing configuration
+	codFeeConfig: json("cod_fee_config"), // COD fee configuration
+	insuranceFeeConfig: json("insurance_fee_config"), // Insurance configuration
+	returnFeePercentage: decimal("return_fee_percentage", { precision: 5, scale: 2 }).default('40.00'),
+	exchangeFeePercentage: decimal("exchange_fee_percentage", { precision: 5, scale: 2 }).default('150.00'),
+	bankTransfersPerWeek: integer("bank_transfers_per_week").default(3),
+	notes: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 export const shippingZones = pgTable("shipping_zones", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
-  zoneName: varchar("zone_name", { length: 50 }).notNull(),
-  zoneNumber: integer("zone_number").notNull(),
-  basePriceUpTo3Kg: decimal("base_price_up_to_3kg", { precision: 10, scale: 2 }).notNull(),
-  additionalKgPrice: decimal("additional_kg_price", { precision: 10, scale: 2 }).notNull(),
-  areas: json().notNull(), // Array of governorates/cities
-  active: tinyinteger().default(1).notNull(),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
+	zoneName: varchar("zone_name", { length: 50 }).notNull(),
+	zoneNumber: integer("zone_number").notNull(),
+	basePriceUpTo3Kg: decimal("base_price_up_to_3kg", { precision: 10, scale: 2 }).notNull(),
+	additionalKgPrice: decimal("additional_kg_price", { precision: 10, scale: 2 }).notNull(),
+	areas: json().notNull(), // Array of governorates/cities
+	active: integer().default(1).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
 export const shipments = pgTable("shipments", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  orderId: integer("order_id").notNull().references(() => orders.id),
-  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
-  trackingNumber: varchar("tracking_number", { length: 100 }),
-  zoneId: integer("zone_id").notNull().references(() => shippingZones.id),
-  weight: decimal({ precision: 10, scale: 2 }).notNull(), // in KG
-  shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).notNull(),
-  codFee: decimal("cod_fee", { precision: 10, scale: 2 }).default('0.00'),
-  insuranceFee: decimal("insurance_fee", { precision: 10, scale: 2 }).default('0.00'),
-  totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
-  status: text().default('pending').notNull(),
-  shippedAt: timestamp("shipped_at", { mode: 'string' }),
-  deliveredAt: timestamp("delivered_at", { mode: 'string' }),
-  returnedAt: timestamp("returned_at", { mode: 'string' }),
-  returnReason: text("return_reason"),
-  notes: text(),
-  createdBy: integer("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	orderId: integer("order_id").notNull().references(() => orders.id),
+	companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
+	trackingNumber: varchar("tracking_number", { length: 100 }),
+	zoneId: integer("zone_id").notNull().references(() => shippingZones.id),
+	weight: decimal({ precision: 10, scale: 2 }).notNull(), // in KG
+	shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).notNull(),
+	codFee: decimal("cod_fee", { precision: 10, scale: 2 }).default('0.00'),
+	insuranceFee: decimal("insurance_fee", { precision: 10, scale: 2 }).default('0.00'),
+	totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
+	status: text().default('pending').notNull(),
+	shippedAt: timestamp("shipped_at", { mode: 'string' }),
+	deliveredAt: timestamp("delivered_at", { mode: 'string' }),
+	returnedAt: timestamp("returned_at", { mode: 'string' }),
+	returnReason: text("return_reason"),
+	notes: text(),
+	createdBy: integer("created_by").notNull().references(() => users.id),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 export const shipmentReturns = pgTable("shipment_returns", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  shipmentId: integer("shipment_id").notNull().references(() => shipments.id),
-  returnType: text().notNull(),
-  returnReason: text("return_reason"),
-  returnCost: decimal("return_cost", { precision: 10, scale: 2 }).notNull(),
-  status: text().default('pending').notNull(),
-  receivedAt: timestamp("received_at", { mode: 'string' }),
-  processedBy: integer("processed_by").references(() => users.id),
-  processedAt: timestamp("processed_at", { mode: 'string' }),
-  notes: text(),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	shipmentId: integer("shipment_id").notNull().references(() => shipments.id),
+	returnType: text().notNull(),
+	returnReason: text("return_reason"),
+	returnCost: decimal("return_cost", { precision: 10, scale: 2 }).notNull(),
+	status: text().default('pending').notNull(),
+	receivedAt: timestamp("received_at", { mode: 'string' }),
+	processedBy: integer("processed_by").references(() => users.id),
+	processedAt: timestamp("processed_at", { mode: 'string' }),
+	notes: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
 // ============================================
@@ -1021,28 +1021,28 @@ export const shipmentReturns = pgTable("shipment_returns", {
 // ============================================
 
 export const collections = pgTable("collections", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  collectionType: text().notNull(),
-  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
-  amount: decimal({ precision: 10, scale: 2 }).notNull(),
-  collectionDate: date("collection_date").notNull(),
-  receiptNumber: varchar("receipt_number", { length: 100 }),
-  bankReference: varchar("bank_reference", { length: 100 }),
-  status: text().default('pending').notNull(),
-  notes: text(),
-  createdBy: integer("created_by").notNull().references(() => users.id),
-  confirmedBy: integer("confirmed_by").references(() => users.id),
-  confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	collectionType: text().notNull(),
+	companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
+	amount: decimal({ precision: 10, scale: 2 }).notNull(),
+	collectionDate: date("collection_date").notNull(),
+	receiptNumber: varchar("receipt_number", { length: 100 }),
+	bankReference: varchar("bank_reference", { length: 100 }),
+	status: text().default('pending').notNull(),
+	notes: text(),
+	createdBy: integer("created_by").notNull().references(() => users.id),
+	confirmedBy: integer("confirmed_by").references(() => users.id),
+	confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 export const collectionItems = pgTable("collection_items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  collectionId: integer("collection_id").notNull().references(() => collections.id),
-  orderId: integer("order_id").notNull().references(() => orders.id),
-  amount: decimal({ precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	collectionId: integer("collection_id").notNull().references(() => collections.id),
+	orderId: integer("order_id").notNull().references(() => orders.id),
+	amount: decimal({ precision: 10, scale: 2 }).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
 // ============================================
@@ -1050,43 +1050,43 @@ export const collectionItems = pgTable("collection_items", {
 // ============================================
 
 export const dailyOperationalMetrics = pgTable("daily_operational_metrics", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  date: date().notNull().unique(),
-  
-  // Orders
-  ordersCreated: integer("orders_created").default(0).notNull(),
-  ordersCreatedValue: decimal("orders_created_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersConfirmed: integer("orders_confirmed").default(0).notNull(),
-  ordersConfirmedValue: decimal("orders_confirmed_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersShipped: integer("orders_shipped").default(0).notNull(),
-  ordersShippedValue: decimal("orders_shipped_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersReturned: integer("orders_returned").default(0).notNull(),
-  ordersReturnedValue: decimal("orders_returned_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersDelivered: integer("orders_delivered").default(0).notNull(),
-  ordersDeliveredValue: decimal("orders_delivered_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  
-  // Collections
-  totalCollection: decimal("total_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  cashCollection: decimal("cash_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  bankCollection: decimal("bank_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  
-  // Expenses
-  operatingExpenses: decimal("operating_expenses", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  adSpend: decimal("ad_spend", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  treasuryPaid: decimal("treasury_paid", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  
-  // KPIs (calculated)
-  tcr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Created Orders
-  tcc: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Confirmed Orders
-  tcs: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Shipped Orders
-  tcrn: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Net Shipments (after returns)
-  ocr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Operating Expenses ÷ Collection
-  adr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Ad Spend ÷ Collection
-  fdr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Treasury Paid ÷ Collection
-  
-  calculatedAt: timestamp("calculated_at", { mode: 'string' }),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	date: date().notNull().unique(),
+
+	// Orders
+	ordersCreated: integer("orders_created").default(0).notNull(),
+	ordersCreatedValue: decimal("orders_created_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	ordersConfirmed: integer("orders_confirmed").default(0).notNull(),
+	ordersConfirmedValue: decimal("orders_confirmed_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	ordersShipped: integer("orders_shipped").default(0).notNull(),
+	ordersShippedValue: decimal("orders_shipped_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	ordersReturned: integer("orders_returned").default(0).notNull(),
+	ordersReturnedValue: decimal("orders_returned_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	ordersDelivered: integer("orders_delivered").default(0).notNull(),
+	ordersDeliveredValue: decimal("orders_delivered_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
+
+	// Collections
+	totalCollection: decimal("total_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	cashCollection: decimal("cash_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	bankCollection: decimal("bank_collection", { precision: 10, scale: 2 }).default('0.00').notNull(),
+
+	// Expenses
+	operatingExpenses: decimal("operating_expenses", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	adSpend: decimal("ad_spend", { precision: 10, scale: 2 }).default('0.00').notNull(),
+	treasuryPaid: decimal("treasury_paid", { precision: 10, scale: 2 }).default('0.00').notNull(),
+
+	// KPIs (calculated)
+	tcr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Created Orders
+	tcc: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Confirmed Orders
+	tcs: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Shipped Orders
+	tcrn: decimal({ precision: 5, scale: 2 }).default('0.00'), // Collection ÷ Net Shipments (after returns)
+	ocr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Operating Expenses ÷ Collection
+	adr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Ad Spend ÷ Collection
+	fdr: decimal({ precision: 5, scale: 2 }).default('0.00'), // Treasury Paid ÷ Collection
+
+	calculatedAt: timestamp("calculated_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // ============================================
@@ -1094,24 +1094,24 @@ export const dailyOperationalMetrics = pgTable("daily_operational_metrics", {
 // ============================================
 
 export const adCampaignPerformance = pgTable("ad_campaign_performance", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  date: date().notNull(),
-  campaignName: varchar("campaign_name", { length: 200 }).notNull(),
-  platform: text().notNull(),
-  spend: decimal({ precision: 10, scale: 2 }).notNull(),
-  results: integer().default(0).notNull(),
-  costPerResult: decimal("cost_per_result", { precision: 10, scale: 4 }).notNull(),
-  reach: integer().default(0),
-  impressions: integer().default(0),
-  clicks: integer().default(0),
-  conversions: integer().default(0),
-  messagesStarted: integer("messages_started").default(0),
-  costPerMessage: decimal("cost_per_message", { precision: 10, scale: 2 }),
-  active: tinyinteger().default(1).notNull(),
-  notes: text(),
-  createdBy: integer("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	date: date().notNull(),
+	campaignName: varchar("campaign_name", { length: 200 }).notNull(),
+	platform: text().notNull(),
+	spend: decimal({ precision: 10, scale: 2 }).notNull(),
+	results: integer().default(0).notNull(),
+	costPerResult: decimal("cost_per_result", { precision: 10, scale: 4 }).notNull(),
+	reach: integer().default(0),
+	impressions: integer().default(0),
+	clicks: integer().default(0),
+	conversions: integer().default(0),
+	messagesStarted: integer("messages_started").default(0),
+	costPerMessage: decimal("cost_per_message", { precision: 10, scale: 2 }),
+	active: integer().default(1).notNull(),
+	notes: text(),
+	createdBy: integer("created_by").notNull().references(() => users.id),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // ============================================
@@ -1119,22 +1119,22 @@ export const adCampaignPerformance = pgTable("ad_campaign_performance", {
 // ============================================
 
 export const revenueForecasts = pgTable("revenue_forecasts", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  date: date().notNull(),
-  adSpend: decimal("ad_spend", { precision: 10, scale: 2 }).notNull(),
-  lastCampaignEfficiency: decimal("last_campaign_efficiency", { precision: 10, scale: 4 }).notNull(), // Cost per result
-  expectedOrders: integer("expected_orders").notNull(),
-  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).notNull(),
-  shipmentRate: decimal("shipment_rate", { precision: 5, scale: 2 }).notNull(), // % of orders actually shipped
-  deliverySuccessRate: decimal("delivery_success_rate", { precision: 5, scale: 2 }).notNull(), // % delivered after returns
-  expectedRevenue: decimal("expected_revenue", { precision: 10, scale: 2 }).notNull(),
-  actualRevenue: decimal("actual_revenue", { precision: 10, scale: 2 }),
-  variance: decimal({ precision: 10, scale: 2 }),
-  variancePercentage: decimal("variance_percentage", { precision: 5, scale: 2 }),
-  notes: text(),
-  createdBy: integer("created_by").notNull().references(() => users.id),
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	date: date().notNull(),
+	adSpend: decimal("ad_spend", { precision: 10, scale: 2 }).notNull(),
+	lastCampaignEfficiency: decimal("last_campaign_efficiency", { precision: 10, scale: 4 }).notNull(), // Cost per result
+	expectedOrders: integer("expected_orders").notNull(),
+	averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).notNull(),
+	shipmentRate: decimal("shipment_rate", { precision: 5, scale: 2 }).notNull(), // % of orders actually shipped
+	deliverySuccessRate: decimal("delivery_success_rate", { precision: 5, scale: 2 }).notNull(), // % delivered after returns
+	expectedRevenue: decimal("expected_revenue", { precision: 10, scale: 2 }).notNull(),
+	actualRevenue: decimal("actual_revenue", { precision: 10, scale: 2 }),
+	variance: decimal({ precision: 10, scale: 2 }),
+	variancePercentage: decimal("variance_percentage", { precision: 5, scale: 2 }),
+	notes: text(),
+	createdBy: integer("created_by").notNull().references(() => users.id),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 
@@ -1144,289 +1144,289 @@ export const revenueForecasts = pgTable("revenue_forecasts", {
 
 // 1. جدول شركات الشحن
 export const shippingPartners = pgTable("shipping_partners", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  name: varchar({ length: 50 }).notNull().unique(), // 'bosta', 'aramex', 'mylerz', 'gt_express'
-  displayName: varchar("display_name", { length: 100 }).notNull(),
-  logo: varchar({ length: 255 }),
-  
-  // التغطية الجغرافية (JSON Format)
-  coverage: json().$type<{
-    governorates: string[];
-    areas: Array<{
-      governorate: string;
-      cities: string[];
-      deliveryTime: number;
-      successRate: number;
-      cost: number;
-      active: boolean;
-    }>;
-  }>(),
-  
-  // الأداء
-  successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('95.00'),
-  totalShipments: integer("total_shipments").default(0),
-  successfulDeliveries: integer("successful_deliveries").default(0),
-  avgDeliveryTime: decimal("avg_delivery_time", { precision: 4, scale: 1 }).default('3.0'),
-  complaintRate: decimal("complaint_rate", { precision: 4, scale: 2 }).default('0.02'),
-  rating: decimal({ precision: 3, scale: 2 }).default('4.00'),
-  
-  // السعة
-  dailyLimit: integer("daily_limit").default(1000),
-  currentLoad: integer("current_load").default(0),
-  peakHours: json("peak_hours").$type<string[]>().default('[]'),
-  
-  // الجوانب المالية
-  codFeePercentage: decimal("cod_fee_percentage", { precision: 5, scale: 2 }).default('2.50'),
-  deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default('25.00'),
-  codFeeFixed: decimal("cod_fee_fixed", { precision: 10, scale: 2 }).default('5.00'),
-  settlementDays: integer("settlement_days").default(7),
-  creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }).default('50000.00'),
-  
-  // إعدادات التوزيع
-  allocationWeight: decimal("allocation_weight", { precision: 3, scale: 2 }).default('1.00'),
-  priority: integer().default(1),
-  autoAssign: integer("auto_assign").default(1),
-  maxDailyAssignments: integer("max_daily_assignments").default(200),
-  
-  // حالة النشاط
-  active: tinyinteger().default(1),
-  suspended: tinyinteger().default(0),
-  suspensionReason: text("suspension_reason"),
-  
-  // معلومات الاتصال
-  accountManager: varchar("account_manager", { length: 100 }),
-  phone: varchar({ length: 20 }),
-  email: varchar({ length: 100 }),
-  apiCredentials: json("api_credentials").$type<{
-    apiKey?: string;
-    apiSecret?: string;
-    baseUrl?: string;
-  }>(),
-  
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	name: varchar({ length: 50 }).notNull().unique(), // 'bosta', 'aramex', 'mylerz', 'gt_express'
+	displayName: varchar("display_name", { length: 100 }).notNull(),
+	logo: varchar({ length: 255 }),
+
+	// التغطية الجغرافية (JSON Format)
+	coverage: json().$type<{
+		governorates: string[];
+		areas: Array<{
+			governorate: string;
+			cities: string[];
+			deliveryTime: number;
+			successRate: number;
+			cost: number;
+			active: boolean;
+		}>;
+	}>(),
+
+	// الأداء
+	successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('95.00'),
+	totalShipments: integer("total_shipments").default(0),
+	successfulDeliveries: integer("successful_deliveries").default(0),
+	avgDeliveryTime: decimal("avg_delivery_time", { precision: 4, scale: 1 }).default('3.0'),
+	complaintRate: decimal("complaint_rate", { precision: 4, scale: 2 }).default('0.02'),
+	rating: decimal({ precision: 3, scale: 2 }).default('4.00'),
+
+	// السعة
+	dailyLimit: integer("daily_limit").default(1000),
+	currentLoad: integer("current_load").default(0),
+	peakHours: json("peak_hours").$type<string[]>().default('[]'),
+
+	// الجوانب المالية
+	codFeePercentage: decimal("cod_fee_percentage", { precision: 5, scale: 2 }).default('2.50'),
+	deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default('25.00'),
+	codFeeFixed: decimal("cod_fee_fixed", { precision: 10, scale: 2 }).default('5.00'),
+	settlementDays: integer("settlement_days").default(7),
+	creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }).default('50000.00'),
+
+	// إعدادات التوزيع
+	allocationWeight: decimal("allocation_weight", { precision: 3, scale: 2 }).default('1.00'),
+	priority: integer().default(1),
+	autoAssign: integer("auto_assign").default(1),
+	maxDailyAssignments: integer("max_daily_assignments").default(200),
+
+	// حالة النشاط
+	active: integer().default(1),
+	suspended: integer().default(0),
+	suspensionReason: text("suspension_reason"),
+
+	// معلومات الاتصال
+	accountManager: varchar("account_manager", { length: 100 }),
+	phone: varchar({ length: 20 }),
+	email: varchar({ length: 100 }),
+	apiCredentials: json("api_credentials").$type<{
+		apiKey?: string;
+		apiSecret?: string;
+		baseUrl?: string;
+	}>(),
+
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 });
 
 // 2. جدول طلبات COD
 export const codOrders = pgTable("cod_orders", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  orderId: varchar("order_id", { length: 50 }).notNull().unique(),
-  
-  // معلومات العميل
-  customerName: varchar("customer_name", { length: 100 }).notNull(),
-  customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
-  customerEmail: varchar("customer_email", { length: 100 }),
-  
-  // العنوان
-  shippingAddress: json("shipping_address").$type<{
-    governorate: string;
-    city: string;
-    area: string;
-    street: string;
-    building: string;
-    floor: string;
-    apartment: string;
-    notes?: string;
-  }>().notNull(),
-  
-  // المبلغ
-  orderAmount: decimal("order_amount", { precision: 10, scale: 2 }).notNull(),
-  codAmount: decimal("cod_amount", { precision: 10, scale: 2 }).notNull(),
-  
-  // مراحل COD (8 مراحل)
-  stages: json().$type<{
-    customerService?: {
-      agentId: string;
-      confirmed: boolean;
-      callTimestamp: string | null;
-      notes: string;
-    };
-    confirmation?: {
-      agentId: string;
-      called: boolean;
-      confirmed: boolean;
-      callTimestamp: string | null;
-      customerNotes: string;
-    };
-    preparation?: {
-      warehouseId: string;
-      prepared: boolean;
-      preparedAt: string | null;
-      itemsReady: boolean;
-      notes: string;
-    };
-    supplier?: {
-      supplierId: string;
-      supplied: boolean;
-      suppliedAt: string | null;
-      supplierNotes: string;
-    };
-    shipping?: {
-      partnerId: number;
-      pickedUp: boolean;
-      pickedUpAt: string | null;
-      driverName: string;
-      trackingNumber: string;
-    };
-    delivery?: {
-      delivered: boolean;
-      deliveredAt: string | null;
-      receiverName: string;
-      receiverPhone: string;
-      deliveryNotes: string;
-    };
-    collection?: {
-      collected: boolean;
-      collectedAt: string | null;
-      collectedAmount: string;
-      receiptNumber: string;
-      collectionNotes: string;
-    };
-    settlement?: {
-      settled: boolean;
-      settledAt: string | null;
-      transferDate: string | null;
-      bankReference: string;
-      settlementNotes: string;
-    };
-  }>().default('{}'),
-  
-  // التتبع
-  currentStage: varchar("current_stage", { length: 50 }).default('pending'),
-  status: text().default('pending'),
-  
-  // تخصيص الشحن
-  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
-  trackingNumber: varchar("tracking_number", { length: 100 }),
-  
-  // المواعيد
-  estimatedDelivery: timestamp("estimated_delivery", { mode: 'string' }),
-  actualDelivery: timestamp("actual_delivery", { mode: 'string' }),
-  
-  // إشعارات
-  notifications: json().$type<Array<{
-    type: string;
-    sentAt: string;
-    channel: 'sms' | 'email' | 'whatsapp';
-    status: 'sent' | 'failed' | 'pending';
-  }>>().default('[]'),
-  
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
-  updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	orderId: varchar("order_id", { length: 50 }).notNull().unique(),
+
+	// معلومات العميل
+	customerName: varchar("customer_name", { length: 100 }).notNull(),
+	customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+	customerEmail: varchar("customer_email", { length: 100 }),
+
+	// العنوان
+	shippingAddress: json("shipping_address").$type<{
+		governorate: string;
+		city: string;
+		area: string;
+		street: string;
+		building: string;
+		floor: string;
+		apartment: string;
+		notes?: string;
+	}>().notNull(),
+
+	// المبلغ
+	orderAmount: decimal("order_amount", { precision: 10, scale: 2 }).notNull(),
+	codAmount: decimal("cod_amount", { precision: 10, scale: 2 }).notNull(),
+
+	// مراحل COD (8 مراحل)
+	stages: json().$type<{
+		customerService?: {
+			agentId: string;
+			confirmed: boolean;
+			callTimestamp: string | null;
+			notes: string;
+		};
+		confirmation?: {
+			agentId: string;
+			called: boolean;
+			confirmed: boolean;
+			callTimestamp: string | null;
+			customerNotes: string;
+		};
+		preparation?: {
+			warehouseId: string;
+			prepared: boolean;
+			preparedAt: string | null;
+			itemsReady: boolean;
+			notes: string;
+		};
+		supplier?: {
+			supplierId: string;
+			supplied: boolean;
+			suppliedAt: string | null;
+			supplierNotes: string;
+		};
+		shipping?: {
+			partnerId: number;
+			pickedUp: boolean;
+			pickedUpAt: string | null;
+			driverName: string;
+			trackingNumber: string;
+		};
+		delivery?: {
+			delivered: boolean;
+			deliveredAt: string | null;
+			receiverName: string;
+			receiverPhone: string;
+			deliveryNotes: string;
+		};
+		collection?: {
+			collected: boolean;
+			collectedAt: string | null;
+			collectedAmount: string;
+			receiptNumber: string;
+			collectionNotes: string;
+		};
+		settlement?: {
+			settled: boolean;
+			settledAt: string | null;
+			transferDate: string | null;
+			bankReference: string;
+			settlementNotes: string;
+		};
+	}>().default('{}'),
+
+	// التتبع
+	currentStage: varchar("current_stage", { length: 50 }).default('pending'),
+	status: text().default('pending'),
+
+	// تخصيص الشحن
+	shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
+	trackingNumber: varchar("tracking_number", { length: 100 }),
+
+	// المواعيد
+	estimatedDelivery: timestamp("estimated_delivery", { mode: 'string' }),
+	actualDelivery: timestamp("actual_delivery", { mode: 'string' }),
+
+	// إشعارات
+	notifications: json().$type<Array<{
+		type: string;
+		sentAt: string;
+		channel: 'sms' | 'email' | 'whatsapp';
+		status: 'sent' | 'failed' | 'pending';
+	}>>().default('[]'),
+
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
 },
-(table) => [
-  index("cod_orders_order_id").on(table.orderId),
-  index("cod_orders_customer_phone").on(table.customerPhone),
-  index("cod_orders_status").on(table.status),
-  index("cod_orders_current_stage").on(table.currentStage),
-]);
+	(table) => [
+		index("cod_orders_order_id").on(table.orderId),
+		index("cod_orders_customer_phone").on(table.customerPhone),
+		index("cod_orders_status").on(table.status),
+		index("cod_orders_current_stage").on(table.currentStage),
+	]);
 
 // 3. جدول تخصيص الشحن
 export const shippingAllocations = pgTable("shipping_allocations", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  codOrderId: integer("cod_order_id").references(() => codOrders.id),
-  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
-  
-  allocationScore: decimal("allocation_score", { precision: 5, scale: 2 }),
-  allocationReason: text("allocation_reason"),
-  
-  // حالة الشحنة
-  shipmentStatus: varchar("shipment_status", { length: 30 }).default('pending'),
-  apiResponse: json("api_response"),
-  
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	codOrderId: integer("cod_order_id").references(() => codOrders.id),
+	shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
+
+	allocationScore: decimal("allocation_score", { precision: 5, scale: 2 }),
+	allocationReason: text("allocation_reason"),
+
+	// حالة الشحنة
+	shipmentStatus: varchar("shipment_status", { length: 30 }).default('pending'),
+	apiResponse: json("api_response"),
+
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
 // 4. جدول سجل التتبع
 export const trackingLogs = pgTable("tracking_logs", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  codOrderId: integer("cod_order_id").references(() => codOrders.id),
-  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
-  
-  stage: varchar({ length: 50 }).notNull(),
-  status: varchar({ length: 30 }).notNull(),
-  description: text(),
-  agentId: varchar("agent_id", { length: 50 }),
-  
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	codOrderId: integer("cod_order_id").references(() => codOrders.id),
+	shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
+
+	stage: varchar({ length: 50 }).notNull(),
+	status: varchar({ length: 30 }).notNull(),
+	description: text(),
+	agentId: varchar("agent_id", { length: 50 }),
+
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 },
-(table) => [
-  index("tracking_logs_cod_order_id").on(table.codOrderId),
-  index("tracking_logs_stage").on(table.stage),
-]);
+	(table) => [
+		index("tracking_logs_cod_order_id").on(table.codOrderId),
+		index("tracking_logs_stage").on(table.stage),
+	]);
 
 // 5. جدول الفال باك
 export const fallbackLogs = pgTable("fallback_logs", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  originalPartnerId: integer("original_partner_id").references(() => shippingPartners.id),
-  newPartnerId: integer("new_partner_id").references(() => shippingPartners.id),
-  codOrderId: integer("cod_order_id").references(() => codOrders.id),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	originalPartnerId: integer("original_partner_id").references(() => shippingPartners.id),
+	newPartnerId: integer("new_partner_id").references(() => shippingPartners.id),
+	codOrderId: integer("cod_order_id").references(() => codOrders.id),
 
-  reason: varchar({ length: 100 }).notNull(),
-  details: json(),
+	reason: varchar({ length: 100 }).notNull(),
+	details: json(),
 
-  createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
 // 6. Shipping Performance by Governorate
 export const shippingPerformanceByGovernorate = pgTable("shipping_performance_by_governorate", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
-  governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
-  governorateName: varchar("governorate_name", { length: 100 }),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
+	governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
+	governorateName: varchar("governorate_name", { length: 100 }),
 
-  totalShipments: integer("total_shipments").default(0),
-  successfulShipments: integer("successful_shipments").default(0),
-  failedShipments: integer("failed_shipments").default(0),
+	totalShipments: integer("total_shipments").default(0),
+	successfulShipments: integer("successful_shipments").default(0),
+	failedShipments: integer("failed_shipments").default(0),
 
-  successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
-  avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
-  customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
-  avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
+	successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
+	avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
+	customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
+	avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
 
-  failedReasons: json("failed_reasons"),
-  lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	failedReasons: json("failed_reasons"),
+	lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
 // 7. Shipping Performance by Center
 export const shippingPerformanceByCenter = pgTable("shipping_performance_by_center", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
-  governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
-  centerCode: varchar("center_code", { length: 20 }).notNull(),
-  centerName: varchar("center_name", { length: 100 }),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
+	governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
+	centerCode: varchar("center_code", { length: 20 }).notNull(),
+	centerName: varchar("center_name", { length: 100 }),
 
-  totalShipments: integer("total_shipments").default(0),
-  successfulShipments: integer("successful_shipments").default(0),
-  failedShipments: integer("failed_shipments").default(0),
+	totalShipments: integer("total_shipments").default(0),
+	successfulShipments: integer("successful_shipments").default(0),
+	failedShipments: integer("failed_shipments").default(0),
 
-  successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
-  avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
-  customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
-  avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
+	successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
+	avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
+	customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
+	avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
 
-  failedReasons: json("failed_reasons"),
-  lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	failedReasons: json("failed_reasons"),
+	lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
 // 8. Shipping Performance by Point
 export const shippingPerformanceByPoint = pgTable("shipping_performance_by_point", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
-  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
-  governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
-  centerCode: varchar("center_code", { length: 20 }).notNull(),
-  pointCode: varchar("point_code", { length: 30 }).notNull(),
-  pointName: varchar("point_name", { length: 100 }),
+	id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+	companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
+	governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
+	centerCode: varchar("center_code", { length: 20 }).notNull(),
+	pointCode: varchar("point_code", { length: 30 }).notNull(),
+	pointName: varchar("point_name", { length: 100 }),
 
-  totalShipments: integer("total_shipments").default(0),
-  successfulShipments: integer("successful_shipments").default(0),
-  failedShipments: integer("failed_shipments").default(0),
+	totalShipments: integer("total_shipments").default(0),
+	successfulShipments: integer("successful_shipments").default(0),
+	failedShipments: integer("failed_shipments").default(0),
 
-  successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
-  avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
-  customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
-  avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
+	successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
+	avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
+	customerSatisfaction: decimal("customer_satisfaction", { precision: 3, scale: 2 }).default('0.00'),
+	avgPrice: decimal("avg_price", { precision: 10, scale: 2 }).default('0.00'),
 
-  failedReasons: json("failed_reasons"),
-  lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
+	failedReasons: json("failed_reasons"),
+	lastUpdated: timestamp("last_updated", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });

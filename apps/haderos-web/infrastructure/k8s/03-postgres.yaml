@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: haderos-postgres
+  labels:
+    app: haderos
+    component: database
+spec:
+  ports:
+    - port: 5432
+      name: postgres
+  selector:
+    app: haderos
+    component: database
+  clusterIP: None # Headless service for StatefulSet identity
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: haderos-postgres
+  labels:
+    app: haderos
+    component: database
+spec:
+  serviceName: "haderos-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haderos
+      component: database
+  template:
+    metadata:
+      labels:
+        app: haderos
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - configMapRef:
+                name: haderos-config
+            - secretRef:
+                name: haderos-secrets
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "haderos"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "haderos"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

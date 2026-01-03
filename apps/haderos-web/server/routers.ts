@@ -80,6 +80,7 @@ import { spreadsheetCollabRouter } from './routers/spreadsheet-collab';
 import { messagingRouter } from './routers/messaging';
 import { egyptianCommerceRouter } from './routers/egyptian-commerce';
 import { monitoringRouter } from './routers/monitoring';
+import { etaRouter } from './routers/eta';
 
 export const appRouter = router({
   system: systemRouter,
@@ -116,6 +117,7 @@ export const appRouter = router({
   messaging: messagingRouter,
   egyptianCommerce: egyptianCommerceRouter,
   monitoring: monitoringRouter,
+  eta: etaRouter,
 
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),

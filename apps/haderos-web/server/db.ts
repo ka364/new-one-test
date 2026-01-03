@@ -18,6 +18,7 @@ import {
   investors,
   investorActivity,
 } from '../drizzle/schema';
+import { eInvoices } from '../drizzle/schema-eta';
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
 // Type definitions
@@ -45,6 +46,8 @@ export type InsertAgentInsight = InferInsertModel<typeof agentInsights>;
 export type AgentInsight = InferSelectModel<typeof agentInsights>;
 export type InsertChatMessage = InferInsertModel<typeof chatMessages>;
 export type ChatMessage = InferSelectModel<typeof chatMessages>;
+export type InsertEInvoice = InferInsertModel<typeof eInvoices>;
+export type EInvoice = InferSelectModel<typeof eInvoices>;
 import { ENV } from './_core/env';
 
 const { Pool } = pg;
@@ -583,6 +586,48 @@ export async function getUserChatHistory(userId: number, limit = 50) {
     .where(eq(chatMessages.userId, userId))
     .orderBy(desc(chatMessages.createdAt))
     .limit(limit);
+}
+
+// ============================================
+// ETA E-INVOICING
+// ============================================
+
+export async function createEInvoice(invoice: InsertEInvoice) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const result = await db.insert(eInvoices).values(invoice);
+  return result;
+}
+
+export async function getEInvoiceByOrderId(orderId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(eInvoices).where(eq(eInvoices.orderId, orderId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getEInvoiceByUuid(uuid: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(eInvoices).where(eq(eInvoices.uuid, uuid)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateEInvoiceStatus(
+  id: number,
+  status: EInvoice['status'],
+  updates?: Partial<EInvoice>
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(eInvoices)
+    .set({
+      status,
+      ...updates,
+      updatedAt: new Date(), // drizzlie might need manual updated_at if onUpdateNow isn't perfectly supported by driver
+    })
+    .where(eq(eInvoices.id, id));
 }
 
 // ============================================

@@ -482,6 +482,36 @@ export const holidayPromotions = pgTable('holiday_promotions', {
 });
 
 // ============================================
+// SHARED ORDERS (Postgres Definition)
+// ============================================
+
+/**
+ * طلبات النظام (تعريف Postgres)
+ * مطلوب للتحليلات لأن التعريف الأصلي MySQL
+ */
+export const orders = pgTable('orders', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  orderNumber: text('order_number').notNull().unique(),
+
+  customerName: text('customer_name').notNull(),
+  customerPhone: text('customer_phone'),
+  customerEmail: text('customer_email'),
+
+  totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull(),
+  currency: text('currency').default('EGP'),
+
+  status: text('status').default('pending'),
+  paymentStatus: text('payment_status').default('pending'),
+
+  shippingAddress: text('shipping_address'),
+  notes: text('notes'),
+
+  createdBy: integer('created_by'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================
 // RELATIONS
 // ============================================
 

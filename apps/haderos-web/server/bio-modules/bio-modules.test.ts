@@ -6,6 +6,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { BeeHiveLoadBalancer } from './beehive';
+import { DolphinCustomerService } from './dolphin';
+import { HawkMonitoringSystem } from './hawk';
 
 // Mock EventBus before any imports
 vi.mock('../_core/eventBus', () => ({
@@ -177,9 +180,9 @@ describe('Bio-Protocol System - Unit Tests', () => {
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       };
 
@@ -365,6 +368,67 @@ describe('Bio-Protocol System - Unit Tests', () => {
       const failing = modules.filter((m) => m.health < 50);
       expect(failing).toHaveLength(1);
       expect(failing[0].name).toBe('corvid');
+    });
+  });
+  describe('9. BeeHive Module - Load Balancing', () => {
+    it('should select node with lowest load', () => {
+      const nodes = [
+        { id: 'node_1', url: 'http://node1', health: 'healthy', load: 0.3 },
+        { id: 'node_2', url: 'http://node2', health: 'healthy', load: 0.5 },
+      ] as any[];
+      // const { BeeHiveLoadBalancer } = require('./beehive');
+      const beeHive = new BeeHiveLoadBalancer(nodes);
+
+      const selected = beeHive.selectNode();
+      expect(selected.id).toBe('node_1');
+    });
+
+    it('should ignore unhealthy nodes', () => {
+      const nodes = [
+        { id: 'node_1', url: 'http://node1', health: 'unhealthy', load: 0.1 },
+        { id: 'node_2', url: 'http://node2', health: 'healthy', load: 0.8 },
+      ] as any[];
+      // const { BeeHiveLoadBalancer } = require('./beehive');
+      const beeHive = new BeeHiveLoadBalancer(nodes);
+
+      const selected = beeHive.selectNode();
+      expect(selected.id).toBe('node_2');
+    });
+  });
+
+  describe('10. Dolphin Module - Customer Service', () => {
+    it('should detect sentiment and valid response', () => {
+      // const { DolphinCustomerService } = require('./dolphin'); // Removed
+      const dolphin = new DolphinCustomerService();
+
+      const response = dolphin.processQuery({ userId: '1', query: 'I am so angry customer service is bad' });
+      expect(response.escalated).toBe(true);
+      expect(response.confidence).toBeGreaterThan(0.9);
+    });
+
+    it('should detect arabic language', () => {
+      // const { DolphinCustomerService } = require('./dolphin'); // Removed
+      const dolphin = new DolphinCustomerService();
+
+      const response = dolphin.processQuery({ userId: '1', query: 'أريد استرجاع المنتج' });
+      expect(response.language).toBe('ar');
+      expect(response.text).toContain('يمكنك استرجاع');
+    });
+  });
+
+  describe('11. Hawk Module - Monitoring & Alerting', () => {
+    it('should trigger alert on slow performance', () => {
+      // const { HawkMonitoringSystem } = require('./hawk'); // Removed
+      const hawk = new HawkMonitoringSystem();
+
+      hawk.monitorWorkflow('order_processing', {
+        performanceMetrics: { totalTime: 2500, success: true }
+      });
+
+      const alerts = hawk.getAlerts();
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].severity).toBe('high');
+      expect(alerts[0].message).toContain('slow performance');
     });
   });
 });

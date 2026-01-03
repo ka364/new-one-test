@@ -5,8 +5,9 @@
 
 import { publicProcedure, router } from '../_core/trpc';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
+import { requireDb } from '../db';
+import { eq, and, gte, lte, desc, sql, sum, count } from 'drizzle-orm';
+import { orders, transactions } from '../../drizzle/schema';
 import { createSimulationEngine } from '../simulation/engine';
 import { performanceSystem } from '../hr/performance';
 import { recruitmentSystem } from '../hr/recruitment';
@@ -95,18 +96,63 @@ class ReportGenerator {
    * تقرير مالي شامل
    */
   async generateFinancialReport(period: { start: Date; end: Date }): Promise<Report> {
-    const db = await getDb();
+    const db = await requireDb();
 
-    // بيانات محاكاة واقعية
+    // 1. Calculate Real Financial Metrics
+    const [incomeStats] = await db
+      .select({
+        totalIncome: sum(transactions.amount),
+        count: count(transactions.id),
+      })
+      .from(transactions)
+      .where(
+        and(
+          gte(transactions.createdAt, period.start.toISOString()),
+          lte(transactions.createdAt, period.end.toISOString()),
+          eq(transactions.type, 'income'),
+          eq(transactions.status, 'completed')
+        )
+      );
+
+    const [expenseStats] = await db
+      .select({
+        totalExpense: sum(transactions.amount),
+      })
+      .from(transactions)
+      .where(
+        and(
+          gte(transactions.createdAt, period.start.toISOString()),
+          lte(transactions.createdAt, period.end.toISOString()),
+          eq(transactions.type, 'expense'),
+          eq(transactions.status, 'completed')
+        )
+      );
+
+    const [orderStats] = await db
+      .select({ count: count(orders.id) })
+      .from(orders)
+      .where(
+        and(
+          gte(orders.createdAt, period.start.toISOString()),
+          lte(orders.createdAt, period.end.toISOString())
+        )
+      );
+
+    const totalRevenue = Number(incomeStats?.totalIncome || 0);
+    const totalExpenses = Number(expenseStats?.totalExpense || 0);
+    const totalOrders = Number(orderStats?.count || 0);
+    const netProfit = totalRevenue - totalExpenses;
+    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
     const summary: ReportSummary = {
-      totalRevenue: 1792258,
-      totalOrders: 3000,
-      totalCustomers: 300,
-      totalEmployees: 25,
-      growthRate: 15.3,
-      profitMargin: 22.5,
-      customerSatisfaction: 88,
-      employeeSatisfaction: 78,
+      totalRevenue,
+      totalOrders,
+      totalCustomers: 0, // TODO: Count distinct users
+      totalEmployees: 0,
+      growthRate: 0, // Requires previous period comparison
+      profitMargin: Number(profitMargin.toFixed(2)),
+      customerSatisfaction: 0,
+      employeeSatisfaction: 0,
     };
 
     const sections: ReportSection[] = [
@@ -163,7 +209,7 @@ class ReportGenerator {
         title: 'Revenue Trend',
         titleAr: 'اتجاه الإيرادات',
         type: 'charts',
-        data: this.generateMonthlyRevenueTrend(period),
+        data: await this.generateMonthlyRevenueTrend(period), // Async now
       },
     ];
 
@@ -610,16 +656,30 @@ class ReportGenerator {
 
   // ===== دوال مساعدة =====
 
-  private generateMonthlyRevenueTrend(period: { start: Date; end: Date }) {
-    const data = [];
-    const months = 6;
-    for (let i = 0; i < months; i++) {
-      data.push({
-        month: `Month ${i + 1}`,
-        revenue: 250000 + i * 50000 + Math.random() * 20000,
-      });
-    }
-    return data;
+  private async generateMonthlyRevenueTrend(period: { start: Date; end: Date }) {
+    const db = await requireDb();
+
+    const monthlyRevenue = await db
+      .select({
+        month: sql<string>`TO_CHAR(${transactions.createdAt}, 'YYYY-MM')`,
+        revenue: sum(transactions.amount)
+      })
+      .from(transactions)
+      .where(
+        and(
+          gte(transactions.createdAt, period.start.toISOString()),
+          lte(transactions.createdAt, period.end.toISOString()),
+          eq(transactions.type, 'income'),
+          eq(transactions.status, 'completed')
+        )
+      )
+      .groupBy(sql`TO_CHAR(${transactions.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${transactions.createdAt}, 'YYYY-MM')`);
+
+    return monthlyRevenue.map(item => ({
+      month: item.month,
+      revenue: Number(item.revenue || 0)
+    }));
   }
 
   private generateMonthlyOrderTrend(period: { start: Date; end: Date }) {

@@ -14,6 +14,8 @@ import {
 import { getEventBus } from '../events/eventBus';
 import { evaluateTransactionWithKAIA } from '../kaia/engine';
 import { notifyOwner } from '../_core/notification';
+import { llmService } from '../ai/llm.service';
+import { aiConfig } from '../ai/config';
 
 export interface CashFlowForecast {
   period: string;
@@ -288,13 +290,13 @@ export class FinancialAgent {
         const avgIncome =
           incomeTransactions.length > 0
             ? incomeTransactions.reduce((sum, t) => sum + Number(t.amount), 0) /
-              incomeTransactions.length
+            incomeTransactions.length
             : 0;
 
         const avgExpenses =
           expenseTransactions.length > 0
             ? expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0) /
-              expenseTransactions.length
+            expenseTransactions.length
             : 0;
 
         forecasts.push({
@@ -396,6 +398,45 @@ export class FinancialAgent {
     } catch (error) {
       console.error('[FinancialAgent] Error generating summary:', error);
       return null;
+    }
+  }
+
+  /**
+   * Generate an Intelligent Financial Report using AI
+   */
+  async generateAIReport(startDate: Date, endDate: Date, lang: 'en' | 'ar' = 'en'): Promise<string> {
+    const summary = await this.generateFinancialSummary(startDate, endDate);
+    if (!summary) return 'Failed to generate financial data.';
+
+    // If AI is not configured, fall back to basic text
+    if (!aiConfig.openaiApiKey) {
+      return lang === 'ar'
+        ? `تقرير مالي (أساسي): الدخل ${summary.totalIncome}, المصروفات ${summary.totalExpenses}, الصافي ${summary.netFlow}`
+        : `Financial Report (Basic): Income ${summary.totalIncome}, Expenses ${summary.totalExpenses}, Net ${summary.netFlow}`;
+    }
+
+    const systemPrompt = `
+    You are an expert Financial Analyst for "HADEROS AI Cloud".
+    Generate a professional, insightful executive summary based on the provided JSON financial data.
+    
+    Language: ${lang === 'ar' ? 'Arabic' : 'English'}
+    Tone: Professional, Strategic, Action-Oriented.
+    
+    Structure:
+    1. Executive Summary (Net Flow status).
+    2. Income Analysis (Key drivers).
+    3. Expense Analysis (Major cost centers).
+    4. Recommendations.
+    `;
+
+    const userPrompt = JSON.stringify(summary, null, 2);
+
+    try {
+      const result = await llmService.generateCompletion(systemPrompt, userPrompt);
+      return result.content;
+    } catch (err) {
+      console.error('[FinancialAgent] AI Report generation failed:', err);
+      return 'Error generating AI report.';
     }
   }
 }

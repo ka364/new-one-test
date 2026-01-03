@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haderos-config
+  labels:
+    app: haderos
+data:
+  NODE_ENV: "production"
+  NUXT_PUBLIC_API_BASE: "/api"
+  POSTGRES_DB: "haderos_platform"
+  POSTGRES_USER: "haderos"
+  # DB Host in K8s will be the service name
+  DB_HOST: "haderos-postgres" 
+  REDIS_HOST: "haderos-redis"
+  REDIS_PORT: "6379"

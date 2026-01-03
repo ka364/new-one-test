@@ -19,7 +19,7 @@ export const passwordSchema = z
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character');
 
-export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number');
+export const phoneSchema = z.string().regex(/^(\+?[1-9]\d{1,14}|01[0-9]{9})$/, 'Invalid phone number');
 
 export const urlSchema = z.string().url('Invalid URL');
 
@@ -96,6 +96,7 @@ export const updateEmployeeSchema = createEmployeeSchema.partial();
 
 export const orderItemSchema = z.object({
   productId: z.string(),
+  productName: z.string().min(1, 'Product name is required'),
   quantity: positiveIntSchema,
   price: positiveIntSchema,
   discount: nonNegativeIntSchema.optional(),

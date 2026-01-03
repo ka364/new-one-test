@@ -12,6 +12,9 @@ export { antOptimizer, AntColonyOptimizer } from './ant';
 export { tardigradeEngine, TardigradeResilienceEngine } from './tardigrade';
 export { chameleonEngine, ChameleonAdaptiveEngine } from './chameleon';
 export { cephalopodEngine, CephalopodDistributedEngine } from './cephalopod';
+export { beeHiveEngine, BeeHiveLoadBalancer } from './beehive';
+export { dolphinEngine, DolphinCustomerService } from './dolphin';
+export { hawkEngine, HawkMonitoringSystem } from './hawk';
 
 // Orchestrator
 export {

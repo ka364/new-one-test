@@ -15,7 +15,7 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { router, publicProcedure } from '../trpc';
+import { router, publicProcedure } from '../_core/trpc';
 import { db } from '../db';
 import { eq, and, gte, lte, desc, asc, sql, ilike, or, count, sum, avg } from 'drizzle-orm';
 import {

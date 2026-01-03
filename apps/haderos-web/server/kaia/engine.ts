@@ -1,11 +1,20 @@
-// @ts-nocheck
+
+import { llmService, LLMResponse } from '../ai/llm.service';
+
 /**
  * KAIA (Knowledge-Augmented Islamic AI) Ethical Governance Engine
  * Core engine for applying Sharia-compliant and ethical rules to business decisions
  */
 
-import { EthicalRule, Transaction } from '../../drizzle/schema';
+
+import { InferSelectModel } from 'drizzle-orm';
+import { ethicalRules, transactions } from '../../drizzle/schema';
 import { getActiveEthicalRules } from '../db';
+import { aiConfig } from '../ai/config';
+
+export type EthicalRule = InferSelectModel<typeof ethicalRules>;
+export type Transaction = InferSelectModel<typeof transactions>;
+
 
 export interface KAIADecision {
   approved: boolean;
@@ -21,12 +30,14 @@ export interface KAIADecision {
   overallReasonAr?: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   requiresHumanReview: boolean;
+  aiAnalysis?: string; // New field for LLM insights
 }
 
 export interface EvaluationContext {
   transaction?: Partial<Transaction>;
   metadata?: Record<string, any>;
   userId?: number;
+  unstructuredData?: string; // New field for text analysis
 }
 
 /**
@@ -70,10 +81,10 @@ export class KAIAEngine {
   /**
    * Evaluate a transaction against all active ethical rules
    */
-  async evaluateTransaction(transaction: Partial<Transaction>): Promise<KAIADecision> {
+  async evaluateTransaction(transaction: Partial<Transaction>, unstructuredData?: string): Promise<KAIADecision> {
     await this.refreshRulesIfNeeded();
 
-    const context: EvaluationContext = { transaction };
+    const context: EvaluationContext = { transaction, unstructuredData };
     const appliedRules: KAIADecision['appliedRules'] = [];
     let highestSeverity: KAIADecision['severity'] = 'low';
     let requiresReview = false;
@@ -94,6 +105,23 @@ export class KAIAEngine {
         if (rule.requiresReview && ruleResult.result !== 'pass') {
           requiresReview = true;
         }
+      }
+    }
+
+    // AI Semantic Analysis (if unstructured data is present)
+    let aiAnalysis = '';
+    if (unstructuredData && aiConfig.openaiApiKey) {
+      try {
+        const aiResult = await this.analyzeEthicalCompliance(unstructuredData);
+        aiAnalysis = aiResult.content;
+
+        // If AI flags a major issue, force review
+        if (aiAnalysis.toLowerCase().includes('violation') || aiAnalysis.toLowerCase().includes('haram')) {
+          requiresReview = true;
+          highestSeverity = 'high';
+        }
+      } catch (err) {
+        console.error('[KAIA] AI Analysis failed:', err);
       }
     }
 
@@ -127,7 +155,26 @@ export class KAIAEngine {
       overallReasonAr,
       severity: highestSeverity,
       requiresHumanReview: requiresReview || decision === 'review_required',
+      aiAnalysis
     };
+  }
+
+  /**
+   * Perform Semantic Analysis using LLM
+   */
+  async analyzeEthicalCompliance(text: string): Promise<LLMResponse> {
+    const systemPrompt = `
+      You are KAIA (Knowledge-Augmented Islamic AI), an expert in Sharia-compliant finance and ethics.
+      Analyze the following text (e.g., contract clause, product description) for ethical or Sharia violations.
+      Focus on: Riba (Interest), Gharar (Uncertainty), Haram products (Alcohol, Gambling, Pork), and Unethical labor.
+      
+      Response Format:
+      - Brief Summary (1 sentence).
+      - Verdict: COMPLIANT | SUSPICIOUS | NON-COMPLIANT.
+      - Reason.
+      `;
+
+    return await llmService.generateCompletion(systemPrompt, text);
   }
 
   /**
@@ -310,8 +357,8 @@ export class KAIAEngine {
   /**
    * Quick check if a transaction is Sharia-compliant
    */
-  async isTransactionShariaCompliant(transaction: Partial<Transaction>): Promise<boolean> {
-    const decision = await this.evaluateTransaction(transaction);
+  async isTransactionShariaCompliant(transaction: Partial<Transaction>, unstructuredData?: string): Promise<boolean> {
+    const decision = await this.evaluateTransaction(transaction, unstructuredData);
     return (
       decision.approved &&
       !decision.appliedRules.some(
@@ -352,8 +399,9 @@ export function getKAIAEngine(): KAIAEngine {
  * Helper function to evaluate a transaction
  */
 export async function evaluateTransactionWithKAIA(
-  transaction: Partial<Transaction>
+  transaction: Partial<Transaction>,
+  unstructuredData?: string
 ): Promise<KAIADecision> {
   const engine = getKAIAEngine();
-  return await engine.evaluateTransaction(transaction);
+  return await engine.evaluateTransaction(transaction, unstructuredData);
 }

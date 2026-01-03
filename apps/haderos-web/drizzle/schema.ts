@@ -1,18 +1,18 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, int, varchar, timestamp, mysqlEnum, text, json, decimal, datetime, index, date, tinyint } from "drizzle-orm/mysql-core"
+import { pgTable, pgSchema, AnyPgColumn, foreignKey, integer, varchar, timestamp, text, json, decimal, index, date, boolean } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-export const accountGenerationLogs = mysqlTable("account_generation_logs", {
-	id: int().autoincrement().notNull(),
+export const accountGenerationLogs = pgTable("account_generation_logs", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	month: varchar({ length: 7 }).notNull(),
-	accountsGenerated: int("accounts_generated").notNull(),
-	generatedBy: int("generated_by").notNull().references(() => users.id),
+	accountsGenerated: integer("accounts_generated").notNull(),
+	generatedBy: integer("generated_by").notNull().references(() => users.id),
 	excelFilePath: varchar("excel_file_path", { length: 500 }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
-export const agentInsights = mysqlTable("agentInsights", {
-	id: int().autoincrement().notNull(),
-	agentType: mysqlEnum(['financial','demand_planner','campaign_orchestrator','ethics_gatekeeper']).notNull(),
+export const agentInsights = pgTable("agentInsights", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	agentType: text().notNull(),
 	insightType: varchar({ length: 100 }).notNull(),
 	title: varchar({ length: 200 }).notNull(),
 	titleAr: varchar({ length: 200 }),
@@ -20,20 +20,20 @@ export const agentInsights = mysqlTable("agentInsights", {
 	descriptionAr: text(),
 	insightData: json().notNull(),
 	confidence: decimal({ precision: 5, scale: 2 }),
-	priority: mysqlEnum(['low','medium','high','critical']).default('medium').notNull(),
-	status: mysqlEnum(['new','reviewed','actioned','dismissed']).default('new').notNull(),
-	reviewedBy: int(),
+	priority: text().default('medium').notNull(),
+	status: text().default('new').notNull(),
+	reviewedBy: integer(),
 	reviewedAt: timestamp({ mode: 'string' }),
 	reviewNotes: text(),
 	relatedEntityType: varchar({ length: 100 }),
-	relatedEntityId: int(),
+	relatedEntityId: integer(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const aiSuggestions = mysqlTable("ai_suggestions", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const aiSuggestions = pgTable("ai_suggestions", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	suggestionType: varchar({ length: 100 }).notNull(),
 	title: varchar({ length: 255 }).notNull(),
 	titleAr: varchar({ length: 255 }),
@@ -47,148 +47,148 @@ export const aiSuggestions = mysqlTable("ai_suggestions", {
 	respondedAt: timestamp({ mode: 'string' }),
 });
 
-export const auditTrail = mysqlTable("auditTrail", {
-	id: int().autoincrement().notNull(),
+export const auditTrail = pgTable("auditTrail", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	entityType: varchar({ length: 100 }).notNull(),
-	entityId: int().notNull(),
-	action: mysqlEnum(['create','update','delete','approve','reject','review']).notNull(),
+	entityId: integer().notNull(),
+	action: text().notNull(),
 	actionDescription: text(),
-	kaiaDecision: mysqlEnum(['approved','rejected','flagged','review_required']),
+	kaiaDecision: text(),
 	appliedRules: json(),
 	decisionReason: text(),
 	decisionReasonAr: text(),
 	oldValues: json(),
 	newValues: json(),
-	performedBy: int().notNull(),
+	performedBy: integer().notNull(),
 	performedAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	ipAddress: varchar({ length: 45 }),
 	userAgent: text(),
 });
 
-export const campaigns = mysqlTable("campaigns", {
-	id: int().autoincrement().notNull(),
+export const campaigns = pgTable("campaigns", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	campaignName: varchar({ length: 200 }).notNull(),
 	campaignNameAr: varchar({ length: 200 }),
 	description: text(),
 	descriptionAr: text(),
-	type: mysqlEnum(['email','social_media','sms','multi_channel']).notNull(),
-	status: mysqlEnum(['draft','scheduled','active','paused','completed','cancelled']).default('draft').notNull(),
+	type: text().notNull(),
+	status: text().default('draft').notNull(),
 	budget: decimal({ precision: 10, scale: 2 }),
 	spent: decimal({ precision: 10, scale: 2 }).default('0.00').notNull(),
 	currency: varchar({ length: 3 }).default('USD').notNull(),
-	impressions: int().default(0).notNull(),
-	clicks: int().default(0).notNull(),
-	conversions: int().default(0).notNull(),
+	impressions: integer().default(0).notNull(),
+	clicks: integer().default(0).notNull(),
+	conversions: integer().default(0).notNull(),
 	revenue: decimal({ precision: 10, scale: 2 }).default('0.00').notNull(),
-	aiOptimizationEnabled: tinyint().default(1).notNull(),
+	aiOptimizationEnabled: tinyinteger().default(1).notNull(),
 	lastOptimizedAt: timestamp({ mode: 'string' }),
 	optimizationNotes: text(),
 	startDate: timestamp({ mode: 'string' }).notNull(),
 	endDate: timestamp({ mode: 'string' }),
 	targetAudience: json(),
 	campaignConfig: json(),
-	createdBy: int().notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const chatMessages = mysqlTable("chatMessages", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull(),
-	role: mysqlEnum(['user','assistant','system']).notNull(),
+export const chatMessages = pgTable("chatMessages", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull(),
+	role: text().notNull(),
 	content: text().notNull(),
 	conversationId: varchar({ length: 100 }),
-	parentMessageId: int(),
+	parentMessageId: integer(),
 	metadata: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const contentCalendar = mysqlTable("content_calendar", {
-	id: int().autoincrement().notNull(),
-	createdBy: int().notNull(),
+export const contentCalendar = pgTable("content_calendar", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	createdBy: integer().notNull(),
 	title: varchar({ length: 255 }).notNull(),
 	titleAr: varchar({ length: 255 }),
 	description: text(),
-	contentType: mysqlEnum(['social_post','blog_article','video','infographic','newsletter','ad_campaign']).notNull(),
+	contentType: text().notNull(),
 	platform: varchar({ length: 100 }),
 	scheduledDate: timestamp({ mode: 'string' }).notNull(),
 	publishedDate: timestamp({ mode: 'string' }),
-	status: mysqlEnum(['draft','scheduled','published','archived']).default('draft').notNull(),
+	status: text().default('draft').notNull(),
 	content: text(),
 	hashtags: json(),
 	mediaFiles: json(),
-	views: int().default(0),
-	likes: int().default(0),
-	comments: int().default(0),
-	shares: int().default(0),
-	clicks: int().default(0),
+	views: integer().default(0),
+	likes: integer().default(0),
+	comments: integer().default(0),
+	shares: integer().default(0),
+	clicks: integer().default(0),
 	engagementRate: varchar({ length: 10 }),
-	relatedCampaignId: int(),
-	relatedProductId: int(),
+	relatedCampaignId: integer(),
+	relatedProductId: integer(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const contentTemplates = mysqlTable("content_templates", {
-	id: int().autoincrement().notNull(),
-	createdBy: int().notNull(),
+export const contentTemplates = pgTable("content_templates", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	createdBy: integer().notNull(),
 	templateName: varchar({ length: 255 }).notNull(),
 	templateNameAr: varchar({ length: 255 }),
 	description: text(),
 	category: varchar({ length: 100 }),
-	contentType: mysqlEnum(['social_post','blog_article','video_script','email','ad_copy']).notNull(),
+	contentType: text().notNull(),
 	templateContent: text().notNull(),
 	placeholders: json(),
-	usageCount: int().default(0).notNull(),
+	usageCount: integer().default(0).notNull(),
 	lastUsed: timestamp({ mode: 'string' }),
-	isPublic: tinyint().default(0).notNull(),
-	isActive: tinyint().default(1).notNull(),
+	isPublic: tinyinteger().default(0).notNull(),
+	isActive: tinyinteger().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const dailySalesReports = mysqlTable("daily_sales_reports", {
-	id: int().autoincrement().notNull(),
+export const dailySalesReports = pgTable("daily_sales_reports", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	reportDate: timestamp("report_date", { mode: 'string' }).notNull(),
-	nowOrdersCount: int("now_orders_count").default(0),
-	nowPiecesCount: int("now_pieces_count").default(0),
+	nowOrdersCount: integer("now_orders_count").default(0),
+	nowPiecesCount: integer("now_pieces_count").default(0),
 	nowRevenue: decimal("now_revenue", { precision: 10, scale: 2 }).default('0'),
-	oneOrdersCount: int("one_orders_count").default(0),
-	onePiecesCount: int("one_pieces_count").default(0),
+	oneOrdersCount: integer("one_orders_count").default(0),
+	onePiecesCount: integer("one_pieces_count").default(0),
 	oneRevenue: decimal("one_revenue", { precision: 10, scale: 2 }).default('0'),
-	factoryOrdersCount: int("factory_orders_count").default(0),
-	factoryPiecesCount: int("factory_pieces_count").default(0),
+	factoryOrdersCount: integer("factory_orders_count").default(0),
+	factoryPiecesCount: integer("factory_pieces_count").default(0),
 	factoryRevenue: decimal("factory_revenue", { precision: 10, scale: 2 }).default('0'),
-	externalOrdersCount: int("external_orders_count").default(0),
-	externalPiecesCount: int("external_pieces_count").default(0),
+	externalOrdersCount: integer("external_orders_count").default(0),
+	externalPiecesCount: integer("external_pieces_count").default(0),
 	externalRevenue: decimal("external_revenue", { precision: 10, scale: 2 }).default('0'),
-	websiteOrdersCount: int("website_orders_count").default(0),
-	websitePiecesCount: int("website_pieces_count").default(0),
+	websiteOrdersCount: integer("website_orders_count").default(0),
+	websitePiecesCount: integer("website_pieces_count").default(0),
 	websiteRevenue: decimal("website_revenue", { precision: 10, scale: 2 }).default('0'),
-	totalOrdersCount: int("total_orders_count").default(0),
-	totalPiecesCount: int("total_pieces_count").default(0),
+	totalOrdersCount: integer("total_orders_count").default(0),
+	totalPiecesCount: integer("total_pieces_count").default(0),
 	totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default('0'),
-	shippedOrdersCount: int("shipped_orders_count").default(0),
-	shippedPiecesCount: int("shipped_pieces_count").default(0),
+	shippedOrdersCount: integer("shipped_orders_count").default(0),
+	shippedPiecesCount: integer("shipped_pieces_count").default(0),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
-export const documentVerificationLogs = mysqlTable("document_verification_logs", {
-	id: int().autoincrement().notNull(),
-	employeeId: int("employee_id").notNull(),
-	documentId: int("document_id"),
+export const documentVerificationLogs = pgTable("document_verification_logs", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	employeeId: integer("employee_id").notNull(),
+	documentId: integer("document_id"),
 	verificationType: varchar("verification_type", { length: 100 }).notNull(),
 	verificationResult: varchar("verification_result", { length: 50 }).notNull(),
 	verificationScore: decimal("verification_score", { precision: 5, scale: 2 }),
 	details: text(),
 	errorMessage: text("error_message"),
-	performedBy: int("performed_by"),
-	performedAt: datetime("performed_at", { mode: 'string'}).notNull(),
+	performedBy: integer("performed_by"),
+	performedAt: timestamp("performed_at", { mode: 'string'}).notNull(),
 });
 
-export const dynamicIcons = mysqlTable("dynamic_icons", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const dynamicIcons = pgTable("dynamic_icons", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	iconName: varchar({ length: 100 }).notNull(),
 	iconNameAr: varchar({ length: 100 }),
 	iconEmoji: varchar({ length: 10 }).notNull(),
@@ -196,45 +196,45 @@ export const dynamicIcons = mysqlTable("dynamic_icons", {
 	description: text(),
 	descriptionAr: text(),
 	actionConfig: json().notNull(),
-	usageCount: int().default(0).notNull(),
+	usageCount: integer().default(0).notNull(),
 	lastUsed: timestamp({ mode: 'string' }),
-	isVisible: tinyint().default(1).notNull(),
-	displayOrder: int().default(0).notNull(),
+	isVisible: tinyinteger().default(1).notNull(),
+	displayOrder: integer().default(0).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const employeeDocuments = mysqlTable("employee_documents", {
-	id: int().autoincrement().notNull(),
-	employeeId: int("employee_id").notNull(),
+export const employeeDocuments = pgTable("employee_documents", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	employeeId: integer("employee_id").notNull(),
 	documentType: varchar("document_type", { length: 100 }).notNull(),
 	documentName: varchar("document_name", { length: 255 }).notNull(),
 	fileUrl: text("file_url").notNull(),
 	fileKey: varchar("file_key", { length: 500 }).notNull(),
-	fileSize: int("file_size"),
+	fileSize: integer("file_size"),
 	mimeType: varchar("mime_type", { length: 100 }),
-	isVerified: tinyint("is_verified").default(0),
+	isVerified: integer("is_verified").default(0),
 	verificationStatus: varchar("verification_status", { length: 50 }).default('pending'),
 	verificationScore: decimal("verification_score", { precision: 5, scale: 2 }),
 	verificationNotes: text("verification_notes"),
 	extractedData: text("extracted_data"),
-	uploadedBy: int("uploaded_by"),
-	uploadedAt: datetime("uploaded_at", { mode: 'string'}).notNull(),
-	verifiedAt: datetime("verified_at", { mode: 'string'}),
-	verifiedBy: int("verified_by"),
+	uploadedBy: integer("uploaded_by"),
+	uploadedAt: timestamp("uploaded_at", { mode: 'string'}).notNull(),
+	verifiedAt: timestamp("verified_at", { mode: 'string'}),
+	verifiedBy: integer("verified_by"),
 });
 
-export const employeeMonthlyData = mysqlTable("employee_monthly_data", {
-	id: int().autoincrement().notNull(),
-	accountId: int("account_id").notNull().references(() => monthlyEmployeeAccounts.id),
+export const employeeMonthlyData = pgTable("employee_monthly_data", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	accountId: integer("account_id").notNull().references(() => monthlyEmployeeAccounts.id),
 	dataType: varchar("data_type", { length: 100 }).notNull(),
 	dataJson: json("data_json").notNull(),
 	submittedAt: timestamp("submitted_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 });
 
-export const employees = mysqlTable("employees", {
-	id: int().autoincrement().notNull(),
+export const employees = pgTable("employees", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	fullName: varchar("full_name", { length: 255 }).notNull(),
 	nationalId: varchar("national_id", { length: 14 }).notNull(),
 	dateOfBirth: varchar("date_of_birth", { length: 10 }),
@@ -248,68 +248,68 @@ export const employees = mysqlTable("employees", {
 	jobTitle: varchar("job_title", { length: 255 }).notNull(),
 	department: varchar({ length: 255 }).notNull(),
 	salary: decimal({ precision: 10, scale: 2 }),
-	hireDate: datetime("hire_date", { mode: 'string'}).notNull(),
+	hireDate: timestamp("hire_date", { mode: 'string'}).notNull(),
 	contractType: varchar("contract_type", { length: 50 }),
-	isActive: tinyint("is_active").default(1),
-	documentsVerified: tinyint("documents_verified").default(0),
+	isActive: integer("is_active").default(1),
+	documentsVerified: integer("documents_verified").default(0),
 	verificationStatus: varchar("verification_status", { length: 50 }).default('pending'),
 	verificationNotes: text("verification_notes"),
-	createdBy: int("created_by"),
-	createdAt: datetime("created_at", { mode: 'string'}).notNull(),
-	updatedAt: datetime("updated_at", { mode: 'string'}),
+	createdBy: integer("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string'}).notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string'}),
 	role: varchar({ length: 50 }).default('employee'),
-	parentId: int("parent_id"),
-	childrenCount: int("children_count").default(0),
+	parentId: integer("parent_id"),
+	childrenCount: integer("children_count").default(0),
 },
 (table) => [
 	index("national_id").on(table.nationalId),
 ]);
 
-export const ethicalRules = mysqlTable("ethicalRules", {
-	id: int().autoincrement().notNull(),
+export const ethicalRules = pgTable("ethicalRules", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	ruleName: varchar({ length: 200 }).notNull(),
 	ruleNameAr: varchar({ length: 200 }),
 	ruleDescription: text().notNull(),
 	ruleDescriptionAr: text(),
-	ruleType: mysqlEnum(['sharia_financial','sharia_commercial','ethical_business','compliance','risk_management']).notNull(),
+	ruleType: text().notNull(),
 	category: varchar({ length: 100 }),
-	severity: mysqlEnum(['low','medium','high','critical']).default('medium').notNull(),
+	severity: text().default('medium').notNull(),
 	ruleLogic: json().notNull(),
-	isActive: tinyint().default(1).notNull(),
-	autoApply: tinyint().default(1).notNull(),
-	requiresReview: tinyint().default(0).notNull(),
-	priority: int().default(100).notNull(),
+	isActive: tinyinteger().default(1).notNull(),
+	autoApply: tinyinteger().default(1).notNull(),
+	requiresReview: tinyinteger().default(0).notNull(),
+	priority: integer().default(100).notNull(),
 	referenceSource: text(),
 	referenceSourceAr: text(),
-	createdBy: int().notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const events = mysqlTable("events", {
-	id: int().autoincrement().notNull(),
+export const events = pgTable("events", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	eventType: varchar({ length: 100 }).notNull(),
 	eventName: varchar({ length: 200 }).notNull(),
 	eventData: json().notNull(),
-	status: mysqlEnum(['pending','processing','completed','failed']).default('pending').notNull(),
-	priority: int().default(100).notNull(),
+	status: text().default('pending').notNull(),
+	priority: integer().default(100).notNull(),
 	processedBy: varchar({ length: 100 }),
 	processedAt: timestamp({ mode: 'string' }),
 	errorMessage: text(),
-	retryCount: int().default(0).notNull(),
-	maxRetries: int().default(3).notNull(),
-	createdBy: int(),
+	retryCount: integer().default(0).notNull(),
+	maxRetries: integer().default(3).notNull(),
+	createdBy: integer(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const externalShipments = mysqlTable("external_shipments", {
-	id: int().autoincrement().notNull(),
+export const externalShipments = pgTable("external_shipments", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	shippingCompany: varchar("shipping_company", { length: 50 }).notNull(),
 	trackingNumber: varchar("tracking_number", { length: 100 }),
 	orderNumber: varchar("order_number", { length: 100 }),
 	customerName: varchar("customer_name", { length: 255 }),
 	customerPhone: varchar("customer_phone", { length: 50 }),
-	quantity: int().default(0),
+	quantity: integer().default(0),
 	amount: decimal({ precision: 10, scale: 2 }).default('0'),
 	// you can use { mode: 'date' }, if you want to have Date as type for this column
 	shipmentDate: date("shipment_date", { mode: 'string' }),
@@ -324,11 +324,11 @@ export const externalShipments = mysqlTable("external_shipments", {
 	index("idx_order").on(table.orderNumber),
 ]);
 
-export const factoryBatches = mysqlTable("factory_batches", {
-	id: int().autoincrement().notNull(),
+export const factoryBatches = pgTable("factory_batches", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	batchNumber: varchar("batch_number", { length: 100 }).notNull(),
-	productId: int("product_id").notNull().references(() => products.id),
-	quantity: int().notNull(),
+	productId: integer("product_id").notNull().references(() => products.id),
+	quantity: integer().notNull(),
 	supplierPrice: decimal("supplier_price", { precision: 10, scale: 2 }).notNull(),
 	totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
 	deliveryDate: timestamp("delivery_date", { mode: 'string' }),
@@ -337,22 +337,22 @@ export const factoryBatches = mysqlTable("factory_batches", {
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
-export const founderAccounts = mysqlTable("founder_accounts", {
-	id: int().autoincrement().notNull(),
+export const founderAccounts = pgTable("founder_accounts", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	fullName: varchar("full_name", { length: 255 }).notNull(),
 	email: varchar({ length: 320 }).notNull(),
 	username: varchar({ length: 100 }).notNull(),
 	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
 	role: varchar({ length: 100 }).notNull(),
 	title: varchar({ length: 255 }),
-	isActive: tinyint("is_active").default(1).notNull(),
+	isActive: integer("is_active").default(1).notNull(),
 	currentMonth: varchar("current_month", { length: 7 }).notNull(),
 	passwordExpiresAt: timestamp("password_expires_at", { mode: 'string' }).notNull(),
 	lastPasswordChangeAt: timestamp("last_password_change_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	permissions: json(),
 	lastLoginAt: timestamp("last_login_at", { mode: 'string' }),
 	lastLoginIp: varchar("last_login_ip", { length: 45 }),
-	loginCount: int("login_count").default(0),
+	loginCount: integer("login_count").default(0),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 },
@@ -361,41 +361,41 @@ export const founderAccounts = mysqlTable("founder_accounts", {
 	index("username").on(table.username),
 ]);
 
-export const founderLoginHistory = mysqlTable("founder_login_history", {
-	id: int().autoincrement().notNull(),
-	founderId: int("founder_id").notNull().references(() => founderAccounts.id),
+export const founderLoginHistory = pgTable("founder_login_history", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	founderId: integer("founder_id").notNull().references(() => founderAccounts.id),
 	loginAt: timestamp("login_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	ipAddress: varchar("ip_address", { length: 45 }),
 	userAgent: text("user_agent"),
-	success: tinyint().notNull(),
+	success: tinyinteger().notNull(),
 	failureReason: varchar("failure_reason", { length: 255 }),
 	sessionId: varchar("session_id", { length: 255 }),
-	sessionDuration: int("session_duration"),
+	sessionDuration: integer("session_duration"),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const googleDriveFiles = mysqlTable("google_drive_files", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const googleDriveFiles = pgTable("google_drive_files", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	fileName: varchar({ length: 255 }).notNull(),
 	fileType: varchar({ length: 50 }).notNull(),
 	filePath: text().notNull(),
 	shareableLink: text(),
 	purpose: varchar({ length: 255 }),
 	metadata: json(),
-	createdBy: int().notNull().references(() => users.id),
+	createdBy: integer().notNull().references(() => users.id),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	lastModified: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const imageEmbeddings = mysqlTable("image_embeddings", {
-	id: int().autoincrement().notNull(),
-	imageId: int("image_id").notNull().references(() => productImages.id),
+export const imageEmbeddings = pgTable("image_embeddings", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	imageId: integer("image_id").notNull().references(() => productImages.id),
 	embeddingVector: text("embedding_vector").notNull(),
 	modelName: varchar("model_name", { length: 100 }).notNull(),
 	modelVersion: varchar("model_version", { length: 50 }).notNull(),
-	vectorDimensions: int("vector_dimensions").notNull(),
-	processingTime: int("processing_time"),
+	vectorDimensions: integer("vector_dimensions").notNull(),
+	processingTime: integer("processing_time"),
 	confidence: decimal({ precision: 5, scale: 4 }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
@@ -405,92 +405,92 @@ export const imageEmbeddings = mysqlTable("image_embeddings", {
 	index("model_idx").on(table.modelName, table.modelVersion),
 ]);
 
-export const inventory = mysqlTable("inventory", {
-	id: int().autoincrement().notNull(),
-	productId: int("product_id").notNull().references(() => products.id),
+export const inventory = pgTable("inventory", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	productId: integer("product_id").notNull().references(() => products.id),
 	size: varchar({ length: 10 }),
 	color: varchar({ length: 50 }),
-	quantity: int().default(0).notNull(),
-	minStockLevel: int("min_stock_level").default(10),
+	quantity: integer().default(0).notNull(),
+	minStockLevel: integer("min_stock_level").default(10),
 	location: varchar({ length: 100 }),
 	lastRestocked: timestamp("last_restocked", { mode: 'string' }),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 });
 
-export const monthlyEmployeeAccounts = mysqlTable("monthly_employee_accounts", {
-	id: int().autoincrement().notNull(),
+export const monthlyEmployeeAccounts = pgTable("monthly_employee_accounts", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	employeeName: varchar("employee_name", { length: 255 }).notNull(),
 	username: varchar({ length: 100 }).notNull(),
 	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
 	month: varchar({ length: 7 }).notNull(),
-	isActive: tinyint("is_active").default(1),
+	isActive: integer("is_active").default(1),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
 	lastLoginAt: timestamp("last_login_at", { mode: 'string' }),
 	email: varchar({ length: 255 }),
-	emailVerified: tinyint("email_verified").default(0),
+	emailVerified: integer("email_verified").default(0),
 	otpCode: varchar("otp_code", { length: 6 }),
 	otpExpiresAt: timestamp("otp_expires_at", { mode: 'string' }),
-	otpAttempts: int("otp_attempts").default(0),
+	otpAttempts: integer("otp_attempts").default(0),
 },
 (table) => [
 	index("username").on(table.username),
 ]);
 
-export const notifications = mysqlTable("notifications", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull(),
-	type: mysqlEnum(['info','warning','error','success','critical']).default('info').notNull(),
+export const notifications = pgTable("notifications", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull(),
+	type: text().default('info').notNull(),
 	title: varchar({ length: 200 }).notNull(),
 	titleAr: varchar({ length: 200 }),
 	message: text().notNull(),
 	messageAr: text(),
 	relatedEntityType: varchar({ length: 100 }),
-	relatedEntityId: int(),
-	isRead: tinyint().default(0).notNull(),
+	relatedEntityId: integer(),
+	isRead: tinyinteger().default(0).notNull(),
 	readAt: timestamp({ mode: 'string' }),
 	metadata: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const orderItems = mysqlTable("order_items", {
-	id: int().autoincrement().notNull(),
-	orderId: int("order_id").notNull().references(() => orders.id),
-	productId: int("product_id").notNull().references(() => products.id),
+export const orderItems = pgTable("order_items", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	orderId: integer("order_id").notNull().references(() => orders.id),
+	productId: integer("product_id").notNull().references(() => products.id),
 	size: varchar({ length: 10 }),
 	color: varchar({ length: 50 }),
-	quantity: int().default(1).notNull(),
+	quantity: integer().default(1).notNull(),
 	unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
 	subtotal: decimal({ precision: 10, scale: 2 }).notNull(),
 });
 
-export const orderStatusHistory = mysqlTable("order_status_history", {
-	id: int().autoincrement().notNull(),
-	orderId: int("order_id").notNull().references(() => orders.id),
+export const orderStatusHistory = pgTable("order_status_history", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	orderId: integer("order_id").notNull().references(() => orders.id),
 	oldStatus: varchar("old_status", { length: 50 }),
 	newStatus: varchar("new_status", { length: 50 }).notNull(),
-	changedBy: int("changed_by"),
+	changedBy: integer("changed_by"),
 	notes: text(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 });
 
-export const orders = mysqlTable("orders", {
-	id: int().autoincrement().notNull(),
+export const orders = pgTable("orders", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	orderNumber: varchar({ length: 50 }).notNull(),
 	customerName: varchar({ length: 200 }).notNull(),
 	customerEmail: varchar({ length: 320 }),
 	customerPhone: varchar({ length: 20 }),
 	productName: varchar({ length: 300 }).notNull(),
 	productDescription: text(),
-	quantity: int().default(1).notNull(),
+	quantity: integer().default(1).notNull(),
 	unitPrice: decimal({ precision: 10, scale: 2 }).notNull(),
 	totalAmount: decimal({ precision: 10, scale: 2 }).notNull(),
 	currency: varchar({ length: 3 }).default('USD').notNull(),
-	status: mysqlEnum(['pending','processing','confirmed','shipped','delivered','cancelled','refunded']).default('pending').notNull(),
-	paymentStatus: mysqlEnum(['pending','paid','failed','refunded']).default('pending').notNull(),
+	status: text().default('pending').notNull(),
+	paymentStatus: text().default('pending').notNull(),
 	shippingAddress: text(),
 	notes: text(),
-	createdBy: int().notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 },
@@ -498,20 +498,20 @@ export const orders = mysqlTable("orders", {
 	index("orders_orderNumber_unique").on(table.orderNumber),
 ]);
 
-export const otpVerifications = mysqlTable("otp_verifications", {
-	id: int().autoincrement().notNull(),
-	employeeId: int("employee_id"),
+export const otpVerifications = pgTable("otp_verifications", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	employeeId: integer("employee_id"),
 	phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
 	email: varchar({ length: 255 }),
 	otpCode: varchar("otp_code", { length: 6 }).notNull(),
-	method: mysqlEnum(['email','sms']).default('email').notNull(),
-	expiresAt: datetime("expires_at", { mode: 'string'}).notNull(),
-	verifiedAt: datetime("verified_at", { mode: 'string'}),
+	method: text().default('email').notNull(),
+	expiresAt: timestamp("expires_at", { mode: 'string'}).notNull(),
+	verifiedAt: timestamp("verified_at", { mode: 'string'}),
 	latitude: decimal({ precision: 10, scale: 8 }),
 	longitude: decimal({ precision: 11, scale: 8 }),
 	ipAddress: varchar("ip_address", { length: 45 }),
-	verificationAttempts: int("verification_attempts").default(0),
-	createdAt: datetime("created_at", { mode: 'string'}).default('CURRENT_TIMESTAMP'),
+	verificationAttempts: integer("verification_attempts").default(0),
+	createdAt: timestamp("created_at", { mode: 'string'}).default('CURRENT_TIMESTAMP'),
 },
 (table) => [
 	index("idx_phone").on(table.phoneNumber),
@@ -520,14 +520,14 @@ export const otpVerifications = mysqlTable("otp_verifications", {
 	index("idx_expires").on(table.expiresAt),
 ]);
 
-export const productBarcodes = mysqlTable("product_barcodes", {
-	id: int().autoincrement().notNull(),
-	productId: int("product_id").notNull().references(() => products.id),
+export const productBarcodes = pgTable("product_barcodes", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	productId: integer("product_id").notNull().references(() => products.id),
 	barcodeType: varchar("barcode_type", { length: 50 }).notNull(),
 	barcodeValue: varchar("barcode_value", { length: 255 }).notNull(),
 	size: varchar({ length: 10 }),
 	color: varchar({ length: 50 }),
-	isActive: tinyint("is_active").default(1),
+	isActive: integer("is_active").default(1),
 	notes: text(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
@@ -538,25 +538,25 @@ export const productBarcodes = mysqlTable("product_barcodes", {
 	index("barcode_value").on(table.barcodeValue),
 ]);
 
-export const productImageRequests = mysqlTable("product_image_requests", {
-	id: int().autoincrement().notNull(),
+export const productImageRequests = pgTable("product_image_requests", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	requestNumber: varchar({ length: 50 }).notNull(),
-	requestedBy: int().notNull(),
+	requestedBy: integer().notNull(),
 	productName: varchar({ length: 255 }).notNull(),
 	productDescription: text(),
 	productSku: varchar({ length: 100 }),
-	imageType: mysqlEnum(['product_photo','lifestyle','detail_shot','360_view','video','infographic']).notNull(),
-	quantity: int().default(1).notNull(),
+	imageType: text().notNull(),
+	quantity: integer().default(1).notNull(),
 	specifications: json(),
-	urgency: mysqlEnum(['low','medium','high','urgent']).default('medium').notNull(),
+	urgency: text().default('medium').notNull(),
 	deadline: timestamp({ mode: 'string' }),
 	notes: text(),
-	status: mysqlEnum(['pending','assigned','in_progress','review','completed','cancelled']).default('pending').notNull(),
-	assignedTo: int(),
+	status: text().default('pending').notNull(),
+	assignedTo: integer(),
 	assignedAt: timestamp({ mode: 'string' }),
 	completedImages: json(),
 	completedAt: timestamp({ mode: 'string' }),
-	rating: int(),
+	rating: integer(),
 	feedback: text(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
@@ -565,18 +565,18 @@ export const productImageRequests = mysqlTable("product_image_requests", {
 	index("product_image_requests_requestNumber_unique").on(table.requestNumber),
 ]);
 
-export const productImages = mysqlTable("product_images", {
-	id: int().autoincrement().notNull(),
-	productId: int("product_id").notNull().references(() => products.id),
+export const productImages = pgTable("product_images", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	productId: integer("product_id").notNull().references(() => products.id),
 	s3Url: varchar("s3_url", { length: 500 }).notNull(),
 	s3Key: varchar("s3_key", { length: 255 }).notNull(),
 	imageType: varchar("image_type", { length: 50 }).default('product').notNull(),
-	isPrimary: tinyint("is_primary").default(0),
-	sortOrder: int("sort_order").default(0),
+	isPrimary: integer("is_primary").default(0),
+	sortOrder: integer("sort_order").default(0),
 	originalUrl: varchar("original_url", { length: 500 }),
-	width: int(),
-	height: int(),
-	fileSize: int("file_size"),
+	width: integer(),
+	height: integer(),
+	fileSize: integer("file_size"),
 	mimeType: varchar("mime_type", { length: 50 }),
 	uploadedAt: timestamp("uploaded_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
@@ -586,9 +586,9 @@ export const productImages = mysqlTable("product_images", {
 	index("is_primary_idx").on(table.isPrimary),
 ]);
 
-export const productSizeCharts = mysqlTable("product_size_charts", {
-	id: int().autoincrement().notNull(),
-	productId: int("product_id").notNull().references(() => products.id),
+export const productSizeCharts = pgTable("product_size_charts", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	productId: integer("product_id").notNull().references(() => products.id),
 	size: varchar({ length: 10 }).notNull(),
 	lengthCm: decimal("length_cm", { precision: 5, scale: 2 }),
 	widthCm: decimal("width_cm", { precision: 5, scale: 2 }),
@@ -597,13 +597,13 @@ export const productSizeCharts = mysqlTable("product_size_charts", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 });
 
-export const products = mysqlTable("products", {
-	id: int().autoincrement().notNull(),
+export const products = pgTable("products", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	modelCode: varchar("model_code", { length: 50 }).notNull(),
 	supplierPrice: decimal("supplier_price", { precision: 10, scale: 2 }).notNull(),
 	sellingPrice: decimal("selling_price", { precision: 10, scale: 2 }),
 	category: varchar({ length: 50 }),
-	isActive: tinyint("is_active").default(1),
+	isActive: integer("is_active").default(1),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 },
@@ -611,39 +611,39 @@ export const products = mysqlTable("products", {
 	index("products_model_code_unique").on(table.modelCode),
 ]);
 
-export const replacements = mysqlTable("replacements", {
-	id: int().autoincrement().notNull(),
-	originalOrderId: int("original_order_id").notNull().references(() => orders.id),
-	newOrderId: int("new_order_id").references(() => orders.id),
+export const replacements = pgTable("replacements", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	originalOrderId: integer("original_order_id").notNull().references(() => orders.id),
+	newOrderId: integer("new_order_id").references(() => orders.id),
 	reason: text().notNull(),
 	status: varchar({ length: 50 }).default('pending').notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	completedAt: timestamp("completed_at", { mode: 'string' }),
 });
 
-export const reports = mysqlTable("reports", {
-	id: int().autoincrement().notNull(),
+export const reports = pgTable("reports", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	reportName: varchar({ length: 200 }).notNull(),
 	reportNameAr: varchar({ length: 200 }),
-	reportType: mysqlEnum(['sales','financial','orders','transactions','ethical_compliance','custom']).notNull(),
+	reportType: text().notNull(),
 	description: text(),
 	descriptionAr: text(),
 	reportConfig: json().notNull(),
 	reportData: json(),
-	isScheduled: tinyint().default(0).notNull(),
-	scheduleFrequency: mysqlEnum(['daily','weekly','monthly','quarterly']),
+	isScheduled: tinyinteger().default(0).notNull(),
+	scheduleFrequency: text(),
 	nextRunAt: timestamp({ mode: 'string' }),
 	lastRunAt: timestamp({ mode: 'string' }),
-	status: mysqlEnum(['draft','generating','completed','failed']).default('draft').notNull(),
-	createdBy: int().notNull(),
+	status: text().default('draft').notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const returns = mysqlTable("returns", {
-	id: int().autoincrement().notNull(),
-	shipmentId: int("shipment_id").notNull().references(() => shipments.id),
-	orderId: int("order_id").notNull().references(() => orders.id),
+export const returns = pgTable("returns", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	shipmentId: integer("shipment_id").notNull().references(() => shipments.id),
+	orderId: integer("order_id").notNull().references(() => orders.id),
 	returnReason: varchar("return_reason", { length: 255 }).notNull(),
 	returnDate: timestamp("return_date", { mode: 'string' }),
 	refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
@@ -654,24 +654,24 @@ export const returns = mysqlTable("returns", {
 
 // Old shipments table removed - replaced with comprehensive shipping system below
 
-export const shopifyConfig = mysqlTable("shopify_config", {
-	id: int().autoincrement().notNull(),
+export const shopifyConfig = pgTable("shopify_config", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	storeName: varchar("store_name", { length: 255 }).notNull(),
 	accessToken: text("access_token").notNull(),
 	apiVersion: varchar("api_version", { length: 50 }).default('2025-10').notNull(),
-	isActive: tinyint("is_active").default(1).notNull(),
+	isActive: integer("is_active").default(1).notNull(),
 	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
-	autoSyncEnabled: tinyint("auto_sync_enabled").default(1).notNull(),
-	syncIntervalMinutes: int("sync_interval_minutes").default(15).notNull(),
+	autoSyncEnabled: integer("auto_sync_enabled").default(1).notNull(),
+	syncIntervalMinutes: integer("sync_interval_minutes").default(15).notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const shopifyOrders = mysqlTable("shopify_orders", {
-	id: int().autoincrement().notNull(),
+export const shopifyOrders = pgTable("shopify_orders", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	shopifyOrderId: varchar("shopify_order_id", { length: 255 }).notNull(),
-	localOrderId: int("local_order_id").references(() => orders.id),
-	orderNumber: int("order_number"),
+	localOrderId: integer("local_order_id").references(() => orders.id),
+	orderNumber: integer("order_number"),
 	orderName: varchar("order_name", { length: 100 }),
 	email: varchar({ length: 320 }),
 	phone: varchar({ length: 20 }),
@@ -680,12 +680,12 @@ export const shopifyOrders = mysqlTable("shopify_orders", {
 	totalTax: decimal("total_tax", { precision: 10, scale: 2 }),
 	totalShipping: decimal("total_shipping", { precision: 10, scale: 2 }),
 	currency: varchar({ length: 10 }).default('EGP'),
-	financialStatus: mysqlEnum("financial_status", ['pending','authorized','paid','partially_paid','refunded','voided']),
-	fulfillmentStatus: mysqlEnum("fulfillment_status", ['fulfilled','partial','unfulfilled','restocked']),
+	financialStatus: text(),
+	fulfillmentStatus: text(),
 	customerData: json("customer_data"),
 	shippingAddress: json("shipping_address"),
 	lineItems: json("line_items"),
-	syncStatus: mysqlEnum("sync_status", ['synced','pending','error']).default('pending').notNull(),
+	syncStatus: text().default('pending').notNull(),
 	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
 	syncError: text("sync_error"),
 	trackingNumber: varchar("tracking_number", { length: 255 }),
@@ -699,18 +699,18 @@ export const shopifyOrders = mysqlTable("shopify_orders", {
 	index("shopify_order_id").on(table.shopifyOrderId),
 ]);
 
-export const shopifyProducts = mysqlTable("shopify_products", {
-	id: int().autoincrement().notNull(),
+export const shopifyProducts = pgTable("shopify_products", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	shopifyProductId: varchar("shopify_product_id", { length: 255 }).notNull(),
-	localProductId: int("local_product_id").references(() => products.id),
+	localProductId: integer("local_product_id").references(() => products.id),
 	title: varchar({ length: 500 }),
 	bodyHtml: text("body_html"),
 	vendor: varchar({ length: 255 }),
 	productType: varchar("product_type", { length: 255 }),
 	handle: varchar({ length: 255 }),
 	tags: text(),
-	syncStatus: mysqlEnum("sync_status", ['synced','pending','error']).default('pending').notNull(),
-	syncDirection: mysqlEnum("sync_direction", ['shopify_to_local','local_to_shopify','bidirectional']).default('bidirectional'),
+	syncStatus: text().default('pending').notNull(),
+	syncDirection: text().default('bidirectional'),
 	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
 	syncError: text("sync_error"),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
@@ -720,36 +720,36 @@ export const shopifyProducts = mysqlTable("shopify_products", {
 	index("shopify_product_id").on(table.shopifyProductId),
 ]);
 
-export const shopifySyncLogs = mysqlTable("shopify_sync_logs", {
-	id: int().autoincrement().notNull(),
-	syncType: mysqlEnum("sync_type", ['products','inventory','orders','customers']).notNull(),
-	direction: mysqlEnum(['shopify_to_local','local_to_shopify']).notNull(),
-	status: mysqlEnum(['success','partial','error']).notNull(),
-	itemsProcessed: int("items_processed").default(0),
-	itemsSucceeded: int("items_succeeded").default(0),
-	itemsFailed: int("items_failed").default(0),
+export const shopifySyncLogs = pgTable("shopify_sync_logs", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	syncType: text().notNull(),
+	direction: text().notNull(),
+	status: text().notNull(),
+	itemsProcessed: integer("items_processed").default(0),
+	itemsSucceeded: integer("items_succeeded").default(0),
+	itemsFailed: integer("items_failed").default(0),
 	errorMessage: text("error_message"),
 	errorDetails: json("error_details"),
-	duration: int(),
+	duration: integer(),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const shopifyVariants = mysqlTable("shopify_variants", {
-	id: int().autoincrement().notNull(),
+export const shopifyVariants = pgTable("shopify_variants", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	shopifyVariantId: varchar("shopify_variant_id", { length: 255 }).notNull(),
 	shopifyProductId: varchar("shopify_product_id", { length: 255 }).notNull(),
-	localVariantId: int("local_variant_id"),
+	localVariantId: integer("local_variant_id"),
 	title: varchar({ length: 255 }),
 	price: decimal({ precision: 10, scale: 2 }),
 	compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
 	sku: varchar({ length: 255 }),
 	barcode: varchar({ length: 255 }),
-	inventoryQuantity: int("inventory_quantity").default(0),
+	inventoryQuantity: integer("inventory_quantity").default(0),
 	inventoryItemId: varchar("inventory_item_id", { length: 255 }),
 	option1: varchar({ length: 255 }),
 	option2: varchar({ length: 255 }),
 	option3: varchar({ length: 255 }),
-	syncStatus: mysqlEnum("sync_status", ['synced','pending','error']).default('pending').notNull(),
+	syncStatus: text().default('pending').notNull(),
 	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
@@ -758,39 +758,39 @@ export const shopifyVariants = mysqlTable("shopify_variants", {
 	index("shopify_variant_id").on(table.shopifyVariantId),
 ]);
 
-export const shopifyWebhookLogs = mysqlTable("shopify_webhook_logs", {
-	id: int().autoincrement().notNull(),
+export const shopifyWebhookLogs = pgTable("shopify_webhook_logs", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	topic: varchar({ length: 100 }).notNull(),
 	shopifyId: varchar("shopify_id", { length: 255 }),
 	payload: json().notNull(),
 	headers: json(),
-	processed: tinyint().default(0).notNull(),
+	processed: tinyinteger().default(0).notNull(),
 	processedAt: timestamp("processed_at", { mode: 'string' }),
 	error: text(),
-	retryCount: int("retry_count").default(0),
+	retryCount: integer("retry_count").default(0),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const stockAlerts = mysqlTable("stock_alerts", {
-	id: int().autoincrement().notNull(),
-	inventoryId: int("inventory_id").notNull().references(() => inventory.id),
+export const stockAlerts = pgTable("stock_alerts", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	inventoryId: integer("inventory_id").notNull().references(() => inventory.id),
 	alertType: varchar("alert_type", { length: 50 }).notNull(),
 	message: text().notNull(),
-	isResolved: tinyint("is_resolved").default(0),
+	isResolved: integer("is_resolved").default(0),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 	resolvedAt: timestamp("resolved_at", { mode: 'string' }),
 });
 
-export const subscriptions = mysqlTable("subscriptions", {
-	id: int().autoincrement().notNull(),
+export const subscriptions = pgTable("subscriptions", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	subscriptionNumber: varchar({ length: 50 }).notNull(),
-	userId: int().notNull(),
+	userId: integer().notNull(),
 	planName: varchar({ length: 200 }).notNull(),
 	planDescription: text(),
 	amount: decimal({ precision: 10, scale: 2 }).notNull(),
 	currency: varchar({ length: 3 }).default('USD').notNull(),
-	billingCycle: mysqlEnum(['monthly','quarterly','yearly']).notNull(),
-	status: mysqlEnum(['active','paused','cancelled','expired']).default('active').notNull(),
+	billingCycle: text().notNull(),
+	status: text().default('active').notNull(),
 	startDate: timestamp({ mode: 'string' }).notNull(),
 	endDate: timestamp({ mode: 'string' }),
 	nextBillingDate: timestamp({ mode: 'string' }),
@@ -798,7 +798,7 @@ export const subscriptions = mysqlTable("subscriptions", {
 	paymentMethod: varchar({ length: 50 }),
 	lastPaymentDate: timestamp({ mode: 'string' }),
 	lastPaymentAmount: decimal({ precision: 10, scale: 2 }),
-	shariaCompliant: tinyint().default(1).notNull(),
+	shariaCompliant: tinyinteger().default(1).notNull(),
 	metadata: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
@@ -807,41 +807,41 @@ export const subscriptions = mysqlTable("subscriptions", {
 	index("subscriptions_subscriptionNumber_unique").on(table.subscriptionNumber),
 ]);
 
-export const taskPatterns = mysqlTable("task_patterns", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const taskPatterns = pgTable("task_patterns", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	taskType: varchar({ length: 100 }).notNull(),
 	taskName: varchar({ length: 255 }).notNull(),
 	taskNameAr: varchar({ length: 255 }),
-	frequency: int().default(0).notNull(),
+	frequency: integer().default(0).notNull(),
 	lastUsed: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
-	avgTimeSpent: int(),
+	avgTimeSpent: integer(),
 	confidence: decimal({ precision: 5, scale: 2 }).default('0.00'),
 	suggestedIcon: varchar({ length: 50 }),
-	isActive: tinyint().default(1).notNull(),
+	isActive: tinyinteger().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const transactions = mysqlTable("transactions", {
-	id: int().autoincrement().notNull(),
+export const transactions = pgTable("transactions", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	transactionNumber: varchar({ length: 50 }).notNull(),
-	type: mysqlEnum(['income','expense','transfer','payment','refund','subscription']).notNull(),
+	type: text().notNull(),
 	category: varchar({ length: 100 }),
 	amount: decimal({ precision: 10, scale: 2 }).notNull(),
 	currency: varchar({ length: 3 }).default('USD').notNull(),
 	description: text(),
-	relatedOrderId: int(),
-	relatedSubscriptionId: int(),
+	relatedOrderId: integer(),
+	relatedSubscriptionId: integer(),
 	paymentMethod: varchar({ length: 50 }),
-	status: mysqlEnum(['pending','completed','failed','cancelled']).default('pending').notNull(),
-	shariaCompliant: tinyint().default(1).notNull(),
-	ethicalCheckStatus: mysqlEnum(['pending','approved','rejected','review_required']).default('pending').notNull(),
+	status: text().default('pending').notNull(),
+	shariaCompliant: tinyinteger().default(1).notNull(),
+	ethicalCheckStatus: text().default('pending').notNull(),
 	ethicalCheckNotes: text(),
-	ethicalCheckBy: int(),
+	ethicalCheckBy: integer(),
 	ethicalCheckAt: timestamp({ mode: 'string' }),
 	metadata: json(),
-	createdBy: int().notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 },
@@ -849,22 +849,22 @@ export const transactions = mysqlTable("transactions", {
 	index("transactions_transactionNumber_unique").on(table.transactionNumber),
 ]);
 
-export const userBehavior = mysqlTable("user_behavior", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const userBehavior = pgTable("user_behavior", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	actionType: varchar({ length: 100 }).notNull(),
 	actionData: json(),
 	context: json(),
 	timestamp: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const userPreferences = mysqlTable("user_preferences", {
-	id: int().autoincrement().notNull(),
-	userId: int().notNull().references(() => users.id),
+export const userPreferences = pgTable("user_preferences", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	userId: integer().notNull().references(() => users.id),
 	preferredLanguage: varchar({ length: 10 }).default('ar').notNull(),
 	theme: varchar({ length: 20 }).default('light').notNull(),
-	notificationsEnabled: tinyint().default(1).notNull(),
-	autoSuggestIcons: tinyint().default(1).notNull(),
+	notificationsEnabled: tinyinteger().default(1).notNull(),
+	autoSuggestIcons: tinyinteger().default(1).notNull(),
 	customSettings: json(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
@@ -873,17 +873,17 @@ export const userPreferences = mysqlTable("user_preferences", {
 	index("userId").on(table.userId),
 ]);
 
-export const investors = mysqlTable("investors", {
-	id: int().autoincrement().notNull(),
+export const investors = pgTable("investors", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	name: varchar({ length: 255 }).notNull(),
 	email: varchar({ length: 320 }).notNull(),
 	company: varchar({ length: 255 }),
 	phone: varchar({ length: 50 }),
 	passwordHash: varchar({ length: 255 }).notNull(),
-	status: mysqlEnum(['pending','active','inactive']).default('active').notNull(),
+	status: text().default('active').notNull(),
 	investmentInterest: decimal({ precision: 15, scale: 2 }),
 	notes: text(),
-	createdBy: int().notNull(),
+	createdBy: integer().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 	lastLoginAt: timestamp({ mode: 'string' }),
@@ -892,13 +892,13 @@ export const investors = mysqlTable("investors", {
 	index("investors_email_unique").on(table.email),
 ]);
 
-export const investorActivity = mysqlTable("investor_activity", {
-	id: int().autoincrement().notNull(),
-	investorId: int().notNull().references(() => investors.id),
-	actionType: mysqlEnum(['page_view','kaia_test','pitch_view','login','logout']).notNull(),
+export const investorActivity = pgTable("investor_activity", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+	investorId: integer().notNull().references(() => investors.id),
+	actionType: text().notNull(),
 	pagePath: varchar({ length: 500 }),
 	pageTitle: varchar({ length: 255 }),
-	timeSpent: int().default(0),
+	timeSpent: integer().default(0),
 	actionData: json(),
 	ipAddress: varchar({ length: 45 }),
 	userAgent: text(),
@@ -909,15 +909,15 @@ export const investorActivity = mysqlTable("investor_activity", {
 	index("investor_activity_action_type").on(table.actionType),
 ]);
 
-export const users = mysqlTable("users", {
-	id: int().autoincrement().notNull(),
+export const users = pgTable("users", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	openId: varchar({ length: 64 }).notNull(),
 	name: text(),
 	email: varchar({ length: 320 }),
 	loginMethod: varchar({ length: 64 }),
-	role: mysqlEnum(['user','admin']).default('user').notNull(),
+	role: text().default('user').notNull(),
 	permissions: json(),
-	isActive: tinyint().default(1).notNull(),
+	isActive: tinyinteger().default(1).notNull(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 	lastSignedIn: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
@@ -926,19 +926,19 @@ export const users = mysqlTable("users", {
 	index("users_openId_unique").on(table.openId),
 ]);
 
-export const visualSearchHistory = mysqlTable("visual_search_history", {
-	id: int().autoincrement().notNull(),
+export const visualSearchHistory = pgTable("visual_search_history", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
 	searchImageUrl: varchar("search_image_url", { length: 500 }),
 	searchImageS3Key: varchar("search_image_s3_key", { length: 255 }),
-	topResultProductId: int("top_result_product_id").references(() => products.id),
+	topResultProductId: integer("top_result_product_id").references(() => products.id),
 	topResultSimilarity: decimal("top_result_similarity", { precision: 5, scale: 4 }),
-	totalResults: int("total_results"),
-	userId: int("user_id"),
+	totalResults: integer("total_results"),
+	userId: integer("user_id"),
 	userRole: varchar("user_role", { length: 50 }),
 	searchContext: varchar("search_context", { length: 100 }),
-	searchDuration: int("search_duration"),
-	wasHelpful: tinyint("was_helpful"),
-	selectedProductId: int("selected_product_id").references(() => products.id),
+	searchDuration: integer("search_duration"),
+	wasHelpful: integer("was_helpful"),
+	selectedProductId: integer("selected_product_id").references(() => products.id),
 	searchedAt: timestamp("searched_at", { mode: 'string' }).default('CURRENT_TIMESTAMP'),
 },
 (table) => [
@@ -951,66 +951,66 @@ export const visualSearchHistory = mysqlTable("visual_search_history", {
 // SHIPPING & LOGISTICS SYSTEM
 // ============================================
 
-export const shippingCompanies = mysqlTable("shipping_companies", {
-  id: int().autoincrement().primaryKey(),
+export const shippingCompanies = pgTable("shipping_companies", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   name: varchar({ length: 100 }).notNull(),
   nameAr: varchar("name_ar", { length: 100 }),
   code: varchar({ length: 50 }).notNull().unique(),
-  active: tinyint().default(1).notNull(),
+  active: tinyinteger().default(1).notNull(),
   zonesConfig: json("zones_config").notNull(), // Zone pricing configuration
   codFeeConfig: json("cod_fee_config"), // COD fee configuration
   insuranceFeeConfig: json("insurance_fee_config"), // Insurance configuration
   returnFeePercentage: decimal("return_fee_percentage", { precision: 5, scale: 2 }).default('40.00'),
   exchangeFeePercentage: decimal("exchange_fee_percentage", { precision: 5, scale: 2 }).default('150.00'),
-  bankTransfersPerWeek: int("bank_transfers_per_week").default(3),
+  bankTransfersPerWeek: integer("bank_transfers_per_week").default(3),
   notes: text(),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
   updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const shippingZones = mysqlTable("shipping_zones", {
-  id: int().autoincrement().primaryKey(),
-  companyId: int("company_id").notNull().references(() => shippingCompanies.id),
+export const shippingZones = pgTable("shipping_zones", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
   zoneName: varchar("zone_name", { length: 50 }).notNull(),
-  zoneNumber: int("zone_number").notNull(),
+  zoneNumber: integer("zone_number").notNull(),
   basePriceUpTo3Kg: decimal("base_price_up_to_3kg", { precision: 10, scale: 2 }).notNull(),
   additionalKgPrice: decimal("additional_kg_price", { precision: 10, scale: 2 }).notNull(),
   areas: json().notNull(), // Array of governorates/cities
-  active: tinyint().default(1).notNull(),
+  active: tinyinteger().default(1).notNull(),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
 
-export const shipments = mysqlTable("shipments", {
-  id: int().autoincrement().primaryKey(),
-  orderId: int("order_id").notNull().references(() => orders.id),
-  companyId: int("company_id").notNull().references(() => shippingCompanies.id),
+export const shipments = pgTable("shipments", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  orderId: integer("order_id").notNull().references(() => orders.id),
+  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
   trackingNumber: varchar("tracking_number", { length: 100 }),
-  zoneId: int("zone_id").notNull().references(() => shippingZones.id),
+  zoneId: integer("zone_id").notNull().references(() => shippingZones.id),
   weight: decimal({ precision: 10, scale: 2 }).notNull(), // in KG
   shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).notNull(),
   codFee: decimal("cod_fee", { precision: 10, scale: 2 }).default('0.00'),
   insuranceFee: decimal("insurance_fee", { precision: 10, scale: 2 }).default('0.00'),
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
-  status: mysqlEnum(['pending', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'returned', 'lost', 'cancelled']).default('pending').notNull(),
+  status: text().default('pending').notNull(),
   shippedAt: timestamp("shipped_at", { mode: 'string' }),
   deliveredAt: timestamp("delivered_at", { mode: 'string' }),
   returnedAt: timestamp("returned_at", { mode: 'string' }),
   returnReason: text("return_reason"),
   notes: text(),
-  createdBy: int("created_by").notNull().references(() => users.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
   updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const shipmentReturns = mysqlTable("shipment_returns", {
-  id: int().autoincrement().primaryKey(),
-  shipmentId: int("shipment_id").notNull().references(() => shipments.id),
-  returnType: mysqlEnum("return_type", ['full_return', 'exchange', 'delivery_failed']).notNull(),
+export const shipmentReturns = pgTable("shipment_returns", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  shipmentId: integer("shipment_id").notNull().references(() => shipments.id),
+  returnType: text().notNull(),
   returnReason: text("return_reason"),
   returnCost: decimal("return_cost", { precision: 10, scale: 2 }).notNull(),
-  status: mysqlEnum(['pending', 'received', 'processed']).default('pending').notNull(),
+  status: text().default('pending').notNull(),
   receivedAt: timestamp("received_at", { mode: 'string' }),
-  processedBy: int("processed_by").references(() => users.id),
+  processedBy: integer("processed_by").references(() => users.id),
   processedAt: timestamp("processed_at", { mode: 'string' }),
   notes: text(),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
@@ -1020,27 +1020,27 @@ export const shipmentReturns = mysqlTable("shipment_returns", {
 // COLLECTIONS & PAYMENTS SYSTEM
 // ============================================
 
-export const collections = mysqlTable("collections", {
-  id: int().autoincrement().primaryKey(),
-  collectionType: mysqlEnum("collection_type", ['cash', 'bank_transfer']).notNull(),
-  companyId: int("company_id").notNull().references(() => shippingCompanies.id),
+export const collections = pgTable("collections", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  collectionType: text().notNull(),
+  companyId: integer("company_id").notNull().references(() => shippingCompanies.id),
   amount: decimal({ precision: 10, scale: 2 }).notNull(),
   collectionDate: date("collection_date").notNull(),
   receiptNumber: varchar("receipt_number", { length: 100 }),
   bankReference: varchar("bank_reference", { length: 100 }),
-  status: mysqlEnum(['pending', 'confirmed', 'reconciled']).default('pending').notNull(),
+  status: text().default('pending').notNull(),
   notes: text(),
-  createdBy: int("created_by").notNull().references(() => users.id),
-  confirmedBy: int("confirmed_by").references(() => users.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  confirmedBy: integer("confirmed_by").references(() => users.id),
   confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
   updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const collectionItems = mysqlTable("collection_items", {
-  id: int().autoincrement().primaryKey(),
-  collectionId: int("collection_id").notNull().references(() => collections.id),
-  orderId: int("order_id").notNull().references(() => orders.id),
+export const collectionItems = pgTable("collection_items", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  collectionId: integer("collection_id").notNull().references(() => collections.id),
+  orderId: integer("order_id").notNull().references(() => orders.id),
   amount: decimal({ precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
@@ -1049,20 +1049,20 @@ export const collectionItems = mysqlTable("collection_items", {
 // OPERATIONAL KPIs & METRICS
 // ============================================
 
-export const dailyOperationalMetrics = mysqlTable("daily_operational_metrics", {
-  id: int().autoincrement().primaryKey(),
+export const dailyOperationalMetrics = pgTable("daily_operational_metrics", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   date: date().notNull().unique(),
   
   // Orders
-  ordersCreated: int("orders_created").default(0).notNull(),
+  ordersCreated: integer("orders_created").default(0).notNull(),
   ordersCreatedValue: decimal("orders_created_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersConfirmed: int("orders_confirmed").default(0).notNull(),
+  ordersConfirmed: integer("orders_confirmed").default(0).notNull(),
   ordersConfirmedValue: decimal("orders_confirmed_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersShipped: int("orders_shipped").default(0).notNull(),
+  ordersShipped: integer("orders_shipped").default(0).notNull(),
   ordersShippedValue: decimal("orders_shipped_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersReturned: int("orders_returned").default(0).notNull(),
+  ordersReturned: integer("orders_returned").default(0).notNull(),
   ordersReturnedValue: decimal("orders_returned_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
-  ordersDelivered: int("orders_delivered").default(0).notNull(),
+  ordersDelivered: integer("orders_delivered").default(0).notNull(),
   ordersDeliveredValue: decimal("orders_delivered_value", { precision: 10, scale: 2 }).default('0.00').notNull(),
   
   // Collections
@@ -1093,23 +1093,23 @@ export const dailyOperationalMetrics = mysqlTable("daily_operational_metrics", {
 // AD CAMPAIGN PERFORMANCE
 // ============================================
 
-export const adCampaignPerformance = mysqlTable("ad_campaign_performance", {
-  id: int().autoincrement().primaryKey(),
+export const adCampaignPerformance = pgTable("ad_campaign_performance", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   date: date().notNull(),
   campaignName: varchar("campaign_name", { length: 200 }).notNull(),
-  platform: mysqlEnum(['facebook', 'instagram', 'google', 'tiktok', 'snapchat', 'other']).notNull(),
+  platform: text().notNull(),
   spend: decimal({ precision: 10, scale: 2 }).notNull(),
-  results: int().default(0).notNull(),
+  results: integer().default(0).notNull(),
   costPerResult: decimal("cost_per_result", { precision: 10, scale: 4 }).notNull(),
-  reach: int().default(0),
-  impressions: int().default(0),
-  clicks: int().default(0),
-  conversions: int().default(0),
-  messagesStarted: int("messages_started").default(0),
+  reach: integer().default(0),
+  impressions: integer().default(0),
+  clicks: integer().default(0),
+  conversions: integer().default(0),
+  messagesStarted: integer("messages_started").default(0),
   costPerMessage: decimal("cost_per_message", { precision: 10, scale: 2 }),
-  active: tinyint().default(1).notNull(),
+  active: tinyinteger().default(1).notNull(),
   notes: text(),
-  createdBy: int("created_by").notNull().references(() => users.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
   updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
@@ -1118,12 +1118,12 @@ export const adCampaignPerformance = mysqlTable("ad_campaign_performance", {
 // EXPECTED REVENUE CALCULATOR
 // ============================================
 
-export const revenueForecasts = mysqlTable("revenue_forecasts", {
-  id: int().autoincrement().primaryKey(),
+export const revenueForecasts = pgTable("revenue_forecasts", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   date: date().notNull(),
   adSpend: decimal("ad_spend", { precision: 10, scale: 2 }).notNull(),
   lastCampaignEfficiency: decimal("last_campaign_efficiency", { precision: 10, scale: 4 }).notNull(), // Cost per result
-  expectedOrders: int("expected_orders").notNull(),
+  expectedOrders: integer("expected_orders").notNull(),
   averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).notNull(),
   shipmentRate: decimal("shipment_rate", { precision: 5, scale: 2 }).notNull(), // % of orders actually shipped
   deliverySuccessRate: decimal("delivery_success_rate", { precision: 5, scale: 2 }).notNull(), // % delivered after returns
@@ -1132,7 +1132,7 @@ export const revenueForecasts = mysqlTable("revenue_forecasts", {
   variance: decimal({ precision: 10, scale: 2 }),
   variancePercentage: decimal("variance_percentage", { precision: 5, scale: 2 }),
   notes: text(),
-  createdBy: int("created_by").notNull().references(() => users.id),
+  createdBy: integer("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at", { mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
   updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
@@ -1143,8 +1143,8 @@ export const revenueForecasts = mysqlTable("revenue_forecasts", {
 // ============================================
 
 // 1. جدول شركات الشحن
-export const shippingPartners = mysqlTable("shipping_partners", {
-  id: int().autoincrement().primaryKey(),
+export const shippingPartners = pgTable("shipping_partners", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   name: varchar({ length: 50 }).notNull().unique(), // 'bosta', 'aramex', 'mylerz', 'gt_express'
   displayName: varchar("display_name", { length: 100 }).notNull(),
   logo: varchar({ length: 255 }),
@@ -1164,33 +1164,33 @@ export const shippingPartners = mysqlTable("shipping_partners", {
   
   // الأداء
   successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('95.00'),
-  totalShipments: int("total_shipments").default(0),
-  successfulDeliveries: int("successful_deliveries").default(0),
+  totalShipments: integer("total_shipments").default(0),
+  successfulDeliveries: integer("successful_deliveries").default(0),
   avgDeliveryTime: decimal("avg_delivery_time", { precision: 4, scale: 1 }).default('3.0'),
   complaintRate: decimal("complaint_rate", { precision: 4, scale: 2 }).default('0.02'),
   rating: decimal({ precision: 3, scale: 2 }).default('4.00'),
   
   // السعة
-  dailyLimit: int("daily_limit").default(1000),
-  currentLoad: int("current_load").default(0),
+  dailyLimit: integer("daily_limit").default(1000),
+  currentLoad: integer("current_load").default(0),
   peakHours: json("peak_hours").$type<string[]>().default('[]'),
   
   // الجوانب المالية
   codFeePercentage: decimal("cod_fee_percentage", { precision: 5, scale: 2 }).default('2.50'),
   deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default('25.00'),
   codFeeFixed: decimal("cod_fee_fixed", { precision: 10, scale: 2 }).default('5.00'),
-  settlementDays: int("settlement_days").default(7),
+  settlementDays: integer("settlement_days").default(7),
   creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }).default('50000.00'),
   
   // إعدادات التوزيع
   allocationWeight: decimal("allocation_weight", { precision: 3, scale: 2 }).default('1.00'),
-  priority: int().default(1),
-  autoAssign: tinyint("auto_assign").default(1),
-  maxDailyAssignments: int("max_daily_assignments").default(200),
+  priority: integer().default(1),
+  autoAssign: integer("auto_assign").default(1),
+  maxDailyAssignments: integer("max_daily_assignments").default(200),
   
   // حالة النشاط
-  active: tinyint().default(1),
-  suspended: tinyint().default(0),
+  active: tinyinteger().default(1),
+  suspended: tinyinteger().default(0),
   suspensionReason: text("suspension_reason"),
   
   // معلومات الاتصال
@@ -1208,8 +1208,8 @@ export const shippingPartners = mysqlTable("shipping_partners", {
 });
 
 // 2. جدول طلبات COD
-export const codOrders = mysqlTable("cod_orders", {
-  id: int().autoincrement().primaryKey(),
+export const codOrders = pgTable("cod_orders", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
   orderId: varchar("order_id", { length: 50 }).notNull().unique(),
   
   // معلومات العميل
@@ -1293,10 +1293,10 @@ export const codOrders = mysqlTable("cod_orders", {
   
   // التتبع
   currentStage: varchar("current_stage", { length: 50 }).default('pending'),
-  status: mysqlEnum(['pending','in_progress','completed','cancelled']).default('pending'),
+  status: text().default('pending'),
   
   // تخصيص الشحن
-  shippingPartnerId: int("shipping_partner_id").references(() => shippingPartners.id),
+  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
   trackingNumber: varchar("tracking_number", { length: 100 }),
   
   // المواعيد
@@ -1322,10 +1322,10 @@ export const codOrders = mysqlTable("cod_orders", {
 ]);
 
 // 3. جدول تخصيص الشحن
-export const shippingAllocations = mysqlTable("shipping_allocations", {
-  id: int().autoincrement().primaryKey(),
-  codOrderId: int("cod_order_id").references(() => codOrders.id),
-  shippingPartnerId: int("shipping_partner_id").references(() => shippingPartners.id),
+export const shippingAllocations = pgTable("shipping_allocations", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  codOrderId: integer("cod_order_id").references(() => codOrders.id),
+  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
   
   allocationScore: decimal("allocation_score", { precision: 5, scale: 2 }),
   allocationReason: text("allocation_reason"),
@@ -1338,10 +1338,10 @@ export const shippingAllocations = mysqlTable("shipping_allocations", {
 });
 
 // 4. جدول سجل التتبع
-export const trackingLogs = mysqlTable("tracking_logs", {
-  id: int().autoincrement().primaryKey(),
-  codOrderId: int("cod_order_id").references(() => codOrders.id),
-  shippingPartnerId: int("shipping_partner_id").references(() => shippingPartners.id),
+export const trackingLogs = pgTable("tracking_logs", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  codOrderId: integer("cod_order_id").references(() => codOrders.id),
+  shippingPartnerId: integer("shipping_partner_id").references(() => shippingPartners.id),
   
   stage: varchar({ length: 50 }).notNull(),
   status: varchar({ length: 30 }).notNull(),
@@ -1356,11 +1356,11 @@ export const trackingLogs = mysqlTable("tracking_logs", {
 ]);
 
 // 5. جدول الفال باك
-export const fallbackLogs = mysqlTable("fallback_logs", {
-  id: int().autoincrement().primaryKey(),
-  originalPartnerId: int("original_partner_id").references(() => shippingPartners.id),
-  newPartnerId: int("new_partner_id").references(() => shippingPartners.id),
-  codOrderId: int("cod_order_id").references(() => codOrders.id),
+export const fallbackLogs = pgTable("fallback_logs", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  originalPartnerId: integer("original_partner_id").references(() => shippingPartners.id),
+  newPartnerId: integer("new_partner_id").references(() => shippingPartners.id),
+  codOrderId: integer("cod_order_id").references(() => codOrders.id),
 
   reason: varchar({ length: 100 }).notNull(),
   details: json(),
@@ -1369,15 +1369,15 @@ export const fallbackLogs = mysqlTable("fallback_logs", {
 });
 
 // 6. Shipping Performance by Governorate
-export const shippingPerformanceByGovernorate = mysqlTable("shipping_performance_by_governorate", {
-  id: int().autoincrement().primaryKey(),
-  companyId: int("company_id").references(() => shippingPartners.id).notNull(),
+export const shippingPerformanceByGovernorate = pgTable("shipping_performance_by_governorate", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
   governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
   governorateName: varchar("governorate_name", { length: 100 }),
 
-  totalShipments: int("total_shipments").default(0),
-  successfulShipments: int("successful_shipments").default(0),
-  failedShipments: int("failed_shipments").default(0),
+  totalShipments: integer("total_shipments").default(0),
+  successfulShipments: integer("successful_shipments").default(0),
+  failedShipments: integer("failed_shipments").default(0),
 
   successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
   avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
@@ -1389,16 +1389,16 @@ export const shippingPerformanceByGovernorate = mysqlTable("shipping_performance
 });
 
 // 7. Shipping Performance by Center
-export const shippingPerformanceByCenter = mysqlTable("shipping_performance_by_center", {
-  id: int().autoincrement().primaryKey(),
-  companyId: int("company_id").references(() => shippingPartners.id).notNull(),
+export const shippingPerformanceByCenter = pgTable("shipping_performance_by_center", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
   governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
   centerCode: varchar("center_code", { length: 20 }).notNull(),
   centerName: varchar("center_name", { length: 100 }),
 
-  totalShipments: int("total_shipments").default(0),
-  successfulShipments: int("successful_shipments").default(0),
-  failedShipments: int("failed_shipments").default(0),
+  totalShipments: integer("total_shipments").default(0),
+  successfulShipments: integer("successful_shipments").default(0),
+  failedShipments: integer("failed_shipments").default(0),
 
   successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
   avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),
@@ -1410,17 +1410,17 @@ export const shippingPerformanceByCenter = mysqlTable("shipping_performance_by_c
 });
 
 // 8. Shipping Performance by Point
-export const shippingPerformanceByPoint = mysqlTable("shipping_performance_by_point", {
-  id: int().autoincrement().primaryKey(),
-  companyId: int("company_id").references(() => shippingPartners.id).notNull(),
+export const shippingPerformanceByPoint = pgTable("shipping_performance_by_point", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().primaryKey(),
+  companyId: integer("company_id").references(() => shippingPartners.id).notNull(),
   governorateCode: varchar("governorate_code", { length: 10 }).notNull(),
   centerCode: varchar("center_code", { length: 20 }).notNull(),
   pointCode: varchar("point_code", { length: 30 }).notNull(),
   pointName: varchar("point_name", { length: 100 }),
 
-  totalShipments: int("total_shipments").default(0),
-  successfulShipments: int("successful_shipments").default(0),
-  failedShipments: int("failed_shipments").default(0),
+  totalShipments: integer("total_shipments").default(0),
+  successfulShipments: integer("successful_shipments").default(0),
+  failedShipments: integer("failed_shipments").default(0),
 
   successRate: decimal("success_rate", { precision: 5, scale: 2 }).default('0.00'),
   avgDeliveryDays: decimal("avg_delivery_days", { precision: 4, scale: 1 }).default('0.0'),

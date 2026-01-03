@@ -5,8 +5,9 @@
 
 import { publicProcedure, router } from '../_core/trpc';
 import { z } from 'zod';
-import { getDb } from '../db';
-import { eq, and, gte, lte, desc, sql, count } from 'drizzle-orm';
+import { requireDb } from '../db';
+import { eq, and, gte, lte, desc, sql, count, sum } from 'drizzle-orm';
+import { orders, employees } from '../../drizzle/schema';
 import { KPIType, performanceSystem } from '../hr/performance';
 import { recruitmentSystem } from '../hr/recruitment';
 import { createSimulationEngine } from '../simulation/engine';
@@ -70,16 +71,37 @@ class DashboardGenerator {
    * لوحة التحكم التنفيذية - Executive Dashboard
    */
   async generateExecutiveDashboard(timeRange: { start: Date; end: Date }): Promise<Dashboard> {
-    const db = await getDb();
+    const db = await requireDb();
+
+    // 1. Calculate Total Revenue & Orders
+    const [revenueStats] = await db
+      .select({
+        totalRevenue: sum(orders.totalAmount),
+        orderCount: count(orders.id),
+      })
+      .from(orders)
+      .where(
+        and(
+          gte(orders.createdAt, timeRange.start.toISOString()),
+          lte(orders.createdAt, timeRange.end.toISOString())
+        )
+      );
+
+    const totalRevenue = Number(revenueStats?.totalRevenue || 0);
+    const totalOrders = Number(revenueStats?.orderCount || 0);
+
+    // 2. Count Employees
+    const [empStats] = await db.select({ count: count(employees.id) }).from(employees);
+    const employeeCount = Number(empStats?.count || 0);
 
     // البطاقات الرئيسية
     const cards: DashboardCard[] = [
       {
         title: 'Total Revenue',
         titleAr: 'إجمالي الإيرادات',
-        value: 1792258,
+        value: totalRevenue.toLocaleString(),
         unit: 'جنيه',
-        change: 15.3,
+        change: 15.3, // TODO: Calculate previous period change
         trend: 'up',
         icon: 'money',
         color: 'green',
@@ -87,25 +109,16 @@ class DashboardGenerator {
       {
         title: 'Total Orders',
         titleAr: 'إجمالي الطلبات',
-        value: 3000,
+        value: totalOrders,
         change: 12.5,
         trend: 'up',
         icon: 'shopping-cart',
         color: 'blue',
       },
       {
-        title: 'Active Customers',
-        titleAr: 'العملاء النشطين',
-        value: 300,
-        change: 8.2,
-        trend: 'up',
-        icon: 'users',
-        color: 'purple',
-      },
-      {
         title: 'Employee Count',
         titleAr: 'عدد الموظفين',
-        value: 25,
+        value: employeeCount,
         change: 0,
         trend: 'stable',
         icon: 'briefcase',
@@ -119,19 +132,13 @@ class DashboardGenerator {
         type: 'line',
         title: 'Revenue Trend',
         titleAr: 'اتجاه الإيرادات',
-        data: this.generateRevenueTrend(timeRange),
+        data: await this.generateRevenueTrend(timeRange), // Now async
       },
       {
         type: 'bar',
         title: 'Orders by Status',
         titleAr: 'الطلبات حسب الحالة',
         data: this.generateOrdersByStatus(),
-      },
-      {
-        type: 'pie',
-        title: 'Revenue by Product Category',
-        titleAr: 'الإيرادات حسب فئة المنتج',
-        data: this.generateRevenueByCategory(),
       },
     ];
 
@@ -500,18 +507,29 @@ class DashboardGenerator {
 
   // ===== دوال مساعدة لتوليد البيانات =====
 
-  private generateRevenueTrend(timeRange: { start: Date; end: Date }) {
-    const data = [];
-    const days = 30;
-    for (let i = 0; i < days; i++) {
-      data.push({
-        date: new Date(timeRange.end.getTime() - (days - i) * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0],
-        revenue: 15000 + Math.random() * 10000,
-      });
-    }
-    return data;
+  private async generateRevenueTrend(timeRange: { start: Date; end: Date }) {
+    const db = await requireDb();
+
+    // Aggregate revenue by date
+    const dailyRevenue = await db
+      .select({
+        date: sql<string>`TO_CHAR(${orders.createdAt}, 'YYYY-MM-DD')`,
+        revenue: sum(orders.totalAmount),
+      })
+      .from(orders)
+      .where(
+        and(
+          gte(orders.createdAt, timeRange.start.toISOString()),
+          lte(orders.createdAt, timeRange.end.toISOString())
+        )
+      )
+      .groupBy(sql`TO_CHAR(${orders.createdAt}, 'YYYY-MM-DD')`)
+      .orderBy(sql`TO_CHAR(${orders.createdAt}, 'YYYY-MM-DD')`);
+
+    return dailyRevenue.map(d => ({
+      date: d.date,
+      revenue: Number(d.revenue || 0)
+    }));
   }
 
   private generateOrdersByStatus() {

@@ -14,6 +14,8 @@ import { logger } from '../_core/logger';
 import { withErrorHandling, isDuplicateKeyError } from '../_core/error-handler';
 import { withPerformanceTracking } from '../_core/async-performance-wrapper';
 import { invalidateOrderCache } from '../_core/cache-manager';
+import { etaService } from '../services/eta.service';
+import { logger } from '../_core/logger';
 
 export const ordersRouter = router({
   /**
@@ -237,6 +239,25 @@ export const ordersRouter = router({
               customerPhone: input.customerPhone,
               status: 'pending',
             });
+
+            // Trigger ETA Invoice Creation (Async - non-blocking)
+            // Use orderIds[0] as primary for now. In multi-order split, logic might need adjustment.
+            etaService.createInvoiceForOrder(orderIds[0]).catch(err => {
+              logger.error('Failed to auto-create ETA invoice', err, { orderId: orderIds[0] });
+            });
+
+            return {
+              success: true,
+              orderId: orderIds[0], // Primary order ID (for backward compatibility)
+              orderIds: orderIds, // All order IDs (useful for multi-item orders)
+              orderNumber,
+              message: 'تم إنشاء الطلب بنجاح',
+              validation: {
+                isValid: validation.isValid,
+                warnings: validation.warnings,
+                recommendations: validation.recommendations,
+              },
+            };
 
             return {
               success: true,

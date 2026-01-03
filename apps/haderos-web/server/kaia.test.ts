@@ -1,299 +1,173 @@
-/**
- * KAIA Ethical Governance Engine - Unit Tests
- *
- * Tests for KAIA engine logic without real database calls.
- */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { KAIAEngine } from './kaia/engine';
 
-// Mock the database
+// Mock the database dependency
 vi.mock('./db', () => ({
-  createEthicalRule: vi.fn().mockResolvedValue({ id: 1 }),
-  getEthicalRules: vi.fn().mockResolvedValue([
+  getActiveEthicalRules: vi.fn().mockResolvedValue([
+    // Rule 1: Prohibition of Riba (Interest)
     {
       id: 1,
-      ruleName: 'Large Transaction Rule',
-      ruleDescription: 'Flag transactions over $5000',
-      ruleType: 'risk_management',
-      category: 'financial',
-      severity: 'high',
+      ruleName: 'Prohibition of Riba',
+      ruleDescription: 'Interest-based transactions are prohibited',
+      ruleType: 'sharia_financial',
+      severity: 'critical',
       ruleLogic: {
-        conditions: [{ field: 'transaction.amount', operator: '>', value: 5000 }],
-        action: 'flag',
+        conditions: [
+          { field: 'transaction.interest', operator: '>', value: 0 }
+        ],
+        action: 'reject',
       },
       requiresReview: false,
       priority: 100,
       isActive: true,
     },
+    // Rule 2: Avoidance of Gharar (Uncertainty)
     {
       id: 2,
-      ruleName: 'Profit Margin Rule',
-      ruleDescription: 'Ensure minimum profit margin',
-      ruleType: 'business',
-      category: 'pricing',
-      severity: 'medium',
+      ruleName: 'Avoidance of Gharar',
+      ruleDescription: 'Transactions with significant uncertainty require review',
+      ruleType: 'sharia_commercial',
+      severity: 'high',
       ruleLogic: {
-        conditions: [{ field: 'product.margin', operator: '>=', value: 0.1 }],
-        action: 'approve',
+        conditions: [
+          { field: 'transaction.quantity', operator: '==', value: 'غير محدد' }
+        ],
+        action: 'reject', // Fails the rule
       },
-      requiresReview: false,
-      priority: 50,
+      requiresReview: true, // Forces "review_required" instead of "rejected"
+      priority: 90,
       isActive: true,
     },
+    // Rule 3: Prohibition of Haram Products
+    {
+      id: 3,
+      ruleName: 'Prohibited Products',
+      ruleDescription: 'Alcohol and other restricted items are prohibited',
+      ruleType: 'compliance',
+      severity: 'critical',
+      ruleLogic: {
+        conditions: [
+          { field: 'transaction.product', operator: '==', value: 'مشروبات كحولية' }
+        ],
+        action: 'reject',
+      },
+      requiresReview: false,
+      priority: 100,
+      isActive: true,
+    }
   ]),
-  requireDb: vi.fn().mockResolvedValue({}),
 }));
 
-describe('KAIA Ethical Governance Engine - Unit Tests', () => {
+describe('KAIA Engine Unit Tests', () => {
+  let engine: KAIAEngine;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Re-instantiate engine to ensure fresh rules load
+    engine = new KAIAEngine();
+    // We need to wait for the async loadRules to complete in the constructor, 
+    // or rely on reloadRules() if we want to be safe, but constructor kicks it off.
+    // However, since it is async void in constructor, we might race. 
+    // Best practice: await engine.reloadRules() or similar if accessible.
+    // The engine calls loadRules() in constructor without await. 
+    // We can assume for these unit tests the promise typically resolves quickly 
+    // since it's a mocked value, but let's call a method to ensure it's loaded if needed.
+    // Actually, KAIAEngine.evaluateTransaction calls refreshRulesIfNeeded which awaits loadRules.
+    // So we are safe.
   });
 
-  describe('Rule Evaluation Logic', () => {
-    it('should approve compliant small transaction', () => {
-      const evaluateTransaction = (transaction: { amount: string }) => {
-        const amount = parseFloat(transaction.amount);
-        if (amount > 5000) {
-          return { approved: true, decision: 'flagged', appliedRules: ['Large Transaction Rule'] };
-        }
-        return { approved: true, decision: 'approved', appliedRules: [] };
-      };
-
-      const result = evaluateTransaction({ amount: '100.00' });
-      expect(result.approved).toBe(true);
-      expect(result.decision).toBe('approved');
-    });
-
-    it('should flag large transaction', () => {
-      const evaluateTransaction = (transaction: { amount: string }) => {
-        const amount = parseFloat(transaction.amount);
-        if (amount > 5000) {
-          return { approved: true, decision: 'flagged', appliedRules: ['Large Transaction Rule'] };
-        }
-        return { approved: true, decision: 'approved', appliedRules: [] };
-      };
-
-      const result = evaluateTransaction({ amount: '15000.00' });
-      expect(result.decision).toBe('flagged');
-      expect(result.appliedRules.length).toBeGreaterThan(0);
-    });
-
-    it('should handle multiple rules', () => {
-      const rules = [
-        { name: 'Rule 1', threshold: 5000, action: 'flag' },
-        { name: 'Rule 2', threshold: 10000, action: 'block' },
-        { name: 'Rule 3', threshold: 50000, action: 'escalate' },
-      ];
-
-      const evaluateAmount = (amount: number) => {
-        const appliedRules = rules.filter((r) => amount > r.threshold);
-        return {
-          appliedRules,
-          highestAction:
-            appliedRules.length > 0 ? appliedRules[appliedRules.length - 1].action : 'approve',
-        };
-      };
-
-      expect(evaluateAmount(3000).appliedRules).toHaveLength(0);
-      expect(evaluateAmount(7000).appliedRules).toHaveLength(1);
-      expect(evaluateAmount(15000).appliedRules).toHaveLength(2);
-      expect(evaluateAmount(100000).appliedRules).toHaveLength(3);
-    });
-  });
-
-  describe('Rule Loading', () => {
-    it('should have rules loaded', () => {
-      const rules = [
-        { id: 1, name: 'Rule 1', isActive: true },
-        { id: 2, name: 'Rule 2', isActive: true },
-        { id: 3, name: 'Rule 3', isActive: false },
-      ];
-
-      const activeRules = rules.filter((r) => r.isActive);
-      expect(activeRules.length).toBeGreaterThan(0);
-      expect(activeRules.length).toBe(2);
-    });
-
-    it('should filter rules by category', () => {
-      const rules = [
-        { id: 1, name: 'Financial Rule', category: 'financial' },
-        { id: 2, name: 'Business Rule', category: 'business' },
-        { id: 3, name: 'Security Rule', category: 'security' },
-      ];
-
-      const financialRules = rules.filter((r) => r.category === 'financial');
-      expect(financialRules).toHaveLength(1);
-    });
-
-    it('should sort rules by priority', () => {
-      const rules = [
-        { id: 1, name: 'Low Priority', priority: 10 },
-        { id: 2, name: 'High Priority', priority: 100 },
-        { id: 3, name: 'Medium Priority', priority: 50 },
-      ];
-
-      const sorted = [...rules].sort((a, b) => b.priority - a.priority);
-      expect(sorted[0].name).toBe('High Priority');
-      expect(sorted[2].name).toBe('Low Priority');
-    });
-  });
-
-  describe('Decision Reasoning', () => {
-    it('should provide detailed decision reasoning', () => {
-      const generateReasoning = (decision: string, appliedRules: string[], severity: string) => {
-        if (appliedRules.length === 0) {
-          return 'Transaction approved - no rules triggered.';
-        }
-        return `Transaction ${decision} due to: ${appliedRules.join(', ')}. Severity: ${severity}`;
-      };
-
-      const reason1 = generateReasoning('approved', [], 'low');
-      expect(reason1).toContain('approved');
-      expect(reason1.length).toBeGreaterThan(0);
-
-      const reason2 = generateReasoning('flagged', ['Large Transaction'], 'high');
-      expect(reason2).toContain('Large Transaction');
-      expect(reason2).toContain('Severity: high');
-    });
-
-    it('should categorize severity correctly', () => {
-      const getSeverity = (amount: number): 'low' | 'medium' | 'high' | 'critical' => {
-        if (amount > 50000) return 'critical';
-        if (amount > 10000) return 'high';
-        if (amount > 5000) return 'medium';
-        return 'low';
-      };
-
-      expect(getSeverity(1000)).toBe('low');
-      expect(getSeverity(7000)).toBe('medium');
-      expect(getSeverity(25000)).toBe('high');
-      expect(getSeverity(100000)).toBe('critical');
-    });
-  });
-
-  describe('Rule Logic Evaluation', () => {
-    it('should evaluate greater than condition', () => {
-      const evaluateCondition = (value: number, operator: string, threshold: number): boolean => {
-        switch (operator) {
-          case '>':
-            return value > threshold;
-          case '>=':
-            return value >= threshold;
-          case '<':
-            return value < threshold;
-          case '<=':
-            return value <= threshold;
-          case '==':
-            return value === threshold;
-          default:
-            return false;
-        }
-      };
-
-      expect(evaluateCondition(100, '>', 50)).toBe(true);
-      expect(evaluateCondition(50, '>', 50)).toBe(false);
-      expect(evaluateCondition(50, '>=', 50)).toBe(true);
-      expect(evaluateCondition(30, '<', 50)).toBe(true);
-    });
-
-    it('should handle multiple conditions with AND logic', () => {
-      const conditions = [
-        { field: 'amount', operator: '>', value: 100, actual: 150 },
-        { field: 'category', operator: '==', value: 'sale', actual: 'sale' },
-      ];
-
-      const allPassed = conditions.every((c) => {
-        if (c.operator === '>') return c.actual > c.value;
-        if (c.operator === '==') return c.actual === c.value;
-        return false;
-      });
-
-      expect(allPassed).toBe(true);
-    });
-
-    it('should handle multiple conditions with OR logic', () => {
-      const conditions = [
-        { field: 'amount', operator: '>', value: 1000, actual: 500 }, // false
-        { field: 'priority', operator: '==', value: 'high', actual: 'high' }, // true
-      ];
-
-      const anyPassed = conditions.some((c) => {
-        if (c.operator === '>') return c.actual > c.value;
-        if (c.operator === '==') return c.actual === c.value;
-        return false;
-      });
-
-      expect(anyPassed).toBe(true);
-    });
-  });
-
-  describe('Transaction Types', () => {
-    it('should handle income transactions', () => {
-      const transaction = {
-        amount: '500.00',
-        type: 'income' as const,
-        description: 'Sale',
-      };
-
-      expect(transaction.type).toBe('income');
-      expect(parseFloat(transaction.amount)).toBe(500);
-    });
-
-    it('should handle expense transactions', () => {
-      const transaction = {
-        amount: '200.00',
-        type: 'expense' as const,
-        description: 'Purchase',
-      };
-
-      expect(transaction.type).toBe('expense');
-      expect(parseFloat(transaction.amount)).toBe(200);
-    });
-
-    it('should handle refund transactions', () => {
-      const transaction = {
-        amount: '150.00',
-        type: 'refund' as const,
-        description: 'Customer refund',
-      };
-
-      expect(transaction.type).toBe('refund');
-    });
-  });
-});
-
-describe('Transaction Router - Unit Tests', () => {
-  it('should create transaction with KAIA evaluation', () => {
-    const evaluateAndCreate = (transaction: { amount: string; type: string }) => {
-      const amount = parseFloat(transaction.amount);
-      const decision = amount > 5000 ? 'flagged' : 'approved';
-
-      return {
-        transaction,
-        kaiaDecision: {
-          decision,
-          approved: true,
-          timestamp: new Date().toISOString(),
-        },
-      };
+  // Test Case 1: المعاملة الحلال (Halal Transaction)
+  it('Test 1: Halal Transaction should be APPROVED', async () => {
+    const halalTransaction = {
+      type: 'sale',
+      product: 'كتاب تعليمي',
+      price: 100,
+      interest: 0,
+      uncertainty: 0
     };
 
-    const result = evaluateAndCreate({ amount: '500.00', type: 'income' });
+    const result = await engine.evaluateTransaction(halalTransaction);
 
-    expect(result).toBeDefined();
-    expect(result.kaiaDecision.approved).toBeDefined();
-    expect(result.kaiaDecision.decision).toBeDefined();
+    expect(result.approved).toBe(true);
+    expect(result.decision).toBe('approved');
+    console.log('✓ Test 1: Halal Transaction -> APPROVED');
   });
 
-  it('should validate transaction amount format', () => {
-    const validateAmount = (amount: string): boolean => {
-      const parsed = parseFloat(amount);
-      return !isNaN(parsed) && parsed >= 0;
+  // Test Case 2: معاملة ربا (Riba Transaction)
+  it('Test 2: Riba Transaction should be REJECTED', async () => {
+    const ribaTransaction = {
+      type: 'loan',
+      amount: 1000,
+      interest: 50, // Should trigger Rule 1
+      period: '1 month'
     };
 
-    expect(validateAmount('100.00')).toBe(true);
-    expect(validateAmount('0')).toBe(true);
-    expect(validateAmount('-50')).toBe(false);
-    expect(validateAmount('abc')).toBe(false);
+    const result = await engine.evaluateTransaction(ribaTransaction);
+
+    expect(result.approved).toBe(false);
+    expect(result.decision).toBe('rejected');
+    expect(result.appliedRules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ ruleName: 'Prohibition of Riba', result: 'fail' })
+      ])
+    );
+    console.log('✓ Test 2: Riba Transaction -> REJECTED');
   });
+
+  // Test Case 3: معاملة غرر (Gharar Transaction)
+  it('Test 3: Gharar Transaction should be REVIEW_REQUIRED', async () => {
+    const ghararTransaction = {
+      type: 'future_sale',
+      product: 'محصول قادم',
+      quantity: 'غير محدد', // Should trigger Rule 2
+      delivery: 'غير مؤكد'
+    };
+
+    const result = await engine.evaluateTransaction(ghararTransaction);
+
+    expect(result.approved).toBe(false);
+    expect(result.decision).toBe('review_required');
+    expect(result.requiresHumanReview).toBe(true);
+    console.log('✓ Test 3: Gharar Transaction -> REVIEW_REQUIRED');
+  });
+
+  // Test Case 4: منتج محرم (Haram Product)
+  it('Test 4: Haram Product should be REJECTED', async () => {
+    const haramTransaction = {
+      type: 'sale',
+      product: 'مشروبات كحولية', // Should trigger Rule 3
+      price: 200
+    };
+
+    const result = await engine.evaluateTransaction(haramTransaction);
+
+    expect(result.approved).toBe(false);
+    expect(result.decision).toBe('rejected');
+    expect(result.appliedRules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ ruleName: 'Prohibited Products', result: 'fail' })
+      ])
+    );
+    console.log('✓ Test 4: Haram Product -> REJECTED');
+  });
+
+  // Test Case 5: تجارة إلكترونية عادية (Normal E-commerce)
+  it('Test 5: Normal E-commerce Transaction should be APPROVED', async () => {
+    const normalTransaction = {
+      type: 'ecommerce',
+      product: 'هاتف ذكي',
+      price: 5000,
+      warranty: '1 سنة',
+      returnPolicy: '14 يوم',
+      interest: 0 // Explicitly 0 to be safe
+    };
+
+    const result = await engine.evaluateTransaction(normalTransaction);
+
+    expect(result.approved).toBe(true);
+    expect(result.decision).toBe('approved');
+    console.log('✓ Test 5: Normal E-commerce -> APPROVED');
+  });
+
 });
